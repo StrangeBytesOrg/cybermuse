@@ -1,0 +1,12 @@
+{
+    "cSpell.words": [
+        //
+        "nuxt",
+        "toastification",
+        "mirostat",
+        "dotenv",
+        "tailwindcss",
+        "daisyui"
+    ],
+    "typescript.tsdk": "node_modules/typescript/lib"
+}

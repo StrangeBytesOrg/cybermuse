@@ -1,0 +1,12 @@
+html,
+body,
+html:focus-within {
+    scroll-behavior: smooth;
+    /* min-height: 100vh; */
+}
+
+#__nuxt {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
