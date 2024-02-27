@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
-const apiUrl = ref(localStorage.getItem('apiUrl') || '')
+import {useConnectionStore} from '../store/connection'
 
-const setApiUrl = () => {
-    localStorage.setItem('apiUrl', apiUrl.value)
+const connectionStore = useConnectionStore()
+
+const connect = () => {
+    console.log('connect')
+    connectionStore.save()
 }
 </script>
 
 <template>
     API URL:
-    <input type="text" v-model="apiUrl" />
-    <button class="btn" @click="setApiUrl">Set API URL</button>
+    <input type="text" v-model="connectionStore.apiUrl" />
+    <button class="btn" @click="connect">Connect</button>
 </template>

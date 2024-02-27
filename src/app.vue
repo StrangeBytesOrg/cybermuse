@@ -25,7 +25,6 @@ const toggleMenu = () => {
                 class="wat-menu w-80 max-md:min-w-[20rem] max-md:w-1/2 flex flex-col bg-base-300"
                 :class="{show: showMenu}">
                 <div class="px-5 flex flex-col flex-grow">
-                    <router-link to="/">Chat</router-link>
                     <router-link to="/connection">Connection</router-link>
                     <router-link to="/characters">Characters</router-link>
                     <router-link to="/create-character">Create Character</router-link>

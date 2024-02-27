@@ -1,14 +1,24 @@
 <script lang="ts" setup>
-import {jsonFromLocalstorage} from '../ls'
-type character = {name: string}
-// const characterString = localStorage.getItem('characters')
-// const characters: character[] = JSON.parse(characterString)
-const characters = jsonFromLocalstorage('characters') as character[]
-console.log(characters)
+import {useCharacterStore} from '../store'
+
+const characterStore = useCharacterStore()
+
+const deleteCharacter = (index: number) => {
+    characterStore.characters.splice(index, 1)
+    characterStore.update()
+}
 </script>
 
 <template>
-    <div v-for="character in characters" :key="character.name">
-        {{ character.name }}
-    </div>
+    <template v-if="characterStore.characters.length">
+        <div v-for="(character, characterIndex) in characterStore.characters" :key="character.name">
+            <router-link :to="`/character?id=${characterIndex}`">{{ character.name }}</router-link>
+            <router-link :to="`/chat?id=${characterIndex}`" class="btn btn-primary">Chat</router-link>
+            <router-link :to="`/character?id=${characterIndex}`" class="btn btn-secondary">Info</router-link>
+            <button class="btn btn-error" @click="deleteCharacter(characterIndex)">Delete</button>
+        </div>
+    </template>
+    <template v-else>
+        <div>no characters</div>
+    </template>
 </template>

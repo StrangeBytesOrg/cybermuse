@@ -3,7 +3,7 @@ export default defineNuxtConfig({
     srcDir: './src',
     devtools: {enabled: true},
     ssr: false,
-    modules: ['@nuxtjs/tailwindcss'],
+    modules: ['@pinia/nuxt', '@nuxtjs/tailwindcss'],
     css: ['@/assets/css/global.css'],
     telemetry: false,
 })
