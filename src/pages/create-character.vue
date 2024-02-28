@@ -16,7 +16,12 @@ const createCharacter = () => {
 </script>
 
 <template>
-    <input type="text" class="input input-bordered" v-model="characterName" placeholder="Character Name" />
-    <textarea class="textarea textarea-bordered" v-model="characterDescription" placeholder="Description"></textarea>
-    <button @click="createCharacter" class="btn btn-primary">Create</button>
+    <div class="flex flex-col p-5">
+        <input type="text" class="input input-bordered" v-model="characterName" placeholder="Character Name" />
+        <textarea
+            class="textarea textarea-bordered mt-5"
+            v-model="characterDescription"
+            placeholder="Description"></textarea>
+        <button @click="createCharacter" class="btn btn-primary mt-5">Create</button>
+    </div>
 </template>

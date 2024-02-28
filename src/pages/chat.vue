@@ -75,7 +75,6 @@ const sendMessage = async () => {
 </script>
 
 <template>
-    Connected: {{ connectionStore.connected }}
     <main class="w-full md:p-5 flex flex-col flex-grow min-h-0">
         <!-- Messages -->
         <div ref="messagesElement" class="md:container md:mx-auto flex-grow overflow-auto pt-3">
