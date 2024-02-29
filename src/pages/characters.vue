@@ -1,14 +1,16 @@
 <script lang="ts" setup>
-import {useCharacterStore} from '../store'
+import {db} from '../db'
 
-const characterStore = useCharacterStore()
+const characters = await db.characters.toArray()
 </script>
 
 <template>
     <div class="flex flex-col p-5">
-        <template v-if="characterStore.characters.length">
-            <div v-for="(character, characterIndex) in characterStore.characters" :key="character.name">
-                <router-link :to="`/character?id=${characterIndex}`" class="card bg-base-200 mb-5">
+        <template v-if="characters.length">
+            <div v-for="character in characters" :key="character.name">
+                <router-link
+                    :to="`/character?id=${character.id}`"
+                    class="card bg-base-200 mb-5 hover:outline outline-primary">
                     <div class="card-body flex flex-row">
                         <div class="avatar">
                             <div class="w-24 rounded-xl">
@@ -16,6 +18,7 @@ const characterStore = useCharacterStore()
                             </div>
                         </div>
                         <div class="inline-flex flex-col">
+                            Id: {{ character.id }}
                             <div class="font-bold">
                                 {{ character.name }}
                             </div>

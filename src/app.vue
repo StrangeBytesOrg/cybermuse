@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useConnectionStore} from './store'
+import {db} from './db'
 
 const showMenu = ref(false)
 const connectionStore = useConnectionStore()

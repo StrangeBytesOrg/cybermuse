@@ -1,18 +1,15 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useCharacterStore} from '../store'
+import {db} from '../db'
 
-const characterStore = useCharacterStore()
 const characterName = ref('')
 const characterDescription = ref('')
 
 const createCharacter = async () => {
-    characterStore.characters.push({
+    await db.characters.add({
         name: characterName.value,
         description: characterDescription.value,
-        messages: [],
     })
-    characterStore.update()
     await navigateTo('/characters')
 }
 </script>

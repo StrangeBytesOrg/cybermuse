@@ -6,7 +6,8 @@
         "mirostat",
         "dotenv",
         "tailwindcss",
-        "daisyui"
+        "daisyui",
+        "dexie"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }
