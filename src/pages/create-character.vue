@@ -6,12 +6,14 @@ const characterStore = useCharacterStore()
 const characterName = ref('')
 const characterDescription = ref('')
 
-const createCharacter = () => {
+const createCharacter = async () => {
     characterStore.characters.push({
         name: characterName.value,
         description: characterDescription.value,
+        messages: [],
     })
     characterStore.update()
+    await navigateTo('/characters')
 }
 </script>
 

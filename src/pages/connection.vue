@@ -1,10 +1,10 @@
 <script lang="ts" setup>
-import {useConnectionStore} from '../store/connection'
+import {useConnectionStore} from '../store'
 
 const connectionStore = useConnectionStore()
 
 const saveConnection = () => {
-    connectionStore.save()
+    connectionStore.update()
 }
 </script>
 

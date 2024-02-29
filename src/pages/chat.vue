@@ -2,23 +2,24 @@
 import {ref} from 'vue'
 import snarkdown from 'snarkdown'
 import {llama} from '../completion'
-import {useConnectionStore} from '../store/'
-import {useCharacterStore} from '../store'
-
-type message = {userType: string; text: string}
+import {useConnectionStore, useCharacterStore, useMessageStore, useSettingsStore} from '../store/'
 
 const route = useRoute()
 const connectionStore = useConnectionStore()
+const settingsStore = useSettingsStore()
 const characterStore = useCharacterStore()
+const messageStore = useMessageStore()
 
-const messages = ref([]) as Ref<message[]>
 const characterId = route.query.id
 const character = characterStore.characters[characterId]
+const messages = messageStore.messages
 
 const avatar = '/placeholder-avatar.webp'
 const currentMessage = ref('')
 const currentResponse = ref('')
 const pendingMessage = ref(false)
+
+console.log({gen: settingsStore.generationSettings})
 
 const createPrompt = () => {
     let prompt = ''
@@ -29,7 +30,7 @@ const createPrompt = () => {
     prompt += `<|im_end|>\n`
 
     // Previous Messages
-    messages.value.forEach((message) => {
+    messages.forEach((message) => {
         prompt += `<|im_start|>${message.userType}\n`
         prompt += `${message.text}\n`
         prompt += `<|im_end|>\n`
@@ -52,12 +53,14 @@ const sendMessage = async () => {
     console.log(prompt)
 
     pendingMessage.value = true
-    messages.value.push({userType: 'user', text: currentMessage.value})
+    messages.push({userType: 'user', user: 'user', text: currentMessage.value})
     const response = llama(
         prompt,
         {
-            n_predict: 128,
-            temperature: 0.5,
+            temperature: settingsStore.generationSettings.temperature,
+            top_p: settingsStore.generationSettings.topP,
+            top_k: settingsStore.generationSettings.topK,
+            n_predict: Number(settingsStore.generationSettings.maxTokens),
         },
         {},
         url,
@@ -68,9 +71,15 @@ const sendMessage = async () => {
     }
     pendingMessage.value = false
 
-    messages.value.push({userType: 'wat', text: currentResponse.value})
+    messages.push({userType: 'bot', user: character.name, text: currentResponse.value})
     currentMessage.value = ''
     currentResponse.value = ''
+    messageStore.update()
+}
+
+const deleteMessage = (messageIndex: number) => {
+    messages.splice(messageIndex, 1)
+    messageStore.update()
 }
 </script>
 
@@ -89,6 +98,7 @@ const sendMessage = async () => {
                     <div class="font-bold">{{ message.user }}</div>
                     <div v-html="snarkdown(message.text)" />
                 </div>
+                <button class="btn btn-error" @click="deleteMessage(index)">Delete</button>
             </div>
 
             <!-- Loading message -->

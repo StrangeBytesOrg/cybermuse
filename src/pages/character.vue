@@ -5,6 +5,11 @@ const route = useRoute()
 const characterStore = useCharacterStore()
 const characterId = route.query.id
 const character = characterStore.characters[characterId]
+
+const deleteCharacter = () => {
+    characterStore.characters.splice(characterId, 1)
+    characterStore.update()
+}
 </script>
 
 <template>
@@ -13,5 +18,7 @@ const character = characterStore.characters[characterId]
         Name: {{ character.name }}
         <br />
         Description: {{ character.description }}
+        <br />
+        <button class="btn btn-error" @click="deleteCharacter()">Delete</button>
     </div>
 </template>

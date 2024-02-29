@@ -5,10 +5,9 @@ export const useConnectionStore = defineStore('connection', () => {
     const apiUrl = ref(localStorage.getItem('apiUrl') || '')
     const connected = ref(false)
 
-    const save = () => {
+    const update = () => {
         localStorage.setItem('apiUrl', apiUrl.value)
-        connected.value = true
     }
 
-    return {apiUrl, connected, save}
+    return {apiUrl, connected, update}
 })
