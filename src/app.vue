@@ -11,16 +11,34 @@ const toggleMenu = () => {
 }
 
 const checkConnection = async () => {
-    const connectionCheckUrl = `${connectionStore.apiUrl}/health`
-    const connectionResponse = await fetch(connectionCheckUrl, {
+    // const connectionCheckUrl = `${connectionStore.apiUrl}/health`
+    // const connectionResponse = await fetch(connectionCheckUrl, {
+    //     method: 'GET',
+    //     headers: {
+    //         'Content-Type': 'application/json',
+    //         // Bearer: 'Bearer abc123',
+    //     },
+    // })
+    // const {status} = await connectionResponse.json()
+    // connectionStore.connected = status === 'ok' ? true : false
+    let checkUrl = ''
+    if (connectionStore.apiType === 'llamacpp') {
+        // checkUrl = `${connectionStore.apiUrl}/v1/models`
+        checkUrl = `${connectionStore.apiUrl}/health`
+    } else if (connectionStore.apiType === 'koboldcpp') {
+        checkUrl = `${connectionStore.apiUrl}/api/v1/model`
+    }
+
+    const response = await fetch(checkUrl, {
         method: 'GET',
         headers: {
             'Content-Type': 'application/json',
-            // Bearer: 'Bearer abc123',
         },
     })
-    const {status} = await connectionResponse.json()
-    connectionStore.connected = status === 'ok' ? true : false
+    const responseJson = await response.json()
+    if (responseJson.result) {
+        connectionStore.connected = true
+    }
 }
 checkConnection()
 </script>
