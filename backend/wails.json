@@ -1,0 +1,16 @@
+{
+    "$schema": "https://wails.io/schemas/config.v2.json",
+    "name": "wails-demo",
+    "outputfilename": "chat-frontend",
+    "frontend:install": "pnpm install",
+    "frontend:build": "pnpm exec vite build --outDir ../backend/dist",
+    "frontend:dev:watcher": "pnpm run dev",
+    "frontend:dev:serverUrl": "auto",
+    "frontend:dir": "../src/",
+    "build:dir": "../build",
+    "wailsjsdir": "../src/",
+    "author": {
+        "name": "Strange Bytes",
+        "email": "dev@strangebytes.org"
+    }
+}
