@@ -1,19 +1,27 @@
 <script lang="ts" setup>
+import {ref, onBeforeMount} from 'vue'
+import {useRoute, useRouter} from 'vue-router'
 import {db} from '../db'
 
 const route = useRoute()
+const router = useRouter()
 const characterId = Number(route.query.id)
-const character = await db.characters.get(characterId)
-const chats = await db.chats.where('characterId').equals(characterId).toArray()
+const character = ref({})
+const chats = ref([])
+
+onBeforeMount(async () => {
+    character.value = await db.characters.get(characterId)
+    chats.value = await db.chats.where('characterId').equals(characterId).toArray()
+})
 
 const deleteCharacter = async () => {
     await db.characters.delete(characterId)
-    await navigateTo('/characters')
+    await router.push('/characters')
 }
 
 const createChat = async () => {
     const chatId = await db.chats.add({characterId})
-    await navigateTo(`/chat?id=${chatId}`)
+    await router.push(`/chat?id=${chatId}`)
 }
 </script>
 

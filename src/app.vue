@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
+import {RouterLink, RouterView} from 'vue-router'
 import {useConnectionStore} from './store'
-import {db} from './db'
 
 const showMenu = ref(false)
 const connectionStore = useConnectionStore()
@@ -41,6 +41,9 @@ const checkConnection = async () => {
     }
 }
 checkConnection()
+
+import './assets/css/global.css'
+import './assets/css/tailwind.css'
 </script>
 
 <template>
@@ -49,14 +52,8 @@ checkConnection()
         <!-- Header -->
         <div class="navbar w-full bg-neutral text-neutral-content fixed z-[50] top-0 flex justify-between">
             <button class="btn btn-square btn-outline" aria-label="menu">
-                <img class="w-8" src="/menu.svg" />
+                <img class="w-8" src="./assets/img/menu.svg" />
             </button>
-
-            <!-- Connection Status Indicator -->
-            <div>
-                <span class="mr-1">Connection:</span>
-                <span class="badge" :class="connectionStore.connected ? 'badge-success' : 'badge-error'"></span>
-            </div>
         </div>
 
         <div class="flex flex-grow min-h-0 pt-16">
@@ -75,7 +72,7 @@ checkConnection()
 
             <!-- Main -->
             <div class="flex flex-col flex-1 overflow-auto md:mr-2">
-                <NuxtPage />
+                <RouterView />
             </div>
         </div>
     </div>

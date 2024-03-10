@@ -5,7 +5,7 @@ html:focus-within {
     /* min-height: 100vh; */
 }
 
-#__nuxt {
+#app {
     min-height: 100vh;
     display: flex;
     flex-direction: column;

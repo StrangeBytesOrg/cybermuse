@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
+import {useRouter} from 'vue-router'
 import {db} from '../db'
 
+const router = useRouter()
 const characterName = ref('')
 const characterDescription = ref('')
 
@@ -10,7 +12,7 @@ const createCharacter = async () => {
         name: characterName.value,
         description: characterDescription.value,
     })
-    await navigateTo('/characters')
+    await router.push('/characters')
 }
 </script>
 

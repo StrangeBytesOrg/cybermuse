@@ -1,7 +1,8 @@
 <script lang="ts" setup>
 import {db} from '../db'
+import {useDexieLiveQuery} from '../livequery'
 
-const characters = await db.characters.toArray()
+const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValue: []})
 </script>
 
 <template>
@@ -14,7 +15,7 @@ const characters = await db.characters.toArray()
                     <div class="card-body flex flex-row">
                         <div class="avatar">
                             <div class="w-24 rounded-xl">
-                                <img src="/placeholder-avatar.webp" alt="{{character.name}} avatar" />
+                                <img src="../assets/img/placeholder-avatar.webp" alt="{{character.name}} avatar" />
                             </div>
                         </div>
                         <div class="inline-flex flex-col">
@@ -28,7 +29,6 @@ const characters = await db.characters.toArray()
                         </div>
                     </div>
                 </router-link>
-                <!-- <router-link :to="`/chat?id=${characterIndex}`" class="btn btn-primary">Chat</router-link> -->
             </div>
         </template>
         <template v-else>

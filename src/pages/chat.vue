@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, onBeforeMount} from 'vue'
+import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
 import {llama} from '../completion'
 import {useConnectionStore, useSettingsStore} from '../store/'
@@ -10,12 +11,18 @@ const route = useRoute()
 const connectionStore = useConnectionStore()
 const settingsStore = useSettingsStore()
 
+connectionStore.connected = true
 const chatId = Number(route.query.id)
-const chat = await db.chats.get(chatId)
-const character = await db.characters.get(chat.characterId)
+
+const chat = ref({})
+const character = ref({})
+onBeforeMount(async () => {
+    chat.value = await db.chats.get(chatId)
+    character.value = await db.characters.get(chat.value.characterId)
+})
 const messages = useDexieLiveQuery(() => db.messages.where('chatId').equals(chatId).toArray(), {initialValue: []})
 
-const avatar = '/placeholder-avatar.webp'
+const avatar = '../assets/img/placeholder-avatar.webp'
 const currentMessage = ref('')
 const currentResponse = ref('')
 const pendingMessage = ref(false)
@@ -24,8 +31,8 @@ const createPrompt = () => {
     let prompt = ''
     // Setup
     prompt += `<|im_start|>system\n`
-    prompt += `Play the role of ${character.name} in this chat with User.\n`
-    prompt += `${character.name} Description:\n${character.description}\n`
+    prompt += `Play the role of ${character.value.name} in this chat with User.\n`
+    prompt += `${character.value.name} Description:\n${character.value.description}\n`
     prompt += `<|im_end|>\n`
 
     // Previous Messages
@@ -40,7 +47,7 @@ const createPrompt = () => {
     prompt += `User: ${currentMessage.value}\n`
     prompt += `<|im_end|>\n`
     prompt += `<|im_start|>assistant\n`
-    prompt += `${character.name}:`
+    prompt += `${character.value.name}:`
     return prompt
 }
 
@@ -78,7 +85,7 @@ const sendMessage = async () => {
     }
     pendingMessage.value = false
 
-    await db.messages.add({chatId, user: character.name, text: currentResponse.value})
+    await db.messages.add({chatId, user: character.value.name, text: currentResponse.value})
     currentMessage.value = ''
     currentResponse.value = ''
 }
@@ -104,7 +111,10 @@ const deleteMessage = async (messageId: number) => {
                 class="flex flex-row justify-between items-start mb-2 p-3 bg-base-200 rounded-xl">
                 <div class="avatar">
                     <div class="w-16 rounded-full">
-                        <img v-if="message.userType === 'user'" src="/placeholder-avatar.webp" alt="user" />
+                        <img
+                            v-if="message.userType === 'user'"
+                            src="../assets/img/placeholder-avatar.webp"
+                            alt="user" />
                         <img v-else :src="avatar" :alt="character.name" />
                     </div>
                 </div>

@@ -26,7 +26,7 @@ export class ChatDatabase extends Dexie {
     constructor() {
         super('chat-frontend')
 
-        this.version(2).stores({
+        this.version(1).stores({
             characters: '++id, name, description',
             chats: '++id, characterId',
             messages: '++id, chatId, user, text',
