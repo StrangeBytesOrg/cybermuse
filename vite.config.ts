@@ -14,4 +14,7 @@ export default defineConfig({
             plugins: [tailwind(tailwindConfig), autoprefixer],
         },
     },
+    build: {
+        outDir: '../dist',
+    },
 })

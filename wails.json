@@ -3,12 +3,11 @@
     "name": "wails-demo",
     "outputfilename": "chat-frontend",
     "frontend:install": "npm install",
-    "frontend:build": "npm exec vite build --outDir ../backend/dist",
+    "frontend:build": "npm run build",
     "frontend:dev:watcher": "npm run dev",
     "frontend:dev:serverUrl": "auto",
-    "frontend:dir": "../src/",
-    "build:dir": "../build",
-    "wailsjsdir": "../src/",
+    "frontend:dir": "./src/",
+    "build:dir": "./build",
     "author": {
         "name": "Strange Bytes",
         "email": "dev@strangebytes.org"
