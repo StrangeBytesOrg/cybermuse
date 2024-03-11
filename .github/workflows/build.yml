@@ -19,14 +19,15 @@ jobs:
             matrix:
                 build:
                     - name: 'App'
+                      app-working-directory: 'backend'
                       platform: 'linux/amd64'
                       os: 'ubuntu-latest'
-                    - name: 'App'
-                      platform: 'windows/amd64'
-                      os: 'windows-latest'
-                    - name: 'App'
-                      platform: 'darwin/universal'
-                      os: 'macos-latest'
+                    # - name: 'App'
+                    #   platform: 'windows/amd64'
+                    #   os: 'windows-latest'
+                    # - name: 'App'
+                    #   platform: 'darwin/universal'
+                    #   os: 'macos-latest'
 
         runs-on: ${{ matrix.build.os }}
         steps:
