@@ -11,7 +11,13 @@ export interface Chat {
     characterId: number
     createdAt: number
     updatedAt: number
-    messages: object[]
+    messages: [
+        {
+            user: string
+            text: string
+            createdAt: number
+        },
+    ]
 }
 
 export class ChatDatabase extends Dexie {
