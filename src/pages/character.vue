@@ -2,28 +2,19 @@
 import {ref, onBeforeMount} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {db} from '../db'
+import {useDexieLiveQuery} from '../livequery'
 
 const route = useRoute()
 const router = useRouter()
 const characterId = Number(route.query.id)
-const character = ref({})
-const chats = ref([])
 
-onBeforeMount(async () => {
-    character.value = await db.characters.get(characterId)
-    chats.value = await db.chats.where('characterId').equals(characterId).toArray()
-
-    // const wat = await db.chats.get(2)
-    // if (!wat) {
-    //     console.log('wat not found')
-    // } else {
-    //     console.log(wat)
-    //     wat.messages.push({text: 'foo', userType: 'wat'})
-    //     await db.chats.put(wat)
-    // }
-})
+const character = useDexieLiveQuery(() => db.characters.get(characterId), {initialValue: {}})
+const chats = useDexieLiveQuery(() => db.chats.where('characterId').equals(characterId).toArray(), {initialValue: []})
 
 const updateCharacter = async () => {
+    if (!character.value) {
+        return
+    }
     await db.characters.update(characterId, character.value)
 }
 
@@ -70,10 +61,22 @@ const deleteChat = async (chatId) => {
                 :to="`/chat?id=${chat.id}`"
                 v-for="chat in chats"
                 :key="chat.id"
-                class="mt-5 px-3 py-2 bg-base-100 rounded-md flex">
-                <!-- <router-link :to="`/chat?id=${chat.id}`" class="btn btn-primary">Chat Id: {{ chat.id }}</router-link> -->
-                <p>Created: {{ chat.createdAt }}</p>
-                <p>Last message: {{}}</p>
+                class="mt-5 px-3 py-2 bg-base-100 rounded-md flex hover:bg-primary-content">
+                <!-- Info -->
+                <div class="flex flex-col">
+                    <p>
+                        Created:
+                        {{
+                            new Date(chat.createdAt).toLocaleDateString(undefined, {
+                                year: 'numeric',
+                                month: 'long',
+                                day: 'numeric',
+                            })
+                        }}
+                    </p>
+                    <p v-if="chat.messages.length">Message Count: {{ chat.messages.length }}</p>
+                </div>
+                <!-- Controls -->
                 <button class="btn btn-error ml-auto" @click.prevent="deleteChat(chat.id)">Delete</button>
             </router-link>
         </div>
