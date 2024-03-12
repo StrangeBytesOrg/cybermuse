@@ -48,15 +48,7 @@ import './styles/tailwind.css'
 
         <div class="flex flex-grow min-h-0 pt-16">
             <!-- Menu -->
-            <!-- <div class="wat-menu w-80 max-md:min-w-[20rem] max-md:w-1/2 flex flex-col bg-base-300">
-                <div class="px-5 flex flex-col flex-grow">
-                    <router-link to="/create-character">Create Character</router-link>
-                    <router-link to="/characters">Characters</router-link>
-                    <router-link to="/connection">Connection</router-link>
-                    <router-link to="/settings">Settings</router-link>
-                </div>
-            </div> -->
-            <ul class="menu w-60 bg-base-200 min-h-full">
+            <ul class="menu w-60 bg-base-300 min-h-full fixed">
                 <li>
                     <router-link to="/create-character" class="font-bold" active-class="active">
                         Create Character
@@ -64,6 +56,9 @@ import './styles/tailwind.css'
                 </li>
                 <li>
                     <router-link to="/characters" class="font-bold" active-class="active">Characters</router-link>
+                </li>
+                <li>
+                    <router-link to="/instruct" class="font-bold" active-class="active">Instruct</router-link>
                 </li>
                 <li>
                     <router-link to="/connection" class="font-bold" active-class="active">Connection</router-link>
@@ -74,7 +69,7 @@ import './styles/tailwind.css'
             </ul>
 
             <!-- Main -->
-            <div class="flex flex-col flex-1 overflow-auto md:mr-2">
+            <div class="flex flex-col flex-1 overflow-auto md:mr-2 ml-60">
                 <RouterView />
             </div>
         </div>

@@ -7,6 +7,7 @@ import Character from './pages/character.vue'
 import Chat from './pages/chat.vue'
 import Connection from './pages/connection.vue'
 import Settings from './pages/settings.vue'
+import Instruct from './pages/instruct.vue'
 
 export default createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +36,11 @@ export default createRouter({
             path: '/chat',
             name: 'chat',
             component: Chat,
+        },
+        {
+            path: '/instruct',
+            name: 'instruct',
+            component: Instruct,
         },
         {
             path: '/connection',
