@@ -37,24 +37,30 @@ const deleteChat = async (chatId) => {
 
 <template>
     <div class="flex flex-col p-5">
-        <input
-            type="text"
-            v-model="character.name"
-            class="input input-bordered max-w-80"
-            placeholder="Character Name" />
-        <textarea
-            class="textarea textarea-bordered mt-5"
-            v-model="character.description"
-            placeholder="Description"></textarea>
+        <!-- Character Details -->
+        <div class="card bg-base-200 p-5">
+            <h2 class="text-xl">Character Info</h2>
+            <div class="divider mt-2"></div>
+            <input
+                type="text"
+                v-model="character.name"
+                class="input input-bordered max-w-80 border-2 focus:outline-none focus:border-primary"
+                placeholder="Character Name" />
+            <textarea
+                class="textarea textarea-bordered mt-5 border-2 focus:outline-none focus:border-primary"
+                v-model="character.description"
+                placeholder="Description"></textarea>
 
-        <div class="flex flex-row mt-5">
-            <button class="btn btn-primary" @click="updateCharacter()">Update</button>
-            <button class="btn btn-error ml-5" @click="deleteCharacter()">Delete</button>
+            <div class="flex flex-row mt-5">
+                <button class="btn btn-primary" @click="updateCharacter()">Update</button>
+                <button class="btn btn-error ml-5" @click="deleteCharacter()">Delete</button>
+            </div>
         </div>
 
+        <!-- Chats -->
         <div class="card bg-base-200 mt-5 p-5">
             <h2 class="text-xl">Chats</h2>
-            <div class="divider"></div>
+            <div class="divider mt-2"></div>
             <button class="btn btn-primary max-w-28" @click="createChat()">New Chat</button>
 
             <router-link
