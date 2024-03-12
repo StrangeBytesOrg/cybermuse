@@ -9,31 +9,24 @@ export interface Character {
 export interface Chat {
     id?: number
     characterId: number
-}
-
-export interface Message {
-    id?: number
-    chatId: number
-    user: string
-    text: string
+    createdAt: number
+    updatedAt: number
+    messages: object[]
 }
 
 export class ChatDatabase extends Dexie {
     characters: Table<Character, number>
     chats: Table<Chat, number>
-    messages: Table<Message, number>
 
     constructor() {
         super('chat-frontend')
 
         this.version(1).stores({
             characters: '++id, name, description',
-            chats: '++id, characterId',
-            messages: '++id, chatId, user, text',
+            chats: '++id, characterId, createdAt, updatedAt, *messages',
         })
         this.characters = this.table('characters')
         this.chats = this.table('chats')
-        this.messages = this.table('messages')
     }
 }
 export const db = new ChatDatabase()

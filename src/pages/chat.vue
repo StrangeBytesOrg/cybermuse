@@ -14,20 +14,25 @@ const settingsStore = useSettingsStore()
 connectionStore.connected = true
 const chatId = Number(route.query.id)
 
-const chat = ref({})
 const character = ref({})
+
+const chat = useDexieLiveQuery(() => db.chats.get(chatId), {initialValue: {messages: []}})
 onBeforeMount(async () => {
-    chat.value = await db.chats.get(chatId)
-    character.value = await db.characters.get(chat.value.characterId)
+    const {characterId} = await db.chats.get(chatId)
+    character.value = await db.characters.get(characterId)
 })
-const messages = useDexieLiveQuery(() => db.messages.where('chatId').equals(chatId).toArray(), {initialValue: []})
 
 const avatar = '../assets/img/placeholder-avatar.webp'
 const currentMessage = ref('')
 const currentResponse = ref('')
 const pendingMessage = ref(false)
 
-const createPrompt = () => {
+type Message = {
+    userType: 'user' | 'bot'
+    user: string
+    text: string
+}
+const createPrompt = (messages: Message[]) => {
     let prompt = ''
     // Setup
     prompt += `<|im_start|>system\n`
@@ -36,7 +41,7 @@ const createPrompt = () => {
     prompt += `<|im_end|>\n`
 
     // Previous Messages
-    messages.value.forEach((message) => {
+    messages.forEach((message) => {
         prompt += `<|im_start|>${message.userType}\n`
         prompt += `${message.text}\n`
         prompt += `<|im_end|>\n`
@@ -62,12 +67,13 @@ const sendMessage = async () => {
     console.log('send message')
     const url = `${connectionStore.apiUrl}/completion`
 
-    const prompt = createPrompt()
+    const prompt = createPrompt(chat.value.messages)
     console.log(prompt)
 
     pendingMessage.value = true
 
-    await db.messages.add({chatId, user: 'user', text: currentMessage.value})
+    chat.value.messages.push({user: 'user', text: currentMessage.value})
+
     const response = llama(
         prompt,
         {
@@ -85,7 +91,9 @@ const sendMessage = async () => {
     }
     pendingMessage.value = false
 
-    await db.messages.add({chatId, user: character.value.name, text: currentResponse.value})
+    chat.value.messages.push({user: character.value.name, text: currentResponse.value})
+    await db.chats.update(chatId, chat.value)
+
     currentMessage.value = ''
     currentResponse.value = ''
 }
@@ -96,8 +104,9 @@ const editMessage = (messageId: number) => {
     console.log(editMode.value)
 }
 
-const deleteMessage = async (messageId: number) => {
-    await db.messages.delete(messageId)
+const deleteMessage = async (messageIndex: number) => {
+    chat.value.messages.splice(messageIndex, 1)
+    await db.chats.update(chatId, chat.value)
 }
 </script>
 
@@ -106,7 +115,7 @@ const deleteMessage = async (messageId: number) => {
         <!-- Messages -->
         <div ref="messagesElement" class="md:container md:mx-auto flex-grow overflow-auto pt-3">
             <div
-                v-for="(message, index) in messages"
+                v-for="(message, index) in chat.messages"
                 v-bind:key="index"
                 class="flex flex-row justify-between items-start mb-2 p-3 bg-base-200 rounded-xl">
                 <div class="avatar">
@@ -131,14 +140,14 @@ const deleteMessage = async (messageId: number) => {
                         <div v-html="snarkdown(message.text)" />
                     </template>
                 </div>
-                <button class="btn btn-square btn-neutral p-1" @click="deleteMessage(message.id)">
+                <button class="btn btn-square btn-neutral p-1" @click="deleteMessage(index)">
                     <!-- prettier-ignore -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <!-- prettier-ignore -->
                         <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                     </svg>
                 </button>
-                <button class="btn btn-square btn-neutral p-1" @click="editMessage(message.id)">
+                <button class="btn btn-square btn-neutral p-1" @click="editMessage(index)">
                     <!-- prettier-ignore -->
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                         <!-- prettier-ignore -->
