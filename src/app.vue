@@ -5,20 +5,9 @@ import {useConnectionStore} from './store'
 const connectionStore = useConnectionStore()
 
 const checkConnection = async () => {
-    // const connectionCheckUrl = `${connectionStore.apiUrl}/health`
-    // const connectionResponse = await fetch(connectionCheckUrl, {
-    //     method: 'GET',
-    //     headers: {
-    //         'Content-Type': 'application/json',
-    //         // Bearer: 'Bearer abc123',
-    //     },
-    // })
-    // const {status} = await connectionResponse.json()
-    // connectionStore.connected = status === 'ok' ? true : false
     let checkUrl = ''
     if (connectionStore.apiType === 'llamacpp') {
-        // checkUrl = `${connectionStore.apiUrl}/v1/models`
-        checkUrl = `${connectionStore.apiUrl}/health`
+        checkUrl = `${connectionStore.apiUrl}/v1/models`
     } else if (connectionStore.apiType === 'koboldcpp') {
         checkUrl = `${connectionStore.apiUrl}/api/v1/model`
     }

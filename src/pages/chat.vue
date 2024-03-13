@@ -2,7 +2,7 @@
 import {ref, onBeforeMount} from 'vue'
 import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
-import {llama} from '../completion'
+import {sseRequest} from '../lib/fetch-backend'
 import {useConnectionStore, useSettingsStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../livequery'
@@ -66,30 +66,34 @@ const checkSend = (event: KeyboardEvent) => {
 
 const sendMessage = async () => {
     console.log('send message')
-    const url = `${connectionStore.apiUrl}/completion`
 
     const prompt = createPrompt(chat.value.messages)
     console.log(prompt)
-
     pendingMessage.value = true
 
     chat.value.messages.push({user: 'user', text: currentMessage.value})
 
-    const response = llama(
+    const body = JSON.stringify({
         prompt,
-        {
-            temperature: settingsStore.generationSettings.temperature,
-            top_p: settingsStore.generationSettings.topP,
-            top_k: settingsStore.generationSettings.topK,
-            n_predict: Number(settingsStore.generationSettings.maxTokens),
-        },
-        {},
-        url,
-    )
+        temperature: settingsStore.generationSettings.temperature,
+        top_p: settingsStore.generationSettings.topP,
+        top_k: settingsStore.generationSettings.topK,
+        n_predict: Number(settingsStore.generationSettings.maxTokens),
+        stream: true,
+    })
+    const apiUrl = `${connectionStore.apiUrl}/completion`
+    // const apiUrl = `${connectionStore.apiUrl}/api/extra/generate/stream` // Koboldcpp endpoint
 
+    const response = await sseRequest(apiUrl, body)
     for await (const chunk of response) {
-        currentResponse.value += chunk.data.content
+        const data = JSON.parse(chunk.data)
+        currentResponse.value += data.content
+        // currentResponse.value += data.token // Koboldcpp response
     }
+
+    // TODO parse response based on syntax used
+
+    console.log(currentResponse.value)
     pendingMessage.value = false
 
     chat.value.messages.push({user: character.value.name, text: currentResponse.value})
