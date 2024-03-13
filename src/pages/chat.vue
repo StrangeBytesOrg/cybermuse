@@ -5,7 +5,7 @@ import snarkdown from 'snarkdown'
 import {sseRequest} from '../lib/fetch-backend'
 import {useConnectionStore, useSettingsStore} from '../store/'
 import {db} from '../db'
-import {useDexieLiveQuery} from '../livequery'
+import {useDexieLiveQuery} from '../lib/livequery'
 
 const route = useRoute()
 const connectionStore = useConnectionStore()

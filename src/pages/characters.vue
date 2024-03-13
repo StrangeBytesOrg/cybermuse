@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {db} from '../db'
-import {useDexieLiveQuery} from '../livequery'
+import {useDexieLiveQuery} from '../lib/livequery'
 
 const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValue: []})
 </script>

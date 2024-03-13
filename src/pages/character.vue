@@ -2,7 +2,7 @@
 import {ref, onBeforeMount} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {db} from '../db'
-import {useDexieLiveQuery} from '../livequery'
+import {useDexieLiveQuery} from '../lib/livequery'
 
 const route = useRoute()
 const router = useRouter()
