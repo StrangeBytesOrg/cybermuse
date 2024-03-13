@@ -14,12 +14,12 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
                     class="card bg-base-200 mb-5 hover:outline outline-primary">
                     <div class="card-body flex flex-row">
                         <div class="avatar">
-                            <div class="w-24 rounded-xl">
-                                <img src="../assets/img/placeholder-avatar.webp" alt="{{character.name}} avatar" />
+                            <div class="w-36 max-h-36 rounded-xl">
+                                <img v-if="character.image" :src="character.image" :alt="character.name" />
+                                <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                             </div>
                         </div>
                         <div class="inline-flex flex-col">
-                            Id: {{ character.id }}
                             <div class="font-bold">
                                 {{ character.name }}
                             </div>

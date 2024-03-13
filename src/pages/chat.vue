@@ -3,6 +3,7 @@ import {ref, onBeforeMount} from 'vue'
 import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
 import {sseRequest} from '../lib/fetch-backend'
+import {createPrompt} from '../lib/format-prompt'
 import {useConnectionStore, useSettingsStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
@@ -15,7 +16,6 @@ connectionStore.connected = true
 const chatId = Number(route.query.id)
 
 const character = ref({})
-const avatar = '../assets/img/placeholder-avatar.webp'
 const currentMessage = ref('')
 const currentResponse = ref('')
 const pendingMessage = ref(false)
@@ -28,35 +28,6 @@ onBeforeMount(async () => {
     character.value = await db.characters.get(characterId)
 })
 
-type Message = {
-    userType: 'user' | 'bot'
-    user: string
-    text: string
-}
-const createPrompt = (messages: Message[]) => {
-    let prompt = ''
-    // Setup
-    prompt += `<|im_start|>system\n`
-    prompt += `Play the role of ${character.value.name} in this chat with User.\n`
-    prompt += `${character.value.name} Description:\n${character.value.description}\n`
-    prompt += `<|im_end|>\n`
-
-    // Previous Messages
-    messages.forEach((message) => {
-        prompt += `<|im_start|>${message.userType}\n`
-        prompt += `${message.text}\n`
-        prompt += `<|im_end|>\n`
-    })
-
-    // Current Message
-    prompt += `<|im_start|>user\n`
-    prompt += `User: ${currentMessage.value}\n`
-    prompt += `<|im_end|>\n`
-    prompt += `<|im_start|>assistant\n`
-    prompt += `${character.value.name}:`
-    return prompt
-}
-
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
@@ -67,11 +38,15 @@ const checkSend = (event: KeyboardEvent) => {
 const sendMessage = async () => {
     console.log('send message')
 
-    const prompt = createPrompt(chat.value.messages)
-    console.log(prompt)
-    pendingMessage.value = true
+    let systemPrompt = ''
+    systemPrompt += `Play the role of ${character.value.name} in this chat with User.\n`
+    systemPrompt += `${character.value.name} Description:\n${character.value.description}\n`
 
-    chat.value.messages.push({user: 'user', text: currentMessage.value})
+    pendingMessage.value = true
+    chat.value.messages.push({user: 'user', userType: 'user', text: currentMessage.value})
+
+    const prompt = createPrompt(systemPrompt, chat.value.messages)
+    console.log(prompt)
 
     const body = JSON.stringify({
         prompt,
@@ -79,6 +54,7 @@ const sendMessage = async () => {
         top_p: settingsStore.generationSettings.topP,
         top_k: settingsStore.generationSettings.topK,
         n_predict: Number(settingsStore.generationSettings.maxTokens),
+        stop: ['<|', '<|im_end', '<|im_end|>'],
         stream: true,
     })
     const apiUrl = `${connectionStore.apiUrl}/completion`
@@ -96,7 +72,7 @@ const sendMessage = async () => {
     console.log(currentResponse.value)
     pendingMessage.value = false
 
-    chat.value.messages.push({user: character.value.name, text: currentResponse.value})
+    chat.value.messages.push({user: character.value.name, userType: 'assistant', text: currentResponse.value})
     await db.chats.update(chatId, chat.value)
 
     currentMessage.value = ''
@@ -135,7 +111,8 @@ const deleteMessage = async (messageIndex: number) => {
                                 v-if="message.userType === 'user'"
                                 src="../assets/img/placeholder-avatar.webp"
                                 alt="user" />
-                            <img v-else :src="avatar" :alt="character.name" />
+                            <img v-else-if="character.image" :src="character.image" :alt="character.name" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
                     <div class="flex-grow pl-3">
@@ -181,7 +158,8 @@ const deleteMessage = async (messageIndex: number) => {
                     class="flex flex-row justify-between items-start mb-2 p-3 bg-base-200 rounded-xl">
                     <div class="avatar">
                         <div class="w-16 rounded-full">
-                            <img :src="avatar" :alt="character.name" />
+                            <img v-if="character.image" :src="character.image" :alt="character.name" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
                     <div class="flex-grow pl-3">
