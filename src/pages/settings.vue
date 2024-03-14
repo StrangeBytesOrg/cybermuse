@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import {ref} from 'vue'
 import {useSettingsStore} from '../store'
 
 const settingsStore = useSettingsStore()
+const promptTemplate = ref('')
 
 const saveSettings = () => {
     settingsStore.update()
@@ -36,6 +38,13 @@ const saveSettings = () => {
                 <span class="label-text">Max Tokens</span>
             </div>
             <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.maxTokens" />
+        </label>
+
+        <label class="form-control w-full">
+            <div class="label">
+                <span class="label-text">Prompt Syntax</span>
+            </div>
+            <textarea class="textarea textarea-bordered" v-model="promptTemplate" />
         </label>
 
         <button class="btn btn-primary mt-9" @click="saveSettings">Save</button>

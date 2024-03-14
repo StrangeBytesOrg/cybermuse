@@ -38,14 +38,23 @@ const checkSend = (event: KeyboardEvent) => {
 const sendMessage = async () => {
     console.log('send message')
 
+    let prompt = ''
     let systemPrompt = ''
     systemPrompt += `Play the role of ${character.value.name} in this chat with User.\n`
     systemPrompt += `${character.value.name} Description:\n${character.value.description}\n`
+    prompt += createPrompt([
+        {
+            userType: 'system',
+            text: systemPrompt,
+        },
+    ])
 
     pendingMessage.value = true
     chat.value.messages.push({user: 'user', userType: 'user', text: currentMessage.value})
 
-    const prompt = createPrompt(systemPrompt, chat.value.messages)
+    prompt += createPrompt(chat.value.messages)
+
+    prompt += `<|im_start|>assistant\n` // TODO this needs to be baked into prompt formatting somehow
     console.log(prompt)
 
     const body = JSON.stringify({
@@ -54,7 +63,8 @@ const sendMessage = async () => {
         top_p: settingsStore.generationSettings.topP,
         top_k: settingsStore.generationSettings.topK,
         n_predict: Number(settingsStore.generationSettings.maxTokens),
-        stop: ['<|', '<|im_end', '<|im_end|>'],
+        stop: ['<|im_end|>'],
+        seed: 80085,
         stream: true,
     })
     const apiUrl = `${connectionStore.apiUrl}/completion`
@@ -68,8 +78,8 @@ const sendMessage = async () => {
     }
 
     // TODO parse response based on syntax used
+    console.log('Response:', currentResponse.value)
 
-    console.log(currentResponse.value)
     pendingMessage.value = false
 
     chat.value.messages.push({user: character.value.name, userType: 'assistant', text: currentResponse.value})
@@ -178,7 +188,6 @@ const deleteMessage = async (messageIndex: number) => {
                 v-model="currentMessage"
                 @keydown="checkSend"
                 :disabled="pendingMessage"
-                maxlength="500"
                 class="textarea textarea-primary border-2 resize-none flex-1 textarea-xs textarea-bordered align-middle text-base h-20 focus:outline-none focus:border-secondary" />
 
             <!-- Chat Send Button -->
