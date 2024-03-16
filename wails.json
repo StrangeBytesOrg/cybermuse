@@ -3,7 +3,7 @@
     "name": "chat",
     "outputfilename": "chat-frontend",
     "frontend:install": "pnpm install",
-    "frontend:build": "pnpm run build",
+    "frontend:build": "pnpm run build:frontend",
     "frontend:dev:watcher": "pnpm run dev",
     "frontend:dev:serverUrl": "auto",
     "frontend:dir": "./",

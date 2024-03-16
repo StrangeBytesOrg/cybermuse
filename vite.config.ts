@@ -9,6 +9,7 @@ import tailwindConfig from './tailwind.config'
 export default defineConfig({
     root: './src',
     plugins: [vue()],
+    base: './',
     css: {
         postcss: {
             plugins: [tailwind(tailwindConfig), autoprefixer],

@@ -2,11 +2,18 @@
     "name": "chat-frontend",
     "version": "0.1.0",
     "type": "module",
+    "main": "backend/main.js",
+    "description": "A batteries included AI Chat Application",
+    "author": "Strange Bytes",
     "scripts": {
         "dev": "vite",
-        "build": "vite build"
+        "build": "npm run build:frontend && npm run build:backend",
+        "build:frontend": "vite build",
+        "build:backend": "tsx build.ts",
+        "make": "electron-builder"
     },
     "dependencies": {
+        "@electron/fuses": "^1.7.0",
         "@huggingface/jinja": "^0.2.1",
         "@vueuse/rxjs": "^10.9.0",
         "daisyui": "^4.7.2",
@@ -24,6 +31,8 @@
         "@vue/eslint-config-typescript": "^12.0.0",
         "@vue/tsconfig": "^0.5.1",
         "autoprefixer": "^10.4.18",
+        "electron": "^29.1.4",
+        "electron-builder": "^24.13.3",
         "eslint": "^8.57.0",
         "prettier": "^3.2.5",
         "tailwindcss": "^3.4.1",
