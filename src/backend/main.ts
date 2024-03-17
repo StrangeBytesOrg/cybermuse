@@ -4,8 +4,7 @@ import {app, BrowserWindow} from 'electron'
 
 // import sourceMapSupport from 'source-map-support'
 
-// Works like __dirname
-const esmDirname = url.fileURLToPath(new URL('.', import.meta.url))
+const esmDirname = url.fileURLToPath(new URL('.', import.meta.url)) // Works like __dirname
 
 // sourceMapSupport.install()
 

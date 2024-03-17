@@ -7,7 +7,7 @@
     "author": "Strange Bytes",
     "scripts": {
         "dev": "vite",
-        "build": "npm run build:frontend && npm run build:backend",
+        "build": "pnpm run build:frontend && pnpm run build:backend",
         "build:frontend": "vite build",
         "build:backend": "tsx build.ts",
         "make": "electron-builder"
