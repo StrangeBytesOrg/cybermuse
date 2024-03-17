@@ -134,3 +134,4 @@ const deleteChat = async (chatId) => {
         </div>
     </div>
 </template>
+../../lib/livequery

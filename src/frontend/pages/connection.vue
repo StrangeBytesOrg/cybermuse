@@ -12,7 +12,8 @@ const saveConnection = () => {
 const testConnection = async () => {
     let checkUrl = ''
     if (connectionStore.apiType === 'llamacpp') {
-        checkUrl = `${connectionStore.apiUrl}/v1/models`
+        // checkUrl = `${connectionStore.apiUrl}/v1/models`
+        checkUrl = `${connectionStore.apiUrl}/health`
     } else if (connectionStore.apiType === 'koboldcpp') {
         checkUrl = `${connectionStore.apiUrl}/api/v1/model`
     }

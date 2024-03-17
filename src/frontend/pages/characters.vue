@@ -36,3 +36,4 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
         </template>
     </div>
 </template>
+../../lib/livequery

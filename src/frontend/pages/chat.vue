@@ -201,3 +201,4 @@ const deleteMessage = async (messageIndex: number) => {
         </div>
     </main>
 </template>
+../../lib/fetch-backend../../lib/format-prompt../../lib/livequery
