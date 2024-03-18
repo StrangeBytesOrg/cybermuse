@@ -24,7 +24,7 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
                             <div class="font-bold">
                                 {{ character.name }}
                             </div>
-                            <div class="text-gray-500 overflow-hidden fadeout">
+                            <div class="text-gray-500 overflow-hidden h-full fadeout">
                                 <p class="whitespace-pre-line">
                                     {{ character.description }}
                                 </p>

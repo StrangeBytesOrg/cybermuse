@@ -63,6 +63,14 @@ const deleteChat = async (chatId) => {
     await db.chats.delete(chatId)
     chats.value = await db.chats.where('characterId').equals(characterId).toArray()
 }
+
+const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString(undefined, {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    })
+}
 </script>
 
 <template>
@@ -104,32 +112,30 @@ const deleteChat = async (chatId) => {
         </div>
 
         <!-- Chats -->
-        <div class="card bg-base-200 mt-5 p-5">
-            <h2 class="text-xl">Chats</h2>
+        <div class="card bg-base-200 mt-5 p-5 max-w-full">
+            <div class="flex flex-row">
+                <h2 class="text-xl">Chats</h2>
+            </div>
             <div class="divider mt-2"></div>
-            <button class="btn btn-primary max-w-28" @click="createChat()">New Chat</button>
 
+            <button class="btn btn-primary max-w-28" @click="createChat()">New Chat</button>
             <router-link
                 :to="`/chat?id=${chat.id}`"
                 v-for="chat in chats"
                 :key="chat.id"
-                class="mt-5 px-3 py-2 bg-base-100 rounded-md flex hover:bg-primary-content">
+                class="flex relative mt-5 px-3 py-2 bg-base-100 rounded-md hover:bg-primary-content">
                 <!-- Info -->
                 <div class="flex flex-col">
-                    <p>
-                        Created:
-                        {{
-                            new Date(chat.createdAt).toLocaleDateString(undefined, {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                            })
-                        }}
-                    </p>
+                    <p>Created: {{ formatDate(chat.createdAt) }}</p>
                     <p v-if="chat.messages.length">Message Count: {{ chat.messages.length }}</p>
+                    <div class="text-ellipsis line-clamp-1">
+                        <p>Last Message: {{ chat.messages[chat.messages.length - 1].text }}</p>
+                    </div>
                 </div>
                 <!-- Controls -->
-                <button class="btn btn-error ml-auto" @click.prevent="deleteChat(chat.id)">Delete</button>
+                <div class="absolute top-3 right-3">
+                    <button class="btn btn-error ml-auto" @click.prevent="deleteChat(chat.id)">Delete</button>
+                </div>
             </router-link>
         </div>
     </div>
