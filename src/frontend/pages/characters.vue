@@ -19,12 +19,15 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
                                 <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                             </div>
                         </div>
-                        <div class="inline-flex flex-col">
+
+                        <div class="inline-flex flex-col h-36">
                             <div class="font-bold">
                                 {{ character.name }}
                             </div>
-                            <div class="text-gray-500">
-                                {{ character.description }}
+                            <div class="text-gray-500 overflow-hidden fadeout">
+                                <p class="whitespace-pre-line">
+                                    {{ character.description }}
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -36,4 +39,10 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
         </template>
     </div>
 </template>
-../../lib/livequery
+
+<style lang="css">
+.fadeout {
+    -webkit-mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+    mask-image: linear-gradient(to bottom, black 75%, transparent 100%);
+}
+</style>
