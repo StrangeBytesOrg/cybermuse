@@ -107,9 +107,9 @@ const deleteMessage = async (messageIndex: number) => {
 </script>
 
 <template>
-    <main class="w-full md:p-5 flex flex-col flex-grow min-h-0">
+    <main class="flex flex-col flex-grow min-h-0">
         <!-- Messages -->
-        <div ref="messagesElement" class="md:container md:mx-auto flex-grow overflow-auto pt-3">
+        <div ref="messagesElement" class="flex-grow overflow-auto my-1 px-1 md:my-2 md:px-3">
             <template v-if="chat && chat.messages && chat.messages.length">
                 <div
                     v-for="(message, index) in chat.messages"
@@ -181,7 +181,7 @@ const deleteMessage = async (messageIndex: number) => {
             </template>
         </div>
 
-        <div class="flex">
+        <div class="flex md:px-3 md:pb-2">
             <textarea
                 ref="inputElement"
                 id="message-input"
@@ -201,4 +201,3 @@ const deleteMessage = async (messageIndex: number) => {
         </div>
     </main>
 </template>
-../../lib/fetch-backend../../lib/format-prompt../../lib/livequery

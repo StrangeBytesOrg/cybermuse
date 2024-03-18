@@ -2,11 +2,27 @@ html,
 body,
 html:focus-within {
     scroll-behavior: smooth;
-    /* min-height: 100vh; */
+    height: 100vh;
+    height: var(--doc-height);
 }
 
-#app {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
+/* Mostly fixes mobile style issues */
+:root {
+    --doc-height: 100%;
+}
+
+/* Fancy Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: oklch(var(--p));
+    border-radius: 10px;
+    border: none;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
 }
