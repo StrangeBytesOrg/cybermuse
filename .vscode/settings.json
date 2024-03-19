@@ -7,7 +7,9 @@
         "dotenv",
         "tailwindcss",
         "daisyui",
-        "dexie"
+        "dexie",
+        "llamacpp",
+        "koboldcpp"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

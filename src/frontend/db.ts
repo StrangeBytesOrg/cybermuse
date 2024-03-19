@@ -7,18 +7,17 @@ export interface Character {
     image: string | ArrayBuffer
 }
 
+type Message = {
+    user: string
+    text: string
+    createdAt: number
+}
 export interface Chat {
     id?: number
     characterId: number
     createdAt: number
     updatedAt: number
-    messages: [
-        {
-            user: string
-            text: string
-            createdAt: number
-        },
-    ]
+    messages: Message[] | []
 }
 
 export class ChatDatabase extends Dexie {

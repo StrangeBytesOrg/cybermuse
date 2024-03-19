@@ -6,7 +6,7 @@ const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValu
 </script>
 
 <template>
-    <div class="flex flex-col p-5">
+    <div class="flex flex-col px-5 mt-1">
         <template v-if="characters.length">
             <div v-for="character in characters" :key="character.name">
                 <router-link

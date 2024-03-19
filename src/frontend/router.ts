@@ -3,6 +3,7 @@ import {createRouter, createWebHistory} from 'vue-router'
 import Index from './pages/index.vue'
 import CreateChracter from './pages/create-character.vue'
 import Characters from './pages/characters.vue'
+import Chats from './pages/chats.vue'
 import Character from './pages/character.vue'
 import Chat from './pages/chat.vue'
 import Connection from './pages/connection.vue'
@@ -31,6 +32,11 @@ export default createRouter({
             path: '/character',
             name: 'character',
             component: Character,
+        },
+        {
+            path: '/chats',
+            name: 'chats',
+            component: Chats,
         },
         {
             path: '/chat',

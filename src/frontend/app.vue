@@ -24,6 +24,9 @@ import './styles/tailwind.css'
                 <router-link to="/characters" class="font-bold mt-1" active-class="active">Characters</router-link>
             </li>
             <li>
+                <router-link to="/chats" class="font-bold mt-1" active-class="active">Chats</router-link>
+            </li>
+            <li>
                 <router-link to="/instruct" class="font-bold mt-1" active-class="active">Instruct</router-link>
             </li>
             <li>
@@ -36,8 +39,11 @@ import './styles/tailwind.css'
 
         <!-- Main -->
         <div class="flex flex-grow min-h-0 mt-16 ml-60">
-            <div class="flex flex-col flex-1 overflow-auto mr-1">
-                <RouterView />
+            <div class="flex flex-col flex-1 overflow-auto mr-1 mt-3">
+                <!-- TODO: Add loading indicator -->
+                <Suspense>
+                    <RouterView />
+                </Suspense>
             </div>
         </div>
     </div>
