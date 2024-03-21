@@ -13,7 +13,7 @@ const buildOptions: BuildOptions = {
     format: 'esm', // Works best with electron
     bundle: false,
     outdir: outputPath,
-    entryPoints: ['./src/backend/main.ts'],
+    entryPoints: ['./src/backend/**/*.ts'],
     target: 'esnext',
 }
 

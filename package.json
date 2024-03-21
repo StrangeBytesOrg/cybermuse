@@ -14,16 +14,25 @@
     },
     "dependencies": {
         "@electron/fuses": "^1.7.0",
+        "@fastify/cors": "^9.0.1",
+        "@fastify/swagger": "^8.14.0",
+        "@fastify/swagger-ui": "^3.0.0",
         "@huggingface/jinja": "^0.2.1",
+        "@ts-rest/core": "^3.36.0",
+        "@ts-rest/fastify": "^3.36.0",
+        "@ts-rest/open-api": "^3.36.0",
         "@vueuse/rxjs": "^10.9.0",
         "daisyui": "^4.7.2",
         "dexie": "^3.2.5",
         "eventsource-parser": "^1.1.2",
+        "fastify": "^4.26.2",
+        "node-llama-cpp": "3.0.0-beta.14",
         "pinia": "^2.1.7",
         "rxjs": "^7.8.1",
         "snarkdown": "^2.0.0",
         "vue": "^3.4.21",
-        "vue-router": "^4.3.0"
+        "vue-router": "^4.3.0",
+        "zod": "^3.22.4"
     },
     "devDependencies": {
         "@vitejs/plugin-vue": "^5.0.4",

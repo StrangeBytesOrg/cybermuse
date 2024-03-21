@@ -1,12 +1,18 @@
 {
+    "include": ["./**/*"],
     "compilerOptions": {
-        "target": "ES6",
-        "module": "commonjs",
-        // "sourceMap": true,
-        "strict": true,
-        "esModuleInterop": true,
-        "noEmit": true
-    },
-    "include": ["./**/*.ts"],
-    "exclude": ["node_modules"]
+        "target": "ESNext",
+        "module": "ESNext",
+        "sourceMap": true,
+        "baseUrl": ".",
+        "noEmit": true, // Build with script, not tsc
+        // "lib": ["ESNext"],
+        // "types": [
+        //     "node",
+        // ],
+        // "esModuleInterop": true,
+        // "moduleResolution": "Node",
+        "moduleResolution": "Bundler",
+        "allowSyntheticDefaultImports": true
+    }
 }

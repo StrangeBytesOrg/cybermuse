@@ -8,6 +8,7 @@ import Character from './pages/character.vue'
 import Chat from './pages/chat.vue'
 import Connection from './pages/connection.vue'
 import Settings from './pages/settings.vue'
+import BackendSettings from './pages/backend-settings.vue'
 import Instruct from './pages/instruct.vue'
 
 export default createRouter({
@@ -57,6 +58,11 @@ export default createRouter({
             path: '/settings',
             name: 'settings',
             component: Settings,
+        },
+        {
+            path: '/backend-settings',
+            name: 'backend-settings',
+            component: BackendSettings,
         },
     ],
 })
