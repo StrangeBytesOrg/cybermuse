@@ -51,13 +51,18 @@ export const generate = async (prompt: string) => {
 
 export const listModels = async () => {
     // TODO handle directories
-    const models = fs.readdirSync(modelDir)
-    const modelList = models.map((model) => {
-        return {
-            name: model,
-        }
-    })
-    return modelList
+    try {
+        const models = fs.readdirSync(modelDir)
+        const modelList = models.map((model) => {
+            return {
+                name: model,
+            }
+        })
+        return modelList
+    } catch (err) {
+        console.error(err)
+        return []
+    }
 }
 
 export const setModelDir = async (dir: string) => {
