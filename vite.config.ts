@@ -11,13 +11,13 @@ const esmDirname = url.fileURLToPath(new URL('.', import.meta.url))
 // https://vitejs.dev/config/
 export default defineConfig({
     root: './src/frontend/',
-    plugins: [vue()],
     base: './',
     css: {
         postcss: {
             plugins: [tailwind(tailwindConfig), autoprefixer],
         },
     },
+    plugins: [vue()],
     build: {
         outDir: path.resolve(esmDirname, 'dist'),
     },

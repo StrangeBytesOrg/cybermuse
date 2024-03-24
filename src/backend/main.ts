@@ -13,9 +13,11 @@ import {
 } from 'fastify-type-provider-zod'
 import z from 'zod'
 import {getStatus, generate, loadModel, listModels, setModelDir} from './generate.js'
+import sourcemapSupport from 'source-map-support'
 
 const serverPort = 31700
 const esmDirname = url.fileURLToPath(new URL('.', import.meta.url)) // Works like __dirname
+sourcemapSupport.install()
 
 function createWindow() {
     const win = new BrowserWindow({
