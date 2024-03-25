@@ -35,12 +35,6 @@ const build = async () => {
     await esbuild.build(buildOptions)
     const buildTime = performance.now() - startTime
     console.log('Built in', buildTime.toFixed(2) + 'ms')
-
-    console.log('Restarting electron')
-    electronProcess?.kill()
-    electronProcess = proc.spawn(electronPath, [distMain], {
-        stdio: 'inherit',
-    })
 }
 
 build()
@@ -50,6 +44,19 @@ if (devMode) {
     const server = await createServer({})
     await server.listen()
 
+    console.log('Starting electron')
+    electronProcess = proc.spawn(electronPath, [distMain], {
+        stdio: 'inherit',
+    })
+
     console.log(`Watching ${sourceDir}`)
-    chokidar.watch(sourceDir).on('change', build)
+    chokidar.watch(sourceDir).on('change', async () => {
+        await build()
+
+        console.log('Restarting electron')
+        electronProcess?.kill()
+        electronProcess = proc.spawn(electronPath, [distMain], {
+            stdio: 'inherit',
+        })
+    })
 }
