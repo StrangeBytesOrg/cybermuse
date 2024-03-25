@@ -1,6 +1,5 @@
 {
     "cSpell.words": [
-        //
         "pinia",
         "toastification",
         "mirostat",
@@ -9,7 +8,8 @@
         "daisyui",
         "dexie",
         "llamacpp",
-        "koboldcpp"
+        "koboldcpp",
+        "snarkdown"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

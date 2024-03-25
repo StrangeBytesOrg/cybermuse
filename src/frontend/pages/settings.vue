@@ -1,12 +1,12 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
-import {useSettingsStore} from '../store'
+import {useSettingsStore, usePromptStore} from '../store'
 
 const settingsStore = useSettingsStore()
-const promptTemplate = ref('')
+const promptStore = usePromptStore()
 
 const saveSettings = () => {
     settingsStore.update()
+    promptStore.update()
 }
 </script>
 
@@ -40,12 +40,33 @@ const saveSettings = () => {
             <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.maxTokens" />
         </label>
 
-        <label class="form-control w-full">
+        <label class="form-control w-full max-w-xs">
+            <div class="label">
+                <span class="label-text">System Prompt</span>
+            </div>
+            <textarea
+                class="textarea textarea-bordered leading-normal"
+                v-model="promptStore.promptSettings.systemPrompt" />
+        </label>
+
+        <!-- <label class="form-control w-full max-w-xs">
+            <div class="label">
+                <span class="label-text">Prompt Syntax Template</span>
+            </div>
+            <select class="select select-bordered" v-model="promptStore.promptSettings.promptSyntax">
+                <option selected value="default">Empty</option>
+                <option value="custom">ChatML</option>
+            </select>
+        </label> -->
+
+        <!-- <label class="form-control w-full">
             <div class="label">
                 <span class="label-text">Prompt Syntax</span>
             </div>
-            <textarea class="textarea textarea-bordered" v-model="promptTemplate" />
-        </label>
+            <textarea
+                class="textarea textarea-bordered leading-normal"
+                v-model="promptStore.promptSettings.promptSyntax" />
+        </label> -->
 
         <button class="btn btn-primary mt-9" @click="saveSettings">Save</button>
     </div>

@@ -1,32 +1,30 @@
 <script lang="ts" setup>
-import {ref, onBeforeMount} from 'vue'
+import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
-import {sseRequest} from '../lib/fetch-backend'
+import {request, type GenerationParams} from '../lib/fetch-backend'
 import {createPrompt} from '../lib/format-prompt'
-import {useConnectionStore, useSettingsStore} from '../store/'
+import {useConnectionStore, useSettingsStore, usePromptStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
 
 const route = useRoute()
 const connectionStore = useConnectionStore()
 const settingsStore = useSettingsStore()
+const promptStore = usePromptStore()
 
 connectionStore.connected = true
 const chatId = Number(route.query.id)
 
 const character = ref({})
 const currentMessage = ref('')
-const currentResponse = ref('')
 const pendingMessage = ref(false)
 const editModeActive = ref(false)
 const editModeIndex = ref(-1)
 
-const chat = useDexieLiveQuery(() => db.chats.get(chatId), {initialValue: {messages: []}})
-onBeforeMount(async () => {
-    const {characterId} = await db.chats.get(chatId)
-    character.value = await db.characters.get(characterId)
-})
+const chat = await useDexieLiveQuery(() => db.chats.get(chatId), {initialValue: {messages: []}})
+const {characterId} = await db.chats.get(chatId)
+character.value = await db.characters.get(characterId)
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -39,58 +37,56 @@ const sendMessage = async () => {
     console.log('send message')
 
     let prompt = ''
-    let systemPrompt = ''
-    systemPrompt += `Play the role of ${character.value.name} in this chat with User.\n`
-    systemPrompt += `${character.value.name} Description:\n${character.value.description}\n`
+
+    // Add system prompt
     prompt += createPrompt([
         {
             userType: 'system',
-            text: systemPrompt,
+            text: promptStore.promptSettings.systemPrompt,
         },
     ])
 
     pendingMessage.value = true
+
+    // Add the new user message to the chat
+    // Also add a new message to the chat for the response
     chat.value.messages.push({user: 'user', userType: 'user', text: currentMessage.value})
+    await db.chats.update(chatId, chat.value)
 
     prompt += createPrompt(chat.value.messages)
-
     prompt += `<|im_start|>assistant\n` // TODO this needs to be baked into prompt formatting somehow
     console.log(prompt)
 
-    const body = JSON.stringify({
+    chat.value?.messages.push({user: character.value.name, userType: 'assistant', text: ''}) // TODO add a pending flag
+    await db.chats.update(chatId, chat.value)
+
+    const generationSettings: GenerationParams = {
         prompt,
+        n_predict: 32,
         temperature: settingsStore.generationSettings.temperature,
-        top_p: settingsStore.generationSettings.topP,
-        top_k: settingsStore.generationSettings.topK,
-        n_predict: Number(settingsStore.generationSettings.maxTokens),
+        top_p: Number(settingsStore.generationSettings.topP),
+        top_k: Number(settingsStore.generationSettings.topK),
         stop: ['<|im_end|>'],
         seed: 80085,
         stream: true,
-    })
-    const apiUrl = `${connectionStore.apiUrl}/completion`
-    // const apiUrl = `${connectionStore.apiUrl}/api/extra/generate/stream` // Koboldcpp endpoint
+    }
 
-    const response = await sseRequest(apiUrl, body)
+    let bufferResponse = ''
+    const response = await request(connectionStore.apiUrl, 'koboldcpp', generationSettings)
     for await (const chunk of response) {
         const data = JSON.parse(chunk.data)
-        currentResponse.value += data.content
-        // currentResponse.value += data.token // Koboldcpp response
+        bufferResponse += data.token // Koboldcpp response
+
+        // Update the last message in the chat with the current response
+        chat.value.messages[chat.value.messages.length - 1].text = bufferResponse
+        await db.chats.update(chatId, chat.value)
     }
 
     // TODO parse response based on syntax used
-    console.log('Response:', currentResponse.value)
+    console.log('Response:', bufferResponse)
 
     pendingMessage.value = false
-
-    chat.value.messages.push({
-        user: character.value.name,
-        userType: 'assistant',
-        text: currentResponse.value,
-    })
-    await db.chats.update(chatId, chat.value)
-
     currentMessage.value = ''
-    currentResponse.value = ''
 }
 
 const swipeRight = () => {}
@@ -142,6 +138,8 @@ const deleteMessage = async (messageIndex: number) => {
                         </template>
                         <template v-else>
                             <div v-html="snarkdown(message.text)" />
+                            <!-- TODO change to use an explicit loading flag on the message object -->
+                            <span v-if="message.text === ''" class="loading loading-dots loading-sm mb-[-12px]" />
                         </template>
                     </div>
 
@@ -183,26 +181,10 @@ const deleteMessage = async (messageIndex: number) => {
                         </div>
                     </template>
                 </div>
-
-                <!-- Loading message -->
-                <div
-                    v-if="pendingMessage"
-                    class="flex flex-row justify-between items-start mb-2 p-3 bg-base-200 rounded-xl">
-                    <div class="avatar">
-                        <div class="w-16 rounded-full">
-                            <img v-if="character.image" :src="character.image" :alt="character.name" />
-                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
-                        </div>
-                    </div>
-                    <div class="flex-grow pl-3">
-                        <div class="font-bold">WAAAAT</div>
-                        {{ currentResponse }}
-                        <span v-if="currentResponse === ''" class="loading loading-dots loading-sm mb-[-12px]" />
-                    </div>
-                </div>
             </template>
         </div>
 
+        <!-- Chat Controls -->
         <div class="flex md:px-3 md:pb-2">
             <textarea
                 ref="inputElement"
@@ -212,7 +194,6 @@ const deleteMessage = async (messageIndex: number) => {
                 :disabled="pendingMessage"
                 class="textarea textarea-primary border-2 resize-none flex-1 textarea-xs textarea-bordered align-middle text-base h-20 focus:outline-none focus:border-secondary" />
 
-            <!-- Chat Send Button -->
             <button
                 @click="sendMessage"
                 :disabled="pendingMessage || connectionStore.connected === false"

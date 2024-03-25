@@ -17,7 +17,8 @@ const saveConnection = () => {
                 <span class="label-text">API Type</span>
             </div>
             <select class="select select-bordered" v-model="connectionStore.apiType">
-                <option selected value="llamacpp">LlamaCPP Server</option>
+                <option value="built-in">Built-in</option>
+                <option value="llamacpp">LlamaCPP Server</option>
                 <option value="koboldcpp">KoboldCPP</option>
             </select>
         </label>
