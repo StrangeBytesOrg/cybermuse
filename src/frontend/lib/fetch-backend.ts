@@ -67,8 +67,6 @@ export type GenerationParams = {
 
 export const request = async (apiBase: string, generationParams: GenerationParams) => {
     const url = `${apiBase}/api/generate-stream`
-
     const body = JSON.stringify(generationParams)
-    const response = await sseRequest(url, body)
-    return response
+    return await sseRequest(url, body)
 }

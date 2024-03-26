@@ -47,8 +47,6 @@ export const loadModel = async (modelName: string) => {
 }
 
 export const generate = async (prompt: string, cb) => {
-    // const tokens = model.tokenize(prompt)
-
     const wat = await completion.generateCompletion(prompt, {
         maxTokens: 16,
         onToken: (token) => {
