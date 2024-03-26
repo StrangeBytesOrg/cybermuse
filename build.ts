@@ -27,7 +27,7 @@ const buildOptions: BuildOptions = {
     sourcemap: devMode,
 }
 
-let electronProcess: proc.ChildProcess | null = null
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const build = async () => {
     const startTime = performance.now()
@@ -45,18 +45,16 @@ if (devMode) {
     await server.listen()
 
     console.log('Starting electron')
-    electronProcess = proc.spawn(electronPath, [distMain], {
-        stdio: 'inherit',
-    })
+    let electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
 
     console.log(`Watching ${sourceDir}`)
     chokidar.watch(sourceDir).on('change', async () => {
+        console.log('Restarting electron')
+        electronProcess.kill()
+
         await build()
 
-        console.log('Restarting electron')
-        electronProcess?.kill()
-        electronProcess = proc.spawn(electronPath, [distMain], {
-            stdio: 'inherit',
-        })
+        await delay(500) // Delay to allow the server to shutdown and free up port
+        electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
     })
 }

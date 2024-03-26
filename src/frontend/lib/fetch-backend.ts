@@ -54,7 +54,6 @@ export const sseRequest = async (url: string, body: string, controller: AbortCon
     return iterable
 }
 
-type ApiType = 'builtin' | 'llamacpp' | 'koboldcpp'
 export type GenerationParams = {
     prompt: string
     n_predict: number
@@ -66,15 +65,8 @@ export type GenerationParams = {
     stream: boolean
 }
 
-export const request = async (apiBase: string, apiType: ApiType, generationParams: GenerationParams) => {
-    let url = ''
-    if (apiType === 'builtin') {
-        url = `${apiBase}/completion`
-    } else if (apiType === 'llamacpp') {
-        url = `${apiBase}/llama/completion`
-    } else if (apiType === 'koboldcpp') {
-        url = `${apiBase}/api/extra/generate/stream`
-    }
+export const request = async (apiBase: string, generationParams: GenerationParams) => {
+    const url = `${apiBase}/api/generate-stream`
 
     const body = JSON.stringify(generationParams)
     const response = await sseRequest(url, body)

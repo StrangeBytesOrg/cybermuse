@@ -62,7 +62,7 @@ const sendMessage = async () => {
 
     const generationSettings: GenerationParams = {
         prompt,
-        n_predict: 32,
+        n_predict: 36,
         temperature: settingsStore.generationSettings.temperature,
         top_p: Number(settingsStore.generationSettings.topP),
         top_k: Number(settingsStore.generationSettings.topK),
@@ -72,10 +72,10 @@ const sendMessage = async () => {
     }
 
     let bufferResponse = ''
-    const response = await request(connectionStore.apiUrl, 'koboldcpp', generationSettings)
+    const response = await request(connectionStore.apiUrl, generationSettings)
     for await (const chunk of response) {
         const data = JSON.parse(chunk.data)
-        bufferResponse += data.token // Koboldcpp response
+        bufferResponse += data.text
 
         // Update the last message in the chat with the current response
         chat.value.messages[chat.value.messages.length - 1].text = bufferResponse

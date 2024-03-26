@@ -8,7 +8,7 @@ const modelFolder = ref('')
 const localServerBase = `http://localhost:31700`
 
 const getStatus = async () => {
-    const res = await fetch(`${localServerBase}/status`)
+    const res = await fetch(`${localServerBase}/api/status`)
     const data = await res.json()
     console.log(data)
     currentModel.value = data.currentModel
@@ -17,23 +17,26 @@ const getStatus = async () => {
 }
 
 const getModels = async () => {
-    const res = await fetch(`${localServerBase}/models`)
+    const res = await fetch(`${localServerBase}/api/models`)
     const data = await res.json()
     console.log(data)
     return data
 }
 
-// const loadModel = async (modelName: string) => {
-//     const {body, status} = await client.loadModel({body: {modelName}})
-//     if (status === 200) {
-//         console.log('Model loaded')
-//     } else {
-//         console.error('Failed to load model')
-//     }
-// }
+const loadModel = async (modelName: string) => {
+    const response = await fetch(`${localServerBase}/api/load-model`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({modelName}),
+    })
+    const data = await response.json()
+    console.log(data)
+}
 
 const setModelDir = async () => {
-    const res = await fetch(`${localServerBase}/set-model-dir`, {
+    const res = await fetch(`${localServerBase}/api/set-model-dir`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

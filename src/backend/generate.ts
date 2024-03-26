@@ -1,26 +1,33 @@
-import os from 'node:os'
 import path from 'node:path'
 import fs from 'node:fs'
 import {getLlama, LlamaCompletion, type LlamaModel, type LlamaContext} from 'node-llama-cpp'
+import {app} from 'electron'
 
 let model: LlamaModel
 let context: LlamaContext
 let completion: LlamaCompletion
-let modelDir: string = path.resolve(os.homedir(), 'models')
 let currentModel: string = ''
 let modelLoaded = false
+
+// Create a local config file if it doesn't exist
+const configPath = path.resolve(app.getPath('userData'), 'config.json')
+if (!fs.existsSync(configPath)) {
+    fs.writeFileSync(configPath, JSON.stringify({modelDir: ''}))
+}
+const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+console.log(`Config path: ${configPath}`)
 
 export const getStatus = () => {
     return {
         modelLoaded,
         currentModel,
-        modelDir,
+        modelDir: config.modelDir,
     }
 }
 
 export const loadModel = async (modelName: string) => {
     console.log(`Loading Model: ${modelName}`)
-    const modelPath = path.resolve(modelDir, modelName)
+    const modelPath = path.resolve(config.modelDir, modelName)
     const llama = await getLlama({
         gpu: false,
     })
@@ -39,11 +46,16 @@ export const loadModel = async (modelName: string) => {
     console.log(`Total Sequences: ${context.totalSequences}`)
 }
 
-export const generate = async (prompt: string) => {
+export const generate = async (prompt: string, cb) => {
     // const tokens = model.tokenize(prompt)
 
     const wat = await completion.generateCompletion(prompt, {
         maxTokens: 16,
+        onToken: (token) => {
+            const str = model.detokenize(token)
+            console.log(token, str)
+            cb(str)
+        },
     })
 
     return wat
@@ -52,7 +64,7 @@ export const generate = async (prompt: string) => {
 export const listModels = async () => {
     // TODO handle directories
     try {
-        const models = fs.readdirSync(modelDir)
+        const models = fs.readdirSync(config.modelDir)
         const modelList = models.map((model) => {
             return {
                 name: model,
@@ -67,5 +79,6 @@ export const listModels = async () => {
 
 export const setModelDir = async (dir: string) => {
     console.log(`Setting Model Folder: ${dir}`)
-    modelDir = dir
+    config.modelDir = dir
+    fs.writeFileSync(configPath, JSON.stringify(config))
 }

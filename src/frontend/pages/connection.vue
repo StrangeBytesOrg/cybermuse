@@ -14,17 +14,6 @@ const saveConnection = () => {
     <div class="flex flex-col p-5">
         <label class="form-control w-full max-w-xs">
             <div class="label">
-                <span class="label-text">API Type</span>
-            </div>
-            <select class="select select-bordered" v-model="connectionStore.apiType">
-                <option value="built-in">Built-in</option>
-                <option value="llamacpp">LlamaCPP Server</option>
-                <option value="koboldcpp">KoboldCPP</option>
-            </select>
-        </label>
-
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
                 <span class="label-text">API URL</span>
             </div>
             <input type="text" class="input input-bordered" v-model="connectionStore.apiUrl" />
@@ -35,13 +24,5 @@ const saveConnection = () => {
         </div>
 
         <div class="mt-3">Connection: {{ connectionStore.connected ? 'Connected' : 'Disconnected' }}</div>
-        <!-- <div>
-            Models:
-            <ul>
-                <li v-for="model in models" :key="model">
-                    {{ model }}
-                </li>
-            </ul>
-        </div> -->
     </div>
 </template>
