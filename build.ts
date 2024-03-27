@@ -6,6 +6,7 @@ import chokidar from 'chokidar'
 import electron from 'electron'
 import proc from 'node:child_process'
 import {createServer} from 'vite'
+import tcpPortUsed from 'tcp-port-used'
 
 const esmDirName = url.fileURLToPath(new URL('.', import.meta.url))
 const devMode = process.argv.some((argv) => argv === '-d' || argv === '--dev')
@@ -27,7 +28,7 @@ const buildOptions: BuildOptions = {
     sourcemap: devMode,
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+// const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 const build = async () => {
     const startTime = performance.now()
@@ -51,10 +52,9 @@ if (devMode) {
     chokidar.watch(sourceDir).on('change', async () => {
         console.log('Restarting electron')
         electronProcess.kill()
-
         await build()
-
-        await delay(500) // Delay to allow the server to shutdown and free up port
+        await tcpPortUsed.waitUntilFree(31700)
+        console.log('Port free')
         electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
     })
 }
