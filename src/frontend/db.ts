@@ -11,6 +11,7 @@ type Message = {
     user: string
     text: string
     createdAt: number
+    pending: boolean
 }
 export interface Chat {
     id?: number

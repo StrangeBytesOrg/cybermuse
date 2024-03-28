@@ -37,7 +37,7 @@ import './styles/tailwind.css'
             </li>
             <li>
                 <router-link to="/backend-settings" class="font-bold mt-1" active-class="active">
-                    Backend Settings
+                    Server Settings
                 </router-link>
             </li>
         </ul>

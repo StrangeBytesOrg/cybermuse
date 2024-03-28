@@ -43,9 +43,32 @@ const setModelDir = async () => {
         },
         body: JSON.stringify({dir: modelFolder.value}),
     })
-    const data = await res.json()
-    console.log(data)
-    getModels()
+    const {success} = await res.json()
+    if (success) {
+        console.log('Model dir updated')
+        models.value = await getModels()
+    } else {
+        console.log('Failed to update model dir')
+        // TODO show error
+    }
+}
+
+const setAutoLoad = async (autoLoad: boolean) => {
+    const res = await fetch(`${localServerBase}/api/set-auto-load`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({autoLoad}),
+    })
+    const {success} = await res.json()
+    if (success) {
+        console.log('Auto load updated')
+        models.value = await getModels()
+    } else {
+        console.log('Failed to update auto load')
+        // TODO show error
+    }
 }
 
 models.value = await getModels()
@@ -64,6 +87,9 @@ await getStatus()
                 <input type="text" class="input input-bordered" v-model="modelFolder" />
                 <button class="btn btn-primary" @click="setModelDir">Update</button>
             </div>
+
+            <button class="btn btn-primary mt-3" @click="setAutoLoad(true)">Enable Auto Load</button>
+            <button class="btn btn-primary mt-3" @click="setAutoLoad(false)">Disable Auto Load</button>
 
             <h2 class="text-lg mt-3">Models</h2>
             <div v-for="model in models" :key="model" class="flex flex-row rounded-lg bg-base-200 p-3 mt-3">
