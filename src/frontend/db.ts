@@ -7,12 +7,6 @@ export interface Character {
     image: string | ArrayBuffer
 }
 
-type Message = {
-    user: string
-    text: string
-    createdAt: number
-    pending: boolean
-}
 export interface Chat {
     id?: number
     characterId: number
@@ -21,19 +15,31 @@ export interface Chat {
     messages: Message[] | []
 }
 
+export interface Message {
+    id?: number
+    chatId: number
+    user: string
+    userType: string
+    text: string
+    pending: boolean
+}
+
 export class ChatDatabase extends Dexie {
     characters: Table<Character, number>
     chats: Table<Chat, number>
+    messages: Table<Message, number>
 
     constructor() {
         super('chat-frontend')
 
         this.version(1).stores({
             characters: '++id, name, description, image',
-            chats: '++id, characterId, createdAt, updatedAt, *messages',
+            chats: '++id, characterId, createdAt, updatedAt',
+            messages: '++id, chatId, user, text, pending',
         })
         this.characters = this.table('characters')
         this.chats = this.table('chats')
+        this.messages = this.table('messages')
     }
 }
 export const db = new ChatDatabase()
