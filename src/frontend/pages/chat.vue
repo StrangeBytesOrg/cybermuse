@@ -73,24 +73,34 @@ const sendMessage = async () => {
 
     const generationSettings: GenerationParams = {
         prompt,
-        n_predict: 12,
+        maxTokens: 12,
         temperature: settingsStore.generationSettings.temperature,
-        top_p: Number(settingsStore.generationSettings.topP),
-        top_k: Number(settingsStore.generationSettings.topK),
+        topP: Number(settingsStore.generationSettings.topP),
+        topK: Number(settingsStore.generationSettings.topK),
         stop: ['<|im_end|>'],
-        seed: 80085,
-        stream: true,
+        // seed: 80085,
+        // stream: true,
     }
 
     let bufferResponse = ''
     const response = await request(connectionStore.apiUrl, generationSettings)
     for await (const chunk of response) {
         const data = JSON.parse(chunk.data)
-        bufferResponse += data.text
-        await db.messages.update(newMessage, {text: bufferResponse})
-        // TODO handle final response
+        if (chunk.event === 'message') {
+            bufferResponse += data.text
+            await db.messages.update(newMessage, {text: bufferResponse})
+        } else if (chunk.event === 'final') {
+            if (data.text !== bufferResponse) {
+                console.warn(`Final response did not match buffered response`)
+                await db.messages.update(newMessage, {text: data.text})
+            }
+        } else {
+            // TODO visually show error
+            console.error('Unknown response type')
+        }
     }
 
+    // TODO probably need some kind of flag to make sure a final response was received
     await db.messages.update(newMessage, {pending: false})
     pendingMessage.value = false
     currentMessage.value = ''

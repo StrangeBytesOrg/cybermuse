@@ -1,8 +1,17 @@
 import path from 'node:path'
 import fs from 'node:fs'
-import {getLlama, LlamaCompletion, type LlamaModel, type LlamaContext} from 'node-llama-cpp'
+import {
+    getLlama,
+    LlamaCompletion,
+    type Llama,
+    type LlamaModel,
+    type LlamaContext,
+    type LlamaCompletionGenerationOptions,
+    type Token,
+} from 'node-llama-cpp'
 import {app} from 'electron'
 
+let llama: Llama
 let model: LlamaModel
 let context: LlamaContext
 let completion: LlamaCompletion
@@ -28,7 +37,7 @@ export const getStatus = () => {
 export const loadModel = async (modelName: string) => {
     console.log(`Loading Model: ${modelName}`)
     const modelPath = path.resolve(config.modelDir, modelName)
-    const llama = await getLlama({
+    llama = await getLlama({
         gpu: false,
     })
     model = await llama.loadModel({modelPath})
@@ -48,35 +57,14 @@ export const loadModel = async (modelName: string) => {
     console.log(`Total Sequences: ${context.totalSequences}`)
 }
 
-export type GenerateParams = {
-    prompt: string
-    maxTokens: number
-    temperature: number
-    minP: number
-    topP: number
-    topK: number
-    // repeatPenalty: number,
+export const generate = async (prompt: string, params: LlamaCompletionGenerationOptions) => {
+    // Tokenize first so that special tokens are handled correctly
+    const tokens = await model.tokenize(prompt, true)
+    return await completion.generateCompletion(tokens, params)
 }
 
-type Callback = (str: string) => void
-
-export const generate = async (params: GenerateParams, cb: Callback) => {
-    // Tokenize first so that special tokens are handled correctly
-    const tokens = await model.tokenize(params.prompt, true)
-    const fullResponse = await completion.generateCompletion(tokens, {
-        maxTokens: params.maxTokens,
-        temperature: params.temperature,
-        minP: params.minP,
-        topP: params.topP,
-        topK: params.topK,
-        // repeatPenalty: params.repeatPenalty,
-        onToken: (token) => {
-            const str = model.detokenize(token)
-            cb(str)
-        },
-    })
-
-    return fullResponse
+export const detokenize = (tokens: Token[]) => {
+    return model.detokenize(tokens)
 }
 
 export const listModels = async () => {

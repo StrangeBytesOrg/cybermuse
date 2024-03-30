@@ -1,4 +1,3 @@
-import {getLlama, LlamaCompletion, type LlamaModel, type LlamaContext} from 'node-llama-cpp'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
@@ -10,8 +9,7 @@ import {
     type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import z from 'zod'
-import {getStatus, generate, loadModel, listModels, setModelDir, setAutoLoad} from './generate.js'
-import {type GenerateParams} from './generate.js'
+import {getStatus, generate, loadModel, listModels, setModelDir, setAutoLoad, detokenize} from './generate.js'
 
 export const server = Fastify({
     // logger: true,
@@ -157,11 +155,12 @@ server.withTypeProvider<ZodTypeProvider>().route({
         description: 'This endpoint uses Server-Sent Events (SSE) to stream data to the client.',
         body: z.object({
             prompt: z.string(),
-            n_predict: z.number().optional(),
+            maxTokens: z.number().optional(),
             temperature: z.number().optional(),
-            min_p: z.number().optional(),
-            top_p: z.number().optional(),
-            top_k: z.number().optional(),
+            minP: z.number().optional(),
+            topP: z.number().optional(),
+            topK: z.number().optional(),
+            // repeatPenalty: // TODO More complex than simple number input. Needs further investigation.
             // stop: z.array(z.string()).optional(),
             // seed: z.number().optional(),
             // stream: z.boolean().optional(),
@@ -179,20 +178,23 @@ server.withTypeProvider<ZodTypeProvider>().route({
             'access-control-allow-origin': '*',
         })
 
-        const generationParams: GenerateParams = {
-            prompt: req.body.prompt,
-            maxTokens: req.body.n_predict || 100,
-            temperature: req.body.temperature || 0.7,
-            minP: req.body.min_p || 0.9,
-            topP: req.body.top_p || 0.9,
-            topK: req.body.top_k || 40,
-        }
-        const fullResponse = await generate(generationParams, (token) => {
-            reply.raw.write(`data: ${JSON.stringify({text: token})}\n\n`)
+        const prompt = req.body.prompt
+        const fullResponse = await generate(prompt, {
+            maxTokens: req.body.maxTokens,
+            temperature: req.body.temperature,
+            minP: req.body.minP,
+            topP: req.body.topP,
+            topK: req.body.topK,
+            // repeatPenalty: req.body.repeatPenalty,
+            grammar: 'test',
+            onToken: (token) => {
+                const text = detokenize(token)
+                reply.raw.write('event: message\n')
+                reply.raw.write(`data: ${JSON.stringify({text})}\n\n`)
+            },
         })
-        reply.raw.end()
         // Send the full response at the end as an extra check
-        // const finalResponse = `data: ${JSON.stringify({text: fullResponse})}\n\n`
-        // reply.raw.end(finalResponse)
+        const finalResponse = `event: final\ndata: ${JSON.stringify({text: fullResponse})}\n\n`
+        reply.raw.end(finalResponse)
     },
 })

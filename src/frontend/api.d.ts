@@ -113,11 +113,11 @@ export interface paths {
         content: {
           "application/json": {
             prompt: string;
-            n_predict?: number;
+            maxTokens?: number;
             temperature?: number;
-            min_p?: number;
-            top_p?: number;
-            top_k?: number;
+            minP?: number;
+            topP?: number;
+            topK?: number;
           };
         };
       };

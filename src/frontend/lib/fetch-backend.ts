@@ -56,13 +56,12 @@ export const sseRequest = async (url: string, body: string, controller: AbortCon
 
 export type GenerationParams = {
     prompt: string
-    n_predict: number
-    temperature: number
-    top_p: number
-    top_k: number
-    stop: string[]
-    seed: number
-    stream: boolean
+    maxTokens: number
+    temperature?: number
+    minP?: number
+    topP?: number
+    topK?: number
+    stop?: string[]
 }
 
 export const request = async (apiBase: string, generationParams: GenerationParams) => {
