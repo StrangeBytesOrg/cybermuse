@@ -3,6 +3,7 @@
     "include": ["./**/*.ts", "./**/*.vue"],
     "compilerOptions": {
         "composite": true,
-        "baseUrl": "."
+        "baseUrl": ".",
+        "noUncheckedIndexedAccess": true
     }
 }

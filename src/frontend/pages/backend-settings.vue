@@ -1,78 +1,80 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
+import createClient from 'openapi-fetch'
+import type {paths} from '../api.d.ts'
 
-const models = ref([])
+const client = createClient<paths>({
+    baseUrl: 'http://localhost:31700',
+})
+
+type models = {name: string}[]
+const models = ref<models>([])
 const currentModel = ref('')
 const modelLoaded = ref(false)
 const modelFolder = ref('')
-const localServerBase = `http://localhost:31700`
 
 const getStatus = async () => {
-    const res = await fetch(`${localServerBase}/api/status`)
-    const data = await res.json()
-    console.log(data)
-    currentModel.value = data.currentModel
-    modelLoaded.value = data.modelLoaded
-    modelFolder.value = data.modelDir
+    const {data, error} = await client.GET('/api/status')
+    if (error) {
+        console.error(error)
+    } else {
+        modelLoaded.value = data.modelLoaded
+        currentModel.value = data.currentModel
+        modelFolder.value = data.modelDir
+    }
 }
 
 const getModels = async () => {
-    const res = await fetch(`${localServerBase}/api/models`)
-    const data = await res.json()
-    console.log(data)
-    return data
+    const {data, error} = await client.GET('/api/models')
+    if (error) {
+        // TODO properly handle error
+    } else {
+        models.value = data
+    }
 }
 
 const loadModel = async (modelName: string) => {
-    const response = await fetch(`${localServerBase}/api/load-model`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    const {error} = await client.POST('/api/load-model', {
+        body: {
+            modelName,
         },
-        body: JSON.stringify({modelName}),
     })
-    const data = await response.json()
-    console.log(data)
+    if (error) {
+        console.log(error)
+    } else {
+        console.log('Loaded model')
+    }
 }
 
 const setModelDir = async () => {
-    const res = await fetch(`${localServerBase}/api/set-model-dir`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    const {error} = await client.POST('/api/set-model-dir', {
+        body: {
+            dir: modelFolder.value,
         },
-        body: JSON.stringify({dir: modelFolder.value}),
     })
-    const {success} = await res.json()
-    if (success) {
-        console.log('Model dir updated')
-        models.value = await getModels()
+    if (error) {
+        // TODO handle error
+        console.log(error)
     } else {
-        console.log('Failed to update model dir')
-        // TODO show error
+        await getModels()
     }
 }
 
 const setAutoLoad = async (autoLoad: boolean) => {
-    const res = await fetch(`${localServerBase}/api/set-auto-load`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
+    const {error} = await client.POST('/api/set-auto-load', {
+        body: {
+            autoLoad,
         },
-        body: JSON.stringify({autoLoad}),
     })
-    const {success} = await res.json()
-    if (success) {
-        console.log('Auto load updated')
-        models.value = await getModels()
+    if (error) {
+        // TODO handle error
     } else {
-        console.log('Failed to update auto load')
-        // TODO show error
+        console.log('Updated autoload')
     }
 }
 
-models.value = await getModels()
 await getStatus()
+await getModels()
 </script>
 
 <template>
