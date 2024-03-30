@@ -32,6 +32,13 @@ server.setValidatorCompiler(validatorCompiler)
 
 await server.register(fastifySwagger, {
     transform: jsonSchemaTransform,
+    openapi: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Chat App builtin server API',
+            version: '0.1.0',
+        },
+    },
 })
 await server.register(fastifySwaggerUI, {
     routePrefix: '/docs',
@@ -180,9 +187,12 @@ server.withTypeProvider<ZodTypeProvider>().route({
             topP: req.body.top_p || 0.9,
             topK: req.body.top_k || 40,
         }
-        await generate(generationParams, (token) => {
+        const fullResponse = await generate(generationParams, (token) => {
             reply.raw.write(`data: ${JSON.stringify({text: token})}\n\n`)
         })
         reply.raw.end()
+        // Send the full response at the end as an extra check
+        // const finalResponse = `data: ${JSON.stringify({text: fullResponse})}\n\n`
+        // reply.raw.end(finalResponse)
     },
 })

@@ -46,11 +46,6 @@ export const loadModel = async (modelName: string) => {
     console.log('Model Loaded')
     console.log(`Sequences Left: ${context.sequencesLeft}`)
     console.log(`Total Sequences: ${context.totalSequences}`)
-
-    const prompt = `<|im_start|>user\nHello<|im_end|>`
-    const tokens = await model.tokenize(prompt)
-    console.log('Prompt:', prompt)
-    console.log('Tokens:', tokens)
 }
 
 export type GenerateParams = {
@@ -66,11 +61,9 @@ export type GenerateParams = {
 type Callback = (str: string) => void
 
 export const generate = async (params: GenerateParams, cb: Callback) => {
-    const tokens = await model.tokenize(params.prompt)
-    console.log(params.prompt)
-    console.log(tokens)
-
-    const wat = await completion.generateCompletion(params.prompt, {
+    // Tokenize first so that special tokens are handled correctly
+    const tokens = await model.tokenize(params.prompt, true)
+    const fullResponse = await completion.generateCompletion(tokens, {
         maxTokens: params.maxTokens,
         temperature: params.temperature,
         minP: params.minP,
@@ -83,7 +76,7 @@ export const generate = async (params: GenerateParams, cb: Callback) => {
         },
     })
 
-    return wat
+    return fullResponse
 }
 
 export const listModels = async () => {
