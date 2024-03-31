@@ -7,8 +7,7 @@ import {createPrompt} from '../lib/format-prompt'
 import {useConnectionStore, useSettingsStore, usePromptStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
-import createClient from 'openapi-fetch'
-import type {paths} from '../api.d.ts'
+import {client} from '../api-client'
 
 const route = useRoute()
 const connectionStore = useConnectionStore()
@@ -22,10 +21,6 @@ const currentMessage = ref('')
 const pendingMessage = ref(false)
 const editModeActive = ref(false)
 const editModeIndex = ref(-1)
-
-const client = createClient<paths>({
-    baseUrl: 'http://localhost:31700',
-})
 
 const chat = await db.chats.get(chatId)
 if (!chat) {

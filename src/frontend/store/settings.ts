@@ -1,13 +1,20 @@
 import {ref} from 'vue'
 import {defineStore} from 'pinia'
 
-type GenerationSettings = {temperature: number; topK?: number; topP?: number; maxTokens?: number}
+type GenerationSettings = {
+    temperature: number
+    minP?: number
+    topK?: number
+    topP?: number
+    maxTokens?: number
+}
 
 export const useSettingsStore = defineStore('settings', () => {
     const defaultSettings: GenerationSettings = {
         temperature: 1,
-        topK: 40,
+        minP: 0,
         topP: 0.9,
+        topK: 40,
         maxTokens: 150,
     }
     const generationSettings = ref<GenerationSettings>(

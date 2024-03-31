@@ -21,6 +21,13 @@ const saveSettings = () => {
 
         <label class="form-control w-full max-w-xs">
             <div class="label">
+                <span class="label-text">Min P</span>
+            </div>
+            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.minP" />
+        </label>
+
+        <label class="form-control w-full max-w-xs">
+            <div class="label">
                 <span class="label-text">Top P</span>
             </div>
             <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.topP" />

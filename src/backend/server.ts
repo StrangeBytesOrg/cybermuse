@@ -171,6 +171,13 @@ server.withTypeProvider<ZodTypeProvider>().route({
         },
     },
     handler: async (req, reply) => {
+        const controller = new AbortController()
+
+        req.socket.on('close', () => {
+            console.log('socket closed, aborting')
+            controller.abort()
+        })
+
         reply.raw.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-store',
@@ -179,21 +186,37 @@ server.withTypeProvider<ZodTypeProvider>().route({
         })
 
         const prompt = req.body.prompt
-        const fullResponse = await generate(prompt, {
-            maxTokens: req.body.maxTokens,
-            temperature: req.body.temperature,
-            minP: req.body.minP,
-            topP: req.body.topP,
-            topK: req.body.topK,
-            // repeatPenalty: req.body.repeatPenalty,
-            onToken: (token) => {
-                const text = detokenize(token)
-                reply.raw.write('event: message\n')
-                reply.raw.write(`data: ${JSON.stringify({text})}\n\n`)
-            },
-        })
-        // Send the full response at the end as an extra check
-        const finalResponse = `event: final\ndata: ${JSON.stringify({text: fullResponse})}\n\n`
-        reply.raw.end(finalResponse)
+
+        try {
+            const fullResponse = await generate(prompt, {
+                maxTokens: req.body.maxTokens,
+                temperature: req.body.temperature,
+                minP: req.body.minP,
+                topP: req.body.topP,
+                topK: req.body.topK,
+                signal: controller.signal,
+                // repeatPenalty: req.body.repeatPenalty,
+                onToken: (token) => {
+                    const text = detokenize(token)
+                    reply.raw.write(`event: message\ndata: ${JSON.stringify({text})}\n\n`)
+                },
+            })
+
+            // Send the full response at the end as an extra check
+            const finalResponse = `event: final\ndata: ${JSON.stringify({text: fullResponse})}\n\n`
+            reply.raw.end(finalResponse)
+            req.socket.removeAllListeners('close')
+            req.socket.destroy()
+        } catch (err) {
+            switch (err.name) {
+                case 'AbortError':
+                    reply.raw.end('event: final\ndata: {text: "Aborted"}\n\n')
+                    break
+                default:
+                    console.log('Unknown error:', err)
+                    reply.raw.end('event: final\ndata: {text: "Error"}\n\n')
+                    break
+            }
+        }
     },
 })

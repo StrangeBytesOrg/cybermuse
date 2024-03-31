@@ -44,7 +44,7 @@ import './styles/tailwind.css'
 
         <!-- Main -->
         <div class="flex flex-grow min-h-0 mt-16 ml-60">
-            <div class="flex flex-col flex-1 overflow-auto mr-1 mt-3">
+            <div class="flex flex-col flex-1 overflow-auto mr-1">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />
