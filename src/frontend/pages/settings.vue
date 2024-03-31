@@ -11,50 +11,64 @@ const saveSettings = () => {
 </script>
 
 <template>
-    <div class="flex flex-col p-5">
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Temperature</span>
-            </div>
-            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.temperature" />
-        </label>
+    <div class="p-3">
+        <div class="flex flex-row">
+            <!-- Generation Settings -->
+            <div class="flex flex-col w-[25%]">
+                <label class="form-control w-full max-w-xs">
+                    <div class="label">
+                        <span class="label-text">Temperature</span>
+                    </div>
+                    <input
+                        type="number"
+                        class="input input-bordered"
+                        v-model="settingsStore.generationSettings.temperature" />
+                </label>
 
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Min P</span>
-            </div>
-            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.minP" />
-        </label>
+                <label class="form-control w-full max-w-xs">
+                    <div class="label">
+                        <span class="label-text">Min P</span>
+                    </div>
+                    <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.minP" />
+                </label>
 
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Top P</span>
-            </div>
-            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.topP" />
-        </label>
+                <label class="form-control w-full max-w-xs">
+                    <div class="label">
+                        <span class="label-text">Top P</span>
+                    </div>
+                    <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.topP" />
+                </label>
 
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Top K</span>
-            </div>
-            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.topK" />
-        </label>
+                <label class="form-control w-full max-w-xs">
+                    <div class="label">
+                        <span class="label-text">Top K</span>
+                    </div>
+                    <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.topK" />
+                </label>
 
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Max Tokens</span>
+                <label class="form-control w-full max-w-xs">
+                    <div class="label">
+                        <span class="label-text">Max Tokens</span>
+                    </div>
+                    <input
+                        type="number"
+                        class="input input-bordered"
+                        v-model="settingsStore.generationSettings.maxTokens" />
+                </label>
             </div>
-            <input type="number" class="input input-bordered" v-model="settingsStore.generationSettings.maxTokens" />
-        </label>
 
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">System Prompt</span>
+            <!-- Prompt Settings -->
+            <div class="flex flex-col pl-3 flex-grow">
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">System Prompt</span>
+                    </div>
+                    <textarea
+                        class="textarea textarea-bordered leading-normal w-full min-h-24"
+                        v-model="promptStore.promptSettings.systemPrompt" />
+                </label>
             </div>
-            <textarea
-                class="textarea textarea-bordered leading-normal"
-                v-model="promptStore.promptSettings.systemPrompt" />
-        </label>
+        </div>
 
         <!-- <label class="form-control w-full max-w-xs">
             <div class="label">

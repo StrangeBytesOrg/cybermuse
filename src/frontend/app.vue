@@ -1,8 +1,17 @@
 <script lang="ts" setup>
+import {onErrorCaptured} from 'vue'
 import {RouterLink, RouterView} from 'vue-router'
 import Connection from './components/connection.vue'
 import './styles/global.css'
 import './styles/tailwind.css'
+import 'vue-toastification/dist/index.css'
+import {useToast} from 'vue-toastification'
+
+const toast = useToast()
+onErrorCaptured((error) => {
+    toast.error(`An error occurred: ${error.message}`)
+    return false
+})
 </script>
 
 <template>

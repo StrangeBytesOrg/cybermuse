@@ -2,7 +2,6 @@
 import {useRouter} from 'vue-router'
 import {db, type Character, type Chat} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
-
 const router = useRouter()
 const characters = await db.characters.toArray()
 const chats = await useDexieLiveQuery(() => db.chats.toArray(), {initialValue: []})
@@ -51,7 +50,6 @@ const deleteChat = async (chatId: number) => {
                     :key="chatIndex"
                     class="relative bg-base-200 rounded-md p-2 mt-2 hover:outline outline-primary">
                     <div class="flex flex-col">
-                        <p>Messages: {{ chat.messages.length }}</p>
                         <p>Created: {{ formatDate(chat.createdAt) }}</p>
                         <p>Updated: {{ formatDate(chat.updatedAt) }}</p>
                     </div>

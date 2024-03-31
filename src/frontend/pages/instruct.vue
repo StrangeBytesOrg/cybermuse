@@ -3,12 +3,14 @@ import {ref} from 'vue'
 import {useConnectionStore, useSettingsStore} from '../store'
 import {client} from '../api-client'
 import {responseToIterable} from '../lib/fetch-backend'
+import {useToast} from 'vue-toastification'
 
 const connectionStore = useConnectionStore()
 const settingsStore = useSettingsStore()
 const pendingMessage = ref(false)
 const currentInput = ref('')
 const generatedResponse = ref('')
+const toast = useToast()
 let controller: AbortController
 
 const getGeneration = async () => {
@@ -43,10 +45,13 @@ const getGeneration = async () => {
             }
         }
     } catch (err) {
-        if (err.name === 'AbortError') {
-            console.log('Aborted')
-        } else {
-            console.error(err)
+        switch (err.name) {
+            case 'AbortError':
+                console.log('Aborted')
+                break
+            default:
+                console.error(err)
+                toast.error(`Error generating message: ${err.message}`)
         }
     } finally {
         pendingMessage.value = false
@@ -59,7 +64,8 @@ const stop = async () => {
 }
 
 const continueMessage = async () => {
-    console.log('TODO implement continueMessage')
+    // TODO implement
+    toast.warning('TODO: Not implemented yet')
 }
 </script>
 

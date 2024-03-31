@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useRoute} from 'vue-router'
+import {useRoute, useRouter} from 'vue-router'
 import snarkdown from 'snarkdown'
 import {responseToIterable} from '../lib/fetch-backend'
 import {createPrompt} from '../lib/format-prompt'
@@ -8,11 +8,14 @@ import {useConnectionStore, useSettingsStore, usePromptStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
 import {client} from '../api-client'
+import {useToast} from 'vue-toastification'
 
 const route = useRoute()
+const router = useRouter()
 const connectionStore = useConnectionStore()
 const settingsStore = useSettingsStore()
 const promptStore = usePromptStore()
+const toast = useToast()
 
 connectionStore.connected = true
 const chatId = Number(route.query.id)
@@ -24,8 +27,9 @@ const editModeIndex = ref(-1)
 
 const chat = await db.chats.get(chatId)
 if (!chat) {
+    setTimeout(() => router.push('/chats'), 3000)
     // TODO handle this better
-    throw new Error(`Chat with id ${chatId} not found`)
+    toast.error('Chat not found')
 }
 const messages = await useDexieLiveQuery(() => db.messages.where({chatId}).toArray(), {initialValue: []})
 const character = await db.characters.get(chat.characterId)
