@@ -79,8 +79,8 @@ server.withTypeProvider<ZodTypeProvider>().route({
 })
 
 server.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
     url: '/api/load-model',
+    method: 'POST',
     schema: {
         summary: 'Load a model',
         body: z.object({
@@ -102,8 +102,8 @@ server.withTypeProvider<ZodTypeProvider>().route({
 })
 
 server.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
     url: '/api/set-model-dir',
+    method: 'POST',
     schema: {
         summary: 'Set the model folder',
         body: z.object({
@@ -125,8 +125,8 @@ server.withTypeProvider<ZodTypeProvider>().route({
 })
 
 server.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
     url: '/api/set-auto-load',
+    method: 'POST',
     schema: {
         summary: 'Set auto load',
         body: z.object({
@@ -148,11 +148,12 @@ server.withTypeProvider<ZodTypeProvider>().route({
 })
 
 server.withTypeProvider<ZodTypeProvider>().route({
-    method: 'POST',
     url: '/api/generate-stream',
+    method: 'POST',
     schema: {
         summary: 'Generate a completion stream',
-        description: 'This endpoint uses Server-Sent Events (SSE) to stream data to the client.',
+        description:
+            'Generates text and returns it using Server-Sent Events (SSE) to stream the response.\n```\nevent: message | final\ndata: {text}\n```\n\nThe `message` event is sent for each token generated and the `final` event is sent at the end with the full response.\n\nThis is a non standard SSE implementation in order to support sending a body and using POST requests so it will not work with the browser EventSource API.',
         body: z.object({
             prompt: z.string(),
             maxTokens: z.number().optional(),
@@ -163,11 +164,10 @@ server.withTypeProvider<ZodTypeProvider>().route({
             // repeatPenalty: // TODO More complex than simple number input. Needs further investigation.
             // stop: z.array(z.string()).optional(),
             // seed: z.number().optional(),
-            // stream: z.boolean().optional(),
         }),
         produces: ['text/event-stream'],
         response: {
-            200: z.string().describe('data: {payload}'),
+            200: z.string().describe('data: {text}'),
         },
     },
     handler: async (req, reply) => {
@@ -186,7 +186,6 @@ server.withTypeProvider<ZodTypeProvider>().route({
             topP: req.body.topP,
             topK: req.body.topK,
             // repeatPenalty: req.body.repeatPenalty,
-            grammar: 'test',
             onToken: (token) => {
                 const text = detokenize(token)
                 reply.raw.write('event: message\n')

@@ -106,7 +106,15 @@ export interface paths {
   "/api/generate-stream": {
     /**
      * Generate a completion stream
-     * @description This endpoint uses Server-Sent Events (SSE) to stream data to the client.
+     * @description Generates text and returns it using Server-Sent Events (SSE) to stream the response.
+     * ```
+     * event: message | final
+     * data: {text}
+     * ```
+     *
+     * The `message` event is sent for each token generated and the `final` event is sent at the end with the full response.
+     *
+     * This is a non standard SSE implementation in order to support sending a body and using POST requests so it will not work with the browser EventSource API.
      */
     post: {
       requestBody: {
@@ -122,7 +130,7 @@ export interface paths {
         };
       };
       responses: {
-        /** @description data: {payload} */
+        /** @description data: {text} */
         200: {
           content: {
             "text/event-stream": string;

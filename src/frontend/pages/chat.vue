@@ -2,11 +2,13 @@
 import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
-import {request, type GenerationParams} from '../lib/fetch-backend'
+import {responseToIterable} from '../lib/fetch-backend'
 import {createPrompt} from '../lib/format-prompt'
 import {useConnectionStore, useSettingsStore, usePromptStore} from '../store/'
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
+import createClient from 'openapi-fetch'
+import type {paths} from '../api.d.ts'
 
 const route = useRoute()
 const connectionStore = useConnectionStore()
@@ -20,6 +22,10 @@ const currentMessage = ref('')
 const pendingMessage = ref(false)
 const editModeActive = ref(false)
 const editModeIndex = ref(-1)
+
+const client = createClient<paths>({
+    baseUrl: 'http://localhost:31700',
+})
 
 const chat = await db.chats.get(chatId)
 if (!chat) {
@@ -41,8 +47,6 @@ const checkSend = (event: KeyboardEvent) => {
 }
 
 const sendMessage = async () => {
-    console.log('send message')
-
     let prompt = ''
 
     // Add system prompt
@@ -71,20 +75,20 @@ const sendMessage = async () => {
         pending: true,
     })
 
-    const generationSettings: GenerationParams = {
-        prompt,
-        maxTokens: 12,
-        temperature: settingsStore.generationSettings.temperature,
-        topP: Number(settingsStore.generationSettings.topP),
-        topK: Number(settingsStore.generationSettings.topK),
-        stop: ['<|im_end|>'],
-        // seed: 80085,
-        // stream: true,
-    }
+    const {response} = await client.POST('/api/generate-stream', {
+        body: {
+            prompt,
+            maxTokens: settingsStore.generationSettings.maxTokens || 64,
+            temperature: settingsStore.generationSettings.temperature,
+            topP: Number(settingsStore.generationSettings.topP),
+            topK: Number(settingsStore.generationSettings.topK),
+        },
+        parseAs: 'stream',
+    })
+    const responseIterable = responseToIterable(response)
 
     let bufferResponse = ''
-    const response = await request(connectionStore.apiUrl, generationSettings)
-    for await (const chunk of response) {
+    for await (const chunk of responseIterable) {
         const data = JSON.parse(chunk.data)
         if (chunk.event === 'message') {
             bufferResponse += data.text

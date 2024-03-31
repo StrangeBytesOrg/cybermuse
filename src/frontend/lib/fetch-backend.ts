@@ -1,6 +1,6 @@
-import {EventSourceParserStream} from 'eventsource-parser/stream'
+import {EventSourceParserStream, type ParsedEvent} from 'eventsource-parser/stream'
 
-const convertToAsyncIterable = async function* <T>(stream: ReadableStream<T>): AsyncGenerator<T> {
+export const convertToAsyncIterable = async function* <T>(stream: ReadableStream<T>): AsyncGenerator<T> {
     const reader = stream.getReader()
     try {
         while (true) {
@@ -13,6 +13,21 @@ const convertToAsyncIterable = async function* <T>(stream: ReadableStream<T>): A
     } finally {
         reader.releaseLock()
     }
+}
+
+/**
+ * Converts a fetch response to an async iterable of a Server Sent Events (SSE) stream.
+ *
+ * @param {Response} response - An HTTP response object.
+ * @returns {AsyncGenerator<ParsedEvent>} - An async iterable of a Server Sent Events (SSE) stream.
+ * @throws {Error} - Throws an error if the response does not contain a body.
+ */
+export const responseToIterable = (response: Response): AsyncGenerator<ParsedEvent> => {
+    if (!response.body) {
+        throw new Error('No body')
+    }
+    const eventStream = response.body.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream())
+    return convertToAsyncIterable(eventStream)
 }
 
 /**
@@ -52,20 +67,4 @@ export const sseRequest = async (url: string, body: string, controller: AbortCon
     const eventStream = res.body.pipeThrough(new TextDecoderStream()).pipeThrough(new EventSourceParserStream())
     const iterable = await convertToAsyncIterable(eventStream)
     return iterable
-}
-
-export type GenerationParams = {
-    prompt: string
-    maxTokens: number
-    temperature?: number
-    minP?: number
-    topP?: number
-    topK?: number
-    stop?: string[]
-}
-
-export const request = async (apiBase: string, generationParams: GenerationParams) => {
-    const url = `${apiBase}/api/generate-stream`
-    const body = JSON.stringify(generationParams)
-    return await sseRequest(url, body)
 }
