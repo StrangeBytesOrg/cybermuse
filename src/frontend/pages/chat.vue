@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, nextTick} from 'vue'
+import {ref, nextTick, watch} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import snarkdown from 'snarkdown'
 import {responseToIterable} from '../lib/fetch-backend'
@@ -23,6 +23,7 @@ const chatId = Number(route.query.id)
 const currentMessage = ref('')
 const pendingMessage = ref(false)
 const editModeId = ref(-1)
+const messagesElement = ref<HTMLDivElement | null>(null)
 
 const chat = await db.chats.get(chatId)
 if (!chat) {
@@ -151,6 +152,23 @@ const resizeTextarea = async (event: Event) => {
 const textGoesBrr = (text: string) => {
     return text.replace(/\n/g, '<br />')
 }
+
+const scrollMessages = (behavior: 'auto' | 'instant' | 'smooth' = 'auto') => {
+    messagesElement.value?.scroll({
+        top: messagesElement.value?.scrollHeight,
+        behavior,
+    })
+}
+
+watch(messages, async (m1, m2) => {
+    await nextTick()
+    if (m2.length === 0) {
+        // Fast scroll to the bottom on the initial load
+        scrollMessages('instant')
+    } else {
+        scrollMessages('smooth')
+    }
+})
 </script>
 
 <template>
@@ -185,9 +203,7 @@ const textGoesBrr = (text: string) => {
                         @focus="resizeTextarea"
                         @keydown.ctrl.enter="saveEdit(message)"
                         v-show="editModeId === message.id"
-                        class="textarea w-full text-base mx-[-1px] my-2 px-[1px] py-0 border-none" />
-                    <!-- Scroll Height: {{ $refs.messagesElement.scrollHeight }} -->
-                    <!-- TODO change to use an explicit loading flag on the message object -->
+                        class="textarea block w-full text-base mx-[-1px] my-2 px-[1px] py-0 border-none" />
                     <span v-if="message.pending" class="loading loading-dots loading-sm mb-[-12px]" />
                     <!-- prettier-ignore-->
                 </div>
