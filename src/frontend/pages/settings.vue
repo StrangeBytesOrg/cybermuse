@@ -67,6 +67,13 @@ const saveSettings = () => {
                         class="textarea textarea-bordered leading-normal w-full min-h-24"
                         v-model="promptStore.promptSettings.systemPrompt" />
                 </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">User Name</span>
+                    </div>
+                    <input type="text" class="input input-bordered" v-model="promptStore.promptSettings.userName" />
+                </label>
             </div>
         </div>
 

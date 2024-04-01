@@ -4,12 +4,14 @@ import {defineStore} from 'pinia'
 type PromptSettings = {
     promptSyntax: string
     systemPrompt: string
+    userName: string
 }
 
 export const usePromptStore = defineStore('prompt', () => {
     const defaultSettings: PromptSettings = {
         promptSyntax: '',
         systemPrompt: '',
+        userName: 'User',
     }
 
     const promptSettings = ref<PromptSettings>(
