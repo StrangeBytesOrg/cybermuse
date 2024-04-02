@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {useRouter} from 'vue-router'
-import {db, type Character, type Chat} from '../db'
+import {db, type Character} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
 const router = useRouter()
 const characters = await db.characters.toArray()
@@ -19,8 +19,19 @@ const formatDate = (timestamp: number) => {
 }
 
 const createChat = async (characterId: number) => {
-    const newChat: Chat = {characterId, createdAt: Date.now(), updatedAt: Date.now(), messages: []}
-    const chatId = await db.chats.add(newChat)
+    const character = await db.characters.get(characterId)
+    const chatId = await db.chats.add({characterId, createdAt: Date.now(), updatedAt: Date.now()})
+    if (character?.firstMessage) {
+        await db.messages.add({
+            chatId,
+            user: character.name,
+            userType: 'assistant',
+            text: 'Hello!',
+            altHistory: [],
+            activeMessage: 0,
+            pending: false,
+        })
+    }
     await router.push(`/chat?id=${chatId}`)
 }
 

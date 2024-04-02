@@ -63,13 +63,18 @@ const cancelCharacter = () => {
             <input
                 type="text"
                 v-model="character.name"
-                class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary"
-                placeholder="Character Name" />
+                placeholder="Character Name"
+                class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
 
             <textarea
-                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
                 v-model="character.description"
-                placeholder="Description"></textarea>
+                placeholder="Description"
+                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+
+            <textarea
+                v-model="character.firstMessage"
+                placeholder="First Message"
+                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
             <!-- Avatar -->
             <div class="flex flex-row mt-5">

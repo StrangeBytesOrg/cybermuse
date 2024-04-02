@@ -1,20 +1,21 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
 import {db} from '../db'
-import {useDexieLiveQuery} from '../lib/livequery'
 
 const route = useRoute()
 const router = useRouter()
 const characterId = Number(route.query.id)
+const character = await db.characters.get(characterId)
 
-const defaultCharacter = {name: '', description: '', image: '../assets/img/placeholder-avatar.webp'}
-const character = useDexieLiveQuery(() => db.characters.get(characterId), {initialValue: defaultCharacter})
+if (!character) {
+    setTimeout(() => {
+        router.push('/characters')
+    }, 3000)
+    throw new Error('Character not found')
+}
 
 const updateCharacter = async () => {
-    if (!character.value) {
-        return
-    }
-    await db.characters.update(characterId, character.value)
+    await db.characters.update(characterId, character)
 }
 
 const uploadImage = () => {
@@ -36,14 +37,14 @@ const handleFileUpload = (event: Event) => {
             console.error('FileReader failed to read file')
             return
         }
-        character.value.image = e.target.result
+        character.image = e.target.result
         updateCharacter()
     }
     reader.readAsDataURL(target.files[0])
 }
 
 const removeImage = () => {
-    character.value.image = ''
+    character.image = ''
     updateCharacter()
 }
 
@@ -67,9 +68,14 @@ const deleteCharacter = async () => {
                 placeholder="Character Name" />
 
             <textarea
-                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
                 v-model="character.description"
-                placeholder="Description"></textarea>
+                placeholder="Description"
+                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+
+            <textarea
+                v-model="character.firstMessage"
+                placeholder="First Message"
+                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
             <!-- Avatar -->
             <div class="flex flex-row mt-5">

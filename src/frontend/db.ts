@@ -4,6 +4,7 @@ export interface Character {
     id?: number
     name: string
     description: string
+    firstMessage?: string
     image: string | ArrayBuffer
 }
 
@@ -34,7 +35,7 @@ export class ChatDatabase extends Dexie {
         super('chat-frontend')
 
         this.version(1).stores({
-            characters: '++id, name, description, image',
+            characters: '++id, name, description, firstMessage, image',
             chats: '++id, characterId, createdAt, updatedAt',
             messages: '++id, chatId, user, userType, text, pending, activeMessage, altHistory',
         })
