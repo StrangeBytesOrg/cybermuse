@@ -65,9 +65,12 @@ const sendMessage = async () => {
         userType: 'user',
         text: currentMessage.value,
         pending: false,
+        altHistory: [''],
+        activeMessage: 0,
     })
 
-    prompt += createPrompt(messages.value)
+    // Add the previous messages to the prompt
+    prompt += createPrompt(messages.value) // TODO needs to be trimmed to a certain length
     prompt += `<|im_start|>assistant\n` // TODO this needs to be baked into prompt formatting somehow
     console.log(prompt)
 
@@ -78,6 +81,8 @@ const sendMessage = async () => {
         userType: 'assistant',
         text: '',
         pending: true,
+        altHistory: [''],
+        activeMessage: 0,
     })
 
     const {response} = await client.POST('/api/generate-stream', {
@@ -115,7 +120,84 @@ const sendMessage = async () => {
     currentMessage.value = ''
 }
 
-const swipeRight = () => {}
+const generateAlt = async (messageId: number) => {
+    const message = await db.messages.get(messageId)
+    message.altHistory[message.activeMessage] = message.text
+    message.altHistory.push('')
+    message.activeMessage = message.altHistory.length - 1
+    await db.messages.update(messageId, message)
+    let prompt = ''
+
+    // Add system prompt
+    prompt += createPrompt([
+        {
+            userType: 'system',
+            text: promptStore.promptSettings.systemPrompt,
+        },
+    ])
+
+    await db.messages.update(messageId, {pending: true, text: ''})
+
+    let messagesBeforeCurrent = await db.messages.where({chatId}).toArray()
+    messagesBeforeCurrent = messagesBeforeCurrent.filter((m) => m.id < message.id)
+
+    prompt += createPrompt(messagesBeforeCurrent)
+    prompt += `<|im_start|>assistant\n`
+    console.log(prompt)
+
+    const {response} = await client.POST('/api/generate-stream', {
+        body: {
+            prompt,
+            maxTokens: settingsStore.generationSettings.maxTokens || 64,
+            temperature: settingsStore.generationSettings.temperature,
+            topP: Number(settingsStore.generationSettings.topP),
+            topK: Number(settingsStore.generationSettings.topK),
+        },
+        parseAs: 'stream',
+    })
+    const responseIterable = responseToIterable(response)
+    let bufferResponse = ''
+    for await (const chunk of responseIterable) {
+        const data = JSON.parse(chunk.data)
+        if (chunk.event === 'message') {
+            bufferResponse += data.text
+            await db.messages.update(messageId, {text: bufferResponse})
+        } else if (chunk.event === 'final') {
+            if (data.text !== bufferResponse) {
+                console.warn(`Final response did not match buffered response`)
+                await db.messages.update(messageId, {text: data.text})
+            }
+        } else {
+            // TODO visually show error
+            console.error('Unknown response type')
+        }
+    }
+
+    // TODO probably need some kind of flag to make sure a final response was received
+    await db.messages.update(messageId, {pending: false})
+}
+
+const swipeRight = async (messageId: number) => {
+    const message = await db.messages.get(messageId)
+    if (!message) {
+        throw new Error('Message not found')
+    }
+    message.altHistory[message.activeMessage] = message.text
+    message.activeMessage += 1
+    message.text = message.altHistory[message.activeMessage] || ''
+    await db.messages.update(message.id, message)
+}
+
+const swipeLeft = async (messageId: number) => {
+    const message = await db.messages.get(messageId)
+    if (!message) {
+        throw new Error('Message not found')
+    }
+    message.altHistory[message.activeMessage] = message.text
+    message.activeMessage -= 1
+    message.text = message.altHistory[message.activeMessage] || ''
+    await db.messages.update(message.id, message)
+}
 
 const editMessage = async (messageId: number) => {
     if (editModeId.value === messageId) {
@@ -160,10 +242,10 @@ const scrollMessages = (behavior: 'auto' | 'instant' | 'smooth' = 'auto') => {
     })
 }
 
-watch(messages, async (m1, m2) => {
+watch(messages, async (currentValue, previousValue) => {
     await nextTick()
-    if (m2.length === 0) {
-        // Fast scroll to the bottom on the initial load
+    // Fast scroll to the bottom on the initial load
+    if (previousValue.length === 0) {
         scrollMessages('instant')
     } else {
         scrollMessages('smooth')
@@ -178,8 +260,8 @@ watch(messages, async (m1, m2) => {
             <div
                 v-for="(message, index) in messages"
                 v-bind:key="index"
-                class="flex flex-row relative min-h-28 justify-between items-start mb-2 p-3 bg-base-200 rounded-xl">
-                <div class="avatar">
+                class="flex flex-row relative min-h-[120px] justify-between items-start mb-2 px-3 py-1 bg-base-200 rounded-xl">
+                <div class="avatar mt-2">
                     <div class="w-16 rounded-full">
                         <img
                             v-if="message.userType === 'user'"
@@ -189,12 +271,12 @@ watch(messages, async (m1, m2) => {
                         <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
                 </div>
-                <div class="flex-grow pl-3">
+                <div class="flex flex-col flex-grow pl-3">
                     <div class="font-bold">{{ message.user }}</div>
                     <div
                         v-html="snarkdown(textGoesBrr(message.text))"
                         v-show="editModeId !== message.id"
-                        class="whitespace-pre-wrap mx-[-1px] my-2 px-[1px]" />
+                        class="whitespace-pre-wrap mx-[-1px] my-2 px-[1px] flex-grow" />
                     <!-- @keydown.esc="cancelEdit" -->
                     <textarea
                         :id="`message-input-${message.id}`"
@@ -205,7 +287,10 @@ watch(messages, async (m1, m2) => {
                         v-show="editModeId === message.id"
                         class="textarea block w-full text-base mx-[-1px] my-2 px-[1px] py-0 border-none" />
                     <span v-if="message.pending" class="loading loading-dots loading-sm mb-[-12px]" />
-                    <!-- prettier-ignore-->
+                    <!-- Alts:
+                    <div v-for="(swipe, index) in message.altHistory" :key="swipe" class="text-xs pl-3">
+                        {{ index }} : {{ swipe }}
+                    </div> -->
                 </div>
 
                 <!-- Message control buttons -->
@@ -231,22 +316,35 @@ watch(messages, async (m1, m2) => {
                     <!-- Edit -->
                     <button class="btn btn-square btn-sm btn-neutral ml-2" @click="editMessage(message.id)">
                         <!-- prettier-ignore -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <!-- prettier-ignore -->
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                        </svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                     </button>
                 </div>
 
-                <!-- Swipe Buttons -->
+                <!-- Swipe Controls -->
                 <template v-if="index === messages.length - 1">
-                    <div class="btn btn-sm btn-neutral absolute bottom-3 left-3">
+                    <!-- Regen Button -->
+                    <button
+                        @click="generateAlt(message.id)"
+                        class="btn btn-square btn-sm btn-neutral absolute bottom-1 right-1">
+                        <!-- prettier-ignore -->
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                    </button>
+                    <div
+                        v-show="message.altHistory[message.activeMessage - 1]"
+                        @click="swipeLeft(message.id)"
+                        class="btn btn-sm btn-neutral absolute bottom-1 left-1">
                         <!-- prettier-ignore -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
                         </svg>
                     </div>
-                    <div class="btn btn-sm btn-neutral absolute bottom-3 right-3">
+                    <div class="absolute bottom-0 left-1/2">
+                        {{ message.activeMessage }} / {{ message.altHistory.length - 1 }}
+                    </div>
+                    <div
+                        v-show="message.altHistory[message.activeMessage + 1]"
+                        @click="swipeRight(message.id)"
+                        class="btn btn-sm btn-neutral absolute bottom-1 right-10">
                         <!-- prettier-ignore -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
                             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
@@ -264,7 +362,7 @@ watch(messages, async (m1, m2) => {
                 v-model="currentMessage"
                 @keydown="checkSend"
                 :disabled="pendingMessage"
-                class="textarea textarea-primary border-2 resize-none flex-1 textarea-xs textarea-bordered align-middle text-base h-20 focus:outline-none focus:border-secondary" />
+                class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
 
             <button
                 @click="sendMessage"
