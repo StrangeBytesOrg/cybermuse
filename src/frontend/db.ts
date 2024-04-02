@@ -12,7 +12,6 @@ export interface Chat {
     characterId: number
     createdAt: number
     updatedAt: number
-    messages: Message[] | []
 }
 
 export interface Message {

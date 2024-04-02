@@ -27,8 +27,8 @@ const messagesElement = ref<HTMLDivElement | null>(null)
 
 const chat = await db.chats.get(chatId)
 if (!chat) {
-    setTimeout(() => router.push('/chats'), 3000)
     // TODO handle this better
+    setTimeout(() => router.push('/chats'), 3000)
     toast.error('Chat not found')
 }
 const messages = await useDexieLiveQuery(() => db.messages.where({chatId}).toArray(), {initialValue: []})
@@ -46,6 +46,7 @@ const checkSend = (event: KeyboardEvent) => {
 }
 
 const sendMessage = async () => {
+    pendingMessage.value = true
     let prompt = ''
 
     // Add system prompt
@@ -55,8 +56,6 @@ const sendMessage = async () => {
             text: promptStore.promptSettings.systemPrompt,
         },
     ])
-
-    pendingMessage.value = true
 
     // Add the new user message to the chat
     await db.messages.add({
@@ -121,6 +120,7 @@ const sendMessage = async () => {
 }
 
 const generateAlt = async (messageId: number) => {
+    pendingMessage.value = true
     const message = await db.messages.get(messageId)
     message.altHistory[message.activeMessage] = message.text
     message.altHistory.push('')
@@ -175,6 +175,7 @@ const generateAlt = async (messageId: number) => {
 
     // TODO probably need some kind of flag to make sure a final response was received
     await db.messages.update(messageId, {pending: false})
+    pendingMessage.value = false
 }
 
 const swipeRight = async (messageId: number) => {
@@ -182,9 +183,10 @@ const swipeRight = async (messageId: number) => {
     if (!message) {
         throw new Error('Message not found')
     }
-    message.altHistory[message.activeMessage] = message.text
-    message.activeMessage += 1
-    message.text = message.altHistory[message.activeMessage] || ''
+
+    message.altHistory[message.activeMessage] = message.text // Save the current message text to the history
+    message.activeMessage += 1 // Move to the next alt
+    message.text = message.altHistory[message.activeMessage] || '' // Load the history text into the message
     await db.messages.update(message.id, message)
 }
 
@@ -260,37 +262,40 @@ watch(messages, async (currentValue, previousValue) => {
             <div
                 v-for="(message, index) in messages"
                 v-bind:key="index"
-                class="flex flex-row relative min-h-[120px] justify-between items-start mb-2 px-3 py-1 bg-base-200 rounded-xl">
-                <div class="avatar mt-2">
-                    <div class="w-16 rounded-full">
-                        <img
-                            v-if="message.userType === 'user'"
-                            src="../assets/img/placeholder-avatar.webp"
-                            alt="user" />
-                        <img v-else-if="character.image" :src="character.image" :alt="character.name" />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                class="flex flex-col relative mb-2 bg-base-200 rounded-xl">
+                <!-- Avatar and Text section -->
+                <div class="flex flex-row pb-2 pt-3">
+                    <div class="avatar ml-2">
+                        <div class="w-16 h-16 rounded-full">
+                            <img
+                                v-if="message.userType === 'user'"
+                                src="../assets/img/placeholder-avatar.webp"
+                                alt="user" />
+                            <img v-else-if="character.image" :src="character.image" :alt="character.name" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                        </div>
                     </div>
-                </div>
-                <div class="flex flex-col flex-grow pl-3">
-                    <div class="font-bold">{{ message.user }}</div>
-                    <div
-                        v-html="snarkdown(textGoesBrr(message.text))"
-                        v-show="editModeId !== message.id"
-                        class="whitespace-pre-wrap mx-[-1px] my-2 px-[1px] flex-grow" />
-                    <!-- @keydown.esc="cancelEdit" -->
-                    <textarea
-                        :id="`message-input-${message.id}`"
-                        v-model="message.text"
-                        @input="resizeTextarea"
-                        @focus="resizeTextarea"
-                        @keydown.ctrl.enter="saveEdit(message)"
-                        v-show="editModeId === message.id"
-                        class="textarea block w-full text-base mx-[-1px] my-2 px-[1px] py-0 border-none" />
-                    <span v-if="message.pending" class="loading loading-dots loading-sm mb-[-12px]" />
-                    <!-- Alts:
-                    <div v-for="(swipe, index) in message.altHistory" :key="swipe" class="text-xs pl-3">
-                        {{ index }} : {{ swipe }}
-                    </div> -->
+                    <div class="flex flex-col flex-grow pl-3">
+                        <div class="font-bold">{{ message.user }}</div>
+                        <div
+                            v-html="snarkdown(textGoesBrr(message.text))"
+                            v-show="editModeId !== message.id"
+                            class="whitespace-pre-wrap mx-[-1px] mt-1 px-[1px] flex-grow" />
+                        <!-- @keydown.esc="cancelEdit" -->
+                        <textarea
+                            :id="`message-input-${message.id}`"
+                            v-model="message.text"
+                            @input="resizeTextarea"
+                            @focus="resizeTextarea"
+                            @keydown.ctrl.enter="saveEdit(message)"
+                            v-show="editModeId === message.id"
+                            class="textarea block w-full text-base mx-[-1px] mt-1 px-[1px] py-0 border-none" />
+                        <span v-if="message.pending" class="loading loading-dots loading-sm mb-[-12px]" />
+                        <!-- Alts:
+                        <div v-for="(swipe, index) in message.altHistory" :key="swipe" class="text-xs pl-3">
+                            {{ index }} : {{ swipe }}
+                        </div> -->
+                    </div>
                 </div>
 
                 <!-- Message control buttons -->
@@ -321,36 +326,40 @@ watch(messages, async (currentValue, previousValue) => {
                 </div>
 
                 <!-- Swipe Controls -->
-                <template v-if="index === messages.length - 1">
-                    <!-- Regen Button -->
-                    <button
-                        @click="generateAlt(message.id)"
-                        class="btn btn-square btn-sm btn-neutral absolute bottom-1 right-1">
-                        <!-- prettier-ignore -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-                    </button>
-                    <div
-                        v-show="message.altHistory[message.activeMessage - 1]"
-                        @click="swipeLeft(message.id)"
-                        class="btn btn-sm btn-neutral absolute bottom-1 left-1">
-                        <!-- prettier-ignore -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
-                        </svg>
+                <div v-if="index === messages.length - 1" class="flex flex-row justify-between px-1 pb-1">
+                    <!-- Swipe Left -->
+                    <div class="flex w-16">
+                        <button
+                            v-show="message.altHistory[message.activeMessage - 1]"
+                            @click="swipeLeft(message.id)"
+                            class="btn btn-sm btn-neutral">
+                            <!-- prettier-ignore -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5" />
+                            </svg>
+                        </button>
                     </div>
-                    <div class="absolute bottom-0 left-1/2">
-                        {{ message.activeMessage }} / {{ message.altHistory.length - 1 }}
+                    <div class="flex" v-if="message.altHistory.length > 1">
+                        {{ message.activeMessage + 1 }} / {{ message.altHistory.length }}
                     </div>
-                    <div
-                        v-show="message.altHistory[message.activeMessage + 1]"
-                        @click="swipeRight(message.id)"
-                        class="btn btn-sm btn-neutral absolute bottom-1 right-10">
-                        <!-- prettier-ignore -->
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
+                    <!-- Swipe Right / Regen -->
+                    <div class="flex w-16 justify-end">
+                        <button
+                            @click="swipeRight(message.id)"
+                            v-if="message.altHistory[message.activeMessage + 1]"
+                            :disabled="pendingMessage"
+                            class="btn btn-sm btn-neutral">
+                            <!-- prettier-ignore -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                            </svg>
+                        </button>
+                        <button @click="generateAlt(message.id)" v-else class="btn btn-sm btn-neutral">
+                            <!-- prettier-ignore -->
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
+                        </button>
                     </div>
-                </template>
+                </div>
             </div>
         </div>
 
