@@ -26,7 +26,7 @@ const createChat = async (characterId: number) => {
             chatId,
             user: character.name,
             userType: 'assistant',
-            text: 'Hello!',
+            text: character.firstMessage,
             altHistory: [],
             activeMessage: 0,
             pending: false,

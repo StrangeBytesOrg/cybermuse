@@ -275,7 +275,7 @@ watch(messages, async (currentValue, previousValue) => {
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
-                    <div class="flex flex-col flex-grow pl-3">
+                    <div class="flex flex-col flex-grow px-2">
                         <div class="font-bold">{{ message.user }}</div>
                         <div
                             v-html="snarkdown(textGoesBrr(message.text))"
