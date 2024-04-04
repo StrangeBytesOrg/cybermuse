@@ -52,6 +52,7 @@ server.withTypeProvider<ZodTypeProvider>().route({
                 modelLoaded: z.boolean(),
                 currentModel: z.string().optional(),
                 modelDir: z.string().optional(),
+                autoLoad: z.boolean(),
             }),
         },
     },
@@ -74,7 +75,9 @@ server.withTypeProvider<ZodTypeProvider>().route({
         },
     },
     handler: async () => {
-        return await listModels()
+        const modelList = await listModels()
+        console.log(modelList)
+        return modelList
     },
 })
 

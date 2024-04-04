@@ -7,11 +7,12 @@ const client = createClient<paths>({
     baseUrl: 'http://localhost:31700',
 })
 
-type models = {name: string}[]
+type models = {name: string; size: number}[]
 const models = ref<models>([])
 const currentModel = ref('')
 const modelLoaded = ref(false)
 const modelFolder = ref('')
+const autoLoad = ref(false)
 
 const getStatus = async () => {
     const {data, error} = await client.GET('/api/status')
@@ -21,6 +22,7 @@ const getStatus = async () => {
         modelLoaded.value = data.modelLoaded
         currentModel.value = data.currentModel
         modelFolder.value = data.modelDir
+        autoLoad.value = data.autoLoad
     }
 }
 
@@ -60,10 +62,10 @@ const setModelDir = async () => {
     }
 }
 
-const setAutoLoad = async (autoLoad: boolean) => {
+const setAutoLoad = async () => {
     const {error} = await client.POST('/api/set-auto-load', {
         body: {
-            autoLoad,
+            autoLoad: autoLoad.value,
         },
     })
     if (error) {
@@ -87,17 +89,30 @@ await getModels()
             <h2 class="text-lg mt-3">Model Folder</h2>
             <div class="flex flex-row">
                 <input type="text" class="input input-bordered" v-model="modelFolder" />
-                <button class="btn btn-primary" @click="setModelDir">Update</button>
+                <button class="btn btn-primary ml-1" @click="setModelDir">Update</button>
             </div>
 
-            <button class="btn btn-primary mt-3" @click="setAutoLoad(true)">Enable Auto Load</button>
-            <button class="btn btn-primary mt-3" @click="setAutoLoad(false)">Disable Auto Load</button>
+            <div class="form-control w-52 mt-3">
+                <label class="cursor-pointer label">
+                    <span class="label-text text-lg">Auto load model</span>
+                    <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
+                </label>
+            </div>
 
             <h2 class="text-lg mt-3">Models</h2>
-            <div v-for="model in models" :key="model" class="flex flex-row rounded-lg bg-base-200 p-3 mt-3">
-                <p>{{ model.name }}</p>
+            <div v-for="model in models" :key="model.name" class="flex flex-row rounded-lg bg-base-200 p-3 mt-3">
+                <div class="flex flex-col">
+                    <p>{{ model.name }}</p>
+                </div>
+                <!-- TODO: Show currently loaded -->
                 <button class="btn btn-primary ml-auto" @click="loadModel(model.name)">Load</button>
             </div>
+
+            <!-- <h2 class="text-lg mt-3">Download Models</h2>
+            <div class="flex flex-row">
+                <input type="text" class="input input-bordered" placeholder="Huggingface Url" />
+                <button class="btn btn-primary ml-1">Download</button>
+            </div> -->
         </div>
     </div>
 </template>

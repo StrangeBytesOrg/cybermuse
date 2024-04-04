@@ -16,6 +16,7 @@ export interface paths {
               modelLoaded: boolean;
               currentModel?: string;
               modelDir?: string;
+              autoLoad: boolean;
             };
           };
         };

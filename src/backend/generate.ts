@@ -31,6 +31,7 @@ export const getStatus = () => {
         modelLoaded,
         currentModel,
         modelDir: config.modelDir,
+        autoLoad: config.autoLoad,
     }
 }
 
@@ -70,12 +71,14 @@ export const detokenize = (tokens: Token[]) => {
 export const listModels = async () => {
     // TODO handle directories
     try {
-        const models = fs.readdirSync(config.modelDir)
-        const modelList = models.map((model) => {
-            return {
-                name: model,
+        const models = fs.readdirSync(config.modelDir, {withFileTypes: true, recursive: true})
+        const modelList = []
+        for (let i = 0; i < models.length; i++) {
+            const model = models[i]
+            if (model.isFile() && model.name.endsWith('.gguf')) {
+                modelList.push({name: model.name})
             }
-        })
+        }
         return modelList
     } catch (err) {
         console.error(err)
