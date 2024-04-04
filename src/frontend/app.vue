@@ -39,10 +39,10 @@ onErrorCaptured((error) => {
                 <router-link to="/instruct" class="font-bold mt-1" active-class="active">Instruct</router-link>
             </li>
             <li>
-                <router-link to="/connection" class="font-bold mt-1" active-class="active">Connection</router-link>
+                <router-link to="/settings" class="font-bold mt-1" active-class="active">Settings</router-link>
             </li>
             <li>
-                <router-link to="/settings" class="font-bold mt-1" active-class="active">Settings</router-link>
+                <router-link to="/connection" class="font-bold mt-1" active-class="active">Connection</router-link>
             </li>
             <li>
                 <router-link to="/backend-settings" class="font-bold mt-1" active-class="active">
