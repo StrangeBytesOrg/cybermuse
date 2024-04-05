@@ -8,11 +8,18 @@ const hfUrl = ref('')
 const hfFiles = ref([])
 const downloadPending = ref(false)
 const toast = useToast()
+const selectedPopularModel = ref('')
+const popularModels = [
+    'NousResearch/Hermes-2-Pro-Mistral-7B-GGUF',
+    'TheBloke/dolphin-2_6-phi-2-GGUF',
+    'TheBloke/Mistral-7B-Instruct-v0.2-GGUF',
+    'TheBloke/Llama-2-7B-Chat-GGUF',
+]
 
-const getModelInfo = async () => {
+const getModelInfo = async (repo: string) => {
     hfFiles.value = []
     try {
-        const wat = listFiles({repo: hfUrl.value})
+        const wat = listFiles({repo})
         for await (const file of wat) {
             if (file.path.endsWith('.gguf')) {
                 hfFiles.value.push({name: file.path, size: file.size})
@@ -54,14 +61,27 @@ const downloadModel = async (repoId: string, path: string) => {
 
 <template>
     <div class="p-2">
-        <div class="flex flex-row">
+        You can find compatible models at
+        <a href="https://huggingface.co/models?library=gguf" target="_blank" class="link">Huggingface</a>
+
+        <div class="flex flex-row mt-3">
+            <select
+                class="select select-bordered w-full"
+                v-model="selectedPopularModel"
+                @change.prevent="getModelInfo(selectedPopularModel)">
+                <option value="" disabled>Popular Models</option>
+                <option v-for="model in popularModels" :key="model" :value="model">{{ model }}</option>
+            </select>
+        </div>
+
+        <div class="flex flex-row mt-3">
             <input
                 v-model="hfUrl"
-                @keydown.enter="getModelInfo"
+                @keydown.enter="getModelInfo(hfUrl)"
                 type="text"
                 class="input input-bordered w-full"
                 placeholder="Model Id, eg: TheBloke/Phi-2-GGUF" />
-            <button @click="getModelInfo" class="btn btn-primary ml-2">Get Model Info</button>
+            <button @click="getModelInfo(hfUrl)" class="btn btn-primary w-40 ml-2">Get Model Info</button>
         </div>
         <div v-if="hfFiles.length" class="mt-2">
             <div v-for="file in hfFiles" :key="file" class="flex flex-row bg-base-200 rounded-md p-2 mt-1">

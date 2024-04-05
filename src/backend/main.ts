@@ -1,6 +1,6 @@
 import path from 'node:path'
 import url from 'node:url'
-import {app, BrowserWindow} from 'electron'
+import {app, shell, BrowserWindow} from 'electron'
 import sourcemapSupport from 'source-map-support'
 import {server} from './server.js'
 
@@ -17,6 +17,11 @@ function createWindow() {
     })
 
     win.setMenu(null)
+
+    win.webContents.setWindowOpenHandler((details) => {
+        shell.openExternal(details.url) // Open URL in user's browser.
+        return {action: 'deny'} // Prevent the app from opening the URL.
+    })
 
     if (app.isPackaged) {
         win.loadFile(path.resolve(esmDirname, '../index.html'))
