@@ -60,6 +60,29 @@ export interface paths {
       };
     };
   };
+  "/api/download-model": {
+    /** Download a model */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            repoId: string;
+            path: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
   "/api/set-model-dir": {
     /** Set the model folder */
     post: {

@@ -1,3 +1,5 @@
+import fs from 'node:fs'
+import path from 'node:path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
@@ -9,7 +11,8 @@ import {
     type ZodTypeProvider,
 } from 'fastify-type-provider-zod'
 import z from 'zod'
-import {getStatus, generate, loadModel, listModels, setModelDir, setAutoLoad, detokenize} from './generate.js'
+import {fileExists} from '@huggingface/hub'
+import {config, getStatus, generate, loadModel, setModelDir, setAutoLoad, detokenize} from './generate.js'
 
 export const server = Fastify({
     // logger: true,
@@ -75,9 +78,20 @@ server.withTypeProvider<ZodTypeProvider>().route({
         },
     },
     handler: async () => {
-        const modelList = await listModels()
-        console.log(modelList)
-        return modelList
+        try {
+            const models = fs.readdirSync(config.modelDir, {withFileTypes: true, recursive: true})
+            const modelList = []
+            for (let i = 0; i < models.length; i++) {
+                const model = models[i]
+                if (model.isFile() && model.name.endsWith('.gguf')) {
+                    modelList.push({name: model.name})
+                }
+            }
+            return modelList
+        } catch (err) {
+            console.error(err)
+            return []
+        }
     },
 })
 
@@ -101,6 +115,50 @@ server.withTypeProvider<ZodTypeProvider>().route({
             await loadModel(modelName)
             return {success: true}
         }
+    },
+})
+
+server.withTypeProvider<ZodTypeProvider>().route({
+    url: '/api/download-model',
+    method: 'POST',
+    schema: {
+        summary: 'Download a model',
+        body: z.object({
+            repoId: z.string(),
+            path: z.string(),
+        }),
+        response: {
+            200: z.object({
+                success: z.boolean(),
+            }),
+        },
+    },
+    handler: async (req) => {
+        const exists = await fileExists({repo: req.body.repoId, path: req.body.path})
+        if (!exists) {
+            return {success: false}
+        }
+
+        const response = await fetch(`https://huggingface.co/${req.body.repoId}/resolve/main/${req.body.path}`)
+        const reader = response.body.getReader()
+        const contentLength = Number(response.headers.get('content-length'))
+        console.log(`Downloading ${req.body.path}, Size: ${(contentLength / 1024 / 1024).toFixed(2)} MB`)
+
+        const finalPath = path.resolve(config.modelDir, req.body.path)
+        console.log(`Model will be downloaded to: ${finalPath}`)
+        const fileStream = fs.createWriteStream(finalPath)
+
+        let receivedLength = 0
+        while (true) {
+            const {done, value} = await reader.read()
+            if (done) break
+            fileStream.write(value)
+            receivedLength += value.length
+            const progress = receivedLength / contentLength
+            console.log(`Progress: ${(progress * 100).toFixed(2)}%`)
+        }
+        fileStream.end()
+        return {success: true}
     },
 })
 

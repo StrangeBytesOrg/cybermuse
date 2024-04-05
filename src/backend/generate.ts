@@ -23,7 +23,7 @@ const configPath = path.resolve(app.getPath('userData'), 'config.json')
 if (!fs.existsSync(configPath)) {
     fs.writeFileSync(configPath, JSON.stringify({modelDir: '', autoLoad: false, lastModel: ''}))
 }
-const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+export const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
 console.log(`Config path: ${configPath}`)
 
 export const getStatus = () => {
@@ -66,24 +66,6 @@ export const generate = async (prompt: string, params: LlamaCompletionGeneration
 
 export const detokenize = (tokens: Token[]) => {
     return model.detokenize(tokens)
-}
-
-export const listModels = async () => {
-    // TODO handle directories
-    try {
-        const models = fs.readdirSync(config.modelDir, {withFileTypes: true, recursive: true})
-        const modelList = []
-        for (let i = 0; i < models.length; i++) {
-            const model = models[i]
-            if (model.isFile() && model.name.endsWith('.gguf')) {
-                modelList.push({name: model.name})
-            }
-        }
-        return modelList
-    } catch (err) {
-        console.error(err)
-        return []
-    }
 }
 
 export const setModelDir = async (dir: string) => {
