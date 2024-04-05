@@ -43,7 +43,11 @@ build()
 
 if (devMode) {
     console.log('Starting vite server')
-    const server = await createServer({})
+    const server = await createServer({
+        server: {
+            host: '0.0.0.0',
+        },
+    })
     await server.listen()
 
     console.log('Starting electron')
