@@ -102,6 +102,14 @@ export interface paths {
             };
           };
         };
+        /** @description Default Response */
+        400: {
+          content: {
+            "application/json": {
+              message: string;
+            };
+          };
+        };
       };
     };
   };

@@ -12,7 +12,10 @@ import {
 } from 'fastify-type-provider-zod'
 import z from 'zod'
 import {fileExists} from '@huggingface/hub'
-import {config, getStatus, generate, loadModel, setModelDir, setAutoLoad, detokenize} from './generate.js'
+import {app} from 'electron'
+import {config, getStatus, generate, loadModel, setAutoLoad, detokenize} from './generate.js'
+
+const configPath = path.resolve(app.getPath('userData'), 'config.json')
 
 export const server = Fastify({
     // logger: true,
@@ -174,14 +177,21 @@ server.withTypeProvider<ZodTypeProvider>().route({
             200: z.object({
                 success: z.boolean(),
             }),
+            400: z.object({
+                message: z.string(),
+            }),
         },
     },
-    handler: async (req) => {
+    handler: async (req, reply) => {
         const dir = req.body.dir
-        if (dir) {
-            await setModelDir(dir)
-            return {success: true}
+        console.log(`Setting Model Folder: ${dir}`)
+        // Check if the directory exists
+        if (!fs.existsSync(dir)) {
+            console.log('Directory does not exist')
+            return reply.status(400).send({message: 'Directory does not exist'})
         }
+        config.modelDir = dir
+        fs.writeFileSync(configPath, JSON.stringify(config))
     },
 })
 

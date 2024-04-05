@@ -68,12 +68,6 @@ export const detokenize = (tokens: Token[]) => {
     return model.detokenize(tokens)
 }
 
-export const setModelDir = async (dir: string) => {
-    console.log(`Setting Model Folder: ${dir}`)
-    config.modelDir = dir
-    fs.writeFileSync(configPath, JSON.stringify(config))
-}
-
 export const setAutoLoad = async (autoLoad: boolean) => {
     console.log(`Setting Auto Load: ${autoLoad}`)
     config.autoLoad = autoLoad
