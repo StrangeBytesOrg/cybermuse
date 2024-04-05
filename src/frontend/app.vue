@@ -39,13 +39,8 @@ const toggleMenu = () => {
             class="menu-overlay z-10 fixed w-full h-full bg-gray-500 opacity-50"
             :class="{hidden: !showMenu}"></div>
         <ul
-            class="menu w-60 bg-base-200 min-h-full fixed sm:relative z-20 wat"
+            class="menu w-60 min-w-60 sm:w-48 sm:min-w-48 bg-base-200 min-h-full fixed sm:relative z-20 wat"
             :class="{customShow: showMenu, customHide: !showMenu}">
-            <li>
-                <router-link to="/create-character" class="font-bold" active-class="active">
-                    Create Character
-                </router-link>
-            </li>
             <li>
                 <router-link to="/characters" class="font-bold mt-1" active-class="active">Characters</router-link>
             </li>
