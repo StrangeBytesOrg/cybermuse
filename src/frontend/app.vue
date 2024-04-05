@@ -42,30 +42,30 @@ const toggleMenu = () => {
             class="menu w-60 min-w-60 sm:w-48 sm:min-w-48 bg-base-200 min-h-full fixed sm:relative z-20 wat"
             :class="{customShow: showMenu, customHide: !showMenu}">
             <li>
-                <router-link to="/characters" class="font-bold mt-1" active-class="active">Characters</router-link>
+                <router-link to="/characters" class="font-bold px-2" active-class="active">Characters</router-link>
             </li>
             <li>
-                <router-link to="/chats" class="font-bold mt-1" active-class="active">Chats</router-link>
+                <router-link to="/chats" class="font-bold px-2" active-class="active">Chats</router-link>
             </li>
             <li>
-                <router-link to="/instruct" class="font-bold mt-1" active-class="active">Instruct</router-link>
+                <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
             </li>
             <li>
-                <router-link to="/settings" class="font-bold mt-1" active-class="active">Settings</router-link>
+                <router-link to="/settings" class="font-bold px-2" active-class="active">Settings</router-link>
             </li>
             <li>
-                <router-link to="/connection" class="font-bold mt-1" active-class="active">Connection</router-link>
+                <router-link to="/connection" class="font-bold px-2" active-class="active">Connection</router-link>
             </li>
             <li>
                 <a class="font-bold">Server Settings</a>
                 <ul>
                     <li>
-                        <router-link to="/backend-settings" class="font-bold mt-1" active-class="active">
+                        <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
                             Models
                         </router-link>
                     </li>
                     <li>
-                        <router-link to="/download-models" class="font-bold mt-1" active-class="active">
+                        <router-link to="/download-models" class="font-bold px-2" active-class="active">
                             Download Models
                         </router-link>
                     </li>
