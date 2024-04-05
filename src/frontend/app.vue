@@ -1,12 +1,14 @@
 <script lang="ts" setup>
 import {onErrorCaptured} from 'vue'
 import {RouterLink, RouterView} from 'vue-router'
-import Connection from './components/connection.vue'
+// import Connection from './components/connection.vue'
+import {useThemeStore} from './store/'
 import './styles/global.css'
 import './styles/tailwind.css'
 import 'vue-toastification/dist/index.css'
 import {useToast} from 'vue-toastification'
 
+const themeStore = useThemeStore()
 const toast = useToast()
 onErrorCaptured((error) => {
     toast.error(`An error occurred: ${error.message}`)
@@ -16,7 +18,7 @@ onErrorCaptured((error) => {
 
 <template>
     <!-- Content -->
-    <div class="flex flex-col" style="height: var(--doc-height)" data-theme="dark">
+    <div class="flex flex-col" style="height: var(--doc-height)" :data-theme="themeStore.theme">
         <!-- <connection /> -->
         <!-- Menu -->
         <ul class="menu flex w-60 bg-base-200 min-h-full fixed">

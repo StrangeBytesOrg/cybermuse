@@ -1,13 +1,34 @@
 <script lang="ts" setup>
-import {useSettingsStore, usePromptStore} from '../store'
+import {useSettingsStore, usePromptStore, useThemeStore} from '../store'
 
 const settingsStore = useSettingsStore()
 const promptStore = usePromptStore()
+const themeStore = useThemeStore()
 
 const saveSettings = () => {
     settingsStore.update()
     promptStore.update()
+    themeStore.update()
 }
+
+const themes = [
+    'dark',
+    'business',
+    'light',
+    'synthwave',
+    'retro',
+    'valentine',
+    'halloween',
+    'forest',
+    'aqua',
+    'lofi',
+    'pastel',
+    'luxury',
+    'dracula',
+    'night',
+    'coffee',
+    'sunset',
+]
 </script>
 
 <template>
@@ -76,6 +97,15 @@ const saveSettings = () => {
                 </label>
             </div>
         </div>
+
+        <label class="form-control w-full max-w-xs">
+            <div class="label">
+                <span class="label-text">Theme</span>
+            </div>
+            <select class="select select-bordered" v-model="themeStore.theme">
+                <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
+            </select>
+        </label>
 
         <!-- <label class="form-control w-full max-w-xs">
             <div class="label">
