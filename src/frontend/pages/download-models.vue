@@ -53,9 +53,7 @@ const downloadModel = async (repoId: string, path: string) => {
 </script>
 
 <template>
-    <div class="card p-3">
-        <h2 class="text-lg mt-3">Download Model from Huggingface</h2>
-        <div class="divider mt-0 mb-1"></div>
+    <div class="p-2">
         <div class="flex flex-row">
             <input
                 v-model="hfUrl"

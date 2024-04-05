@@ -54,46 +54,43 @@ const cancelCharacter = () => {
 </script>
 
 <template>
-    <div class="flex flex-col p-5">
-        <!-- Character Details -->
-        <div class="card bg-base-200 p-5">
-            <h2 class="text-xl">Character Info</h2>
-            <div class="divider mt-2"></div>
+    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
+        <h2 class="text-xl">Character Info</h2>
+        <div class="divider mt-0 mb-1"></div>
 
-            <input
-                type="text"
-                v-model="character.name"
-                placeholder="Character Name"
-                class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
+        <input
+            type="text"
+            v-model="character.name"
+            placeholder="Character Name"
+            class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
 
-            <textarea
-                v-model="character.description"
-                placeholder="Description"
-                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+        <textarea
+            v-model="character.description"
+            placeholder="Description"
+            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
-            <textarea
-                v-model="character.firstMessage"
-                placeholder="First Message"
-                class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+        <textarea
+            v-model="character.firstMessage"
+            placeholder="First Message"
+            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
-            <!-- Avatar -->
-            <div class="flex flex-row mt-5">
-                <div class="avatar">
-                    <div class="w-36 h-36 rounded-xl">
-                        <img v-if="character.image" :src="character.image" :alt="character.name + ' avatar'" />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
-                    </div>
+        <!-- Avatar -->
+        <div class="flex flex-row mt-5">
+            <div class="avatar">
+                <div class="w-36 h-36 rounded-xl">
+                    <img v-if="character.image" :src="character.image" :alt="character.name + ' avatar'" />
+                    <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
-                <button class="btn btn-primary mt-auto ml-5" @click="uploadImage">Upload</button>
-                <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Delete</button>
-                <input type="file" id="fileInput" @change="handleFileUpload" class="hidden" />
             </div>
+            <button class="btn btn-primary mt-auto ml-5" @click="uploadImage">Upload</button>
+            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Delete</button>
+            <input type="file" id="fileInput" @change="handleFileUpload" class="hidden" />
+        </div>
 
-            <div class="divider"></div>
-            <div class="flex flex-row">
-                <button class="btn btn-primary" @click="createCharacter">Create</button>
-                <button class="btn btn-error ml-5" @click="cancelCharacter">Cancel</button>
-            </div>
+        <div class="divider"></div>
+        <div class="flex flex-row">
+            <button class="btn btn-primary" @click="createCharacter">Create</button>
+            <button class="btn btn-error ml-5" @click="cancelCharacter">Cancel</button>
         </div>
     </div>
 </template>

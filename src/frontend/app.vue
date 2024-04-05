@@ -17,13 +17,9 @@ onErrorCaptured((error) => {
 <template>
     <!-- Content -->
     <div class="flex flex-col" style="height: var(--doc-height)" data-theme="dark">
-        <!-- Header -->
-        <div class="navbar w-full bg-neutral text-neutral-content fixed z-[50] top-0 flex justify-between">
-            <connection />
-        </div>
-
+        <!-- <connection /> -->
         <!-- Menu -->
-        <ul class="menu flex w-60 mt-16 bg-base-200 min-h-full fixed">
+        <ul class="menu flex w-60 bg-base-200 min-h-full fixed">
             <li>
                 <router-link to="/create-character" class="font-bold" active-class="active">
                     Create Character
@@ -62,8 +58,8 @@ onErrorCaptured((error) => {
         </ul>
 
         <!-- Main -->
-        <div class="flex flex-grow min-h-0 mt-16 ml-60">
-            <div class="flex flex-col flex-1 overflow-auto mr-1">
+        <div class="flex flex-grow min-h-0 ml-60">
+            <div class="flex flex-col flex-1 overflow-auto mr-1 ml-1">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />

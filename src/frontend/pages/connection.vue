@@ -11,16 +11,16 @@ const saveConnection = () => {
 </script>
 
 <template>
-    <div class="flex flex-col p-5">
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">API URL</span>
-            </div>
-            <input type="text" class="input input-bordered" v-model="connectionStore.apiUrl" />
-        </label>
+    <div class="flex flex-col p-2">
+        <div class="flex flex-row">
+            <label class="form-control w-full max-w-xs">
+                <div class="label">
+                    <span class="label-text">API URL</span>
+                </div>
+                <input type="text" class="input input-bordered" v-model="connectionStore.apiUrl" />
+            </label>
 
-        <div class="flex flex-row mt-5">
-            <button class="btn btn-primary" @click="saveConnection">Save</button>
+            <button class="btn btn-primary ml-2 mt-auto" @click="saveConnection">Save</button>
         </div>
 
         <div class="mt-3">Connection: {{ connectionStore.connected ? 'Connected' : 'Disconnected' }}</div>

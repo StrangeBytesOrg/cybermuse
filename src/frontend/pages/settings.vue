@@ -11,7 +11,7 @@ const saveSettings = () => {
 </script>
 
 <template>
-    <div class="p-3">
+    <div class="p-2">
         <div class="flex flex-row">
             <!-- Generation Settings -->
             <div class="flex flex-col w-[25%]">
