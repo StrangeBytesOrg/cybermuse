@@ -23,7 +23,7 @@ onErrorCaptured((error) => {
         </div>
 
         <!-- Menu -->
-        <ul class="menu flex w-60 mt-16 bg-base-300 min-h-full fixed">
+        <ul class="menu flex w-60 mt-16 bg-base-200 min-h-full fixed">
             <li>
                 <router-link to="/create-character" class="font-bold" active-class="active">
                     Create Character
@@ -45,9 +45,19 @@ onErrorCaptured((error) => {
                 <router-link to="/connection" class="font-bold mt-1" active-class="active">Connection</router-link>
             </li>
             <li>
-                <router-link to="/backend-settings" class="font-bold mt-1" active-class="active">
-                    Server Settings
-                </router-link>
+                <a class="font-bold">Server Settings</a>
+                <ul>
+                    <li>
+                        <router-link to="/backend-settings" class="font-bold mt-1" active-class="active">
+                            Models
+                        </router-link>
+                    </li>
+                    <li>
+                        <router-link to="/download-models" class="font-bold mt-1" active-class="active">
+                            Download Models
+                        </router-link>
+                    </li>
+                </ul>
             </li>
         </ul>
 

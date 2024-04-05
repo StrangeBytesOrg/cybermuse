@@ -9,6 +9,7 @@ import Chat from './pages/chat.vue'
 import Connection from './pages/connection.vue'
 import Settings from './pages/settings.vue'
 import BackendSettings from './pages/backend-settings.vue'
+import DownloadModels from './pages/download-models.vue'
 import Instruct from './pages/instruct.vue'
 
 export default createRouter({
@@ -63,6 +64,11 @@ export default createRouter({
             path: '/backend-settings',
             name: 'backend-settings',
             component: BackendSettings,
+        },
+        {
+            path: '/download-models',
+            name: 'download-models',
+            component: DownloadModels,
         },
     ],
 })
