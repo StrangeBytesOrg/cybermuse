@@ -55,7 +55,7 @@ if (devMode) {
 
     // Get OpenAPI file from server and update client if it has changed
     await delay(3000) // Give the server a moment to startup
-    console.log('Checking spec')
+    console.log('Checking OpenAPI spec')
     const res = await fetch('http://localhost:31700/docs/json')
     const openapiSpec = await res.json()
     const ast = await openapiTs(openapiSpec)

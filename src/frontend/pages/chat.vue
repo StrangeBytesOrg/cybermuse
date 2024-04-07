@@ -16,6 +16,7 @@ const connectionStore = useConnectionStore()
 const settingsStore = useSettingsStore()
 const promptStore = usePromptStore()
 const toast = useToast()
+const responseCharacter = ref('')
 
 connectionStore.connected = true
 const chatId = Number(route.query.id)
@@ -31,12 +32,8 @@ if (!chat) {
     setTimeout(() => router.push('/chats'), 3000)
     toast.error('Chat not found')
 }
-const messages = await useDexieLiveQuery(() => db.messages.where({chatId}).toArray(), {initialValue: []})
-const character = await db.characters.get(chat.characterId)
-if (!character) {
-    // TODO handle this better
-    throw new Error(`Character with id ${chat.characterId} not found`)
-}
+const messages = useDexieLiveQuery(() => db.messages.where({chatId}).toArray(), {initialValue: []})
+const characters = await db.characters.toArray()
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -62,22 +59,45 @@ const sendMessage = async () => {
         chatId,
         user: promptStore.promptSettings.userName,
         userType: 'user',
+        userId: 0, // TODO This works, but needs some further consideration
         text: currentMessage.value,
         pending: false,
         altHistory: [''],
         activeMessage: 0,
     })
 
+    // Have the server select a respondent
+    const characterNames = characters.map((c) => c.name)
+    let respondentPrompt = `<|im_start|>system\nDetermine which character should respond to the user's message.<|im_end|>\n`
+    respondentPrompt += `<|im_start|>user\nAvailable Characters: ${JSON.stringify(characterNames)}\nUser Message:"${currentMessage.value}"<|im_end|>\n`
+    respondentPrompt += `<|im_start|>assistant\n`
+    const {data: responseName} = await client.POST('/api/generate-json', {
+        body: {
+            prompt: respondentPrompt,
+            maxTokens: 32,
+            temperature: 0.1,
+            schema: {
+                enum: characterNames,
+            },
+        },
+    })
+    console.log(responseName)
+    responseCharacter.value = responseName
+
     // Add the previous messages to the prompt
     prompt += createPrompt(messages.value) // TODO needs to be trimmed to a certain length
     prompt += `<|im_start|>assistant\n` // TODO this needs to be baked into prompt formatting somehow
     console.log(prompt)
+
+    const randomCharacterId = Math.floor(Math.random() * characters.length)
+    const character = characters[randomCharacterId]
 
     // Add a new empty message for the response
     const newMessage = await db.messages.add({
         chatId,
         user: character.name,
         userType: 'assistant',
+        userId: character.id,
         text: '',
         pending: true,
         altHistory: [''],
@@ -264,6 +284,7 @@ watch(messages, async (currentValue, previousValue) => {
                 v-bind:key="index"
                 class="flex flex-col relative mb-2 bg-base-200 rounded-xl">
                 <!-- Avatar and Text section -->
+                Character: {{ message.userId }} Has Image: {{ Boolean(characters[message.userId]) }}
                 <div class="flex flex-row pb-2 pt-3">
                     <div class="avatar ml-2">
                         <div class="w-16 h-16 rounded-full">
@@ -271,7 +292,9 @@ watch(messages, async (currentValue, previousValue) => {
                                 v-if="message.userType === 'user'"
                                 src="../assets/img/placeholder-avatar.webp"
                                 alt="user" />
-                            <img v-else-if="character.image" :src="character.image" :alt="character.name" />
+                            <!-- <img
+                                v-else-if="message.userId && characters[message.userId].image"
+                                :src="characters[message.userId].image" /> -->
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
@@ -356,6 +379,8 @@ watch(messages, async (currentValue, previousValue) => {
                 </div>
             </div>
         </div>
+
+        Res: {{ responseCharacter }}
 
         <!-- Chat Controls -->
         <div class="flex md:px-2 md:pb-2">

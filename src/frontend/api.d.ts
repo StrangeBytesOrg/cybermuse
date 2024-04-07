@@ -171,6 +171,32 @@ export interface paths {
       };
     };
   };
+  "/api/generate-json": {
+    /** Generate a completion using a JSON schema */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            prompt: string;
+            maxTokens?: number;
+            temperature?: number;
+            minP?: number;
+            topP?: number;
+            topK?: number;
+            schema?: unknown;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": string;
+          };
+        };
+      };
+    };
+  };
 }
 
 export type webhooks = Record<string, never>;

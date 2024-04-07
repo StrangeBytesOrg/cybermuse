@@ -13,7 +13,7 @@ import {
 import z from 'zod'
 import {fileExists} from '@huggingface/hub'
 import {app} from 'electron'
-import {config, getStatus, generate, loadModel, setAutoLoad, detokenize} from './generate.js'
+import {config, getStatus, generate, loadModel, setAutoLoad, detokenize, generateJson} from './generate.js'
 
 const configPath = path.resolve(app.getPath('userData'), 'config.json')
 
@@ -289,5 +289,47 @@ server.withTypeProvider<ZodTypeProvider>().route({
                     break
             }
         }
+    },
+})
+
+server.withTypeProvider<ZodTypeProvider>().route({
+    url: '/api/generate-json',
+    method: 'POST',
+    schema: {
+        summary: 'Generate a completion using a JSON schema',
+        body: z.object({
+            prompt: z.string(),
+            maxTokens: z.number().optional(),
+            temperature: z.number().optional(),
+            minP: z.number().optional(),
+            topP: z.number().optional(),
+            topK: z.number().optional(),
+            schema: z.any(),
+        }),
+        response: {
+            200: z.string(),
+        },
+    },
+    handler: async (req) => {
+        const startTime = performance.now()
+        const res = await generateJson(
+            req.body.prompt,
+            {
+                temperature: req.body.temperature,
+                maxTokens: req.body.maxTokens,
+            },
+            // {
+            //     type: 'object',
+            //     properties: {
+            //         respondent: {type: 'string'},
+            //     },
+            // },
+            // {enum: ['Robert Tableson', 'Julia', 'Test Person']},
+            req.body.schema,
+        )
+        const timeTaken = performance.now() - startTime
+        console.log(`Response: ${res}`)
+        console.log(`Time taken: ${timeTaken}ms`)
+        return res
     },
 })

@@ -10,7 +10,8 @@ export interface Character {
 
 export interface Chat {
     id?: number
-    characterId: number
+    // characterId: number
+    characters: number[]
     createdAt: number
     updatedAt: number
 }
@@ -20,6 +21,7 @@ export interface Message {
     chatId: number
     user: string
     userType: string
+    userId: number
     text: string
     pending: boolean
     activeMessage: number
@@ -36,8 +38,8 @@ export class ChatDatabase extends Dexie {
 
         this.version(1).stores({
             characters: '++id, name, description, firstMessage, image',
-            chats: '++id, characterId, createdAt, updatedAt',
-            messages: '++id, chatId, user, userType, text, pending, activeMessage, altHistory',
+            chats: '++id, characters, createdAt, updatedAt',
+            messages: '++id, chatId, user, userType, userId, text, pending, activeMessage, altHistory',
         })
         this.characters = this.table('characters')
         this.chats = this.table('chats')

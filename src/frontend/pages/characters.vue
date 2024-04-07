@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import {db} from '../db'
 import {useDexieLiveQuery} from '../lib/livequery'
+import {RouterLink} from 'vue-router'
 
 const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValue: []})
 </script>
 
 <template>
     <div class="flex flex-col p-2">
+        <RouterLink to="/create-character" class="btn btn-primary font-bold mb-3" active-class="active">
+            Create Character
+        </RouterLink>
+
         <template v-if="characters.length">
             <div v-for="character in characters" :key="character.name">
                 <router-link
