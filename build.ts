@@ -29,8 +29,6 @@ const buildOptions: BuildOptions = {
     sourcemap: devMode,
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
 const build = async () => {
     const startTime = performance.now()
     await fs.rm(outputPath, {recursive: true, force: true})
@@ -53,19 +51,6 @@ if (devMode) {
     console.log('Starting electron')
     let electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
 
-    // Get OpenAPI file from server and update client if it has changed
-    await delay(3000) // Give the server a moment to startup
-    console.log('Checking OpenAPI spec')
-    const res = await fetch('http://localhost:31700/docs/json')
-    const openapiSpec = await res.json()
-    const ast = await openapiTs(openapiSpec)
-    const clientPath = path.resolve(esmDirName, 'src/frontend/api.d.ts')
-    const existingClient = await fs.readFile(clientPath, 'utf-8')
-    if (existingClient !== ast) {
-        console.log('Spec updated, updating client')
-        await fs.writeFile(clientPath, ast)
-    }
-
     console.log(`Watching ${sourceDir}`)
     chokidar.watch(sourceDir).on('change', async () => {
         console.log('Restarting electron')
@@ -74,5 +59,18 @@ if (devMode) {
         await tcpPortUsed.waitUntilFree(31700)
         console.log('Port free')
         electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
+
+        // Update OpenAPI client
+        await tcpPortUsed.waitUntilUsed(31700)
+        console.log('Checking OpenAPI spec')
+        const res = await fetch('http://localhost:31700/docs/json')
+        const spec = await res.json()
+        const ast = await openapiTs(spec, {})
+        const clientPath = path.resolve(esmDirName, 'src/frontend/api.d.ts')
+        const existingClient = await fs.readFile(clientPath, 'utf-8')
+        if (existingClient !== ast) {
+            console.log('Spec updated, updating client')
+            await fs.writeFile(clientPath, ast)
+        }
     })
 }
