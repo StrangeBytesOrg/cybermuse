@@ -37,6 +37,19 @@ const build = async () => {
     console.log('Built in', buildTime.toFixed(2) + 'ms')
 }
 
+const updateOpenAPI = async () => {
+    console.log('Checking OpenAPI spec')
+    const res = await fetch('http://localhost:31700/docs/json')
+    const spec = await res.json()
+    const ast = await openapiTs(spec, {})
+    const clientPath = path.resolve(esmDirName, 'src/frontend/api.d.ts')
+    const existingClient = await fs.readFile(clientPath, 'utf-8')
+    if (existingClient !== ast) {
+        console.log('Spec updated, updating client')
+        await fs.writeFile(clientPath, ast)
+    }
+}
+
 build()
 
 if (devMode) {
@@ -51,6 +64,10 @@ if (devMode) {
     console.log('Starting electron')
     let electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
 
+    // Update OpenAPI client
+    await tcpPortUsed.waitUntilUsed(31700)
+    await updateOpenAPI()
+
     console.log(`Watching ${sourceDir}`)
     chokidar.watch(sourceDir).on('change', async () => {
         console.log('Restarting electron')
@@ -62,15 +79,7 @@ if (devMode) {
 
         // Update OpenAPI client
         await tcpPortUsed.waitUntilUsed(31700)
-        console.log('Checking OpenAPI spec')
-        const res = await fetch('http://localhost:31700/docs/json')
-        const spec = await res.json()
-        const ast = await openapiTs(spec, {})
-        const clientPath = path.resolve(esmDirName, 'src/frontend/api.d.ts')
-        const existingClient = await fs.readFile(clientPath, 'utf-8')
-        if (existingClient !== ast) {
-            console.log('Spec updated, updating client')
-            await fs.writeFile(clientPath, ast)
-        }
+        await updateOpenAPI()
+        server.restart()
     })
 }

@@ -1,9 +1,10 @@
 {
+    "printWidth": 120,
     "tabWidth": 4,
     "semi": false,
     "singleQuote": true,
+    "quoteProps": "consistent",
     "bracketSpacing": false,
     "bracketSameLine": true,
-    "htmlWhitespaceSensitivity": "ignore",
-    "printWidth": 120
+    "htmlWhitespaceSensitivity": "ignore"
 }

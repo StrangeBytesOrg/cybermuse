@@ -6,9 +6,11 @@ import Characters from './pages/characters.vue'
 import CreateChat from './pages/create-chat.vue'
 import Chats from './pages/chats.vue'
 import Character from './pages/character.vue'
-import Chat from './pages/chat.vue'
+import Chat from './pages/chat2.vue'
 import Connection from './pages/connection.vue'
-import Settings from './pages/settings.vue'
+import ThemeSettings from './pages/theme-settings.vue'
+import PromptSettings from './pages/prompt-settings.vue'
+import GenerationSettings from './pages/generation-settings.vue'
 import BackendSettings from './pages/backend-settings.vue'
 import DownloadModels from './pages/download-models.vue'
 import Instruct from './pages/instruct.vue'
@@ -62,9 +64,19 @@ export default createRouter({
             component: Connection,
         },
         {
-            path: '/settings',
+            path: '/theme-settings',
             name: 'settings',
-            component: Settings,
+            component: ThemeSettings,
+        },
+        {
+            path: '/prompt-settings',
+            name: 'prompt-settings',
+            component: PromptSettings,
+        },
+        {
+            path: '/generation-settings',
+            name: 'generation-settings',
+            component: GenerationSettings,
         },
         {
             path: '/backend-settings',

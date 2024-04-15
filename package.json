@@ -11,7 +11,9 @@
         "build": "npm run build:frontend && npm run build:backend",
         "build:frontend": "vite build",
         "build:backend": "tsx build.ts",
-        "make": "electron-builder"
+        "make": "electron-builder",
+        "update-db": "drizzle-kit push:sqlite",
+        "eb": "electron-rebuild"
     },
     "dependencies": {
         "@electron/fuses": "^1.7.0",
@@ -21,8 +23,9 @@
         "@huggingface/hub": "^0.14.7",
         "@huggingface/jinja": "^0.2.1",
         "@vueuse/rxjs": "^10.9.0",
+        "better-sqlite3": "^9.4.5",
         "daisyui": "^4.7.2",
-        "dexie": "^4.0.1",
+        "drizzle-orm": "^0.30.7",
         "eventsource-parser": "^1.1.2",
         "fastify": "^4.26.2",
         "fastify-type-provider-zod": "^1.1.9",
@@ -30,7 +33,6 @@
         "openapi-fetch": "^0.9.3",
         "pinia": "^2.1.7",
         "pino-pretty": "^11.0.0",
-        "rxjs": "^7.8.1",
         "snarkdown": "^2.0.0",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0",
@@ -38,12 +40,15 @@
         "zod": "^3.22.4"
     },
     "devDependencies": {
+        "@electron/rebuild": "^3.6.0",
+        "@types/better-sqlite3": "^7.6.9",
         "@vitejs/plugin-vue": "^5.0.4",
         "@vue/eslint-config-prettier": "^9.0.0",
         "@vue/eslint-config-typescript": "^12.0.0",
         "@vue/tsconfig": "^0.5.1",
         "autoprefixer": "^10.4.18",
         "chokidar": "^3.6.0",
+        "drizzle-kit": "^0.20.14",
         "electron": "^29.1.4",
         "electron-builder": "^24.13.3",
         "eslint": "^8.57.0",

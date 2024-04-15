@@ -51,25 +51,31 @@ const toggleMenu = () => {
                 <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
             </li>
             <li>
-                <router-link to="/settings" class="font-bold px-2" active-class="active">Settings</router-link>
-            </li>
-            <li>
                 <router-link to="/connection" class="font-bold px-2" active-class="active">Connection</router-link>
             </li>
+
             <li>
-                <a class="font-bold">Server Settings</a>
-                <ul>
-                    <li>
-                        <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
-                            Models
-                        </router-link>
-                    </li>
-                    <li>
-                        <router-link to="/download-models" class="font-bold px-2" active-class="active">
-                            Download Models
-                        </router-link>
-                    </li>
-                </ul>
+                <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
+                    Theme Settings
+                </router-link>
+            </li>
+            <li>
+                <router-link to="/prompt-settings" class="font-bold px-2" active-class="active">
+                    Prompt Settings
+                </router-link>
+            </li>
+            <li>
+                <router-link to="/generation-settings" class="font-bold px-2" active-class="active">
+                    Generation Settings
+                </router-link>
+            </li>
+            <li>
+                <router-link to="/backend-settings" class="font-bold px-2" active-class="active">Models</router-link>
+            </li>
+            <li>
+                <router-link to="/download-models" class="font-bold px-2" active-class="active">
+                    Download Models
+                </router-link>
             </li>
         </ul>
 

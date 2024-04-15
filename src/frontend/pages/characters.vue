@@ -1,9 +1,13 @@
 <script lang="ts" setup>
-import {db} from '../db'
-import {useDexieLiveQuery} from '../lib/livequery'
+import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
+import {client} from '../api-client'
 
-const characters = useDexieLiveQuery(() => db.characters.toArray(), {initialValue: []})
+const {data, error} = await client.GET('/api/characters')
+if (error) {
+    console.error(error)
+}
+const characters = reactive(data)
 </script>
 
 <template>

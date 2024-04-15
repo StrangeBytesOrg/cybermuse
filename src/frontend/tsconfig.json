@@ -2,8 +2,9 @@
     "extends": "@vue/tsconfig/tsconfig.dom.json",
     "include": ["./**/*.ts", "./**/*.vue"],
     "compilerOptions": {
+        "strict": true,
         "composite": true,
         "baseUrl": ".",
-        "noUncheckedIndexedAccess": true
+        "noUncheckedIndexedAccess": true // Recommended by OpenAPI ts
     }
 }

@@ -5,18 +5,448 @@
 
 
 export interface paths {
-  "/api/status": {
-    /** Get status info about the server */
+  "/api/characters": {
+    /** Get all characters */
+    get: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": ({
+                id: number;
+                name: string;
+                description: string | null;
+                firstMessage: string | null;
+                image: string | null;
+                /** @enum {string} */
+                type: "user" | "character";
+              })[];
+          };
+        };
+      };
+    };
+  };
+  "/api/character/{id}": {
+    /** Get a character by ID */
+    get: {
+      parameters: {
+        path: {
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              id: number;
+              name: string;
+              description: string;
+              firstMessage: string | null;
+              image: string | null;
+              /** @enum {string} */
+              type: "user" | "character";
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/create-character": {
+    /** Create a character */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            name: string;
+            description: string;
+            firstMessage: string | null;
+            image: string | null;
+            /** @enum {string} */
+            type: "user" | "character";
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/update-character/": {
+    /** Update a character */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+            name: string;
+            description: string;
+            firstMessage: string | null;
+            image: string | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/delete-character/": {
+    /** Delete a character */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/create-chat": {
+    /** Create a Chat */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            characters: number[];
+            userCharacter: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              id: number;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/chats": {
+    /** Get all Chats */
+    get: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": ({
+                id: number;
+                createdAt: number;
+                updatedAt: number;
+                chatCharacters: ({
+                    characterId: number | null;
+                  })[];
+              })[];
+          };
+        };
+      };
+    };
+  };
+  "/api/chat/{id}": {
+    /** Get a Chat by ID */
+    get: {
+      parameters: {
+        path: {
+          id: string;
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              id: number;
+              createdAt: number;
+              updatedAt: number;
+              messages: ({
+                  id: number;
+                  text: string;
+                  characterId: number | null;
+                })[];
+              chatCharacters: ({
+                  character: {
+                    id: number;
+                    name: string;
+                    image: string | null;
+                  };
+                })[];
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/delete-chat": {
+    /** Delete a Chat */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/new-message": {
+    /** Add a message from the user to the chat */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            chatId: number;
+            characterId: number;
+            text: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+              id?: number;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/generate-message": {
+    /** Create a new response message */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            chatId: number;
+          };
+        };
+      };
+      responses: {
+        /** @description data: {text} */
+        200: {
+          content: {
+            "text/event-stream": string;
+          };
+        };
+      };
+    };
+  };
+  "/api/update-message": {
+    /** Update an existing message */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+            text: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/delete-message": {
+    /** Delete a Message */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/get-settings": {
+    /** Get settings for prompting */
     get: {
       responses: {
         /** @description Default Response */
         200: {
           content: {
             "application/json": {
-              modelLoaded: boolean;
-              currentModel?: string;
-              modelDir?: string;
-              autoLoad: boolean;
+              systemPrompt: string;
+              promptTemplate: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/set-settings": {
+    /** Set settings for prompting */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            systemPrompt: string;
+            promptTemplate: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/get-generate-presets": {
+    /** Get settings for generating text */
+    get: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": ({
+                id: number;
+                name: string;
+                temperature: number;
+                maxTokens: number;
+                minP: number | null;
+                topP: number | null;
+                topK: number | null;
+              })[];
+          };
+        };
+      };
+    };
+  };
+  "/api/create-generate-preset": {
+    /** Set settings for generating text */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            name: string;
+            temperature: number;
+            maxTokens: number;
+            minP: number | null;
+            topP: number | null;
+            topK: number | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/update-generate-preset": {
+    /** Update settings for generating text */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+            name: string;
+            temperature: number;
+            maxTokens: number;
+            minP: number | null;
+            topP: number | null;
+            topK: number | null;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/delete-generate-preset": {
+    /** Delete settings for generating text */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
             };
           };
         };
@@ -192,6 +622,24 @@ export interface paths {
         200: {
           content: {
             "application/json": string;
+          };
+        };
+      };
+    };
+  };
+  "/api/status": {
+    /** Get status info about the server */
+    get: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              modelLoaded: boolean;
+              currentModel?: string;
+              modelDir?: string;
+              autoLoad: boolean;
+            };
           };
         };
       };

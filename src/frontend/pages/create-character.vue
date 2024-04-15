@@ -1,47 +1,29 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {db} from '../db'
+import {client} from '../api-client'
+import FileInput from '../components/file-select.vue'
 
 const router = useRouter()
 const character = ref({
     name: '',
     description: '',
+    firstMessage: '',
     image: '',
+    type: 'character',
 })
 
 const createCharacter = async () => {
-    await db.characters.add({
-        name: character.value.name,
-        description: character.value.description,
-        image: character.value.image,
+    await client.POST('/api/create-character', {
+        body: {
+            name: character.value.name,
+            description: character.value.description,
+            firstMessage: character.value.firstMessage,
+            image: character.value.image,
+            type: character.value.type,
+        },
     })
     await router.push('/characters')
-}
-
-const uploadImage = () => {
-    const fileInput = document.getElementById('fileInput') as HTMLInputElement
-    if (fileInput) {
-        fileInput.click()
-    }
-}
-
-const handleFileUpload = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (!(target instanceof HTMLInputElement) || !target.files) {
-        console.error('oh no')
-        return
-    }
-
-    const reader = new FileReader()
-    reader.onload = (e) => {
-        if (e.target === null || e.target.result === null) {
-            console.error('FileReader failed to read file')
-            return
-        }
-        character.value.image = e.target.result as string
-    }
-    reader.readAsDataURL(target.files[0])
 }
 
 const removeImage = () => {
@@ -74,6 +56,11 @@ const cancelCharacter = () => {
             placeholder="First Message"
             class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
+        <select v-model="character.type" class="select select-bordered mt-5">
+            <option value="character">Character</option>
+            <option value="user">User</option>
+        </select>
+
         <!-- Avatar -->
         <div class="flex flex-row mt-5">
             <div class="avatar">
@@ -82,9 +69,9 @@ const cancelCharacter = () => {
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
-            <button class="btn btn-primary mt-auto ml-5" @click="uploadImage">Upload</button>
-            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Delete</button>
-            <input type="file" id="fileInput" @change="handleFileUpload" class="hidden" />
+
+            <FileInput v-model="character.image" class="ml-5 mt-auto" />
+            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>

@@ -10,7 +10,8 @@
         "llamacpp",
         "koboldcpp",
         "snarkdown",
-        "openapi"
+        "openapi",
+        "detokenize"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -1,19 +1,18 @@
 <script lang="ts" setup>
-// import {useRouter} from 'vue-router'
-import {db, type Character} from '../db'
-import {useDexieLiveQuery} from '../lib/livequery'
+import {ref} from 'vue'
+import {client} from '../api-client'
 
-// const router = useRouter()
-const characters = await db.characters.toArray()
-const characterMap = new Map()
-characters.forEach((character) => {
-    characterMap.set(character.id, character)
-})
-const chats = useDexieLiveQuery(() => db.chats.toArray(), {initialValue: []})
+const chatRes = await client.GET('/api/chats')
+const characterRes = await client.GET('/api/characters')
+if (!chatRes.data) {
+    throw new Error('No chats found')
+}
+if (!characterRes.data) {
+    throw new Error('No characters found')
+}
 
-// const filteredChats = (character: Character) => {
-//     return chats.value.filter((chat) => chat.characterId === character.id)
-// }
+const chats = ref(chatRes.data)
+const characterMap = new Map(characterRes.data.map((character) => [character.id, character]))
 
 const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString(undefined, {
@@ -24,7 +23,14 @@ const formatDate = (timestamp: number) => {
 }
 
 const deleteChat = async (chatId: number) => {
-    await db.chats.delete(chatId)
+    await client.POST('/api/delete-chat', {
+        body: {
+            id: chatId,
+        },
+    })
+
+    const chatRes = await client.GET('/api/chats')
+    chats.value = chatRes.data
 }
 </script>
 
@@ -39,9 +45,15 @@ const deleteChat = async (chatId: number) => {
                 :key="chat.id"
                 class="relative bg-base-200 rounded-md p-2 mt-2 hover:outline outline-primary">
                 <div>Created: {{ formatDate(chat.createdAt) }}</div>
-                <div class="flex flex-row">
-                    <div v-for="characterId in chat.characters" :key="characterId">
-                        {{ characterMap.get(characterId).name }}
+                <div class="avatar-group -space-x-4 rtl:space-x-reverse">
+                    <div v-for="{characterId} in chat.chatCharacters" :key="characterId" class="avatar">
+                        <div class="h-14">
+                            <img
+                                v-if="characterMap.get(characterId)?.image"
+                                :src="characterMap.get(characterId)?.image"
+                                alt="Character Image" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                        </div>
                     </div>
                 </div>
                 <button

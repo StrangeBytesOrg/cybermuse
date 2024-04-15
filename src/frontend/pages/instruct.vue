@@ -1,13 +1,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useConnectionStore, useSettingsStore} from '../store'
+import {useConnectionStore} from '../store'
 import {client} from '../api-client'
 import {responseToIterable} from '../lib/fetch-backend'
-import {createPrompt} from '../lib/format-prompt'
 import {useToast} from 'vue-toastification'
 
 const connectionStore = useConnectionStore()
-const settingsStore = useSettingsStore()
 const pendingMessage = ref(false)
 const currentInput = ref('')
 const systemPrompt = ref('')
@@ -15,6 +13,16 @@ const generatedResponse = ref('')
 const promptSyntax = ref('none')
 const toast = useToast()
 let controller: AbortController
+
+const createPrompt = (messages: {userType: string; text: string}[]) => {
+    let prompt = ''
+    messages.forEach((message) => {
+        prompt += `<|im_start|>${message.userType}\n`
+        prompt += `${message.text}<|im_end|>\n`
+    })
+    prompt += '<|im_start|>assistant\n'
+    return prompt
+}
 
 const getGeneration = async () => {
     pendingMessage.value = true
@@ -28,7 +36,6 @@ const getGeneration = async () => {
             prompt += createPrompt([{text: systemPrompt.value, userType: 'system'}])
         }
         prompt += createPrompt([{text: currentInput.value, userType: 'user'}])
-        prompt += `<|im_start|>assistant\n`
     } else {
         prompt = currentInput.value
     }
@@ -38,11 +45,6 @@ const getGeneration = async () => {
         const {response} = await client.POST('/api/generate-stream', {
             body: {
                 prompt,
-                maxTokens: settingsStore.generationSettings.maxTokens,
-                temperature: settingsStore.generationSettings.temperature,
-                minP: settingsStore.generationSettings.minP,
-                topP: settingsStore.generationSettings.topP,
-                topK: settingsStore.generationSettings.topK,
             },
             signal: controller.signal,
             parseAs: 'stream',
@@ -77,6 +79,7 @@ const stop = async () => {
     controller.abort('manual abort')
 }
 
+// TODO this could almost certainly be folded into the getGeneration
 const continueMessage = async () => {
     pendingMessage.value = true
     controller = new AbortController()
@@ -98,11 +101,6 @@ const continueMessage = async () => {
         const {response} = await client.POST('/api/generate-stream', {
             body: {
                 prompt,
-                maxTokens: settingsStore.generationSettings.maxTokens,
-                temperature: settingsStore.generationSettings.temperature,
-                minP: settingsStore.generationSettings.minP,
-                topP: settingsStore.generationSettings.topP,
-                topK: settingsStore.generationSettings.topK,
             },
             signal: controller.signal,
             parseAs: 'stream',

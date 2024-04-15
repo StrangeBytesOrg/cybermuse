@@ -1,6 +1,7 @@
 <template>
-    <div class="px-3">
-        <h1 class="text-lg">Welcome to Chat Frontend</h1>
-        <p>This is a simple chat frontend. You can create characters and chat with them.</p>
+    <div class="p-3">
+        <h1 class="text-lg">Welcome</h1>
+        <p>To get started, setup a models folder and download a model.</p>
+        <p>After that, create a character, or use the instruct mode.</p>
     </div>
 </template>
