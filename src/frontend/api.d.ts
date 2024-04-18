@@ -227,7 +227,7 @@ export interface paths {
     };
   };
   "/api/new-message": {
-    /** Add a message from the user to the chat */
+    /** Add a message to the chat */
     post: {
       requestBody: {
         content: {
@@ -252,7 +252,7 @@ export interface paths {
     };
   };
   "/api/generate-message": {
-    /** Create a new response message */
+    /** Generate a new response message */
     post: {
       requestBody: {
         content: {
@@ -324,6 +324,7 @@ export interface paths {
         200: {
           content: {
             "application/json": {
+              name: string;
               instruction: string;
               promptTemplate: string;
             };
@@ -338,6 +339,7 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
+            name: string;
             instruction: string;
             promptTemplate: string;
           };

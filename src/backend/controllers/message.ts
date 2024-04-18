@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, chat, message, generatePresets, promptSetting, character} from '../db.js'
+import {db, chat, message, generatePresets, promptSetting} from '../db.js'
 import {generate, detokenize, getJsonGrammar} from '../generate.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
@@ -11,7 +11,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
         url: '/new-message',
         method: 'POST',
         schema: {
-            summary: 'Add a message from the user to the chat',
+            summary: 'Add a message to the chat',
             body: z.object({
                 chatId: z.number(),
                 characterId: z.number(),
@@ -44,7 +44,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
         url: '/generate-message',
         method: 'POST',
         schema: {
-            summary: 'Create a new response message',
+            summary: 'Generate a new response message',
             body: z.object({
                 chatId: z.number(),
             }),
@@ -71,7 +71,6 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             const notUserCharacters = existingChat?.chatCharacters.filter(
                 (chatCharacter) => chatCharacter.characterId !== existingChat.userCharacter,
             )
-            // const randomChatCharacter = notUserCharacters[Math.floor(Math.random() * notUserCharacters.length)]
 
             const previousMessages = await db.query.message.findMany({
                 where: eq(message.chatId, chatId),

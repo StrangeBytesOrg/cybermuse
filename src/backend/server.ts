@@ -10,7 +10,7 @@ import {
 } from 'fastify-type-provider-zod'
 import z from 'zod'
 import {eq} from 'drizzle-orm'
-import {db, character, generatePresets} from './db.js'
+import {db, character, generatePresets, promptSetting} from './db.js'
 import {getStatus} from './generate.js'
 
 // Routes
@@ -22,6 +22,7 @@ import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
 
+// TODO put these into a script or something
 // Initialize a character for the user if it doesn't exist
 const existingCharacter = await db.query.character.findFirst({where: eq(character.id, 1)})
 console.log(existingCharacter)
@@ -38,6 +39,17 @@ if (!existingPreset) {
         name: 'Default',
         maxTokens: 50,
         temperature: 0.5,
+    })
+}
+// Create a default prompt setting if it doesn't exist
+const existingPromptPreset = await db.query.promptSetting.findFirst({where: eq(promptSetting.id, 1)})
+if (!existingPromptPreset) {
+    await db.insert(promptSetting).values({
+        name: 'ChatML',
+        promptTemplate:
+            '<|im_start|>system\n{{instruction}}\nThe following are descriptions of each character in the dialogue.\n{% for character in characters %}\nDescription of {{character.name}}: {{character.description}}\n{% endfor %}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n',
+        instruction:
+            'Write a single response to the dialogue. Roleplay as the chosen character, and respond to the previous messages.',
     })
 }
 

@@ -40,6 +40,7 @@ export const message = sqliteTable('message', {
 
 export const promptSetting = sqliteTable('prompt_settings', {
     id: integer('id').primaryKey(),
+    name: text('name').notNull(),
     instruction: text('instruction').notNull(),
     promptTemplate: text('prompt_template').notNull(),
 })

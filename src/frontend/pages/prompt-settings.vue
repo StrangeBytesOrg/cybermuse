@@ -5,12 +5,14 @@ import {client} from '../api-client'
 import {Template} from '@huggingface/jinja'
 
 const toast = useToast()
+const presetName = ref('')
 const instruction = ref('')
 const promptTemplate = ref('')
 
 const {data} = await client.GET('/api/get-settings')
 instruction.value = data?.instruction || ''
 promptTemplate.value = data?.promptTemplate || ''
+presetName.value = data?.name || ''
 
 // Some sample data for the example output
 const characters = [
@@ -26,6 +28,7 @@ const exampleMessages = [
 const saveSettings = async () => {
     const {error} = await client.POST('/api/set-settings', {
         body: {
+            name: presetName.value,
             instruction: instruction.value,
             promptTemplate: promptTemplate.value,
         },
@@ -75,16 +78,23 @@ onMounted(() => {
 
 <template>
     <div class="p-2">
-        <label class="form-control w-full max-w-xs">
+        <!-- <label class="form-control w-full max-w-xs">
             <div class="label">
                 <span class="label-text">Prompt Preset</span>
             </div>
             <select class="select select-bordered">
                 <option value="custom">ChatML</option>
             </select>
-        </label>
+        </label> -->
 
         <div class="bg-base-200 rounded-lg px-2 pb-3 mt-3">
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Preset Name</span>
+                </div>
+                <input type="text" v-model="presetName" class="input" />
+            </label>
+
             <!-- Prompt Settings -->
             <div class="flex flex-col flex-grow">
                 <label class="form-control w-full">
