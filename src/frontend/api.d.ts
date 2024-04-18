@@ -324,7 +324,7 @@ export interface paths {
         200: {
           content: {
             "application/json": {
-              systemPrompt: string;
+              instruction: string;
               promptTemplate: string;
             };
           };
@@ -338,7 +338,7 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
-            systemPrompt: string;
+            instruction: string;
             promptTemplate: string;
           };
         };
@@ -596,32 +596,6 @@ export interface paths {
         200: {
           content: {
             "text/event-stream": string;
-          };
-        };
-      };
-    };
-  };
-  "/api/generate-json": {
-    /** Generate a completion using a JSON schema */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            prompt: string;
-            maxTokens?: number;
-            temperature?: number;
-            minP?: number;
-            topP?: number;
-            topK?: number;
-            schema?: unknown;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": string;
           };
         };
       };

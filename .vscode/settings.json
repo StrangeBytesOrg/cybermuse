@@ -6,12 +6,11 @@
         "dotenv",
         "tailwindcss",
         "daisyui",
-        "dexie",
         "llamacpp",
-        "koboldcpp",
         "snarkdown",
         "openapi",
-        "detokenize"
+        "detokenize",
+        "huggingface"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

@@ -11,7 +11,7 @@ export const settingsRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get settings for prompting',
             response: {
                 200: z.object({
-                    systemPrompt: z.string(),
+                    instruction: z.string(),
                     promptTemplate: z.string(),
                 }),
             },
@@ -28,7 +28,7 @@ export const settingsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             summary: 'Set settings for prompting',
             body: z.object({
-                systemPrompt: z.string(),
+                instruction: z.string(),
                 promptTemplate: z.string(),
             }),
             response: {
@@ -41,13 +41,13 @@ export const settingsRoutes: FastifyPluginAsync = async (fastify) => {
                     .insert(promptSetting)
                     .values({
                         id: 1,
-                        systemPrompt: req.body.systemPrompt,
+                        instruction: req.body.instruction,
                         promptTemplate: req.body.promptTemplate,
                     })
                     .onConflictDoUpdate({
                         target: promptSetting.id,
                         set: {
-                            systemPrompt: req.body.systemPrompt,
+                            instruction: req.body.instruction,
                             promptTemplate: req.body.promptTemplate,
                         },
                     })

@@ -1,8 +1,9 @@
 import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
-import {db, character} from '../db.js'
 import {eq} from 'drizzle-orm'
+import {Template} from '@huggingface/jinja'
+import {db, character} from '../db.js'
 
 export const characterRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -24,7 +25,12 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            return await db.select().from(character)
+            const characters = await db.select().from(character)
+            characters.forEach((character) => {
+                const descriptionTemplate = new Template(character.description)
+                character.description = descriptionTemplate.render({char: character.name})
+            })
+            return characters
         },
     })
 

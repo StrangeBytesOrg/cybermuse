@@ -29,7 +29,7 @@
         "eventsource-parser": "^1.1.2",
         "fastify": "^4.26.2",
         "fastify-type-provider-zod": "^1.1.9",
-        "node-llama-cpp": "^3.0.0-beta.15",
+        "node-llama-cpp": "^3.0.0-beta.16",
         "openapi-fetch": "^0.9.3",
         "pinia": "^2.1.7",
         "pino-pretty": "^11.0.0",

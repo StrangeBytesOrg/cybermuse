@@ -3,8 +3,8 @@ import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, chat, message, generatePresets, promptSetting} from '../db.js'
-import {generate, detokenize} from '../generate.js'
+import {db, chat, message, generatePresets, promptSetting, character} from '../db.js'
+import {generate, detokenize, getJsonGrammar} from '../generate.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -66,22 +66,66 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             const existingChat = await db.query.chat.findFirst({
                 where: eq(chat.id, chatId),
-                with: {chatCharacters: true},
+                with: {chatCharacters: {with: {character: true}}},
             })
             const notUserCharacters = existingChat?.chatCharacters.filter(
                 (chatCharacter) => chatCharacter.characterId !== existingChat.userCharacter,
             )
-            const randomChatCharacter = notUserCharacters[Math.floor(Math.random() * notUserCharacters.length)]
+            // const randomChatCharacter = notUserCharacters[Math.floor(Math.random() * notUserCharacters.length)]
 
             const previousMessages = await db.query.message.findMany({
                 where: eq(message.chatId, chatId),
+                with: {character: true},
             })
             // console.log(previousMessages)
+
+            const promptSettings = await db.query.promptSetting.findFirst({where: eq(promptSetting.id, 1)})
+            const generationSettings = await db.query.generatePresets.findFirst({where: eq(generatePresets.id, 1)})
+
+            // TODO implement character descriptions
+            let prompt = ''
+            try {
+                // Parse character descriptions
+                const parsedCharacters = notUserCharacters.map(({character}) => {
+                    const characterTemplate = new Template(character.description)
+                    const description = characterTemplate.render({char: character.name})
+                    return {name: character.name, description}
+                })
+
+                const instructionTemplate = new Template(promptSettings?.instruction || '')
+                const template = new Template(promptSettings?.promptTemplate || '')
+                const instruction = instructionTemplate.render({
+                    characters: parsedCharacters,
+                })
+                console.log('i:', instruction)
+                prompt = template.render({
+                    messages: previousMessages,
+                    instruction,
+                    characters: parsedCharacters,
+                })
+                console.log('template:', promptSettings?.promptTemplate)
+            } catch (err) {
+                console.error('Failed to render template')
+                console.error(err)
+            }
+
+            console.log('prompt:', prompt)
+
+            console.log('Getting response character')
+            const gram = getJsonGrammar({enum: notUserCharacters.map(({character}) => character.name)})
+            const wat = await generate(prompt, {
+                grammar: gram,
+            })
+            const pickedCharacter = JSON.parse(wat)
+
+            console.log('Decider Response:', wat)
+            const chosenCharacter = notUserCharacters.find(({character}) => character.name === pickedCharacter)
+            console.log('Chosen Character:', chosenCharacter)
 
             // Create a new message in the database which will be updated with the response
             const [newMessage] = await db
                 .insert(message)
-                .values({text: '', chatId, characterId: randomChatCharacter.characterId})
+                .values({text: '', chatId, characterId: chosenCharacter?.characterId})
                 .returning({id: message.id, characterId: message.characterId})
 
             // Send an initial response with a message ID and characterId
@@ -89,22 +133,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             initialResponse += `data: ${JSON.stringify({id: newMessage.id, characterId: newMessage.characterId})}\n\n`
             reply.raw.write(initialResponse)
 
-            const formattedMessages = previousMessages.map((message) => ({
-                userType: message.characterId === randomChatCharacter.characterId ? 'assistant' : 'user',
-                text: message.text,
-            }))
-
-            const promptSettings = await db.query.promptSetting.findFirst({where: eq(promptSetting.id, 1)})
-            const generationSettings = await db.query.generatePresets.findFirst({where: eq(generatePresets.id, 1)})
-
-            // TODO implement character descriptions
-            const template = new Template(promptSettings?.promptTemplate)
-            const prompt = template.render({messages: formattedMessages, systemPrompt: promptSettings?.systemPrompt})
-
-            console.log(formattedMessages)
-            console.log('template:', promptSettings?.promptTemplate)
-            console.log('prompt:', prompt)
-
+            prompt += `${chosenCharacter?.character.name}: `
             let bufferedResponse = ''
             const fullResponse = await generate(prompt, {
                 maxTokens: generationSettings.maxTokens,
@@ -112,8 +141,13 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 minP: generationSettings.minP ?? undefined,
                 topP: generationSettings.topP ?? undefined,
                 topK: generationSettings.topK ?? undefined,
+                // stopGenerationTriggers
                 onToken: async (token) => {
                     const text = detokenize(token)
+                    console.log(`Token: ${token}, text: ${text}`)
+                    if (text === '<|im_end|>') {
+                        return
+                    }
                     bufferedResponse += text
                     await db.update(message).set({text: bufferedResponse}).where(eq(message.id, newMessage.id))
                     reply.raw.write(`event: message\ndata: ${JSON.stringify({text})}\n\n`)

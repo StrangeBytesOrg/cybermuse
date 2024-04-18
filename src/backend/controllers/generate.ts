@@ -1,7 +1,7 @@
 import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
-import {generate, detokenize, generateJson} from '../generate.js'
+import {generate, detokenize} from '../generate.js'
 
 export const generateRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -75,48 +75,6 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                         break
                 }
             }
-        },
-    })
-
-    fastify.withTypeProvider<ZodTypeProvider>().route({
-        url: '/generate-json',
-        method: 'POST',
-        schema: {
-            summary: 'Generate a completion using a JSON schema',
-            body: z.object({
-                prompt: z.string(),
-                maxTokens: z.number().optional(),
-                temperature: z.number().optional(),
-                minP: z.number().optional(),
-                topP: z.number().optional(),
-                topK: z.number().optional(),
-                schema: z.any(),
-            }),
-            response: {
-                200: z.string(),
-            },
-        },
-        handler: async (req) => {
-            const startTime = performance.now()
-            const res = await generateJson(
-                req.body.prompt,
-                {
-                    temperature: req.body.temperature,
-                    maxTokens: req.body.maxTokens,
-                },
-                // {
-                //     type: 'object',
-                //     properties: {
-                //         respondent: {type: 'string'},
-                //     },
-                // },
-                // {enum: ['Robert Tableson', 'Julia', 'Test Person']},
-                req.body.schema,
-            )
-            const timeTaken = performance.now() - startTime
-            console.log(`Response: ${res}`)
-            console.log(`Time taken: ${timeTaken}ms`)
-            return res
         },
     })
 }
