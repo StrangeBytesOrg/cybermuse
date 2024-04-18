@@ -14,6 +14,10 @@ const config: Configuration = {
             from: './dist',
             to: './',
         },
+        {
+            from: './migrations/',
+            to: './migrations/',
+        },
         // Remove unnecessary files
         '!**/*.md',
         '!**/*.env', // Are .env files ever necessary inside of node_modules? Hopefully not.

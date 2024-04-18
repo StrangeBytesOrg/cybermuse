@@ -1,10 +1,10 @@
 import path from 'node:path'
 import url from 'node:url'
 import {app, shell, BrowserWindow} from 'electron'
-import sourcemapSupport from 'source-map-support'
+// import sourcemapSupport from 'source-map-support'
 import {server} from './server.js'
 
-sourcemapSupport.install()
+// sourcemapSupport.install()
 
 const serverPort = 31700
 const esmDirname = url.fileURLToPath(new URL('.', import.meta.url)) // Works like __dirname
