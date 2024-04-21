@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {db, promptSetting} from '../db.js'
 
-export const settingsRoutes: FastifyPluginAsync = async (fastify) => {
+export const promptSettingsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
         url: '/get-settings',
         method: 'GET',

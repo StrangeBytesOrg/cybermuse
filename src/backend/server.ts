@@ -2,25 +2,19 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import {
-    serializerCompiler,
-    validatorCompiler,
-    jsonSchemaTransform,
-    type ZodTypeProvider,
-} from 'fastify-type-provider-zod'
-import z from 'zod'
+import {serializerCompiler, validatorCompiler, jsonSchemaTransform} from 'fastify-type-provider-zod'
 import {eq} from 'drizzle-orm'
 import {db, character, generatePresets, promptSetting} from './db.js'
-import {getStatus} from './generate.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
 import {chatRoutes} from './controllers/chats.js'
 import {messageRoutes} from './controllers/message.js'
-import {settingsRoutes} from './controllers/prompt-settings.js'
+import {promptSettingsRoutes} from './controllers/prompt-settings.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
+import {settingsRoutes} from './controllers/settings.js'
 
 // TODO put these into a script or something
 // Initialize a character for the user if it doesn't exist
@@ -89,26 +83,8 @@ await server.register(fastifySwaggerUI, {
 await server.register(characterRoutes, {prefix: '/api'})
 await server.register(chatRoutes, {prefix: '/api'})
 await server.register(messageRoutes, {prefix: '/api'})
-await server.register(settingsRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generateRoutes, {prefix: '/api'})
-
-server.withTypeProvider<ZodTypeProvider>().route({
-    url: '/api/status',
-    method: 'GET',
-    schema: {
-        summary: 'Get status info about the server',
-        response: {
-            200: z.object({
-                modelLoaded: z.boolean(),
-                currentModel: z.string().optional(),
-                modelDir: z.string().optional(),
-                autoLoad: z.boolean(),
-            }),
-        },
-    },
-    handler: async () => {
-        return getStatus()
-    },
-})
+await server.register(settingsRoutes, {prefix: '/api'})
+await server.register(promptSettingsRoutes, {prefix: '/api'})

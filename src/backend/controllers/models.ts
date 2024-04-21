@@ -4,10 +4,8 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {z} from 'zod'
 import {fileExists} from '@huggingface/hub'
-import {app} from 'electron'
-import {config, loadModel, setAutoLoad} from '../generate.js'
-
-const configPath = path.resolve(app.getPath('userData'), 'config.json')
+import {loadModel} from '../generate.js'
+import {getConfig, setConfig} from '../config.js'
 
 export const modelRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -25,6 +23,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async () => {
             try {
+                const config = getConfig()
                 const models = fs.readdirSync(config.modelDir, {withFileTypes: true, recursive: true})
                 const modelList = []
                 for (let i = 0; i < models.length; i++) {
@@ -85,6 +84,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 return {success: false}
             }
 
+            const config = getConfig()
             const response = await fetch(`https://huggingface.co/${req.body.repoId}/resolve/main/${req.body.path}`)
             const reader = response.body.getReader()
             const contentLength = Number(response.headers.get('content-length'))
@@ -127,6 +127,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req, reply) => {
             const dir = req.body.dir
+            const config = getConfig()
             console.log(`Setting Model Folder: ${dir}`)
             // Check if the directory exists
             if (!fs.existsSync(dir)) {
@@ -134,7 +135,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 return reply.status(400).send({message: 'Directory does not exist'})
             }
             config.modelDir = dir
-            fs.writeFileSync(configPath, JSON.stringify(config))
+            setConfig(config)
         },
     })
 
@@ -154,10 +155,10 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             const autoLoad = req.body.autoLoad
-            if (autoLoad !== undefined) {
-                await setAutoLoad(autoLoad)
-                return {success: true}
-            }
+            console.log(`Setting Auto Load: ${autoLoad}`)
+            const config = getConfig()
+            config.autoLoad = autoLoad
+            setConfig(config)
         },
     })
 }

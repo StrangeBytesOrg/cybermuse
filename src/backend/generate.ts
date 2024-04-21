@@ -1,5 +1,4 @@
 import path from 'node:path'
-import fs from 'node:fs'
 import {
     getLlama,
     LlamaCompletion,
@@ -12,26 +11,17 @@ import {
     type GbnfJsonSchema,
     LlamaGrammar,
 } from 'node-llama-cpp'
-import {app} from 'electron'
+import {getConfig, setConfig} from './config.js'
 
 let llama: Llama
 let model: LlamaModel
 let context: LlamaContext
-// let jsonContext: LlamaContext
 let completion: LlamaCompletion
-// let jsonCompletion: LlamaCompletion
 let currentModel: string = ''
 let modelLoaded = false
 
-// Create a local config file if it doesn't exist
-const configPath = path.resolve(app.getPath('userData'), 'config.json')
-if (!fs.existsSync(configPath)) {
-    fs.writeFileSync(configPath, JSON.stringify({modelDir: '', autoLoad: false, lastModel: ''}))
-}
-export const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
-console.log(`Config path: ${configPath}`)
-
 export const getStatus = () => {
+    const config = getConfig()
     return {
         modelLoaded,
         currentModel,
@@ -42,6 +32,7 @@ export const getStatus = () => {
 
 export const loadModel = async (modelName: string) => {
     console.log(`Loading Model: ${modelName}`)
+    const config = getConfig()
     const modelPath = path.resolve(config.modelDir, modelName)
     llama = await getLlama({
         gpu: false, // TODO Use config
@@ -56,7 +47,7 @@ export const loadModel = async (modelName: string) => {
     currentModel = modelName
     modelLoaded = true
     config.lastModel = modelName
-    fs.writeFileSync(configPath, JSON.stringify(config))
+    setConfig(config)
 
     console.log('Model Loaded')
     console.log(`Sequences Left: ${context.sequencesLeft}`)
@@ -74,21 +65,10 @@ export const detokenize = (tokens: Token[]) => {
     return model.detokenize(tokens)
 }
 
-export const setAutoLoad = async (autoLoad: boolean) => {
-    console.log(`Setting Auto Load: ${autoLoad}`)
-    config.autoLoad = autoLoad
-    fs.writeFileSync(configPath, JSON.stringify(config))
-}
-
 export const getGrammar = (gbnfString: string) => {
     return new LlamaGrammar({llama, grammar: gbnfString})
 }
 
 export const getJsonGrammar = (schema: GbnfJsonSchema) => {
     return new LlamaJsonSchemaGrammar(llama, schema)
-}
-
-if (config.autoLoad && config.lastModel) {
-    console.log('Auto Loading Last Model', config.lastModel)
-    loadModel(config.lastModel)
 }

@@ -316,47 +316,6 @@ export interface paths {
       };
     };
   };
-  "/api/get-settings": {
-    /** Get settings for prompting */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              name: string;
-              instruction: string;
-              promptTemplate: string;
-            };
-          };
-        };
-      };
-    };
-  };
-  "/api/set-settings": {
-    /** Set settings for prompting */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            instruction: string;
-            promptTemplate: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
-  };
   "/api/get-generate-presets": {
     /** Get settings for generating text */
     get: {
@@ -615,6 +574,47 @@ export interface paths {
               currentModel?: string;
               modelDir?: string;
               autoLoad: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/get-settings": {
+    /** Get settings for prompting */
+    get: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              name: string;
+              instruction: string;
+              promptTemplate: string;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/set-settings": {
+    /** Set settings for prompting */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            name: string;
+            instruction: string;
+            promptTemplate: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
             };
           };
         };
