@@ -43,6 +43,7 @@ export const promptSetting = sqliteTable('prompt_settings', {
     name: text('name').notNull(),
     instruction: text('instruction').notNull(),
     promptTemplate: text('prompt_template').notNull(),
+    active: integer('active', {mode: 'boolean'}).unique('active'),
 })
 
 export const generatePresets = sqliteTable('generate_presets', {

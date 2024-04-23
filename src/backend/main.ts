@@ -2,8 +2,8 @@ import path from 'node:path'
 import url from 'node:url'
 import {app, shell, BrowserWindow} from 'electron'
 // import sourcemapSupport from 'source-map-support'
-import {server} from './server.js'
 // sourcemapSupport.install()
+import {server} from './server.js'
 import {loadModel} from './generate.js'
 import {getConfig} from './config.js'
 

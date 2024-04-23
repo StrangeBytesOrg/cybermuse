@@ -580,7 +580,7 @@ export interface paths {
       };
     };
   };
-  "/api/get-settings": {
+  "/api/get-prompt-presets": {
     /** Get settings for prompting */
     get: {
       responses: {
@@ -588,24 +588,64 @@ export interface paths {
         200: {
           content: {
             "application/json": {
+                id: number;
+                name: string;
+                instruction: string;
+                promptTemplate: string;
+              }[];
+          };
+        };
+      };
+    };
+  };
+  "/api/create-prompt-preset": {
+    /** Create settings for prompting */
+    post: {
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              id: number;
               name: string;
-              instruction: string;
-              promptTemplate: string;
             };
           };
         };
       };
     };
   };
-  "/api/set-settings": {
+  "/api/set-prompt-preset": {
     /** Set settings for prompting */
     post: {
       requestBody: {
         content: {
           "application/json": {
+            id: number;
             name: string;
             instruction: string;
             promptTemplate: string;
+          };
+        };
+      };
+      responses: {
+        /** @description Default Response */
+        200: {
+          content: {
+            "application/json": {
+              success: boolean;
+            };
+          };
+        };
+      };
+    };
+  };
+  "/api/set-active-prompt-preset": {
+    /** Set active prompt preset */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            id: number;
           };
         };
       };

@@ -3,13 +3,13 @@ import {
     getLlama,
     LlamaCompletion,
     LlamaJsonSchemaGrammar,
+    LlamaGrammar,
     type Llama,
     type LlamaModel,
     type LlamaContext,
     type LlamaCompletionGenerationOptions,
     type Token,
     type GbnfJsonSchema,
-    LlamaGrammar,
 } from 'node-llama-cpp'
 import {getConfig, setConfig} from './config.js'
 
@@ -56,8 +56,11 @@ export const loadModel = async (modelName: string) => {
 
 export const generate = async (prompt: string, params: LlamaCompletionGenerationOptions) => {
     // Tokenize first so that special tokens are handled correctly
+    const startTime = performance.now()
     const tokens = model.tokenize(prompt, true)
     // console.log(tokens)
+    const timeTaken = performance.now() - startTime
+    console.log(`Tokenization time: ${timeTaken.toFixed(2)}ms`)
     return await completion.generateCompletion(tokens, params)
 }
 

@@ -4,7 +4,7 @@ import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, chat, message, generatePresets, promptSetting} from '../db.js'
-import {generate, detokenize, getJsonGrammar} from '../generate.js'
+import {generate, detokenize, getJsonGrammar, getGrammar} from '../generate.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -77,11 +77,17 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 with: {character: true},
             })
             // console.log(previousMessages)
+            previousMessages.forEach((message) => {
+                if (message.character?.type === 'user') {
+                    message.role = 'user'
+                } else if (message.character?.type === 'character') {
+                    message.role = 'assistant'
+                }
+            })
 
-            const promptSettings = await db.query.promptSetting.findFirst({where: eq(promptSetting.id, 1)})
+            const promptSettings = await db.query.promptSetting.findFirst({where: eq(promptSetting.active, true)})
             const generationSettings = await db.query.generatePresets.findFirst({where: eq(generatePresets.id, 1)})
 
-            // TODO implement character descriptions
             let prompt = ''
             try {
                 // Parse character descriptions
@@ -111,13 +117,18 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             console.log('prompt:', prompt)
 
             console.log('Getting response character')
-            const gram = getJsonGrammar({enum: notUserCharacters.map(({character}) => character.name)})
-            const wat = await generate(prompt, {
-                grammar: gram,
-            })
-            const pickedCharacter = JSON.parse(wat)
+            const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
+            const gbnfNameString = characterNames.join(' | ')
+            const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
 
-            console.log('Decider Response:', wat)
+            const pickedCharacter = await generate(prompt, {
+                grammar: gram,
+                // onToken: (token) => {
+                //     // TODO strip special tokens, especially end token
+                // },
+            })
+
+            console.log('Decider Response:', pickedCharacter)
             const chosenCharacter = notUserCharacters.find(({character}) => character.name === pickedCharacter)
             console.log('Chosen Character:', chosenCharacter)
 
@@ -145,6 +156,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                     const text = detokenize(token)
                     console.log(`Token: ${token}, text: ${text}`)
                     if (text === '<|im_end|>') {
+                        console.log('Got end token')
                         return
                     }
                     bufferedResponse += text

@@ -65,14 +65,11 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                 req.socket.removeAllListeners('close')
                 req.socket.destroy()
             } catch (err) {
-                switch (err.name) {
-                    case 'AbortError':
-                        reply.raw.end('event: final\ndata: {text: "Aborted"}\n\n')
-                        break
-                    default:
-                        console.log('Unknown error:', err)
-                        reply.raw.end('event: final\ndata: {text: "Error"}\n\n')
-                        break
+                if (err instanceof DOMException && err.name === 'AbortError') {
+                    reply.raw.end('event: final\ndata: {text: "Aborted"}\n\n')
+                } else {
+                    console.log('Unknown error:', err)
+                    reply.raw.end('event: final\ndata: {text: "Error"}\n\n')
                 }
             }
         },

@@ -1,5 +1,4 @@
 node_modules
-pnpm-lock.yaml
 
 # Github workflows
 .github/workflows/*.yml

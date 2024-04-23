@@ -5,14 +5,13 @@ import {client} from '../api-client'
 import {Template} from '@huggingface/jinja'
 
 const toast = useToast()
+const selectedPreset = ref()
 const presetName = ref('')
 const instruction = ref('')
 const promptTemplate = ref('')
 
-const {data} = await client.GET('/api/get-settings')
-instruction.value = data?.instruction || ''
-promptTemplate.value = data?.promptTemplate || ''
-presetName.value = data?.name || ''
+const {data} = await client.GET('/api/get-prompt-presets')
+const presets = data || []
 
 // Some sample data for the example output
 const characters = [
@@ -20,14 +19,25 @@ const characters = [
     {name: 'Alice', description: '{{char}} is participant 1 in this conversation', type: 'character'},
 ]
 const exampleMessages = [
-    {text: 'How are you?', character: characters[0]},
-    {text: "I'm well, thanks", character: characters[1]},
-    {text: 'What are you up to?', character: characters[0]},
+    {text: 'How are you?', character: characters[0], role: 'user'},
+    {text: "I'm well, thanks", character: characters[1], role: 'assistant'},
+    {text: 'What are you up to?', character: characters[0], role: 'user'},
 ]
 
+const selectPreset = async () => {
+    await client.POST('/api/set-active-prompt-preset', {
+        body: {id: selectedPreset.value},
+    })
+    const preset = presets.find((preset) => preset.id === selectedPreset.value)
+    presetName.value = preset.name
+    instruction.value = preset.instruction
+    promptTemplate.value = preset.promptTemplate
+}
+
 const saveSettings = async () => {
-    const {error} = await client.POST('/api/set-settings', {
+    const {error} = await client.POST('/api/set-prompt-preset', {
         body: {
+            id: selectedPreset.value,
             name: presetName.value,
             instruction: instruction.value,
             promptTemplate: promptTemplate.value,
@@ -39,6 +49,13 @@ const saveSettings = async () => {
     } else {
         toast.success('Settings saved')
     }
+}
+
+const createPreset = async () => {
+    const {data, error} = await client.POST('/api/create-prompt-preset', {body: {}})
+    const newPresetId = data.id
+    const newPresetName = data.name
+    presets.push({id: newPresetId, name: newPresetName, instruction: '', promptTemplate: ''})
 }
 
 const exampleOutput = computed(() => {
@@ -78,14 +95,18 @@ onMounted(() => {
 
 <template>
     <div class="p-2">
-        <!-- <label class="form-control w-full max-w-xs">
+        <label class="form-control w-full max-w-xs">
             <div class="label">
                 <span class="label-text">Prompt Preset</span>
             </div>
-            <select class="select select-bordered">
-                <option value="custom">ChatML</option>
+            <select v-model="selectedPreset" @change="selectPreset" class="select select-bordered">
+                <option v-for="preset in presets" :value="preset.id" :key="preset.id">
+                    {{ preset.name }}
+                </option>
             </select>
-        </label> -->
+        </label>
+
+        <button @click="createPreset" class="btn btn-primary">Create Preset</button>
 
         <div class="bg-base-200 rounded-lg px-2 pb-3 mt-3">
             <label class="form-control w-full">
