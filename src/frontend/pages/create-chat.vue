@@ -21,8 +21,11 @@ const createChat = async () => {
         },
     })
     if (error) {
-        toast.error('Failed to create chat')
-        console.error(error)
+        if (error.message) {
+            toast.error(error.message)
+        } else {
+            toast.error('Failed to create chat')
+        }
         return
     }
     if (data && data.id) {

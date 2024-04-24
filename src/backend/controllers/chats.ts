@@ -24,6 +24,10 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             const {characters, userCharacter} = req.body
             const [newChat] = await db.insert(chat).values({userCharacter}).returning({id: chat.id})
 
+            if (characters.length === 0) {
+                throw new Error('At least one character is required')
+            }
+
             // Add chat characters
             // TODO change to a multi insert
             for (let i = 0; i < characters.length; i += 1) {
