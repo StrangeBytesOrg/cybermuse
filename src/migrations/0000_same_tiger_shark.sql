@@ -10,8 +10,8 @@ CREATE TABLE `character` (
 CREATE TABLE `chat` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`user_character` integer NOT NULL,
-	`created` integer DEFAULT 1713920379423 NOT NULL,
-	`updated` integer DEFAULT 1713920379423 NOT NULL,
+	`created` integer DEFAULT 1713926106992 NOT NULL,
+	`updated` integer DEFAULT 1713926106992 NOT NULL,
 	FOREIGN KEY (`user_character`) REFERENCES `character`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
@@ -46,8 +46,13 @@ CREATE TABLE `prompt_settings` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`instruction` text NOT NULL,
-	`prompt_template` text NOT NULL,
-	`active` integer
+	`prompt_template` text NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `active` ON `prompt_settings` (`active`);
+CREATE TABLE `user` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`generate_preset` integer,
+	`prompt_setting` integer,
+	FOREIGN KEY (`generate_preset`) REFERENCES `generate_presets`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`prompt_setting`) REFERENCES `prompt_settings`(`id`) ON UPDATE no action ON DELETE no action
+);

@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "f2b76201-e720-4083-922b-a85cb30ed0b3",
+  "id": "98406395-0d32-4f43-83a7-975d79933114",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -78,7 +78,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1713920379423
+          "default": 1713926106992
         },
         "updated": {
           "name": "updated",
@@ -86,7 +86,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1713920379423
+          "default": 1713926106992
         }
       },
       "indexes": {},
@@ -317,25 +317,67 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
         },
-        "active": {
-          "name": "active",
+        "generate_preset": {
+          "name": "generate_preset",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "prompt_setting": {
+          "name": "prompt_setting",
           "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
         }
       },
-      "indexes": {
-        "active": {
-          "name": "active",
-          "columns": [
-            "active"
+      "indexes": {},
+      "foreignKeys": {
+        "user_generate_preset_generate_presets_id_fk": {
+          "name": "user_generate_preset_generate_presets_id_fk",
+          "tableFrom": "user",
+          "tableTo": "generate_presets",
+          "columnsFrom": [
+            "generate_preset"
           ],
-          "isUnique": true
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "user_prompt_setting_prompt_settings_id_fk": {
+          "name": "user_prompt_setting_prompt_settings_id_fk",
+          "tableFrom": "user",
+          "tableTo": "prompt_settings",
+          "columnsFrom": [
+            "prompt_setting"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
         }
       },
-      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     }

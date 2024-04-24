@@ -544,11 +544,7 @@ export interface paths {
         content: {
           "application/json": {
             prompt: string;
-            maxTokens?: number;
-            temperature?: number;
-            minP?: number;
-            topP?: number;
-            topK?: number;
+            instruction?: string;
           };
         };
       };
@@ -588,11 +584,14 @@ export interface paths {
         200: {
           content: {
             "application/json": {
-                id: number;
-                name: string;
-                instruction: string;
-                promptTemplate: string;
-              }[];
+              activePresetId: number;
+              presets: {
+                  id: number;
+                  name: string;
+                  instruction: string;
+                  promptTemplate: string;
+                }[];
+            };
           };
         };
       };

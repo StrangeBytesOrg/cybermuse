@@ -5,13 +5,13 @@ import {client} from '../api-client'
 import {Template} from '@huggingface/jinja'
 
 const toast = useToast()
-const selectedPreset = ref()
-const presetName = ref('')
-const instruction = ref('')
-const promptTemplate = ref('')
 
 const {data} = await client.GET('/api/get-prompt-presets')
-const presets = data || []
+const presets = data?.presets || []
+const selectedPreset = ref(data?.activePresetId)
+const presetName = ref(presets.find((preset) => preset.id === selectedPreset.value)?.name || '')
+const instruction = ref(presets.find((preset) => preset.id === selectedPreset.value)?.instruction || '')
+const promptTemplate = ref(presets.find((preset) => preset.id === selectedPreset.value)?.promptTemplate || '')
 
 // Some sample data for the example output
 const characters = [
@@ -95,18 +95,20 @@ onMounted(() => {
 
 <template>
     <div class="p-2">
-        <label class="form-control w-full max-w-xs">
-            <div class="label">
-                <span class="label-text">Prompt Preset</span>
-            </div>
-            <select v-model="selectedPreset" @change="selectPreset" class="select select-bordered">
-                <option v-for="preset in presets" :value="preset.id" :key="preset.id">
-                    {{ preset.name }}
-                </option>
-            </select>
-        </label>
+        <div class="flex flex-row">
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Prompt Preset</span>
+                </div>
+                <select v-model="selectedPreset" @change="selectPreset" class="select select-bordered">
+                    <option v-for="preset in presets" :value="preset.id" :key="preset.id">
+                        {{ preset.name }}
+                    </option>
+                </select>
+            </label>
 
-        <button @click="createPreset" class="btn btn-primary">Create Preset</button>
+            <button @click="createPreset" class="btn btn-primary mt-auto ml-3">Create Preset</button>
+        </div>
 
         <div class="bg-base-200 rounded-lg px-2 pb-3 mt-3">
             <label class="form-control w-full">
@@ -145,6 +147,6 @@ onMounted(() => {
             <div class="text-sm text-gray-500" v-html="exampleOutput"></div>
         </div>
 
-        <button class="btn btn-primary mt-9" @click="saveSettings">Save</button>
+        <button class="btn btn-primary mt-4" @click="saveSettings">Save</button>
     </div>
 </template>

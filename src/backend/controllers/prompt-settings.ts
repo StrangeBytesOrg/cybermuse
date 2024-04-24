@@ -2,7 +2,7 @@ import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
-import {db, promptSetting} from '../db.js'
+import {db, promptSetting, user} from '../db.js'
 
 export const promptSettingsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -11,19 +11,31 @@ export const promptSettingsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             summary: 'Get settings for prompting',
             response: {
-                200: z.array(
-                    z.object({
-                        id: z.number(),
-                        name: z.string(),
-                        instruction: z.string(),
-                        promptTemplate: z.string(),
-                    }),
-                ),
+                200: z.object({
+                    activePresetId: z.number(),
+                    presets: z.array(
+                        z.object({
+                            id: z.number(),
+                            name: z.string(),
+                            instruction: z.string(),
+                            promptTemplate: z.string(),
+                        }),
+                    ),
+                }),
             },
         },
         handler: async () => {
             // const settings = await db.query.promptSetting.findFirst()
-            return await db.query.promptSetting.findMany()
+            const presets = await db.query.promptSetting.findMany()
+            const userSettings = await db.query.user.findFirst({
+                where: eq(user.id, 1),
+                with: {promptSetting: true},
+                columns: {promptSetting: true},
+            })
+            return {
+                activePresetId: userSettings?.promptSetting?.id,
+                presets,
+            }
         },
     })
 
@@ -106,8 +118,7 @@ export const promptSettingsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            await db.update(promptSetting).set({active: null})
-            await db.update(promptSetting).set({active: true}).where(eq(promptSetting.id, req.body.id))
+            await db.update(user).set({promptSetting: req.body.id}).where(eq(user.id, 1))
         },
     })
 }

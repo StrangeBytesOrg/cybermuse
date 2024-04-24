@@ -1,6 +1,9 @@
 import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
+import {eq} from 'drizzle-orm'
+import {Template} from '@huggingface/jinja'
+import {db, user} from '../db.js'
 import {generate, detokenize} from '../generate.js'
 
 export const generateRoutes: FastifyPluginAsync = async (fastify) => {
@@ -13,14 +16,7 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                 'Generates text and returns it using Server-Sent Events (SSE) to stream the response.\n```\nevent: message | final\ndata: {text}\n```\n\nThe `message` event is sent for each token generated and the `final` event is sent at the end with the full response.\n\nThis is a non standard SSE implementation in order to support sending a body and using POST requests so it will not work with the browser EventSource API.',
             body: z.object({
                 prompt: z.string(),
-                maxTokens: z.number().optional(),
-                temperature: z.number().optional(),
-                minP: z.number().optional(),
-                topP: z.number().optional(),
-                topK: z.number().optional(),
-                // repeatPenalty: // TODO More complex than simple number input. Needs further investigation.
-                // stop: z.array(z.string()).optional(),
-                // seed: z.number().optional(),
+                instruction: z.string().optional(),
             }),
             produces: ['text/event-stream'],
             response: {
@@ -42,15 +38,27 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                 'access-control-allow-origin': '*',
             })
 
-            const prompt = req.body.prompt
+            const userSettings = await db.query.user.findFirst({
+                where: eq(user.id, 1),
+                with: {promptSetting: true, generatePreset: true},
+                columns: {promptSetting: true, generatePreset: true},
+            })
+            const generationSettings = userSettings?.generatePreset
 
             try {
+                const promptTemplate = new Template(userSettings?.promptSetting?.promptTemplate || '')
+                const prompt = promptTemplate.render({
+                    instruction: req.body.instruction || '',
+                    messages: [{text: req.body.prompt, role: 'user'}],
+                })
+                console.log(prompt)
+
                 const fullResponse = await generate(prompt, {
-                    maxTokens: req.body.maxTokens,
-                    temperature: req.body.temperature,
-                    minP: req.body.minP,
-                    topP: req.body.topP,
-                    topK: req.body.topK,
+                    maxTokens: generationSettings?.maxTokens,
+                    temperature: generationSettings?.temperature,
+                    minP: generationSettings?.minP || undefined,
+                    topP: generationSettings?.topP || undefined,
+                    topK: generationSettings?.topK || undefined,
                     signal: controller.signal,
                     // repeatPenalty: req.body.repeatPenalty,
                     onToken: (token) => {

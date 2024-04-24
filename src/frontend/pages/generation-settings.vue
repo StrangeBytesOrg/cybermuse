@@ -78,7 +78,7 @@ const deletePreset = async () => {
         <div class="flex flex-row">
             <label class="form-control w-full">
                 <div class="label">
-                    <span class="label-text">Preset</span>
+                    <span class="label-text">Generation Preset</span>
                 </div>
                 <select v-model="selectedPresetId" class="select select-bordered">
                     <option v-for="preset in generationPresets" :value="preset.id" :key="preset.id">

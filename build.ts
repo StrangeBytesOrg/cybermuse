@@ -65,7 +65,7 @@ if (devMode) {
     let electronProcess = proc.spawn(electronPath, [distMain], {stdio: 'inherit'})
 
     // Update OpenAPI client
-    await tcpPortUsed.waitUntilUsed(31700)
+    await tcpPortUsed.waitUntilUsed(31700, 500, 5_000)
     await updateOpenAPI()
 
     console.log(`Watching ${sourceDir}`)

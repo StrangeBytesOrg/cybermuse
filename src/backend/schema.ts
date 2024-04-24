@@ -1,6 +1,12 @@
 import {sqliteTable, text, integer, real} from 'drizzle-orm/sqlite-core'
 import {relations} from 'drizzle-orm'
 
+export const user = sqliteTable('user', {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    generatePreset: integer('generate_preset').references(() => generatePresets.id),
+    promptSetting: integer('prompt_setting').references(() => promptSetting.id),
+})
+
 export const character = sqliteTable('character', {
     id: integer('id').primaryKey({autoIncrement: true}),
     name: text('name').notNull(),
@@ -43,7 +49,6 @@ export const promptSetting = sqliteTable('prompt_settings', {
     name: text('name').notNull(),
     instruction: text('instruction').notNull(),
     promptTemplate: text('prompt_template').notNull(),
-    active: integer('active', {mode: 'boolean'}).unique('active'),
 })
 
 export const generatePresets = sqliteTable('generate_presets', {
@@ -82,4 +87,9 @@ export const charactersToChatsRelations = relations(chatCharacters, ({one}) => (
         fields: [chatCharacters.characterId],
         references: [character.id],
     }),
+}))
+
+export const userSettings = relations(user, ({one}) => ({
+    promptSetting: one(promptSetting, {fields: [user.promptSetting], references: [promptSetting.id]}),
+    generatePreset: one(generatePresets, {fields: [user.generatePreset], references: [generatePresets.id]}),
 }))
