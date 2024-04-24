@@ -36,14 +36,14 @@ jobs:
       - name: Build Electron app with electron-builder
         run: npm run make
 
-      # - uses: ryand56/r2-upload-action@latest
-      #   with:
-      #     r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-      #     r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-      #     r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      #     r2-bucket: chat-app-releases
-      #     source-dir: ./out/*.zip
-      #     destination-dir: ''
+      - uses: ryand56/r2-upload-action@latest
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: chat-app-releases
+          source-dir: ./out/*.zip
+          destination-dir: ''
 
       # - name: Store Linux artifacts
       #   if: runner.os == 'Linux'
@@ -66,9 +66,9 @@ jobs:
       #     name: app-${{ runner.os }}-arm64
       #     path: out/mac-arm64
 
-      - name: Store Windows artifacts
-        if: runner.os == 'Windows'
-        uses: actions/upload-artifact@v4
-        with:
-          name: app-${{ runner.os }}-x64
-          path: out/win-unpacked
+      # - name: Store Windows artifacts
+      #   if: runner.os == 'Windows'
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: app-${{ runner.os }}-x64
+      #     path: out/win-unpacked

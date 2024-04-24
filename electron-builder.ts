@@ -24,10 +24,16 @@ const config: Configuration = {
         '!**/*.bin',
     ],
     linux: {
-        target: ['dir'],
+        target: ['zip'],
+        // target: ['dir'],
     },
     win: {
-        target: ['dir'],
+        target: ['zip'],
+        // target: ['dir'],
+    },
+    mac: {
+        target: ['zip'],
+        // target: ['dir'],
     },
     afterPack: async ({appOutDir, packager}) => {
         const {productFilename} = packager.info.appInfo
