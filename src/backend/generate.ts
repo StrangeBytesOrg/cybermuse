@@ -30,13 +30,17 @@ export const getStatus = () => {
     }
 }
 
+export const init = async () => {
+    llama = await getLlama({
+        gpu: false, // TODO Use config
+    })
+    console.log('Llama Initialized')
+}
+
 export const loadModel = async (modelName: string) => {
     console.log(`Loading Model: ${modelName}`)
     const config = getConfig()
     const modelPath = path.resolve(config.modelDir, modelName)
-    llama = await getLlama({
-        gpu: false, // TODO Use config
-    })
     model = await llama.loadModel({modelPath})
     context = await model.createContext({
         contextSize: 2048,

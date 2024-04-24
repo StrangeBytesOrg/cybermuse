@@ -15,7 +15,7 @@ const config: Configuration = {
             to: './',
         },
         {
-            from: './migrations/',
+            from: './src/migrations/',
             to: './migrations/',
         },
         // Remove unnecessary files

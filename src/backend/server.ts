@@ -3,6 +3,8 @@ import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import {serializerCompiler, validatorCompiler, jsonSchemaTransform} from 'fastify-type-provider-zod'
+import {getConfig} from './config.js'
+import {init, loadModel} from './generate.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
@@ -16,6 +18,12 @@ import {settingsRoutes} from './controllers/settings.js'
 import {initDb} from './init.js'
 
 await initDb()
+const config = getConfig()
+await init()
+
+if (config.autoLoad) {
+    await loadModel(config.lastModel)
+}
 
 export const server = Fastify({
     // logger: true,
@@ -58,3 +66,15 @@ await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generateRoutes, {prefix: '/api'})
 await server.register(settingsRoutes, {prefix: '/api'})
 await server.register(promptSettingsRoutes, {prefix: '/api'})
+
+server.listen({port: config.serverPort}, (error) => {
+    if (error) {
+        console.error(error)
+    }
+    console.log(`Server running on port ${config.serverPort}`)
+})
+
+process.on('SIGINT', () => {
+    server.close()
+    process.exit()
+})

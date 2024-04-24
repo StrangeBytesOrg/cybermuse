@@ -4,7 +4,7 @@ import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, chat, message, generatePresets, promptSetting} from '../db.js'
-import {generate, detokenize, getJsonGrammar, getGrammar} from '../generate.js'
+import {generate, detokenize, getGrammar} from '../generate.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({

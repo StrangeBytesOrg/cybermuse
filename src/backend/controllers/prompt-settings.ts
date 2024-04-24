@@ -107,8 +107,7 @@ export const promptSettingsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             await db.update(promptSetting).set({active: null})
-            const wat = await db.update(promptSetting).set({active: true}).where(eq(promptSetting.id, req.body.id))
-            console.log(wat)
+            await db.update(promptSetting).set({active: true}).where(eq(promptSetting.id, req.body.id))
         },
     })
 }

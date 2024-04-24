@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "sqlite",
-  "id": "ccf06dee-fe1d-4312-b515-a81d17ee9428",
+  "id": "f2b76201-e720-4083-922b-a85cb30ed0b3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -78,7 +78,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1713418193302
+          "default": 1713920379423
         },
         "updated": {
           "name": "updated",
@@ -86,7 +86,7 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
-          "default": 1713418193302
+          "default": 1713920379423
         }
       },
       "indexes": {},
@@ -317,9 +317,24 @@
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
+        },
+        "active": {
+          "name": "active",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         }
       },
-      "indexes": {},
+      "indexes": {
+        "active": {
+          "name": "active",
+          "columns": [
+            "active"
+          ],
+          "isUnique": true
+        }
+      },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}

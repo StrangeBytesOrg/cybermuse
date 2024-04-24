@@ -19,8 +19,8 @@ const popularModels = [
 const getModelInfo = async (repo: string) => {
     hfFiles.value = []
     try {
-        const wat = listFiles({repo})
-        for await (const file of wat) {
+        const files = listFiles({repo})
+        for await (const file of files) {
             if (file.path.endsWith('.gguf')) {
                 hfFiles.value.push({name: file.path, size: file.size})
             }
