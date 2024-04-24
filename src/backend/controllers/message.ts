@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, chat, message, generatePresets, promptSetting} from '../db.js'
+import {db, chat, message, user} from '../db.js'
 import {generate, detokenize, getGrammar} from '../generate.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
@@ -85,8 +85,16 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 }
             })
 
-            const promptSettings = await db.query.promptSetting.findFirst({where: eq(promptSetting.active, true)})
-            const generationSettings = await db.query.generatePresets.findFirst({where: eq(generatePresets.id, 1)})
+            const userSettings = await db.query.user.findFirst({
+                where: eq(user.id, 1),
+                with: {promptSetting: true, generatePreset: true},
+                columns: {promptSetting: true, generatePreset: true},
+            })
+            if (!userSettings) {
+                throw new Error('Prompt settings not set')
+            }
+            const promptSettings = userSettings.promptSetting
+            const generationSettings = userSettings.generatePreset
 
             let prompt = ''
             try {
