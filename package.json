@@ -11,7 +11,7 @@
         "build": "npm run build:frontend && npm run build:backend",
         "build:frontend": "vite build",
         "build:backend": "node --import tsx build.ts",
-        "make": "electron-builder",
+        "make": "node --import tsx build-electron.ts",
         "update-db": "drizzle-kit push:sqlite",
         "eb": "electron-rebuild"
     },
