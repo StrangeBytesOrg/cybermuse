@@ -11,7 +11,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-          # ubuntu-latest,
+          ubuntu-latest,
           windows-latest,
           # macos-latest
         ]
@@ -36,14 +36,22 @@ jobs:
       - name: Build Electron app with electron-builder
         run: npm run make
 
-      - uses: ryand56/r2-upload-action@latest
+      - name: Setup RClone
+        uses: AnimMouse/setup-rclone@v1
         with:
-          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
-          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
-          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          r2-bucket: chat-app-releases
-          source-dir: ./out/*.zip
-          destination-dir: ''
+          disable_base64: true
+          rclone_config: |
+            [r2]
+            type = s3
+            provider = Clouflare
+            access_key_id = ${{ secrets.R2_ACCESS_KEY_ID }}
+            secret_access_key = ${{ secrets.R2_SECRET_ACCESS_KEY }}
+            endpoint = https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+            acl = private
+            no_check_bucket = true
+
+      - name: Push to R2
+        run: rclone copy out/*.zip r2:chat-app-releases 
 
       # - name: Store Linux artifacts
       #   if: runner.os == 'Linux'

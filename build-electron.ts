@@ -23,6 +23,7 @@ const artifacts = await builder.build({
         },
         win: {
             target: ['zip'],
+            // target: ['dir'],
         },
         mac: {
             target: [
