@@ -5,6 +5,7 @@ import builder from 'electron-builder'
 
 const artifacts = await builder.build({
     config: {
+        buildNumber: process.env.BUILD_NUMBER || 'manual',
         appId: 'chat-app',
         directories: {
             output: 'out',
@@ -23,7 +24,6 @@ const artifacts = await builder.build({
         },
         win: {
             target: ['zip'],
-            // target: ['dir'],
         },
         mac: {
             target: [
@@ -31,10 +31,7 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['arm64']},
             ],
         },
-        // buildVersion: 'ci',
-        // buildNumber: 'ci',
-        // artifactName: '${productName}-ci-${platform}.${ext}',
-        artifactName: '${productName}-${os}-${arch}.${ext}',
+        artifactName: '${productName}-${os}-${arch}-${buildNumber}.${ext}',
         // TODO implement fuse flipping correctly for all platforms
         // afterPack: async ({appOutDir, packager}) => {
         //     const {productFilename} = packager.info.appInfo

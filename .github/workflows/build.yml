@@ -1,7 +1,10 @@
 name: App Build
 
 on:
-    workflow_dispatch:
+  workflow_dispatch:
+  push:
+    branches:
+      - ci
 
 jobs:
   build:
@@ -11,9 +14,9 @@ jobs:
       fail-fast: false
       matrix:
         os: [
-          ubuntu-latest,
+          ubuntu-20.04, # ubuntu-latest currently has an issue with installing node-llama-cpp
           windows-latest,
-          # macos-latest
+          # macos-latest,
         ]
 
     steps:
@@ -35,6 +38,8 @@ jobs:
 
       - name: Build Electron app with electron-builder
         run: npm run make
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
 
       - name: Setup RClone
         uses: AnimMouse/setup-rclone@v1
@@ -43,15 +48,15 @@ jobs:
           rclone_config: |
             [r2]
             type = s3
-            provider = Clouflare
+            provider = Cloudflare
             access_key_id = ${{ secrets.R2_ACCESS_KEY_ID }}
             secret_access_key = ${{ secrets.R2_SECRET_ACCESS_KEY }}
             endpoint = https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
             acl = private
             no_check_bucket = true
 
-      - name: Push to R2
-        run: rclone copy out/*.zip r2:chat-app-releases 
+      - name: Upload files to R2
+        run: 'rclone copy --include "*.zip" out r2:chat-app-releases'
 
       # - name: Store Linux artifacts
       #   if: runner.os == 'Linux'
