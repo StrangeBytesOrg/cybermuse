@@ -3,6 +3,8 @@ import builder from 'electron-builder'
 // import {Configuration} from 'electron-builder'
 // import {flipFuses, FuseV1Options, FuseVersion} from '@electron/fuses'
 
+const dev = process.argv.includes('--dev')
+
 const artifacts = await builder.build({
     config: {
         buildNumber: process.env.BUILD_NUMBER || 'manual',
@@ -20,7 +22,7 @@ const artifacts = await builder.build({
             '!**/*.bin',
         ],
         linux: {
-            target: [{target: 'zip', arch: 'x64'}],
+            target: dev ? [{target: 'zip', arch: 'x64'}] : 'dir',
         },
         win: {
             target: ['zip'],
