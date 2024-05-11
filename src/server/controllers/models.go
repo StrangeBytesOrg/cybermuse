@@ -70,10 +70,18 @@ func SetModelPath(ctx context.Context, input *struct {
 		fmt.Println("Model path does not exist:", input.Body.ModelPath)
 		return nil, huma.Error400BadRequest("Model path does not exist")
 	}
+	// Check if the path has write permissions
+	file, err := os.CreateTemp(input.Body.ModelPath, "test")
+	if err != nil {
+		fmt.Println("Model path is not writable:", input.Body.ModelPath)
+		return nil, huma.Error400BadRequest("Model path is not writable")
+	}
+	defer os.Remove(file.Name())
+	defer file.Close()
 
 	appConfig := config.GetConfig()
 	appConfig.ModelsPath = input.Body.ModelPath
-	err := config.SaveConfigToFile(appConfig)
+	err = config.SaveConfigToFile(appConfig)
 	if err != nil {
 		return nil, err
 	}

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {ref, onErrorCaptured} from 'vue'
 import {RouterLink, RouterView} from 'vue-router'
-// import Connection from './components/connection.vue'
 import {useThemeStore} from './store/'
 import './styles/global.css'
 import './styles/tailwind.css'
