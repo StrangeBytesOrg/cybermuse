@@ -11,7 +11,9 @@ import ThemeSettings from './pages/theme-settings.vue'
 import Templates from './pages/templates.vue'
 import Template from './pages/template.vue'
 import CreateTemplate from './pages/create-template.vue'
-import GenerationSettings from './pages/generation-settings.vue'
+import Presets from './pages/presets.vue'
+import Preset from './pages/preset.vue'
+import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
 import DownloadModels from './pages/download-models.vue'
 import Instruct from './pages/instruct.vue'
@@ -80,9 +82,19 @@ export default createRouter({
             component: Template,
         },
         {
-            path: '/generation-settings',
-            name: 'generation-settings',
-            component: GenerationSettings,
+            path: '/presets',
+            name: 'presets',
+            component: Presets,
+        },
+        {
+            path: '/preset/:id',
+            name: 'preset',
+            component: Preset,
+        },
+        {
+            path: '/create-preset',
+            name: 'create-preset',
+            component: CreatePreset,
         },
         {
             path: '/backend-settings',

@@ -213,6 +213,49 @@ func InitRouter() *chi.Mux {
 		OperationID: "ParseTemplate",
 	}, controllers.ParseTemplate)
 
+	// Generate Presets
+	huma.Register(api, huma.Operation{
+		Path:        "/presets",
+		Method:      "GET",
+		Tags:        []string{"presets"},
+		OperationID: "GetAllPresets",
+	}, controllers.GetAllPresets)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/preset/{id}",
+		Method:      "GET",
+		Tags:        []string{"presets"},
+		OperationID: "GetPreset",
+	}, controllers.GetPreset)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/create-preset",
+		Method:      "POST",
+		Tags:        []string{"presets"},
+		OperationID: "CreatePreset",
+	}, controllers.CreatePreset)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/update-preset/{id}",
+		Method:      "POST",
+		Tags:        []string{"presets"},
+		OperationID: "UpdatePreset",
+	}, controllers.UpdatePreset)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/delete-preset/{id}",
+		Method:      "POST",
+		Tags:        []string{"presets"},
+		OperationID: "DeletePreset",
+	}, controllers.DeletePreset)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-active-preset/{id}",
+		Method:      "POST",
+		Tags:        []string{"presets"},
+		OperationID: "SetActivePreset",
+	}, controllers.SetActivePreset)
+
 	// Generation
 	sse.Register(api, huma.Operation{
 		Path:        "/generate",

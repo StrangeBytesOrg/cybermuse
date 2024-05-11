@@ -55,6 +55,17 @@ type PromptTemplate struct {
 	Active  bool   `bun:",notnull" json:"active"`
 }
 
+type GeneratePreset struct {
+	Id          int64   `bun:",pk,autoincrement" json:"id,omitempty"`
+	Name        string  `bun:",notnull,nullzero" json:"name"`
+	Temperature float32 `bun:",notnull" json:"temperature"`
+	MaxTokens   int     `bun:",notnull" json:"maxTokens"`
+	MinP        float32 `bun:",notnull" json:"minP"`
+	TopP        float32 `bun:",notnull" json:"topP"`
+	TopK        float32 `bun:",notnull" json:"topK"`
+	Active      bool    `bun:",notnull" json:"active"`
+}
+
 func InitDB() error {
 	appDataDir := config.GetDataPath()
 
@@ -80,6 +91,7 @@ func InitDB() error {
 		DB.ResetModel(ctx, (*ChatCharacter)(nil))
 		DB.ResetModel(ctx, (*Message)(nil))
 		DB.ResetModel(ctx, (*PromptTemplate)(nil))
+		DB.ResetModel(ctx, (*GeneratePreset)(nil))
 
 		// Create a default user character
 		DB.NewInsert().Model(&Character{Name: "User", Description: "A user", Type: "user"}).Exec(ctx)
@@ -104,6 +116,9 @@ func InitDB() error {
 		DB.NewInsert().Model(&PromptTemplate{Name: "Phi3", Content: phi3TemplateString}).Exec(ctx)
 		DB.NewInsert().Model(&PromptTemplate{Name: "ChatML Roleplay", Content: chatMlRoleplay}).Exec(ctx)
 		DB.NewInsert().Model(&PromptTemplate{Name: "Llama3 Roleplay", Content: llama3Roleplay}).Exec(ctx)
+
+		// Create a default Generate Preset
+		DB.NewInsert().Model(&GeneratePreset{Name: "Default", MaxTokens: 32, Temperature: 0.5, MinP: 0, TopP: 0, TopK: 0, Active: true}).Exec(ctx)
 
 		// Add a default chat message
 		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 1, Text: "Hello.", Generated: false}).Exec(ctx)

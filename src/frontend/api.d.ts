@@ -31,6 +31,9 @@ export interface paths {
   "/create-message": {
     post: operations["CreateMessage"];
   };
+  "/create-preset": {
+    post: operations["CreatePreset"];
+  };
   "/create-template": {
     post: operations["CreateTemplate"];
   };
@@ -42,6 +45,9 @@ export interface paths {
   };
   "/delete-message/{id}": {
     post: operations["DeleteMessage"];
+  };
+  "/delete-preset/{id}": {
+    post: operations["DeletePreset"];
   };
   "/delete-template/{id}": {
     post: operations["DeleteTemplate"];
@@ -60,6 +66,15 @@ export interface paths {
   };
   "/parse-template": {
     post: operations["ParseTemplate"];
+  };
+  "/preset/{id}": {
+    get: operations["GetPreset"];
+  };
+  "/presets": {
+    get: operations["GetAllPresets"];
+  };
+  "/set-active-preset/{id}": {
+    post: operations["SetActivePreset"];
   };
   "/set-active-template/{id}": {
     post: operations["SetActive"];
@@ -90,6 +105,9 @@ export interface paths {
   };
   "/update-message/{id}": {
     post: operations["UpdateMessage"];
+  };
+  "/update-preset/{id}": {
+    post: operations["UpdatePreset"];
   };
   "/update-template/{id}": {
     post: operations["UpdateTemplate"];
@@ -175,6 +193,25 @@ export interface components {
       /** Format: int64 */
       messageId: number;
     };
+    CreatePresetRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      name: string;
+      /** Format: float */
+      temperature: number;
+    };
+    CreatePresetResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      id: number;
+    };
     CreateTemplateRequest: {
       /**
        * Format: uri
@@ -207,8 +244,8 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      path?: string;
-      repoId?: string;
+      path: string;
+      repoId: string;
     };
     ErrorDetail: {
       /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
@@ -274,6 +311,22 @@ export interface components {
     GenerateMessageResponse: {
       text: string;
     };
+    GeneratePreset: {
+      active: boolean;
+      /** Format: int64 */
+      id?: number;
+      /** Format: int64 */
+      maxTokens: number;
+      /** Format: float */
+      minP: number;
+      name: string;
+      /** Format: float */
+      temperature: number;
+      /** Format: float */
+      topK: number;
+      /** Format: float */
+      topP: number;
+    };
     GenerateRequest: {
       /**
        * Format: uri
@@ -301,6 +354,14 @@ export interface components {
       $schema?: string;
       chats: components["schemas"]["Chat"][];
     };
+    GetAllPresetsResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      presets: components["schemas"]["GeneratePreset"][];
+    };
     GetAllTemplatesResponseBody: {
       /**
        * Format: uri
@@ -324,6 +385,14 @@ export interface components {
        */
       $schema?: string;
       chat: components["schemas"]["Chat"];
+    };
+    GetPresetResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      preset: components["schemas"]["GeneratePreset"];
     };
     GetTemplateResponseBody: {
       /**
@@ -435,6 +504,16 @@ export interface components {
        */
       $schema?: string;
       text: string;
+    };
+    UpdatePresetRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      name: string;
+      /** Format: float */
+      temperature: number;
     };
     UpdateTemplateRequest: {
       /**
@@ -598,6 +677,27 @@ export interface operations {
       };
     };
   };
+  CreatePreset: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreatePresetRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreatePresetResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
   CreateTemplate: {
     requestBody: {
       content: {
@@ -664,6 +764,25 @@ export interface operations {
       path: {
         /** @description Message ID */
         id: number;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DeletePreset: {
+    parameters: {
+      path: {
+        id: string;
       };
     };
     responses: {
@@ -898,6 +1017,62 @@ export interface operations {
       };
     };
   };
+  GetPreset: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetPresetResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetAllPresets: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetAllPresetsResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SetActivePreset: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
   SetActive: {
     parameters: {
       path: {
@@ -1078,6 +1253,30 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["UpdateMessageRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  UpdatePreset: {
+    parameters: {
+      path: {
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdatePresetRequest"];
       };
     };
     responses: {

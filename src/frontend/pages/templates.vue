@@ -32,7 +32,7 @@ const setActiveTemplate = async () => {
         <div class="flex flex-row">
             <div class="flex flex-col">
                 <h2 class="text-md">Active Template</h2>
-                <select v-model="selectedTemplate" @change="setActiveTemplate" class="select select-bordered">
+                <select v-model="selectedTemplate" @change="setActiveTemplate" class="select select-bordered min-w-60">
                     <option v-for="template in templates" :key="template.id" :value="template.id">
                         {{ template.name }}
                     </option>

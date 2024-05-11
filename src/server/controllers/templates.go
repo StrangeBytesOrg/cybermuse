@@ -92,7 +92,12 @@ func UpdateTemplate(ctx context.Context, input *struct {
 	}
 
 	template := &db.PromptTemplate{}
-	_, err = db.DB.NewUpdate().Model(template).Set("name = ?", input.Body.Name).Set("content = ?", input.Body.Content).Where("id = ?", input.ID).Exec(ctx)
+	_, err = db.DB.NewUpdate().
+		Model(template).
+		Set("name = ?", input.Body.Name).
+		Set("content = ?", input.Body.Content).
+		Where("id = ?", input.ID).
+		Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -146,13 +151,13 @@ func SetActive(ctx context.Context, input *struct {
 	ID string `path:"id" doc:"Template ID"`
 }) (*struct{}, error) {
 	// Set existing active template to false
-	_, err := db.DB.NewUpdate().Model(&db.PromptTemplate{}).Set("active = ?", false).Where("active = ?", true).Exec(ctx)
+	_, err := db.DB.NewUpdate().Model(&db.PromptTemplate{}).Set("active = false").Where("active = true").Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
 	// Set new active template
 	template := &db.PromptTemplate{}
-	_, err = db.DB.NewUpdate().Model(template).Set("active = ?", true).Where("id = ?", input.ID).Exec(ctx)
+	_, err = db.DB.NewUpdate().Model(template).Set("active = true").Where("id = ?", input.ID).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

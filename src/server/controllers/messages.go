@@ -133,6 +133,14 @@ func GenerateMessage(ctx context.Context, input *struct {
 	characterString := strings.Join(characterNames, " | ")
 	gbnf := "root ::= (" + characterString + ")"
 
+	// Get generation settings
+	preset := &db.GeneratePreset{}
+	err = db.DB.NewSelect().Model(preset).Where("active = true").Scan(ctx)
+	if err != nil {
+		send.Data(&GenerateMessageErrorResponse{Error: "Error getting generation preset"})
+		return
+	}
+
 	// Send request to generation server to get the next respondent
 	payload := map[string]any{
 		"prompt":       prompt,
@@ -212,9 +220,13 @@ func GenerateMessage(ctx context.Context, input *struct {
 
 	// Generate the message content
 	payload = map[string]any{
-		"prompt":       prompt,
-		"n_predict":    64,
 		"stream":       true,
+		"prompt":       prompt,
+		"n_predict":    preset.MaxTokens,
+		"temperature":  preset.Temperature,
+		"top_p":        preset.TopP,
+		"top_k":        preset.TopK,
+		"min_p":        preset.MinP,
 		"cache_prompt": true,
 	}
 	jsonPayload, err = json.Marshal(payload)

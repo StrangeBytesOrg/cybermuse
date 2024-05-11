@@ -58,9 +58,7 @@ const toggleMenu = () => {
                 <router-link to="/templates" class="font-bold px-2" active-class="active">Prompt Templates</router-link>
             </li>
             <li>
-                <router-link to="/generation-settings" class="font-bold px-2" active-class="active">
-                    Generation Settings
-                </router-link>
+                <router-link to="/presets" class="font-bold px-2" active-class="active">Generation Presets</router-link>
             </li>
             <li>
                 <router-link to="/backend-settings" class="font-bold px-2" active-class="active">Models</router-link>
