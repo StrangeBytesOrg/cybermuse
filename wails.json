@@ -1,0 +1,16 @@
+{
+    "$schema": "https://wails.io/schemas/config.v2.json",
+    "name": "chat",
+    "outputfilename": "chat",
+    "frontend:install": "npm install",
+    "frontend:build": "npm run build",
+    "frontend:dev:watcher": "npm run dev",
+    "frontend:dev:serverUrl": "auto",
+    "frontend:dir": "./",
+    "wailsjsdir": "./src/",
+    "appargs": "-loglevel Info",
+    "author": {
+        "name": "Strange Bytes",
+        "email": "dev@strangebytes.org"
+    }
+}

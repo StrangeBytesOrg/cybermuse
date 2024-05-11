@@ -8,75 +8,91 @@ const toast = useToast()
 type models = {name: string; size: number}[]
 const models = ref<models>([])
 const currentModel = ref('')
+const selectModel = ref('')
 const modelLoaded = ref(false)
-const modelFolder = ref('')
+const modelPath = ref('')
 const autoLoad = ref(false)
 const modelLoadPending = ref(false)
-// const downloadUrl = ref('')
-// const searchQuery = ref('')
-// const searchResults = ref([])
 
 const getStatus = async () => {
-    const {data, error} = await client.GET('/api/status')
+    const {data, error} = await client.GET('/status')
     if (error) {
         console.error(error)
+        toast.error('Error getting server status')
     } else {
-        modelLoaded.value = data.modelLoaded
+        modelLoaded.value = data.loaded
         currentModel.value = data.currentModel
-        modelFolder.value = data.modelDir
+        modelPath.value = data.modelPath
         autoLoad.value = data.autoLoad
+        selectModel.value = data.currentModel
     }
 }
 
 const getModels = async () => {
-    const {data, error} = await client.GET('/api/models')
+    models.value = []
+    const {data, error} = await client.GET('/models')
     if (error) {
         // TODO properly handle error
+        toast.error('Failed to get models')
     } else {
-        models.value = data
+        models.value = data.models
+        modelPath.value = data.modelPath
     }
 }
 
-const loadModel = async (modelName: string) => {
+const loadModel = async () => {
     modelLoadPending.value = true
-    const {error} = await client.POST('/api/load-model', {
+    const {error} = await client.POST('/start-server', {
         body: {
-            modelName,
+            modelFile: selectModel.value,
         },
     })
     if (error) {
-        toast.error('Failed to load model')
+        toast.error(`Failed to load model\n${error.detail}`)
         console.error(error)
     } else {
         toast.success('Model loaded')
-        currentModel.value = modelName
+        currentModel.value = selectModel.value
     }
     modelLoadPending.value = false
 }
 
+const unloadModel = async () => {
+    const {error} = await client.POST('/stop-server')
+    if (error) {
+        toast.error(`Failed to unload model\n${error.detail}`)
+    } else {
+        toast.success('Model unloaded')
+        currentModel.value = ''
+        selectModel.value = ''
+    }
+}
+
 const setModelDir = async () => {
-    const {error, data} = await client.POST('/api/set-model-dir', {
+    const {error} = await client.POST('/set-model-path', {
         body: {
-            dir: modelFolder.value,
+            modelPath: modelPath.value,
         },
     })
     if (error) {
-        toast.error(error.message)
+        console.error(error)
+        toast.error(error.detail)
     } else {
+        toast.success('Model path updated')
         await getModels()
     }
 }
 
 const setAutoLoad = async () => {
-    const {error} = await client.POST('/api/set-auto-load', {
+    const {error} = await client.POST('/set-autoload', {
         body: {
             autoLoad: autoLoad.value,
         },
     })
     if (error) {
-        // TODO handle error
+        toast.error(`Failed to update autoload\n${error.detail}`)
     } else {
-        console.log('Updated autoload')
+        toast.success('Autoload updated')
     }
 }
 
@@ -87,13 +103,24 @@ await getModels()
 <template>
     <div class="p-3">
         <div class="flex flex-col">
-            <h2 class="text-lg">Currently Loaded Model: {{ currentModel ? currentModel : 'none' }}</h2>
-            <!-- <p>Loaded: {{ modelLoaded }}</p> -->
+            <h2 class="text-md mt-3">Model Folder</h2>
+            <div class="flex flex-row mt-1">
+                <input type="text" class="input input-bordered max-w-96 flex-grow" v-model="modelPath" />
+                <button class="btn btn-primary ml-2" @click="setModelDir">Update</button>
+            </div>
 
-            <h2 class="text-lg mt-3">Model Folder</h2>
-            <div class="flex flex-row">
-                <input type="text" class="input input-bordered" v-model="modelFolder" />
-                <button class="btn btn-primary ml-1" @click="setModelDir">Update</button>
+            <h2 class="text-md mt-3">Model</h2>
+            <div class="flex flex-row mt-1">
+                <select v-model="selectModel" class="select select-bordered max-w-96 flex-grow">
+                    <option v-for="model in models" :key="model.name">
+                        {{ model.name }}
+                    </option>
+                    <option v-if="!models.length" disabled>No models found</option>
+                </select>
+
+                <button @click="getModels" class="btn btn-primary ml-2">Refresh</button>
+                <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Load</button>
+                <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Unload</button>
             </div>
 
             <div class="form-control w-52 mt-3">
@@ -102,31 +129,6 @@ await getModels()
                     <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
                 </label>
             </div>
-
-            <div class="flex flex-row">
-                <h2 class="text-lg mt-3 w-full">Models</h2>
-                <button class="btn btn-primary btn-sm btn-square mt-auto" @click="getModels">
-                    <!-- prettier-ignore -->
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
-                </button>
-            </div>
-            <div class="divider mt-0 mb-1"></div>
-            <template v-if="models.length">
-                <div v-for="model in models" :key="model.name" class="flex flex-row rounded-lg bg-base-200 p-3 mb-3">
-                    <div class="flex flex-col">
-                        <p>{{ model.name }}</p>
-                    </div>
-                    <button
-                        @click="loadModel(model.name)"
-                        class="btn btn-primary ml-auto"
-                        :disabled="modelLoadPending || model.name === currentModel">
-                        Load
-                    </button>
-                </div>
-            </template>
-            <template v-else>
-                <p>No models found</p>
-            </template>
         </div>
     </div>
 </template>

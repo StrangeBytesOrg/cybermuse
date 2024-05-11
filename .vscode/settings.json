@@ -1,16 +1,19 @@
 {
     "cSpell.words": [
-        "pinia",
-        "toastification",
-        "mirostat",
-        "dotenv",
-        "tailwindcss",
         "daisyui",
-        "llamacpp",
-        "snarkdown",
-        "openapi",
         "detokenize",
-        "huggingface"
+        "dotenv",
+        "huggingface",
+        "huma",
+        "humachi",
+        "llamacpp",
+        "mirostat",
+        "openapi",
+        "pinia",
+        "roleplay",
+        "snarkdown",
+        "tailwindcss",
+        "toastification"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

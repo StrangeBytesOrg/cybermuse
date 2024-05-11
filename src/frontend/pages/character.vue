@@ -9,7 +9,7 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 const characterId = Number(route.query.id)
-const {data} = await client.GET(`/api/character/{id}`, {
+const {data} = await client.GET(`/character/{id}`, {
     params: {path: {id: String(characterId)}},
 })
 
@@ -19,18 +19,16 @@ if (!data) {
     }, 500)
     throw new Error('Character not found')
 }
-const character = reactive(data)
-console.log(data)
+const character = reactive(data.character)
 
 const updateCharacter = async () => {
-    console.log(character)
-    await client.POST('/api/update-character/', {
+    await client.POST('/update-character/{id}', {
+        params: {path: {id: String(characterId)}},
         body: {
-            id: characterId,
             name: character.name,
             description: character.description,
-            firstMessage: character.firstMessage,
-            image: character.image,
+            firstMessage: character.firstMessage || undefined,
+            image: character.image || undefined,
             type: character.type,
         },
     })
@@ -42,12 +40,12 @@ const removeImage = () => {
 }
 
 const deleteCharacter = async () => {
-    const {error} = await client.POST('/api/delete-character/', {
-        body: {id: characterId},
+    const {error} = await client.POST('/delete-character/{id}', {
+        params: {path: {id: String(characterId)}},
     })
     if (error) {
         console.error(error)
-        toast.error(error.message)
+        toast.error(error.detail)
     } else {
         await router.push('/characters')
     }
@@ -79,7 +77,6 @@ const deleteCharacter = async () => {
             <option value="character">Character</option>
             <option value="user">User</option>
         </select>
-
         <!-- Avatar -->
         <div class="flex flex-row mt-5">
             <div class="avatar">

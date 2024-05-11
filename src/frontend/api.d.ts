@@ -4,661 +4,95 @@
  */
 
 
+/** OneOf type helpers */
+type Without<T, U> = { [P in Exclude<keyof T, keyof U>]?: never };
+type XOR<T, U> = (T | U) extends object ? (Without<T, U> & U) | (Without<U, T> & T) : T | U;
+type OneOf<T extends any[]> = T extends [infer Only] ? Only : T extends [infer A, infer B, ...infer Rest] ? OneOf<[XOR<A, B>, ...Rest]> : never;
+
 export interface paths {
-  "/api/characters": {
-    /** Get all characters */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": ({
-                id: number;
-                name: string;
-                description: string | null;
-                firstMessage: string | null;
-                image: string | null;
-                /** @enum {string} */
-                type: "user" | "character";
-              })[];
-          };
-        };
-      };
-    };
+  "/character/{id}": {
+    get: operations["GetCharacter"];
   };
-  "/api/character/{id}": {
-    /** Get a character by ID */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-              description: string;
-              firstMessage: string | null;
-              image: string | null;
-              /** @enum {string} */
-              type: "user" | "character";
-            };
-          };
-        };
-      };
-    };
+  "/characters": {
+    get: operations["GetAllCharacters"];
   };
-  "/api/create-character": {
-    /** Create a character */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            description: string;
-            firstMessage: string | null;
-            image: string | null;
-            /** @enum {string} */
-            type: "user" | "character";
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/chat/{id}": {
+    get: operations["GetChat"];
   };
-  "/api/update-character/": {
-    /** Update a character */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-            name: string;
-            description: string;
-            firstMessage: string | null;
-            image: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/chats": {
+    get: operations["GetAllChats"];
   };
-  "/api/delete-character/": {
-    /** Delete a character */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/create-character": {
+    post: operations["CreateCharacter"];
   };
-  "/api/create-chat": {
-    /** Create a Chat */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            characters: number[];
-            userCharacter: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
-            };
-          };
-        };
-      };
-    };
+  "/create-chat": {
+    post: operations["CreateChat"];
   };
-  "/api/chats": {
-    /** Get all Chats */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": ({
-                id: number;
-                createdAt: number;
-                updatedAt: number;
-                chatCharacters: ({
-                    characterId: number | null;
-                  })[];
-              })[];
-          };
-        };
-      };
-    };
+  "/create-message": {
+    post: operations["CreateMessage"];
   };
-  "/api/chat/{id}": {
-    /** Get a Chat by ID */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
-              createdAt: number;
-              updatedAt: number;
-              messages: ({
-                  id: number;
-                  text: string;
-                  characterId: number | null;
-                })[];
-              chatCharacters: ({
-                  character: {
-                    id: number;
-                    name: string;
-                    image: string | null;
-                  };
-                })[];
-            };
-          };
-        };
-      };
-    };
+  "/create-template": {
+    post: operations["CreateTemplate"];
   };
-  "/api/delete-chat": {
-    /** Delete a Chat */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/delete-character/{id}": {
+    post: operations["DeleteCharacter"];
   };
-  "/api/new-message": {
-    /** Add a message to the chat */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            chatId: number;
-            characterId: number;
-            text: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-              id?: number;
-            };
-          };
-        };
-      };
-    };
+  "/delete-chat/{id}": {
+    post: operations["DeleteChat"];
   };
-  "/api/generate-message": {
-    /** Generate a new response message */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            chatId: number;
-          };
-        };
-      };
-      responses: {
-        /** @description data: {text} */
-        200: {
-          content: {
-            "text/event-stream": string;
-          };
-        };
-      };
-    };
+  "/delete-message/{id}": {
+    post: operations["DeleteMessage"];
   };
-  "/api/update-message": {
-    /** Update an existing message */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-            text: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/delete-template/{id}": {
+    post: operations["DeleteTemplate"];
   };
-  "/api/delete-message": {
-    /** Delete a Message */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/download-model": {
+    post: operations["DownloadModel"];
   };
-  "/api/get-generate-presets": {
-    /** Get settings for generating text */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": ({
-                id: number;
-                name: string;
-                temperature: number;
-                maxTokens: number;
-                minP: number | null;
-                topP: number | null;
-                topK: number | null;
-              })[];
-          };
-        };
-      };
-    };
+  "/generate": {
+    post: operations["Generate"];
   };
-  "/api/create-generate-preset": {
-    /** Set settings for generating text */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            temperature: number;
-            maxTokens: number;
-            minP: number | null;
-            topP: number | null;
-            topK: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/generate-message": {
+    post: operations["GenerateMessage"];
   };
-  "/api/update-generate-preset": {
-    /** Update settings for generating text */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-            name: string;
-            temperature: number;
-            maxTokens: number;
-            minP: number | null;
-            topP: number | null;
-            topK: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/models": {
+    get: operations["ListModels"];
   };
-  "/api/delete-generate-preset": {
-    /** Delete settings for generating text */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/parse-template": {
+    post: operations["ParseTemplate"];
   };
-  "/api/models": {
-    /** Get all models */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-                name: string;
-              }[];
-          };
-        };
-      };
-    };
+  "/set-active-template/{id}": {
+    post: operations["SetActive"];
   };
-  "/api/load-model": {
-    /** Load a model */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            modelName: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/set-autoload": {
+    post: operations["SetAutoLoad"];
   };
-  "/api/download-model": {
-    /** Download a model */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            repoId: string;
-            path: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/set-model-path": {
+    post: operations["SetModelPath"];
   };
-  "/api/set-model-dir": {
-    /** Set the model folder */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            dir: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-        /** @description Default Response */
-        400: {
-          content: {
-            "application/json": {
-              message: string;
-            };
-          };
-        };
-      };
-    };
+  "/start-server": {
+    post: operations["StartServer"];
   };
-  "/api/set-auto-load": {
-    /** Set auto load */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            autoLoad: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/status": {
+    get: operations["GetStatus"];
   };
-  "/api/generate-stream": {
-    /**
-     * Generate a completion stream
-     * @description Generates text and returns it using Server-Sent Events (SSE) to stream the response.
-     * ```
-     * event: message | final
-     * data: {text}
-     * ```
-     *
-     * The `message` event is sent for each token generated and the `final` event is sent at the end with the full response.
-     *
-     * This is a non standard SSE implementation in order to support sending a body and using POST requests so it will not work with the browser EventSource API.
-     */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            prompt: string;
-            instruction?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description data: {text} */
-        200: {
-          content: {
-            "text/event-stream": string;
-          };
-        };
-      };
-    };
+  "/stop-server": {
+    post: operations["StopServer"];
   };
-  "/api/status": {
-    /** Get status info about the server */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              modelLoaded: boolean;
-              currentModel?: string;
-              modelDir?: string;
-              autoLoad: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/template/{id}": {
+    get: operations["GetTemplate"];
   };
-  "/api/get-prompt-presets": {
-    /** Get settings for prompting */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              activePresetId: number;
-              presets: {
-                  id: number;
-                  name: string;
-                  instruction: string;
-                  promptTemplate: string;
-                }[];
-            };
-          };
-        };
-      };
-    };
+  "/templates": {
+    get: operations["GetAllTemplates"];
   };
-  "/api/create-prompt-preset": {
-    /** Create settings for prompting */
-    post: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
-              name: string;
-            };
-          };
-        };
-      };
-    };
+  "/update-character/{id}": {
+    post: operations["UpdateCharacter"];
   };
-  "/api/set-prompt-preset": {
-    /** Set settings for prompting */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-            name: string;
-            instruction: string;
-            promptTemplate: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/update-message/{id}": {
+    post: operations["UpdateMessage"];
   };
-  "/api/set-active-prompt-preset": {
-    /** Set active prompt preset */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-      };
-    };
+  "/update-template/{id}": {
+    post: operations["UpdateTemplate"];
   };
 }
 
@@ -666,6 +100,351 @@ export type webhooks = Record<string, never>;
 
 export interface components {
   schemas: {
+    Character: {
+      description: string;
+      firstMessage: string | null;
+      /** Format: int64 */
+      id: number;
+      image: string | null;
+      name: string;
+      type: string;
+    };
+    Chat: {
+      UpdatedAt: components["schemas"]["NullTime"];
+      characters: components["schemas"]["Character"][];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: int64 */
+      id: number;
+      messages: components["schemas"]["Message"][];
+    };
+    CreateCharacterRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      description: string;
+      firstMessage?: string;
+      image?: string;
+      name: string;
+      type?: string;
+    };
+    CreateCharacterResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      character: components["schemas"]["Character"];
+    };
+    CreateChatRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      characters: number[];
+    };
+    CreateChatResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      chat_id: string;
+    };
+    CreateMessageRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      characterId: number;
+      /** Format: int64 */
+      chatId: number;
+      text: string;
+    };
+    CreateMessageResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      messageId: number;
+    };
+    CreateTemplateRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      content: string;
+      name: string;
+    };
+    CreateTemplateResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      id: number;
+    };
+    DownloadModelError: {
+      error: string;
+    };
+    DownloadModelFinal: Record<string, never>;
+    DownloadModelProgress: {
+      /** Format: double */
+      progress: number;
+    };
+    DownloadModelRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      path?: string;
+      repoId?: string;
+    };
+    ErrorDetail: {
+      /** @description Where the error occurred, e.g. 'body.items[3].tags' or 'path.thing-id' */
+      location?: string;
+      /** @description Error message text */
+      message?: string;
+      /** @description The value at the given location */
+      value?: unknown;
+    };
+    ErrorModel: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** @description A human-readable explanation specific to this occurrence of the problem. */
+      detail?: string;
+      /** @description Optional list of individual error details */
+      errors?: components["schemas"]["ErrorDetail"][];
+      /**
+       * Format: uri
+       * @description A URI reference that identifies the specific occurrence of the problem.
+       */
+      instance?: string;
+      /**
+       * Format: int64
+       * @description HTTP status code
+       */
+      status?: number;
+      /** @description A short, human-readable summary of the problem type. This value should not change between occurrences of the error. */
+      title?: string;
+      /**
+       * Format: uri
+       * @description A URI reference to human-readable documentation for the error.
+       * @default about:blank
+       */
+      type?: string;
+    };
+    ErrorResponse: {
+      error: string;
+    };
+    GenerateMessageErrorResponse: {
+      error: string;
+    };
+    GenerateMessageFinalResponse: {
+      text: string;
+    };
+    GenerateMessageInitialResponse: {
+      /** Format: int64 */
+      characterId: number;
+      /** Format: int64 */
+      messageId: number;
+    };
+    GenerateMessageRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      chatId: number;
+    };
+    GenerateMessageResponse: {
+      text: string;
+    };
+    GenerateRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      prompt: string;
+    };
+    GenerateTextResponse: {
+      text: string;
+    };
+    GetAllCharactersResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      characters: components["schemas"]["Character"][];
+    };
+    GetAllChatsResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      chats: components["schemas"]["Chat"][];
+    };
+    GetAllTemplatesResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      templates: components["schemas"]["PromptTemplate"][];
+    };
+    GetCharacterResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      character: components["schemas"]["Character"];
+    };
+    GetChatResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      chat: components["schemas"]["Chat"];
+    };
+    GetTemplateResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      template: components["schemas"]["PromptTemplate"];
+    };
+    ListModelsResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      modelPath: string;
+      models: components["schemas"]["Model"][];
+    };
+    Message: {
+      /** Format: int64 */
+      characterId: number;
+      /** Format: int64 */
+      chatId: number;
+      generated: boolean;
+      /** Format: int64 */
+      id: number;
+      text: string;
+    };
+    Model: {
+      name: string;
+      /** Format: int64 */
+      size: number;
+    };
+    NullTime: Record<string, never>;
+    ParseTemplateRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      templateString: string;
+    };
+    ParseTemplateResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      parsed: string;
+    };
+    PromptTemplate: {
+      active: boolean;
+      content: string;
+      /** Format: int64 */
+      id: number;
+      name: string;
+    };
+    ServerStatusResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      autoLoad: boolean;
+      currentModel: string;
+      loaded: boolean;
+      modelPath: string;
+    };
+    SetAutoLoadRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      autoLoad: boolean;
+    };
+    SetModelPathRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      modelPath: string;
+    };
+    StartServerInputBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      modelFile: string;
+    };
+    UpdateCharacterRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      description: string;
+      firstMessage?: string;
+      image?: string;
+      name: string;
+      type?: string;
+    };
+    UpdateMessageRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      text: string;
+    };
+    UpdateTemplateRequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      content: string;
+      name: string;
+    };
   };
   responses: never;
   parameters: never;
@@ -678,4 +457,665 @@ export type $defs = Record<string, never>;
 
 export type external = Record<string, never>;
 
-export type operations = Record<string, never>;
+export interface operations {
+
+  GetCharacter: {
+    parameters: {
+      path: {
+        /** @description Character ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetCharacterResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetAllCharacters: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetAllCharactersResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetChat: {
+    parameters: {
+      path: {
+        /** @description Chat ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetChatResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetAllChats: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetAllChatsResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  CreateCharacter: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateCharacterRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateCharacterResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  CreateChat: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateChatRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateChatResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  CreateMessage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateMessageRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateMessageResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  CreateTemplate: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["CreateTemplateRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["CreateTemplateResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DeleteCharacter: {
+    parameters: {
+      path: {
+        /** @description Character ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DeleteChat: {
+    parameters: {
+      path: {
+        /** @description Chat ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DeleteMessage: {
+    parameters: {
+      path: {
+        /** @description Message ID */
+        id: number;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DeleteTemplate: {
+    parameters: {
+      path: {
+        /** @description Template ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  DownloadModel: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["DownloadModelRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/event-stream": OneOf<[{
+              data: components["schemas"]["DownloadModelProgress"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "progress";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["DownloadModelFinal"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "final";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["DownloadModelError"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }]>[];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  Generate: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/event-stream": OneOf<[{
+              data: components["schemas"]["GenerateTextResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "text";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["ErrorResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }]>[];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GenerateMessage: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["GenerateMessageRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "text/event-stream": OneOf<[{
+              data: components["schemas"]["GenerateMessageInitialResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "initial";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateMessageResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "text";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateMessageFinalResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "final";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateMessageErrorResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }]>[];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  ListModels: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ListModelsResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  ParseTemplate: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ParseTemplateRequest"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ParseTemplateResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SetActive: {
+    parameters: {
+      path: {
+        /** @description Template ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SetAutoLoad: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetAutoLoadRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SetModelPath: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetModelPathRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  StartServer: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["StartServerInputBody"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetStatus: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["ServerStatusResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  StopServer: {
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetTemplate: {
+    parameters: {
+      path: {
+        /** @description Template ID */
+        id: string;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetTemplateResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  GetAllTemplates: {
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetAllTemplatesResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  UpdateCharacter: {
+    parameters: {
+      path: {
+        /** @description Character ID */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateCharacterRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  UpdateMessage: {
+    parameters: {
+      path: {
+        /** @description Message ID */
+        id: number;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateMessageRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  UpdateTemplate: {
+    parameters: {
+      path: {
+        /** @description Template ID */
+        id: string;
+      };
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["UpdateTemplateRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+}

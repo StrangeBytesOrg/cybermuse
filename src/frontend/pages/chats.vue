@@ -1,18 +1,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
+import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
 
-const chatRes = await client.GET('/api/chats')
-const characterRes = await client.GET('/api/characters')
-if (!chatRes.data) {
-    throw new Error('No chats found')
-}
-if (!characterRes.data) {
-    throw new Error('No characters found')
-}
-
-const chats = ref(chatRes.data)
-const characterMap = new Map(characterRes.data.map((character) => [character.id, character]))
+const toast = useToast()
+const {data} = await client.GET('/chats')
+const chats = ref(data?.chats || [])
 
 const formatDate = (timestamp: number) => {
     return new Date(timestamp).toLocaleDateString(undefined, {
@@ -23,14 +16,17 @@ const formatDate = (timestamp: number) => {
 }
 
 const deleteChat = async (chatId: number) => {
-    await client.POST('/api/delete-chat', {
-        body: {
-            id: chatId,
-        },
+    const {error} = await client.POST('/delete-chat/{id}', {
+        params: {path: {id: String(chatId)}},
     })
 
-    const chatRes = await client.GET('/api/chats')
-    chats.value = chatRes.data
+    if (error) {
+        console.error(error)
+        toast.error('Failed to delete chat')
+    } else {
+        const chatRes = await client.GET('/chats')
+        chats.value = chatRes.data?.chats || []
+    }
 }
 </script>
 
@@ -46,12 +42,9 @@ const deleteChat = async (chatId: number) => {
                 class="relative bg-base-200 rounded-md p-2 mt-2 hover:outline outline-primary">
                 <div>Created: {{ formatDate(chat.createdAt) }}</div>
                 <div class="avatar-group -space-x-4 rtl:space-x-reverse">
-                    <div v-for="{characterId} in chat.chatCharacters" :key="characterId" class="avatar">
+                    <div v-for="character in chat.characters" :key="character.id" class="avatar">
                         <div class="h-14">
-                            <img
-                                v-if="characterMap.get(characterId)?.image"
-                                :src="characterMap.get(characterId)?.image"
-                                alt="Character Image" />
+                            <img v-if="character.image" :src="character.image" alt="Character Image" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>

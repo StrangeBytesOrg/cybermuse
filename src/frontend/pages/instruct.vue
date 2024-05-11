@@ -13,16 +13,28 @@ const generatedResponse = ref('')
 const toast = useToast()
 let controller: AbortController
 
+// Check if generation server is actually running
+const checkServer = async () => {
+    const {data, error} = await client.GET('/status')
+    if (error) {
+        toast.error('Error getting server status')
+    }
+    if (data && data.loaded) {
+        connectionStore.connected = true
+    }
+}
+await checkServer()
+
 const getGeneration = async () => {
     pendingMessage.value = true
     generatedResponse.value = ''
     controller = new AbortController()
 
     try {
-        const {response} = await client.POST('/api/generate-stream', {
+        const {response} = await client.POST('/generate', {
             body: {
-                instruction: systemPrompt.value,
                 prompt: currentInput.value,
+                // instruction: systemPrompt.value || undefined,
             },
             signal: controller.signal,
             parseAs: 'stream',
@@ -30,10 +42,13 @@ const getGeneration = async () => {
         const responseIterable = responseToIterable(response)
         for await (const chunk of responseIterable) {
             const data = JSON.parse(chunk.data)
-            if (chunk.event === 'message') {
+            if (chunk.event === 'text') {
                 generatedResponse.value += data.text
             } else if (chunk.event === 'final') {
                 generatedResponse.value = data.text
+            } else if (chunk.event === 'error') {
+                console.error('Error', data)
+                toast.error(`Error generating message: ${data.error}`)
             } else {
                 console.error('Unknown event', chunk)
             }

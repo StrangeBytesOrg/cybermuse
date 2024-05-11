@@ -3,7 +3,9 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {client} from '../api-client'
 import FileInput from '../components/file-select.vue'
+import {useToast} from 'vue-toastification'
 
+const toast = useToast()
 const router = useRouter()
 const character = ref({
     name: '',
@@ -14,16 +16,22 @@ const character = ref({
 })
 
 const createCharacter = async () => {
-    await client.POST('/api/create-character', {
+    const {error} = await client.POST('/create-character', {
         body: {
             name: character.value.name,
             description: character.value.description,
-            firstMessage: character.value.firstMessage,
+            // firstMessage: character.value.firstMessage,
+            firstMessage: undefined,
             image: character.value.image,
             type: character.value.type,
         },
     })
-    await router.push('/characters')
+    if (error) {
+        console.error(error)
+        toast.error('Error creating character')
+    } else {
+        await router.push('/characters')
+    }
 }
 
 const removeImage = () => {

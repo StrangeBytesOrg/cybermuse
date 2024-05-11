@@ -1,0 +1,246 @@
+package server
+
+import (
+	"chat-app/src/server/controllers"
+	"os"
+	"path"
+
+	"github.com/danielgtaylor/huma/v2"
+	"github.com/danielgtaylor/huma/v2/adapters/humachi"
+	"github.com/danielgtaylor/huma/v2/sse"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
+)
+
+func InitRouter() *chi.Mux {
+	router := chi.NewMux()
+	router.Use(cors.Handler(
+		cors.Options{},
+	))
+
+	api := humachi.New(router, huma.DefaultConfig("Chat App", "0.0.1"))
+
+	// Characters
+	huma.Register(api, huma.Operation{
+		Path:        "/characters",
+		Method:      "GET",
+		Tags:        []string{"characters"},
+		OperationID: "GetAllCharacters",
+	}, controllers.GetAllCharacters)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/character/{id}",
+		Method:      "GET",
+		Tags:        []string{"characters"},
+		OperationID: "GetCharacter",
+	}, controllers.GetCharacter)
+
+	huma.Register(api, huma.Operation{
+		Path:         "/create-character",
+		Method:       "POST",
+		Tags:         []string{"characters"},
+		OperationID:  "CreateCharacter",
+		MaxBodyBytes: 50 * 1024 * 1024, // 50 MB
+	}, controllers.CreateCharacter)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/update-character/{id}",
+		Method:      "POST",
+		Tags:        []string{"characters"},
+		OperationID: "UpdateCharacter",
+	}, controllers.UpdateCharacter)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/delete-character/{id}",
+		Method:      "POST",
+		Tags:        []string{"characters"},
+		OperationID: "DeleteCharacter",
+	}, controllers.DeleteCharacter)
+
+	// Chats
+	huma.Register(api, huma.Operation{
+		Path:        "/chats",
+		Method:      "GET",
+		Tags:        []string{"chats"},
+		OperationID: "GetAllChats",
+	}, controllers.GetAllChats)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/create-chat",
+		Method:      "POST",
+		Tags:        []string{"chats"},
+		OperationID: "CreateChat",
+	}, controllers.CreateChat)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/delete-chat/{id}",
+		Method:      "POST",
+		Tags:        []string{"chats"},
+		OperationID: "DeleteChat",
+	}, controllers.DeleteChat)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/chat/{id}",
+		Method:      "GET",
+		Tags:        []string{"chats"},
+		OperationID: "GetChat",
+	}, controllers.GetChat)
+
+	// Messages
+	huma.Register(api, huma.Operation{
+		Path:        "/create-message",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "CreateMessage",
+	}, controllers.CreateMessage)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/update-message/{id}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "UpdateMessage",
+	}, controllers.UpdateMessage)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/delete-message/{id}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "DeleteMessage",
+	}, controllers.DeleteMessage)
+
+	// Built in server
+	huma.Register(api, huma.Operation{
+		Path:        "/start-server",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "StartServer",
+	}, controllers.StartServer)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/stop-server",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "StopServer",
+	}, controllers.StopServer)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/status",
+		Method:      "GET",
+		Tags:        []string{"server"},
+		OperationID: "GetStatus",
+	}, controllers.GetServerStatus)
+
+	// Models
+	huma.Register(api, huma.Operation{
+		Path:        "/models",
+		Method:      "GET",
+		Tags:        []string{"server"},
+		OperationID: "ListModels",
+	}, controllers.ListModels)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-model-path",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetModelPath",
+	}, controllers.SetModelPath)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-autoload",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetAutoLoad",
+	}, controllers.SetAutoLoad)
+
+	sse.Register(api, huma.Operation{
+		Path:        "/download-model",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "DownloadModel",
+	}, map[string]any{
+		"progress": controllers.DownloadModelProgress{},
+		"final":    controllers.DownloadModelFinal{},
+		"error":    controllers.DownloadModelError{},
+	}, controllers.DownloadModel)
+
+	// Templates
+	huma.Register(api, huma.Operation{
+		Path:        "/templates",
+		Method:      "GET",
+		Tags:        []string{"templates"},
+		OperationID: "GetAllTemplates",
+	}, controllers.GetAllTemplates)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/template/{id}",
+		Method:      "GET",
+		Tags:        []string{"templates"},
+		OperationID: "GetTemplate",
+	}, controllers.GetTemplate)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/create-template",
+		Method:      "POST",
+		Tags:        []string{"templates"},
+		OperationID: "CreateTemplate",
+	}, controllers.CreateTemplate)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/update-template/{id}",
+		Method:      "POST",
+		Tags:        []string{"templates"},
+		OperationID: "UpdateTemplate",
+	}, controllers.UpdateTemplate)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/delete-template/{id}",
+		Method:      "POST",
+		Tags:        []string{"templates"},
+		OperationID: "DeleteTemplate",
+	}, controllers.DeleteTemplate)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-active-template/{id}",
+		Method:      "POST",
+		Tags:        []string{"templates"},
+		OperationID: "SetActive",
+	}, controllers.SetActive)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/parse-template",
+		Method:      "POST",
+		Tags:        []string{"templates"},
+		OperationID: "ParseTemplate",
+	}, controllers.ParseTemplate)
+
+	// Generation
+	sse.Register(api, huma.Operation{
+		Path:        "/generate",
+		Method:      "POST",
+		Tags:        []string{"generation"},
+		OperationID: "Generate",
+	}, map[string]any{
+		"text":  controllers.GenerateTextResponse{},
+		"error": controllers.ErrorResponse{},
+	}, controllers.Generate)
+
+	sse.Register(api, huma.Operation{
+		Path:        "/generate-message",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "GenerateMessage",
+	}, map[string]any{
+		"initial": controllers.GenerateMessageInitialResponse{},
+		"text":    controllers.GenerateMessageResponse{},
+		"final":   controllers.GenerateMessageFinalResponse{},
+		"error":   controllers.GenerateMessageErrorResponse{},
+	}, controllers.GenerateMessage)
+
+	// Write the OpenAPI spec to a file
+	if os.Getenv("DEV") != "" {
+		openapiSpec, _ := api.OpenAPI().YAML()
+		os.WriteFile(path.Join("src", "openapi.yml"), openapiSpec, 0644)
+	}
+
+	return router
+}

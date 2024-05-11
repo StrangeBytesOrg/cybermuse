@@ -6,82 +6,55 @@ on:
     branches:
       - ci
 
+env:
+  # Necessary for most environments as build failure can occur due to OOM issues
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-
     strategy:
       fail-fast: false
       matrix:
-        os: [
-          ubuntu-20.04, # ubuntu-latest currently has an issue with installing node-llama-cpp
-          windows-latest,
-          # macos-latest,
-        ]
+        build:
+          - name: chat
+            platform: linux/amd64
+            os: ubuntu-latest
+          - name: chat
+            platform: windows/amd64
+            os: windows-latest
+          - name: chat # For Mac builds, the name MUST match the output name in the wails.json file
+            platform: darwin/amd64
+            os: macos-latest
 
+    runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        # with:
+        #   submodules: recursive
 
-      - name: Install Node
-        uses: actions/setup-node@v4
+      - name: Build Wails
+        uses: dAppServer/wails-build-action@v2.2
+        id: build
         with:
-          node-version: '20'
-          cache: 'npm'
-      - run: npm ci
+          build-name: ${{ matrix.build.name }}
+          build-platform: ${{ matrix.build.platform }}
+          package: true # Upload artifacts
+          go-version: '1.22.2'
 
-      - name: Build Frontend
-        run: npm run build:frontend
-      
-      - name: Build Backend
-        run: npm run build:backend
-
-      - name: Build Electron app with electron-builder
-        run: npm run make
-        env:
-          BUILD_NUMBER: ${{ github.run_number }}
-
-      - name: Setup RClone
-        uses: AnimMouse/setup-rclone@v1
-        with:
-          disable_base64: true
-          rclone_config: |
-            [r2]
-            type = s3
-            provider = Cloudflare
-            access_key_id = ${{ secrets.R2_ACCESS_KEY_ID }}
-            secret_access_key = ${{ secrets.R2_SECRET_ACCESS_KEY }}
-            endpoint = https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
-            acl = private
-            no_check_bucket = true
-
-      - name: Upload files to R2
-        run: 'rclone copy --include "*.zip" out r2:chat-app-releases'
-
-      # - name: Store Linux artifacts
-      #   if: runner.os == 'Linux'
-      #   uses: actions/upload-artifact@v4
+      # - name: Setup RClone
+      #   uses: AnimMouse/setup-rclone@v1
       #   with:
-      #     name: app-${{ runner.os }}-x64
-      #     path: out/linux-unpacked
+      #     disable_base64: true
+      #     rclone_config: |
+      #       [r2]
+      #       type = s3
+      #       provider = Cloudflare
+      #       access_key_id = ${{ secrets.R2_ACCESS_KEY_ID }}
+      #       secret_access_key = ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      #       endpoint = https://${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com
+      #       acl = private
+      #       no_check_bucket = true
 
-      # - name: Store Mac x64 Artifact
-      #   if: runner.os == 'macOS'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-${{ runner.os }}-x64
-      #     path: out/mac
-        
-      # - name: Store arm64 Artifact
-      #   if: runner.os == 'macOS'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-${{ runner.os }}-arm64
-      #     path: out/mac-arm64
-
-      # - name: Store Windows artifacts
-      #   if: runner.os == 'Windows'
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: app-${{ runner.os }}-x64
-      #     path: out/win-unpacked
+      # - name: Upload files to R2
+      #   run: 'rclone copy --include "*.zip" out r2:chat-app-releases'

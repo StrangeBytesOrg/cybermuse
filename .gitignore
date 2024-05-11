@@ -3,4 +3,6 @@ dist
 build/bin
 out
 archive
-app-data.db
+src/wailsjs
+tmp/
+src/openapi.yml

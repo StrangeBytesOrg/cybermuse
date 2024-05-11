@@ -8,28 +8,22 @@ const router = useRouter()
 const toast = useToast()
 const selectedCharacters = ref<number[]>([])
 
-const {data, error} = await client.GET('/api/characters')
-// TODO handle error
-const characters = reactive(data || [])
+const {data} = await client.GET('/characters')
+const characters = reactive(data?.characters || [])
 const userCharacter = ref(1)
 
 const createChat = async () => {
-    const {data, error} = await client.POST('/api/create-chat', {
+    const {data, error} = await client.POST('/create-chat', {
         body: {
-            characters: selectedCharacters.value,
-            userCharacter: userCharacter.value,
+            characters: [...selectedCharacters.value, userCharacter.value],
         },
     })
     if (error) {
-        if (error.message) {
-            toast.error(error.message)
-        } else {
-            toast.error('Failed to create chat')
-        }
+        toast.error(error.detail || 'Failed to create chat')
         return
     }
-    if (data && data.id) {
-        router.push(`/chat?id=${data.id}`)
+    if (data && data.chat_id) {
+        router.push(`/chat?id=${data.chat_id}`)
     }
 }
 

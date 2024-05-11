@@ -3,11 +3,11 @@ import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
 import {client} from '../api-client'
 
-const {data, error} = await client.GET('/api/characters')
+const {data, error} = await client.GET('/characters')
 if (error) {
     console.error(error)
 }
-const characters = reactive(data)
+const characters = reactive(data?.characters || [])
 </script>
 
 <template>

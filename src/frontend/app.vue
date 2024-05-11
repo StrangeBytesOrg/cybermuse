@@ -51,18 +51,12 @@ const toggleMenu = () => {
                 <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
             </li>
             <li>
-                <router-link to="/connection" class="font-bold px-2" active-class="active">Connection</router-link>
-            </li>
-
-            <li>
                 <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
                     Theme Settings
                 </router-link>
             </li>
             <li>
-                <router-link to="/prompt-settings" class="font-bold px-2" active-class="active">
-                    Prompt Settings
-                </router-link>
+                <router-link to="/templates" class="font-bold px-2" active-class="active">Prompt Templates</router-link>
             </li>
             <li>
                 <router-link to="/generation-settings" class="font-bold px-2" active-class="active">
