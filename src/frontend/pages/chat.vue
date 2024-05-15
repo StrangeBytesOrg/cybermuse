@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, ref, computed, nextTick, watch, onMounted} from 'vue'
+import {reactive, ref, nextTick, watch, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import snarkdown from 'snarkdown'
 import {useToast} from 'vue-toastification'
@@ -45,7 +45,7 @@ const characterMap = new Map((data?.chat.characters ?? []).map((character) => [c
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
         event.preventDefault()
-        sendMessage()
+        fullSend()
     }
 }
 
@@ -75,6 +75,7 @@ const sendMessage = async () => {
         })
         currentMessage.value = ''
     }
+    return data?.messageId
 }
 
 const newResponse = async () => {
@@ -105,7 +106,7 @@ const newResponse = async () => {
     }
 }
 
-const getMessage = async () => {
+const generateMessage = async () => {
     const {response} = await client.POST('/generate-message', {
         body: {
             chatId: Number(chatId),
@@ -118,7 +119,7 @@ const getMessage = async () => {
     for await (const chunk of responseIterable) {
         const data = JSON.parse(chunk.data)
         if (chunk.event === 'text') {
-            console.log(data.text)
+            // console.log(data.text)
             bufferedResponse += data.text
             const lastMessage = messages[messages.length - 1]
             if (lastMessage) {
@@ -136,8 +137,18 @@ const getMessage = async () => {
     }
 }
 
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const fullSend = async () => {
+    pendingMessage.value = true
+    await sendMessage()
+    await newResponse()
+    await generateMessage()
+    pendingMessage.value = false
+}
+
 const getCharacter = async () => {
-    const {data, error} = await client.POST('/get-response-character/{id}', {
+    const {data, error} = await client.POST('/get-response-character/{chatId}', {
         params: {path: {chatId: Number(chatId)}},
     })
     if (error) {
@@ -163,12 +174,11 @@ const editMessage = async (messageId: number) => {
 const cancelEdit = () => {
     // Reset the text to the original
     const message = messages.find((message) => message.id === editModeId.value)
-    // if (message) {
-    //     message.text = editedText.value
-    // }
-    if (message && message.activeIndex && message.content[message.activeIndex]) {
-        message.content[message.activeIndex].text = editedText.value
-        // const content = message.content[message.activeIndex]
+    if (message) {
+        const content = message.content[message.activeIndex]
+        if (content) {
+            content.text = editedText.value
+        }
     }
     editModeId.value = 0
 }
@@ -215,6 +225,8 @@ const newSwipe = async (message: Message) => {
             message.activeIndex = message.content.length - 1
         }
     }
+
+    await generateMessage()
 }
 
 const swipeLeft = async (message: Message) => {
@@ -272,7 +284,7 @@ onMounted(() => {
         <!-- Messages -->
         <div ref="messagesElement" class="flex-grow overflow-auto px-1 md:px-2">
             <div
-                v-for="message in messages"
+                v-for="(message, index) in messages"
                 :key="message.id"
                 class="flex flex-col relative mb-2 bg-base-200 rounded-xl">
                 <div class="flex flex-row pb-2 pt-3">
@@ -358,7 +370,11 @@ onMounted(() => {
                             <!-- prettier-ignore -->
                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" /></svg>
                         </button>
-                        <button @click="newSwipe(message)" :disabled="pendingMessage" class="btn btn-sm btn-neutral">
+                        <button
+                            @click="newSwipe(message)"
+                            v-show="index === messages.length - 1"
+                            :disabled="pendingMessage"
+                            class="btn btn-sm btn-neutral">
                             <!-- prettier-ignore -->
                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
                         </button>
@@ -378,25 +394,11 @@ onMounted(() => {
                 class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
 
             <button
-                @click="sendMessage"
+                @click="fullSend()"
                 :disabled="pendingMessage || connectionStore.connected === false"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 {{ pendingMessage ? '' : 'Send' }}
                 <span class="loading loading-spinner loading-md" :class="{hidden: !pendingMessage}" />
-            </button>
-
-            <button
-                @click="newResponse"
-                :disabled="pendingMessage || connectionStore.connected === false"
-                class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
-                New Response
-            </button>
-
-            <button
-                @click="getMessage"
-                :disabled="pendingMessage || connectionStore.connected === false"
-                class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
-                Generate
             </button>
         </div>
     </main>
