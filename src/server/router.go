@@ -108,6 +108,34 @@ func InitRouter() *chi.Mux {
 		OperationID: "DeleteMessage",
 	}, controllers.DeleteMessage)
 
+	huma.Register(api, huma.Operation{
+		Path:        "/get-response-character/{id}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "GetResponseCharacter",
+	}, controllers.GetResponseCharacter)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/new-swipe/{messageId}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "NewSwipe",
+	}, controllers.NewSwipe)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/swipe-left/{messageId}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "SwipeLeft",
+	}, controllers.SwipeLeft)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/swipe-right/{messageId}",
+		Method:      "POST",
+		Tags:        []string{"messages"},
+		OperationID: "SwipeRight",
+	}, controllers.SwipeRight)
+
 	// Built in server
 	huma.Register(api, huma.Operation{
 		Path:        "/start-server",
@@ -273,10 +301,9 @@ func InitRouter() *chi.Mux {
 		Tags:        []string{"messages"},
 		OperationID: "GenerateMessage",
 	}, map[string]any{
-		"initial": controllers.GenerateMessageInitialResponse{},
-		"text":    controllers.GenerateMessageResponse{},
-		"final":   controllers.GenerateMessageFinalResponse{},
-		"error":   controllers.GenerateMessageErrorResponse{},
+		"text":  controllers.GenerateMessageResponse{},
+		"final": controllers.GenerateMessageFinalResponse{},
+		"error": controllers.GenerateMessageErrorResponse{},
 	}, controllers.GenerateMessage)
 
 	// Write the OpenAPI spec to a file

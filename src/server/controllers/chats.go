@@ -32,11 +32,16 @@ type GetChatResponse struct {
 }
 
 func GetChat(ctx context.Context, input *struct {
-	Id string `path:"id" doc:"Chat ID"`
+	Id string `path:"id"`
 }) (*GetChatResponse, error) {
 	chat := &db.Chat{}
-	err := db.DB.NewSelect().Model(chat).Where("id = ?", input.Id).Relation("Characters").Relation("Messages").Scan(ctx)
-	// fmt.Printf("Chat Characters: %v\n", chat.Characters)
+	err := db.DB.NewSelect().
+		Model(chat).
+		Where("id = ?", input.Id).
+		Relation("Characters").
+		Relation("Messages").
+		Relation("Messages.Content").
+		Scan(ctx)
 	if err != nil {
 		fmt.Printf("Error getting chat: %v\n", err)
 		return nil, err
@@ -83,7 +88,7 @@ func CreateChat(ctx context.Context, input *struct {
 
 // Delete Chat
 func DeleteChat(ctx context.Context, input *struct {
-	Id string `path:"id" doc:"Chat ID"`
+	Id string `path:"id"`
 }) (*struct{}, error) {
 	chat := &db.Chat{}
 	_, err := db.DB.NewDelete().Model(chat).Where("id = ?", input.Id).Exec(ctx)

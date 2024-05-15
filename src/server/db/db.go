@@ -26,11 +26,18 @@ type Character struct {
 }
 
 type Message struct {
-	Id          int64  `bun:",pk,autoincrement" json:"id"`
-	ChatId      int64  `bun:",notnull,nullzero" json:"chatId"`
-	CharacterId int64  `bun:",notnull,nullzero" json:"characterId"`
-	Text        string `bun:",notnull" json:"text"`
-	Generated   bool   `bun:",notnull" json:"generated"`
+	Id          int64             `bun:",pk,autoincrement" json:"id"`
+	ChatId      int64             `bun:",notnull,nullzero" json:"chatId"`
+	CharacterId int64             `bun:",notnull,nullzero" json:"characterId"`
+	Generated   bool              `bun:",notnull" json:"generated"`
+	ActiveIndex int64             `bun:",notNull" json:"activeIndex"`
+	Content     []*MessageContent `bun:",notnull,rel:has-many,join:id=message_id" json:"content"`
+}
+
+type MessageContent struct {
+	Id        int64  `bun:",pk,autoincrement" json:"id"`
+	Text      string `bun:",notnull" json:"text"`
+	MessageId int64  `bun:",notnull,nullzero" json:"messageId"`
 }
 
 type Chat struct {
@@ -78,6 +85,7 @@ func InitDB() error {
 	DB = bun.NewDB(sqldb, sqlitedialect.New())
 
 	DB.RegisterModel((*ChatCharacter)(nil))
+	DB.RegisterModel((*MessageContent)(nil))
 
 	if os.Getenv("DEV") != "" {
 		DB.AddQueryHook(bundebug.NewQueryHook(
@@ -90,6 +98,7 @@ func InitDB() error {
 		DB.ResetModel(ctx, (*Chat)(nil))
 		DB.ResetModel(ctx, (*ChatCharacter)(nil))
 		DB.ResetModel(ctx, (*Message)(nil))
+		DB.ResetModel(ctx, (*MessageContent)(nil))
 		DB.ResetModel(ctx, (*PromptTemplate)(nil))
 		DB.ResetModel(ctx, (*GeneratePreset)(nil))
 
@@ -121,8 +130,10 @@ func InitDB() error {
 		DB.NewInsert().Model(&GeneratePreset{Name: "Default", MaxTokens: 32, Temperature: 0.5, MinP: 0, TopP: 0, TopK: 0, Active: true}).Exec(ctx)
 
 		// Add a default chat message
-		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 1, Text: "Hello.", Generated: false}).Exec(ctx)
-		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 2, Text: "Hello, I'm here to test the program.", Generated: true}).Exec(ctx)
+		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 1, ActiveIndex: 0, Generated: false}).Exec(ctx)
+		DB.NewInsert().Model(&MessageContent{MessageId: 1, Text: "Hello"}).Exec(ctx)
+		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 2, ActiveIndex: 0, Generated: true}).Exec(ctx)
+		DB.NewInsert().Model(&MessageContent{MessageId: 2, Text: "Hi there, I'm here to help."}).Exec(ctx)
 	}
 	return nil
 }

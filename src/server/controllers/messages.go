@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/sse"
 	"github.com/jclem/sseparser"
 )
@@ -28,33 +29,43 @@ func CreateMessage(ctx context.Context, input *struct {
 		ChatId      int64  `json:"chatId"`
 		CharacterId int64  `json:"characterId"`
 		Text        string `json:"text"`
+		Generated   bool   `json:"generated"`
 	}
 }) (*CreateMessageResponse, error) {
 	message := &db.Message{
 		ChatId:      input.Body.ChatId,
 		CharacterId: input.Body.CharacterId,
-		Text:        input.Body.Text,
-		Generated:   false,
+		Generated:   input.Body.Generated,
 	}
 	_, err := db.DB.NewInsert().Model(message).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
+	_, err = db.DB.NewInsert().Model(&db.MessageContent{Text: input.Body.Text, MessageId: message.Id}).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
 	response := &CreateMessageResponse{}
-	fmt.Println("New message created:", message)
 	response.Body.MessageId = message.Id
 	return response, nil
 }
 
 // Update Message
 func UpdateMessage(ctx context.Context, input *struct {
-	Id   int64 `path:"id" doc:"Message ID"`
+	Id   int64 `path:"id"`
 	Body struct {
 		Text string `json:"text"`
 	}
 }) (*struct{}, error) {
 	message := &db.Message{}
-	_, err := db.DB.NewUpdate().Model(message).Set("text = ?", input.Body.Text).Where("id = ?", input.Id).Exec(ctx)
+	err := db.DB.NewSelect().Model(message).Where("id = ?", input.Id).Relation("Content").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	activeContent := message.Content[message.ActiveIndex]
+
+	_, err = db.DB.NewUpdate().Model(&db.MessageContent{}).Set("text = ?", input.Body.Text).Where("id = ?", activeContent.Id).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -63,20 +74,115 @@ func UpdateMessage(ctx context.Context, input *struct {
 
 // Delete Message
 func DeleteMessage(ctx context.Context, input *struct {
-	Id int64 `path:"id" doc:"Message ID"`
+	Id int64 `path:"id"`
 }) (*struct{}, error) {
 	message := &db.Message{}
-	wat, err := db.DB.NewDelete().Model(message).Where("id = ?", input.Id).Exec(ctx)
+	_, err := db.DB.NewDelete().Model(message).Where("id = ?", input.Id).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("wat:", wat)
 	return nil, nil
 }
 
-type GenerateMessageInitialResponse struct {
-	MessageId   int64 `json:"messageId"`
-	CharacterId int64 `json:"characterId"`
+// Get a response character
+type GetResponseCharacterResponse struct {
+	Body struct {
+		CharacterId int64 `json:"characterId"`
+	}
+}
+
+func GetResponseCharacter(ctx context.Context, input *struct {
+	ChatId int64 `path:"chatId"`
+}) (*GetResponseCharacterResponse, error) {
+	chat := &db.Chat{}
+	err := db.DB.NewSelect().
+		Model(chat).
+		Where("id = ?", input.ChatId).
+		Relation("Characters").
+		Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// Get the active prompt template
+	promptTemplate := &db.PromptTemplate{}
+	err = db.DB.NewSelect().Model(promptTemplate).Where("active = true").Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	prompt, err := util.FormatPrompt(promptTemplate.Content, chat.Messages, chat.Characters)
+	if err != nil {
+		return nil, err
+	}
+
+	// Create GBNF grammar to pick the next respondent
+	characterNames := []string{}
+	for _, character := range chat.Characters {
+		if character.Type == "user" {
+			continue
+		}
+		characterNames = append(characterNames, "\""+character.Name+"\"")
+	}
+	characterString := strings.Join(characterNames, " | ")
+	gbnf := "root ::= (" + characterString + ")"
+
+	// Get generation settings
+	// preset := &db.GeneratePreset{}
+	// err = db.DB.NewSelect().Model(preset).Where("active = true").Scan(ctx)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// Send request to generation server to get the next respondent
+	payload := map[string]any{
+		"prompt":       prompt,
+		"n_predict":    10,
+		"temperature":  0,
+		"grammar":      gbnf,
+		"cache_prompt": true,
+	}
+	jsonPayload, err := json.Marshal(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post("http://localhost:8080/completion", "application/json", bytes.NewBuffer(jsonPayload))
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.New("Error from built-in server")
+	}
+
+	responseBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	type ReturnData struct {
+		Content string `json:"content"`
+	}
+	res := ReturnData{}
+	err = json.Unmarshal(responseBody, &res)
+	if err != nil {
+		return nil, err
+	}
+
+	// Determine characterId from response
+	var pickedCharacter = &db.Character{}
+	for _, character := range chat.Characters {
+		if strings.Contains(res.Content, character.Name) {
+			pickedCharacter = character
+			break
+		}
+	}
+
+	fmt.Println("Picked character name: ", pickedCharacter.Name)
+
+	response := &GetResponseCharacterResponse{}
+	response.Body.CharacterId = pickedCharacter.Id
+	return response, nil
 }
 
 type GenerateMessageResponse struct {
@@ -102,9 +208,30 @@ func GenerateMessage(ctx context.Context, input *struct {
 		Where("id = ?", input.Body.ChatId).
 		Relation("Characters").
 		Relation("Messages").
+		Relation("Messages.Content").
 		Scan(ctx)
 	if err != nil {
 		send.Data(&GenerateMessageErrorResponse{Error: "Error fetching chat"})
+		return
+	}
+
+	// Get the last message
+	var lastMessage *db.Message
+	if len(chat.Messages) > 0 {
+		lastMessage = chat.Messages[len(chat.Messages)-1]
+	}
+	lastMessageContentId := lastMessage.Content[lastMessage.ActiveIndex].Id
+
+	// Get the message character
+	pickedCharacter := &db.Character{}
+	for _, character := range chat.Characters {
+		if character.Id == lastMessage.CharacterId {
+			pickedCharacter = character
+			break
+		}
+	}
+	if pickedCharacter.Id == 0 {
+		send.Data(&GenerateMessageErrorResponse{Error: "Error getting character"})
 		return
 	}
 
@@ -122,16 +249,8 @@ func GenerateMessage(ctx context.Context, input *struct {
 		return
 	}
 
-	// Create GBNF grammar to pick the next respondent
-	characterNames := []string{}
-	for _, character := range chat.Characters {
-		if character.Type == "user" {
-			continue
-		}
-		characterNames = append(characterNames, "\""+character.Name+"\"")
-	}
-	characterString := strings.Join(characterNames, " | ")
-	gbnf := "root ::= (" + characterString + ")"
+	prompt += pickedCharacter.Name + ": "
+	fmt.Println("Prompt: ", prompt)
 
 	// Get generation settings
 	preset := &db.GeneratePreset{}
@@ -141,85 +260,8 @@ func GenerateMessage(ctx context.Context, input *struct {
 		return
 	}
 
-	// Send request to generation server to get the next respondent
-	payload := map[string]any{
-		"prompt":       prompt,
-		"n_predict":    10,
-		"temperature":  0,
-		"grammar":      gbnf,
-		"cache_prompt": true,
-	}
-	jsonPayload, err := json.Marshal(payload)
-	if err != nil {
-		fmt.Println("Error marshalling payload: ", err)
-		send.Data(&GenerateMessageErrorResponse{Error: "Error marshalling payload"})
-		return
-	}
-
-	resp, err := http.Post("http://localhost:8080/completion", "application/json", bytes.NewBuffer(jsonPayload))
-	if err != nil {
-		fmt.Println("Error sending request: ", err)
-		send.Data(&GenerateMessageErrorResponse{Error: "Error from built-in server"})
-		return
-	}
-	if resp.StatusCode != http.StatusOK {
-		fmt.Println("Error from built-in server: ", resp.Status)
-		send.Data(&GenerateMessageErrorResponse{Error: "Error from built-in server"})
-		return
-	}
-
-	responseBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response body: ", err)
-		send.Data(&GenerateMessageErrorResponse{Error: "Error reading response body"})
-		return
-	}
-
-	type returnData struct {
-		Content string `json:"content"`
-	}
-	res := returnData{}
-
-	err = json.Unmarshal(responseBody, &res)
-	if err != nil {
-		fmt.Println("Error unmarshalling response: ", err)
-		send.Data(&GenerateMessageErrorResponse{Error: "Error unmarshalling response"})
-		return
-	}
-	// fmt.Println("Response Data: ", res)
-
-	// Determine characterId from response
-	var pickedCharacter = &db.Character{}
-	for _, character := range chat.Characters {
-		if strings.Contains(res.Content, character.Name) {
-			pickedCharacter = character
-			break
-		}
-	}
-
-	fmt.Println("Picked character name: ", pickedCharacter.Name)
-
-	// Create new message in chat
-	message := &db.Message{
-		ChatId:      input.Body.ChatId,
-		CharacterId: pickedCharacter.Id,
-		Text:        "",
-		Generated:   true,
-	}
-	_, err = db.DB.NewInsert().Model(message).Exec(ctx)
-	if err != nil {
-		send.Data(&GenerateMessageErrorResponse{Error: "Error creating message"})
-		return
-	}
-
-	// Send the initial response so the client knows which character is responding
-	send.Data(&GenerateMessageInitialResponse{MessageId: message.Id, CharacterId: pickedCharacter.Id})
-
-	prompt += pickedCharacter.Name + ": "
-	fmt.Println("Prompt: ", prompt)
-
 	// Generate the message content
-	payload = map[string]any{
+	jsonPayload, err := json.Marshal(map[string]any{
 		"stream":       true,
 		"prompt":       prompt,
 		"n_predict":    preset.MaxTokens,
@@ -228,8 +270,7 @@ func GenerateMessage(ctx context.Context, input *struct {
 		"top_k":        preset.TopK,
 		"min_p":        preset.MinP,
 		"cache_prompt": true,
-	}
-	jsonPayload, err = json.Marshal(payload)
+	})
 	if err != nil {
 		fmt.Println("Error marshalling payload: ", err)
 		send.Data(&GenerateMessageErrorResponse{Error: "Error marshalling payload"})
@@ -244,7 +285,7 @@ func GenerateMessage(ctx context.Context, input *struct {
 	}
 
 	client := &http.Client{}
-	resp, err = client.Do(req)
+	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error sending request: ", err)
 		send.Data(&GenerateMessageErrorResponse{Error: "Error from built-in server"})
@@ -278,15 +319,90 @@ func GenerateMessage(ctx context.Context, input *struct {
 			}
 		}
 		bufferedResponse += e.Data.Content
-		_, err = db.DB.NewUpdate().Model(&db.Message{}).Set("text = ?", bufferedResponse).Where("id = ?", message.Id).Exec(ctx)
+		_, err = db.DB.NewUpdate().Model(&db.MessageContent{}).Set("text = ?", bufferedResponse).Where("id = ?", lastMessageContentId).Exec(ctx)
 		if err != nil {
-			fmt.Println("Error updating message: ", err)
-			send.Data(&GenerateMessageErrorResponse{Error: "Error updating message"})
+			fmt.Println("Error updating message content: ", err)
+			send.Data(&GenerateMessageErrorResponse{Error: "Error updating message content"})
 			return
 		}
+
 		send.Data(&GenerateMessageResponse{Text: e.Data.Content})
 	}
 
 	fmt.Println("Final response: ", bufferedResponse)
 	send.Data(&GenerateMessageFinalResponse{Text: bufferedResponse})
+}
+
+func NewSwipe(ctx context.Context, input *struct {
+	MessageId int64 `path:"messageId"`
+}) (*struct{}, error) {
+	messageContent := &db.MessageContent{
+		MessageId: input.MessageId,
+		Text:      "",
+	}
+	_, err := db.DB.NewInsert().Model(messageContent).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	messageCount, err := db.DB.NewSelect().Model((*db.MessageContent)(nil)).Where("message_id = ?", input.MessageId).Count(ctx)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println("Message count: ", messageCount)
+	newIndex := messageCount - 1
+	fmt.Println("New index: ", newIndex)
+
+	_, err = db.DB.NewUpdate().Model(&db.Message{}).Set("active_index = ?", newIndex).Where("id = ?", input.MessageId).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func SwipeLeft(ctx context.Context, input *struct {
+	MessageId int64 `path:"messageId"`
+}) (*struct{}, error) {
+	message := &db.Message{}
+	err := db.DB.NewSelect().Model(message).Where("id = ?", input.MessageId).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Active index: ", message.ActiveIndex)
+
+	if message.ActiveIndex <= 0 {
+		return nil, huma.Error400BadRequest("Already at the beginning")
+	}
+
+	_, err = db.DB.NewUpdate().Model(message).Set("active_index = ?", message.ActiveIndex-1).Where("id = ?", message.Id).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
+}
+
+func SwipeRight(ctx context.Context, input *struct {
+	MessageId int64 `path:"messageId"`
+}) (*struct{}, error) {
+	message := &db.Message{}
+	err := db.DB.NewSelect().Model(message).Relation("Content").Where("id = ?", input.MessageId).Scan(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Println("Active index: ", message.ActiveIndex)
+
+	if int(message.ActiveIndex) >= len(message.Content)-1 {
+		return nil, huma.Error400BadRequest("Already at the end")
+	}
+
+	_, err = db.DB.NewUpdate().Model(message).Set("active_index = ?", message.ActiveIndex+1).Where("id = ?", message.Id).Exec(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

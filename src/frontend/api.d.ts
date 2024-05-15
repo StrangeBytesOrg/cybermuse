@@ -61,8 +61,14 @@ export interface paths {
   "/generate-message": {
     post: operations["GenerateMessage"];
   };
+  "/get-response-character/{id}": {
+    post: operations["GetResponseCharacter"];
+  };
   "/models": {
     get: operations["ListModels"];
+  };
+  "/new-swipe/{messageId}": {
+    post: operations["NewSwipe"];
   };
   "/parse-template": {
     post: operations["ParseTemplate"];
@@ -93,6 +99,12 @@ export interface paths {
   };
   "/stop-server": {
     post: operations["StopServer"];
+  };
+  "/swipe-left/{messageId}": {
+    post: operations["SwipeLeft"];
+  };
+  "/swipe-right/{messageId}": {
+    post: operations["SwipeRight"];
   };
   "/template/{id}": {
     get: operations["GetTemplate"];
@@ -182,6 +194,7 @@ export interface components {
       characterId: number;
       /** Format: int64 */
       chatId: number;
+      generated: boolean;
       text: string;
     };
     CreateMessageResponseBody: {
@@ -293,12 +306,6 @@ export interface components {
     GenerateMessageFinalResponse: {
       text: string;
     };
-    GenerateMessageInitialResponse: {
-      /** Format: int64 */
-      characterId: number;
-      /** Format: int64 */
-      messageId: number;
-    };
     GenerateMessageRequest: {
       /**
        * Format: uri
@@ -394,6 +401,15 @@ export interface components {
       $schema?: string;
       preset: components["schemas"]["GeneratePreset"];
     };
+    GetResponseCharacterResponseBody: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      /** Format: int64 */
+      characterId: number;
+    };
     GetTemplateResponseBody: {
       /**
        * Format: uri
@@ -413,12 +429,21 @@ export interface components {
     };
     Message: {
       /** Format: int64 */
+      activeIndex: number;
+      /** Format: int64 */
       characterId: number;
       /** Format: int64 */
       chatId: number;
+      content: components["schemas"]["MessageContent"][];
       generated: boolean;
       /** Format: int64 */
       id: number;
+    };
+    MessageContent: {
+      /** Format: int64 */
+      id: number;
+      /** Format: int64 */
+      messageId: number;
       text: string;
     };
     Model: {
@@ -579,7 +604,6 @@ export interface operations {
   GetChat: {
     parameters: {
       path: {
-        /** @description Chat ID */
         id: string;
       };
     };
@@ -742,7 +766,6 @@ export interface operations {
   DeleteChat: {
     parameters: {
       path: {
-        /** @description Chat ID */
         id: string;
       };
     };
@@ -762,7 +785,6 @@ export interface operations {
   DeleteMessage: {
     parameters: {
       path: {
-        /** @description Message ID */
         id: number;
       };
     };
@@ -883,23 +905,23 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["GenerateTextResponse"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "text";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["ErrorResponse"];
               /**
                * @description The event name.
                * @constant
                */
               event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateTextResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "text";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */
@@ -926,17 +948,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["GenerateMessageInitialResponse"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "initial";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["GenerateMessageResponse"];
               /**
                * @description The event name.
@@ -980,6 +991,27 @@ export interface operations {
       };
     };
   };
+  GetResponseCharacter: {
+    parameters: {
+      path: {
+        chatId: number;
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        content: {
+          "application/json": components["schemas"]["GetResponseCharacterResponseBody"];
+        };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
   ListModels: {
     responses: {
       /** @description OK */
@@ -987,6 +1019,25 @@ export interface operations {
         content: {
           "application/json": components["schemas"]["ListModelsResponseBody"];
         };
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  NewSwipe: {
+    parameters: {
+      path: {
+        messageId: number;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
       };
       /** @description Error */
       default: {
@@ -1180,6 +1231,44 @@ export interface operations {
       };
     };
   };
+  SwipeLeft: {
+    parameters: {
+      path: {
+        messageId: number;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SwipeRight: {
+    parameters: {
+      path: {
+        messageId: number;
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
   GetTemplate: {
     parameters: {
       path: {
@@ -1246,7 +1335,6 @@ export interface operations {
   UpdateMessage: {
     parameters: {
       path: {
-        /** @description Message ID */
         id: number;
       };
     };

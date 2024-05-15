@@ -26,7 +26,7 @@ func FormatPrompt(templateString string, messages []*db.Message, characters []*d
 	formattedMessages := []FormattedMessage{}
 	for _, message := range messages {
 		newMessage := FormattedMessage{}
-		newMessage.Text = message.Text
+		newMessage.Text = message.Content[message.ActiveIndex].Text
 		newMessage.Generated = message.Generated
 		newMessage.CharacterName = characterMap[message.CharacterId].Name
 		formattedMessages = append(formattedMessages, newMessage)
