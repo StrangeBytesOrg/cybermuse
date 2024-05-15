@@ -109,30 +109,31 @@ func InitRouter() *chi.Mux {
 	}, controllers.DeleteMessage)
 
 	huma.Register(api, huma.Operation{
-		Path:        "/get-response-character/{id}",
+		Path:        "/get-response-character/{chatId}",
 		Method:      "POST",
 		Tags:        []string{"messages"},
 		OperationID: "GetResponseCharacter",
 	}, controllers.GetResponseCharacter)
 
+	// Swipes
 	huma.Register(api, huma.Operation{
 		Path:        "/new-swipe/{messageId}",
 		Method:      "POST",
-		Tags:        []string{"messages"},
+		Tags:        []string{"swipes"},
 		OperationID: "NewSwipe",
 	}, controllers.NewSwipe)
 
 	huma.Register(api, huma.Operation{
 		Path:        "/swipe-left/{messageId}",
 		Method:      "POST",
-		Tags:        []string{"messages"},
+		Tags:        []string{"swipes"},
 		OperationID: "SwipeLeft",
 	}, controllers.SwipeLeft)
 
 	huma.Register(api, huma.Operation{
 		Path:        "/swipe-right/{messageId}",
 		Method:      "POST",
-		Tags:        []string{"messages"},
+		Tags:        []string{"swipes"},
 		OperationID: "SwipeRight",
 	}, controllers.SwipeRight)
 

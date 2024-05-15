@@ -129,10 +129,10 @@ func ParseTemplate(ctx context.Context, input *struct {
 }) (*ParseTemplateResponse, error) {
 	exampleMessages := []*db.Message{
 		{Id: 1, ChatId: 1, CharacterId: 1, Generated: false, Content: []*db.MessageContent{
-			{Id: 1, MessageId: 1, Text: "Hello, how are you?"},
+			{MessageId: 1, Text: "Hello, how are you?"},
 		}},
 		{Id: 2, ChatId: 1, CharacterId: 2, Generated: true, Content: []*db.MessageContent{
-			{Id: 2, MessageId: 2, Text: "I'm doing well, thank you."},
+			{MessageId: 2, Text: "I'm doing well, thank you."},
 		}},
 	}
 	exampleCharacters := []*db.Character{
