@@ -19,14 +19,14 @@ import (
 // Create Message
 type CreateMessageResponse struct {
 	Body struct {
-		MessageId int64 `json:"messageId"`
+		MessageId uint32 `json:"messageId"`
 	}
 }
 
 func CreateMessage(ctx context.Context, input *struct {
 	Body struct {
-		ChatId      int64  `json:"chatId"`
-		CharacterId int64  `json:"characterId"`
+		ChatId      uint32 `json:"chatId"`
+		CharacterId uint32 `json:"characterId"`
 		Text        string `json:"text"`
 		Generated   bool   `json:"generated"`
 	}
@@ -52,7 +52,7 @@ func CreateMessage(ctx context.Context, input *struct {
 
 // Update Message
 func UpdateMessage(ctx context.Context, input *struct {
-	Id   int64 `path:"id"`
+	Id   uint32 `path:"id"`
 	Body struct {
 		Text string `json:"text"`
 	}
@@ -73,7 +73,7 @@ func UpdateMessage(ctx context.Context, input *struct {
 
 // Delete Message
 func DeleteMessage(ctx context.Context, input *struct {
-	Id int64 `path:"id"`
+	Id uint32 `path:"id"`
 }) (*struct{}, error) {
 	message := &db.Message{}
 	_, err := db.DB.NewDelete().Model(message).Where("id = ?", input.Id).Exec(ctx)
@@ -86,12 +86,12 @@ func DeleteMessage(ctx context.Context, input *struct {
 // Get a response character
 type GetResponseCharacterResponse struct {
 	Body struct {
-		CharacterId int64 `json:"characterId"`
+		CharacterId uint32 `json:"characterId"`
 	}
 }
 
 func GetResponseCharacter(ctx context.Context, input *struct {
-	ChatId int64 `path:"chatId"`
+	ChatId uint32 `path:"chatId"`
 }) (*GetResponseCharacterResponse, error) {
 	chat := &db.Chat{}
 	err := db.DB.NewSelect().
@@ -201,7 +201,7 @@ type GenerateMessageErrorResponse struct {
 
 func GenerateMessage(ctx context.Context, input *struct {
 	Body struct {
-		ChatId int64 `json:"chatId"`
+		ChatId uint32 `json:"chatId"`
 	}
 }, send sse.Sender) {
 	chat := &db.Chat{}

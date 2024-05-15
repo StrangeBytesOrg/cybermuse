@@ -45,7 +45,7 @@ func GetPreset(ctx context.Context, input *struct {
 
 type CreatePresetResponse struct {
 	Body struct {
-		Id int64 `json:"id"`
+		Id uint32 `json:"id"`
 	}
 }
 
@@ -73,6 +73,7 @@ func UpdatePreset(ctx context.Context, input *struct {
 	Body struct {
 		Name        string  `json:"name"`
 		Temperature float32 `json:"temperature"`
+		MaxTokens   int     `json:"maxTokens"`
 	}
 }) (*struct{}, error) {
 	_, err := db.DB.NewUpdate().

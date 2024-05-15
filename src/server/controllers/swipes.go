@@ -9,7 +9,7 @@ import (
 )
 
 func NewSwipe(ctx context.Context, input *struct {
-	MessageId int64 `path:"messageId"`
+	MessageId uint32 `path:"messageId"`
 }) (*struct{}, error) {
 	messageContent := &db.MessageContent{
 		MessageId: input.MessageId,
@@ -37,7 +37,7 @@ func NewSwipe(ctx context.Context, input *struct {
 }
 
 func SwipeLeft(ctx context.Context, input *struct {
-	MessageId int64 `path:"messageId"`
+	MessageId uint32 `path:"messageId"`
 }) (*struct{}, error) {
 	message := &db.Message{}
 	err := db.DB.NewSelect().Model(message).Where("id = ?", input.MessageId).Scan(ctx)
@@ -60,7 +60,7 @@ func SwipeLeft(ctx context.Context, input *struct {
 }
 
 func SwipeRight(ctx context.Context, input *struct {
-	MessageId int64 `path:"messageId"`
+	MessageId uint32 `path:"messageId"`
 }) (*struct{}, error) {
 	message := &db.Message{}
 	err := db.DB.NewSelect().Model(message).Relation("Content").Where("id = ?", input.MessageId).Scan(ctx)

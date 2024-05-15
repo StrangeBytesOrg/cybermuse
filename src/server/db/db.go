@@ -17,7 +17,7 @@ import (
 var DB *bun.DB
 
 type Character struct {
-	Id           int64   `bun:",pk,autoincrement" json:"id"`
+	Id           uint32  `bun:",pk,autoincrement" json:"id"`
 	Name         string  `bun:",nullzero" json:"name"`
 	Description  string  `bun:",nullzero" json:"description"`
 	Type         string  `bun:",notnull,nullzero,default:'character'" json:"type"`
@@ -26,22 +26,22 @@ type Character struct {
 }
 
 type Message struct {
-	Id          int64             `bun:",pk,autoincrement" json:"id"`
-	ChatId      int64             `bun:",notnull,nullzero" json:"chatId"`
-	CharacterId int64             `bun:",notnull,nullzero" json:"characterId"`
+	Id          uint32            `bun:",pk,autoincrement" json:"id"`
+	ChatId      uint32            `bun:",notnull,nullzero" json:"chatId"`
+	CharacterId uint32            `bun:",notnull,nullzero" json:"characterId"`
 	Generated   bool              `bun:",notnull" json:"generated"`
-	ActiveIndex int64             `bun:",notNull" json:"activeIndex"`
+	ActiveIndex uint32            `bun:",notNull" json:"activeIndex"`
 	Content     []*MessageContent `bun:",notnull,rel:has-many,join:id=message_id" json:"content"`
 }
 
 type MessageContent struct {
-	Id        int64  `bun:",pk,autoincrement" json:"id"`
+	Id        uint32 `bun:",pk,autoincrement" json:"id"`
 	Text      string `bun:",notnull" json:"text"`
-	MessageId int64  `bun:",notnull,nullzero" json:"messageId"`
+	MessageId uint32 `bun:",notnull,nullzero" json:"messageId"`
 }
 
 type Chat struct {
-	Id         int64        `bun:",pk,autoincrement" json:"id"`
+	Id         uint32       `bun:",pk,autoincrement" json:"id"`
 	CreatedAt  time.Time    `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
 	UpdatedAt  bun.NullTime ``
 	Characters []*Character `bun:"m2m:chat_characters,join:Chat=Character" json:"characters"`
@@ -49,21 +49,21 @@ type Chat struct {
 }
 
 type ChatCharacter struct {
-	ChatId      int64      `bun:",pk,nullzero"`
+	ChatId      uint32     `bun:",pk,nullzero"`
 	Chat        *Chat      `bun:"rel:belongs-to,join:chat_id=id"`
-	CharacterId int64      `bun:",pk,nullzero"`
+	CharacterId uint32     `bun:",pk,nullzero"`
 	Character   *Character `bun:"rel:belongs-to,join:character_id=id"`
 }
 
 type PromptTemplate struct {
-	Id      int64  `bun:",pk,autoincrement" json:"id"`
+	Id      uint32 `bun:",pk,autoincrement" json:"id"`
 	Name    string `bun:",notnull,nullzero" json:"name"`
 	Content string `bun:",notnull,nullzero" json:"content"`
 	Active  bool   `bun:",notnull" json:"active"`
 }
 
 type GeneratePreset struct {
-	Id          int64   `bun:",pk,autoincrement" json:"id,omitempty"`
+	Id          uint32  `bun:",pk,autoincrement" json:"id,omitempty"`
 	Name        string  `bun:",notnull,nullzero" json:"name"`
 	Temperature float32 `bun:",notnull" json:"temperature"`
 	MaxTokens   int     `bun:",notnull" json:"maxTokens"`

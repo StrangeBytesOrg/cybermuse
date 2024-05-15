@@ -35,10 +35,10 @@ type GetTemplateResponse struct {
 }
 
 func GetTemplate(ctx context.Context, input *struct {
-	ID string `path:"id" doc:"Template ID"`
+	Id string `path:"id" doc:"Template Id"`
 }) (*GetTemplateResponse, error) {
 	template := &db.PromptTemplate{}
-	err := db.DB.NewSelect().Model(template).Where("id = ?", input.ID).Scan(ctx)
+	err := db.DB.NewSelect().Model(template).Where("id = ?", input.Id).Scan(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func GetTemplate(ctx context.Context, input *struct {
 // Create a template
 type CreateTemplateResponse struct {
 	Body struct {
-		ID int64 `json:"id"`
+		Id uint32 `json:"id"`
 	}
 }
 
@@ -74,13 +74,13 @@ func CreateTemplate(ctx context.Context, input *struct {
 		return nil, err
 	}
 	response := &CreateTemplateResponse{}
-	response.Body.ID = template.Id
+	response.Body.Id = template.Id
 	return response, nil
 }
 
 // Update template
 func UpdateTemplate(ctx context.Context, input *struct {
-	ID   string `path:"id" doc:"Template ID"`
+	Id   string `path:"id" doc:"Template Id"`
 	Body struct {
 		Name    string `json:"name"`
 		Content string `json:"content"`
@@ -96,7 +96,7 @@ func UpdateTemplate(ctx context.Context, input *struct {
 		Model(template).
 		Set("name = ?", input.Body.Name).
 		Set("content = ?", input.Body.Content).
-		Where("id = ?", input.ID).
+		Where("id = ?", input.Id).
 		Exec(ctx)
 	if err != nil {
 		return nil, err
@@ -106,9 +106,9 @@ func UpdateTemplate(ctx context.Context, input *struct {
 
 // Delete a template
 func DeleteTemplate(ctx context.Context, input *struct {
-	ID string `path:"id" doc:"Template ID"`
+	Id string `path:"id" doc:"Template Id"`
 }) (*struct{}, error) {
-	_, err := db.DB.NewDelete().Model(&db.PromptTemplate{}).Where("id = ?", input.ID).Exec(ctx)
+	_, err := db.DB.NewDelete().Model(&db.PromptTemplate{}).Where("id = ?", input.Id).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func ParseTemplate(ctx context.Context, input *struct {
 }
 
 func SetActive(ctx context.Context, input *struct {
-	ID string `path:"id" doc:"Template ID"`
+	Id string `path:"id" doc:"Template Id"`
 }) (*struct{}, error) {
 	// Set existing active template to false
 	_, err := db.DB.NewUpdate().Model(&db.PromptTemplate{}).Set("active = false").Where("active = true").Exec(ctx)
@@ -161,7 +161,7 @@ func SetActive(ctx context.Context, input *struct {
 	}
 	// Set new active template
 	template := &db.PromptTemplate{}
-	_, err = db.DB.NewUpdate().Model(template).Set("active = true").Where("id = ?", input.ID).Exec(ctx)
+	_, err = db.DB.NewUpdate().Model(template).Set("active = true").Where("id = ?", input.Id).Exec(ctx)
 	if err != nil {
 		return nil, err
 	}

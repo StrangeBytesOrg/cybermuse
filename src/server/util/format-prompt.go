@@ -18,7 +18,7 @@ type TemplateData struct {
 }
 
 func FormatPrompt(templateString string, messages []*db.Message, characters []*db.Character) (string, error) {
-	characterMap := map[int64]*db.Character{}
+	characterMap := map[uint32]*db.Character{}
 	for _, character := range characters {
 		characterMap[character.Id] = character
 	}

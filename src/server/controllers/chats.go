@@ -60,7 +60,7 @@ type CreateChatResponse struct {
 
 func CreateChat(ctx context.Context, input *struct {
 	Body struct {
-		Characters []int64 `json:"characters"`
+		CharacterIds []uint32 `json:"characters"`
 	}
 }) (*CreateChatResponse, error) {
 	// Create chat
@@ -71,7 +71,7 @@ func CreateChat(ctx context.Context, input *struct {
 	}
 
 	// Add characters to chat
-	for _, characterId := range input.Body.Characters {
+	for _, characterId := range input.Body.CharacterIds {
 		_, err := db.DB.NewInsert().Model(&db.ChatCharacter{
 			ChatId:      chat.Id,
 			CharacterId: characterId,

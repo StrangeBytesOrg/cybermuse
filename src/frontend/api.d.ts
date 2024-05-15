@@ -61,7 +61,7 @@ export interface paths {
   "/generate-message": {
     post: operations["GenerateMessage"];
   };
-  "/get-response-character/{id}": {
+  "/get-response-character/{chatId}": {
     post: operations["GetResponseCharacter"];
   };
   "/models": {
@@ -133,7 +133,7 @@ export interface components {
     Character: {
       description: string;
       firstMessage: string | null;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
       image: string | null;
       name: string;
@@ -144,7 +144,7 @@ export interface components {
       characters: components["schemas"]["Character"][];
       /** Format: date-time */
       createdAt: string;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
       messages: components["schemas"]["Message"][];
     };
@@ -190,9 +190,9 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       characterId: number;
-      /** Format: int64 */
+      /** Format: int32 */
       chatId: number;
       generated: boolean;
       text: string;
@@ -203,7 +203,7 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       messageId: number;
     };
     CreatePresetRequest: {
@@ -222,7 +222,7 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
     };
     CreateTemplateRequest: {
@@ -240,7 +240,7 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
     };
     DownloadModelError: {
@@ -312,7 +312,7 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       chatId: number;
     };
     GenerateMessageResponse: {
@@ -320,7 +320,7 @@ export interface components {
     };
     GeneratePreset: {
       active: boolean;
-      /** Format: int64 */
+      /** Format: int32 */
       id?: number;
       /** Format: int64 */
       maxTokens: number;
@@ -407,7 +407,7 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
-      /** Format: int64 */
+      /** Format: int32 */
       characterId: number;
     };
     GetTemplateResponseBody: {
@@ -428,21 +428,21 @@ export interface components {
       models: components["schemas"]["Model"][];
     };
     Message: {
-      /** Format: int64 */
+      /** Format: int32 */
       activeIndex: number;
-      /** Format: int64 */
+      /** Format: int32 */
       characterId: number;
-      /** Format: int64 */
+      /** Format: int32 */
       chatId: number;
       content: components["schemas"]["MessageContent"][];
       generated: boolean;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
     };
     MessageContent: {
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
-      /** Format: int64 */
+      /** Format: int32 */
       messageId: number;
       text: string;
     };
@@ -471,7 +471,7 @@ export interface components {
     PromptTemplate: {
       active: boolean;
       content: string;
-      /** Format: int64 */
+      /** Format: int32 */
       id: number;
       name: string;
     };
@@ -536,6 +536,8 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
+      /** Format: int64 */
+      maxTokens: number;
       name: string;
       /** Format: float */
       temperature: number;
@@ -566,7 +568,6 @@ export interface operations {
   GetCharacter: {
     parameters: {
       path: {
-        /** @description Character ID */
         id: string;
       };
     };
@@ -746,7 +747,6 @@ export interface operations {
   DeleteCharacter: {
     parameters: {
       path: {
-        /** @description Character ID */
         id: string;
       };
     };
@@ -823,7 +823,7 @@ export interface operations {
   DeleteTemplate: {
     parameters: {
       path: {
-        /** @description Template ID */
+        /** @description Template Id */
         id: string;
       };
     };
@@ -905,23 +905,23 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["ErrorResponse"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "error";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["GenerateTextResponse"];
               /**
                * @description The event name.
                * @constant
                */
               event: "text";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["ErrorResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */
@@ -1127,7 +1127,7 @@ export interface operations {
   SetActive: {
     parameters: {
       path: {
-        /** @description Template ID */
+        /** @description Template Id */
         id: string;
       };
     };
@@ -1272,7 +1272,7 @@ export interface operations {
   GetTemplate: {
     parameters: {
       path: {
-        /** @description Template ID */
+        /** @description Template Id */
         id: string;
       };
     };
@@ -1310,7 +1310,6 @@ export interface operations {
   UpdateCharacter: {
     parameters: {
       path: {
-        /** @description Character ID */
         id: string;
       };
     };
@@ -1383,7 +1382,7 @@ export interface operations {
   UpdateTemplate: {
     parameters: {
       path: {
-        /** @description Template ID */
+        /** @description Template Id */
         id: string;
       };
     };

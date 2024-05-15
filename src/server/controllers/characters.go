@@ -32,7 +32,7 @@ type GetCharacterResponse struct {
 }
 
 func GetCharacter(ctx context.Context, input *struct {
-	Id string `path:"id" doc:"Character ID"`
+	Id string `path:"id"`
 }) (*GetCharacterResponse, error) {
 	character := &db.Character{}
 	err := db.DB.NewSelect().Model(character).Where("id = ?", input.Id).Scan(ctx)
@@ -87,7 +87,7 @@ func CreateCharacter(ctx context.Context, input *struct {
 
 // Update Character
 func UpdateCharacter(ctx context.Context, input *struct {
-	Id   string `path:"id" doc:"Character ID"`
+	Id   string `path:"id"`
 	Body struct {
 		Name         string `json:"name"`
 		Description  string `json:"description"`
@@ -107,10 +107,10 @@ func UpdateCharacter(ctx context.Context, input *struct {
 
 // Delete Character
 func DeleteCharacter(ctx context.Context, input *struct {
-	Id string `path:"id" doc:"Character ID"`
+	CharacterId string `path:"id"`
 }) (*struct{}, error) {
 	character := &db.Character{}
-	_, err := db.DB.NewDelete().Model(character).Where("id = ?", input.Id).Exec(ctx)
+	_, err := db.DB.NewDelete().Model(character).Where("id = ?", input.CharacterId).Exec(ctx)
 	if err != nil {
 		fmt.Printf("Error deleting character: %v\n", err)
 		return nil, err
