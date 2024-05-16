@@ -264,14 +264,25 @@ func GenerateMessage(ctx context.Context, input *struct {
 
 	// Generate the message content
 	jsonPayload, err := json.Marshal(map[string]any{
-		"stream":       true,
-		"prompt":       prompt,
-		"n_predict":    preset.MaxTokens,
-		"temperature":  preset.Temperature,
-		"top_p":        preset.TopP,
-		"top_k":        preset.TopK,
-		"min_p":        preset.MinP,
-		"cache_prompt": true,
+		"stream":            true,
+		"prompt":            prompt,
+		"cache_prompt":      true,
+		"seed":              42,
+		"n_predict":         preset.MaxTokens,
+		"temperature":       preset.Temperature,
+		"top_k":             preset.TopK,
+		"top_p":             preset.TopP,
+		"min_p":             preset.MinP,
+		"tfs_z":             preset.TFSZ,
+		"typical_p":         preset.TypicalP,
+		"repeat_penalty":    preset.RepeatPenalty,
+		"repeat_last_n":     preset.RepeatLastN,
+		"penalize_nl":       preset.PenalizeNL,
+		"presence_penalty":  preset.PresencePenalty,
+		"frequency_penalty": preset.FrequencyPenalty,
+		"mirostat":          preset.Mirostat,
+		"mirostat_tau":      preset.MirostatTau,
+		"mirostat_eta":      preset.MirostatEta,
 	})
 	if err != nil {
 		fmt.Println("Error marshalling payload: ", err)

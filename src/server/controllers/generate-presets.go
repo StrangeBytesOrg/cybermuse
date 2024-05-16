@@ -49,15 +49,52 @@ type CreatePresetResponse struct {
 	}
 }
 
+type GenerationSettings struct {
+	MaxTokens   uint    `json:"maxTokens"`
+	Temperature float32 `json:"temperature"`
+	// dynatemp_range
+	// dynatemp_exponent
+	TopK float32 `json:"topK,omitempty"`
+	TopP float32 `json:"topP,omitempty"`
+	MinP float32 `json:"minP,omitempty"`
+	// stop
+	TFSZ             float32 `json:"tfsz,omitempty"`
+	TypicalP         float32 `json:"typicalP,omitempty"`
+	RepeatPenalty    float32 `json:"repeatPenalty,omitempty"`
+	RepeatLastN      float32 `json:"repeatLastN,omitempty"`
+	PenalizeNL       bool    `json:"penalizeNL,omitempty"`
+	PresencePenalty  float32 `json:"presencePenalty,omitempty"`
+	FrequencyPenalty float32 `json:"frequencyPenalty,omitempty"`
+	// PenaltyPrompt    string  `json:"penaltyPrompt,omitempty"`
+	Mirostat    uint    `json:"mirostat,omitempty"`
+	MirostatTau float32 `json:"mirostatTau,omitempty"`
+	MirostatEta float32 `json:"mirostatEta,omitempty"`
+	// Samplers []string `json:"samplers"`
+}
+
 func CreatePreset(ctx context.Context, input *struct {
 	Body struct {
-		Name        string  `json:"name" minLength:"1"`
-		Temperature float32 `json:"temperature"`
+		Name string `json:"name" minLength:"1"`
+		GenerationSettings
 	}
 }) (*CreatePresetResponse, error) {
 	preset := &db.GeneratePreset{
-		Name:        input.Body.Name,
-		Temperature: input.Body.Temperature,
+		Name:             input.Body.Name,
+		MaxTokens:        input.Body.MaxTokens,
+		Temperature:      input.Body.Temperature,
+		TopK:             input.Body.TopK,
+		TopP:             input.Body.TopP,
+		MinP:             input.Body.MinP,
+		TFSZ:             input.Body.TFSZ,
+		TypicalP:         input.Body.TypicalP,
+		RepeatPenalty:    input.Body.RepeatPenalty,
+		RepeatLastN:      input.Body.RepeatLastN,
+		PenalizeNL:       input.Body.PenalizeNL,
+		PresencePenalty:  input.Body.PresencePenalty,
+		FrequencyPenalty: input.Body.FrequencyPenalty,
+		Mirostat:         input.Body.Mirostat,
+		MirostatTau:      input.Body.MirostatTau,
+		MirostatEta:      input.Body.MirostatEta,
 	}
 	_, err := db.DB.NewInsert().Model(preset).Exec(ctx)
 	if err != nil {
@@ -71,16 +108,29 @@ func CreatePreset(ctx context.Context, input *struct {
 func UpdatePreset(ctx context.Context, input *struct {
 	Id   string `path:"id"`
 	Body struct {
-		Name        string  `json:"name"`
-		Temperature float32 `json:"temperature"`
-		MaxTokens   int     `json:"maxTokens"`
+		Name string `json:"name"`
+		GenerationSettings
 	}
 }) (*struct{}, error) {
 	_, err := db.DB.NewUpdate().
 		Model(&db.GeneratePreset{}).
-		Set("name = ?", input.Body.Name).
-		Set("temperature = ?", input.Body.Temperature).
 		Where("id = ?", input.Id).
+		Set("name = ?", input.Body.Name).
+		Set("max_tokens = ?", input.Body.MaxTokens).
+		Set("temperature = ?", input.Body.Temperature).
+		Set("top_k = ?", input.Body.TopK).
+		Set("top_p = ?", input.Body.TopP).
+		Set("min_p = ?", input.Body.MinP).
+		Set("tfsz = ?", input.Body.TFSZ).
+		Set("typical_p = ?", input.Body.TypicalP).
+		Set("repeat_penalty = ?", input.Body.RepeatPenalty).
+		Set("repeat_last_n = ?", input.Body.RepeatLastN).
+		Set("penalize_nl = ?", input.Body.PenalizeNL).
+		Set("presence_penalty = ?", input.Body.PresencePenalty).
+		Set("frequency_penalty = ?", input.Body.FrequencyPenalty).
+		Set("mirostat = ?", input.Body.Mirostat).
+		Set("mirostat_tau = ?", input.Body.MirostatTau).
+		Set("mirostat_eta = ?", input.Body.MirostatEta).
 		Exec(ctx)
 	if err != nil {
 		return nil, err

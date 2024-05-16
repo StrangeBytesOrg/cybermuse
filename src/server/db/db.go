@@ -63,14 +63,26 @@ type PromptTemplate struct {
 }
 
 type GeneratePreset struct {
-	Id          uint32  `bun:",pk,autoincrement" json:"id,omitempty"`
-	Name        string  `bun:",notnull,nullzero" json:"name"`
-	Temperature float32 `bun:",notnull" json:"temperature"`
-	MaxTokens   int     `bun:",notnull" json:"maxTokens"`
-	MinP        float32 `bun:",notnull" json:"minP"`
-	TopP        float32 `bun:",notnull" json:"topP"`
-	TopK        float32 `bun:",notnull" json:"topK"`
-	Active      bool    `bun:",notnull" json:"active"`
+	// Internal
+	Id     uint32 `bun:",pk,autoincrement" json:"id,omitempty"`
+	Name   string `bun:",notnull,nullzero" json:"name"`
+	Active bool   `bun:",notnull" json:"active"`
+	// Passed to server
+	MaxTokens        uint    `json:"maxTokens"`
+	Temperature      float32 `json:"temperature"`
+	TopK             float32 `bun:"top_k" json:"topK"`
+	TopP             float32 `bun:"top_p" json:"topP"`
+	MinP             float32 `bun:"min_p" json:"minP"`
+	TFSZ             float32 `json:"tfsz"`
+	TypicalP         float32 `bun:"typical_p" json:"typicalP"`
+	RepeatPenalty    float32 `json:"repeatPenalty"`
+	RepeatLastN      float32 `bun:"repeat_last_n" json:"repeatLastN"`
+	PenalizeNL       bool    `json:"penalizeNL"`
+	PresencePenalty  float32 `json:"presencePenalty"`
+	FrequencyPenalty float32 `json:"frequencyPenalty"`
+	Mirostat         uint    `json:"mirostat"`
+	MirostatTau      float32 `json:"mirostatTau"`
+	MirostatEta      float32 `json:"mirostatEta"`
 }
 
 func InitDB() error {
@@ -127,7 +139,26 @@ func InitDB() error {
 		DB.NewInsert().Model(&PromptTemplate{Name: "Llama3 Roleplay", Content: llama3Roleplay}).Exec(ctx)
 
 		// Create a default Generate Preset
-		DB.NewInsert().Model(&GeneratePreset{Name: "Default", MaxTokens: 32, Temperature: 0.5, MinP: 0, TopP: 0, TopK: 0, Active: true}).Exec(ctx)
+		DB.NewInsert().Model(&GeneratePreset{
+			Name:   "Default",
+			Active: true,
+			// Add defaults taken from llama.cpp server defaults
+			MaxTokens:        64,
+			Temperature:      0.8,
+			TopK:             40,
+			TopP:             0.95,
+			MinP:             0.05,
+			TFSZ:             1.0, // 1.0 = disabled
+			TypicalP:         1.0, // 1.0 = disabled
+			RepeatPenalty:    1.1, // 0 = disabled
+			RepeatLastN:      64,  // 0 = disabled, -1 = ctx-size
+			PenalizeNL:       false,
+			PresencePenalty:  0, // 0 = disabled
+			FrequencyPenalty: 0, // 0 = disabled
+			Mirostat:         0, // 0 = disabled, 1 = mirostat, 2 = mirostat 2.0
+			MirostatTau:      5.0,
+			MirostatEta:      0.1,
+		}).Exec(ctx)
 
 		// Add a default chat message
 		DB.NewInsert().Model(&Message{ChatId: 1, CharacterId: 1, ActiveIndex: 0, Generated: false}).Exec(ctx)
