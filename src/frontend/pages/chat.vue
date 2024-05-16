@@ -49,48 +49,19 @@ const checkSend = (event: KeyboardEvent) => {
     }
 }
 
-const sendMessage = async () => {
-    const characterId = 1
+const createMessage = async (characterId: number, text: string = '', generated: boolean) => {
     const {data, error} = await client.POST('/create-message', {
         body: {
             chatId: Number(chatId),
             characterId: Number(characterId),
-            text: currentMessage.value,
-            generated: false,
+            text,
+            generated,
         },
     })
 
     if (error) {
         toast.error(error.detail || 'Failed sending message')
-    }
-
-    if (data && data.messageId) {
-        messages.push({
-            id: data.messageId,
-            chatId: Number(chatId),
-            characterId: characterId,
-            generated: false,
-            activeIndex: 0,
-            content: [{text: currentMessage.value, messageId: data.messageId}],
-        })
-        currentMessage.value = ''
-    }
-    return data?.messageId
-}
-
-const newResponse = async () => {
-    const characterId = 2
-    const {data, error} = await client.POST('/create-message', {
-        body: {
-            chatId: Number(chatId),
-            characterId,
-            text: currentMessage.value,
-            generated: true,
-        },
-    })
-
-    if (error) {
-        toast.error(error.detail || 'Failed sending message')
+        return
     }
 
     if (data && data.messageId) {
@@ -98,9 +69,9 @@ const newResponse = async () => {
             id: data.messageId,
             chatId: Number(chatId),
             characterId,
-            generated: true,
+            generated,
             activeIndex: 0,
-            content: [{text: currentMessage.value, messageId: data.messageId}],
+            content: [{text, messageId: data.messageId}],
         })
         currentMessage.value = ''
     }
@@ -137,12 +108,10 @@ const generateMessage = async () => {
     }
 }
 
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
-
 const fullSend = async () => {
     pendingMessage.value = true
-    await sendMessage()
-    await newResponse()
+    await createMessage(1, currentMessage.value, false)
+    await createMessage(2, '', true)
     await generateMessage()
     pendingMessage.value = false
 }
@@ -291,10 +260,9 @@ onMounted(() => {
                     <div class="avatar ml-2">
                         <div class="w-16 h-16 rounded-full">
                             <img
-                                :src="
-                                    characterMap.get(message.characterId)?.image ||
-                                    '../assets/img/placeholder-avatar.webp'
-                                " />
+                                v-if="characterMap.get(message.characterId)?.image"
+                                :src="characterMap.get(message.characterId)?.image" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />
                         </div>
                     </div>
                     <div class="flex flex-col flex-grow px-2">
