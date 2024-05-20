@@ -49,6 +49,14 @@ func (app *App) startup(ctx context.Context) {
 	http.ListenAndServe(":31700", router)
 }
 
+func (app *App) shutdown(ctx context.Context) {
+	fmt.Println("Shutting down")
+	_, err := controllers.StopServer(ctx, &struct{}{})
+	if err != nil {
+		fmt.Println("Error stopping server:", err)
+	}
+}
+
 //go:embed llama-server
 var embeddedServer []byte
 
