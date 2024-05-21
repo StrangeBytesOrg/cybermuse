@@ -8,7 +8,10 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
+	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -42,6 +45,17 @@ func GetServerStatus(ctx context.Context, input *struct{}) (*ServerStatusRespons
 	return response, nil
 }
 
+// Get process attributes to hide the window on Windows
+func GetProcAttr() *syscall.SysProcAttr {
+	attr := &syscall.SysProcAttr{}
+	if runtime.GOOS == "windows" {
+		attrVal := reflect.ValueOf(attr).Elem()
+		attrVal.FieldByName("CreationFlags").SetUint(0x08000000)
+		attrVal.FieldByName("HideWindow").SetBool(true)
+	}
+	return attr
+}
+
 type StartServerInput struct {
 	Body struct {
 		ModelFile string `json:"modelFile"`
@@ -71,6 +85,7 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 	}
 
 	cmd := exec.Command(binaryPath, "--model", modelPath, "--log-disable")
+	cmd.SysProcAttr = GetProcAttr()
 
 	// Capture the stdout and stderr of the process
 	stdout, err := cmd.StdoutPipe()
