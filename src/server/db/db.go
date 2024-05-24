@@ -4,10 +4,13 @@ import (
 	"chat-app/src/server/config"
 	"context"
 	"database/sql"
+	"embed"
+	"fmt"
 	"os"
 	"path/filepath"
 	"time"
 
+	"github.com/pressly/goose/v3"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/sqlitedialect"
 	"github.com/uptrace/bun/driver/sqliteshim"
@@ -85,16 +88,33 @@ type GeneratePreset struct {
 	MirostatEta      float32 `json:"mirostatEta"`
 }
 
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
+
 func InitDB() error {
 	appDataDir := config.GetDataPath()
 
-	// TODO use a local path for development for ease of testing
-	dbPath := filepath.Join(appDataDir, "app-data.db?cache=shared&_fk=1")
+	var dbPath string
+	if os.Getenv("DEV") != "" {
+		dbPath = "./dev.db?cache=shared&_fk=1"
+	} else {
+		dbPath = filepath.Join(appDataDir, "app-data.db?cache=shared&_fk=1")
+	}
 	sqldb, err := sql.Open(sqliteshim.ShimName, dbPath)
 	if err != nil {
 		panic(err)
 	}
+	fmt.Println("Connected to database:", dbPath)
 	DB = bun.NewDB(sqldb, sqlitedialect.New())
+
+	// Goose migrations
+	goose.SetBaseFS(embedMigrations)
+	if err := goose.SetDialect("sqlite"); err != nil {
+		panic(err)
+	}
+	if err := goose.Up(sqldb, "migrations"); err != nil {
+		panic(err)
+	}
 
 	DB.RegisterModel((*ChatCharacter)(nil))
 	DB.RegisterModel((*MessageContent)(nil))
