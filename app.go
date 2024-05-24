@@ -6,8 +6,10 @@ import (
 	"chat-app/src/server/controllers"
 	"chat-app/src/server/db"
 	"context"
-	_ "embed"
+	"embed"
 	"fmt"
+	"io"
+	"io/fs"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -57,21 +59,14 @@ func (app *App) shutdown(ctx context.Context) {
 	}
 }
 
-//go:embed llama-server
-var embeddedServer []byte
+//go:embed build/llamacpp
+var embeddedServer embed.FS
 
 // Extract the LlamaCPP server into the app data directory
 func installServer() {
 	appDataDir, err := os.UserConfigDir()
 	if err != nil {
 		fmt.Println("Error getting app data dir: ", err)
-		return
-	}
-
-	// Check if the llama-server binary already exists
-	binaryPath := filepath.Join(appDataDir, "chat-app", "llama-server")
-	if _, err := os.Stat(binaryPath); err == nil {
-		println("Llama server already exists")
 		return
 	}
 
@@ -82,6 +77,49 @@ func installServer() {
 		return
 	}
 
-	println("Extracting LlamaCPP to: ", binaryPath)
-	os.WriteFile(binaryPath, embeddedServer, 0755)
+	serverDir := filepath.Join(configDir, "llamacpp")
+	err = os.MkdirAll(serverDir, 0755)
+	if err != nil {
+		fmt.Println("Error creating server dir: ", err)
+		return
+	}
+
+	err = fs.WalkDir(embeddedServer, "build", func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+		src, err := embeddedServer.Open(path)
+		if err != nil {
+			return err
+		}
+		defer src.Close()
+
+		dst := filepath.Join(serverDir, filepath.Base(path))
+
+		if _, err := os.Stat(dst); err == nil {
+			fmt.Printf("File %s already exists, skipping\n", dst)
+			return nil
+		}
+
+		srcBytes, err := io.ReadAll(src)
+		if err != nil {
+			return err
+		}
+
+		if path == "build/llamacpp/server" {
+			os.WriteFile(dst, srcBytes, 0755)
+		} else {
+			os.WriteFile(dst, srcBytes, 0644)
+		}
+
+		fmt.Printf("Extracted %s to %s\n", path, dst)
+		return nil
+	})
+	if err != nil {
+		fmt.Println("Error extracting files: ", err)
+		return
+	}
 }

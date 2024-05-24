@@ -65,7 +65,10 @@ type StartServerInput struct {
 // TODO probably return some details to the client
 func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error) {
 	appConfig := config.GetConfig()
-	binaryPath := filepath.Join(appConfig.AppDataPath, "llama-server")
+	binaryPath := filepath.Join(appConfig.AppDataPath, "llamacpp", "server")
+	if runtime.GOOS == "windows" {
+		binaryPath += ".exe"
+	}
 	modelPath := filepath.Join(appConfig.ModelsPath, input.Body.ModelFile)
 
 	// Check if the model file exists

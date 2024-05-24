@@ -6,7 +6,7 @@ tmp_dir = "tmp"
 args_bin = []
 # bin = "./tmp/main"
 full_bin = "DEV=1 ./tmp/server"
-cmd = "go build -tags server -o ./tmp/server ./main-server.go ./app.go"
+cmd = "go build -tags \"server\" -o ./tmp/server ."
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []
