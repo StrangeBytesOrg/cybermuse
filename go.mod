@@ -13,12 +13,14 @@ require (
 	github.com/uptrace/bun v1.2.1
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.1
 	github.com/uptrace/bun/driver/sqliteshim v1.2.1
+	github.com/uptrace/bun/extra/bundebug v1.2.1
 	github.com/wailsapp/wails/v2 v2.8.0
 )
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-chi/chi v4.1.2+incompatible // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/godbus/dbus/v5 v5.1.0 // indirect
