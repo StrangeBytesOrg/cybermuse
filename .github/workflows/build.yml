@@ -10,6 +10,7 @@ env:
   # Necessary for most environments as build failure can occur due to OOM issues
   NODE_OPTIONS: "--max-old-space-size=4096"
   LLAMA_CPP_VERSION: "b2961"
+  APP_VERSION: "v0.${{ github.run_number }}"
 
 jobs:
   build:
@@ -67,13 +68,17 @@ jobs:
 
       - name: Archive Linux
         if: matrix.build.platform == 'linux/amd64'
-        run: cd build/bin && tar -czf chat.tar.gz chat
+        run: cd build/bin && tar -czf chat-linux-${{env.APP_VERSION}}.tar.gz chat
 
       - name: Archive Windows
         if: matrix.build.platform == 'windows/amd64'
         run: |
           cd build/bin
-          7z a -tzip chat.zip chat-amd64-installer.exe
+          7z a -tzip chat-windows-${{env.APP_VERSION}}.zip chat-amd64-installer.exe
+
+      - name: Archive Mac
+        if: matrix.build.platform == 'darwin/amd64'
+        run: cd build/bin && mv chat.app.zip chat-mac-${{env.APP_VERSION}}.zip
 
       - name: Setup RClone
         uses: AnimMouse/setup-rclone@v1
@@ -90,4 +95,4 @@ jobs:
             no_check_bucket = true
 
       - name: Upload files to R2
-        run: 'rclone copy --include "*.zip" --include "*.tar.gz" build/bin/ r2:chat-app-releases/${{ github.run_number}}/'
+        run: 'rclone copy --include "*.zip" --include "*.tar.gz" build/bin/ r2:chat-app-releases/'
