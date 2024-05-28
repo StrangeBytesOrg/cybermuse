@@ -60,6 +60,8 @@ jobs:
       - name: Build Wails
         uses: dAppServer/wails-build-action@v2.2
         id: build
+        env:
+          VITE_CLIENT_VERSION: ${{env.APP_VERSION}}
         with:
           build-name: ${{ matrix.build.name }}
           build-platform: ${{ matrix.build.platform }}

@@ -10,6 +10,7 @@ import {useToast} from 'vue-toastification'
 const themeStore = useThemeStore()
 const toast = useToast()
 const showMenu = ref(false)
+const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
 onErrorCaptured((error) => {
     toast.error(`An error occurred: ${error.message}`)
@@ -22,7 +23,7 @@ const toggleMenu = () => {
 </script>
 
 <template>
-    <div class="bg-base-200 sm:hidden">
+    <div class="bg-base-200 h-14 sm:hidden fixed top-0 w-full z-30">
         <button @click="toggleMenu" class="btn btn-sm btn-square w-10 h-10 ml-3 mt-2">
             <!-- prettier-ignore -->
             <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
@@ -30,45 +31,57 @@ const toggleMenu = () => {
             </svg>
         </button>
     </div>
-    <div class="flex flex-row" style="height: var(--doc-height)" :data-theme="themeStore.theme">
+
+    <div class="flex flex-row pt-14 pb-1 sm:pt-0" style="height: var(--doc-height)" :data-theme="themeStore.theme">
         <!-- <connection /> -->
-        <!-- Menu -->
         <div
             @click="toggleMenu"
             class="menu-overlay z-10 fixed w-full h-full bg-gray-500 opacity-50"
             :class="{hidden: !showMenu}"></div>
-        <ul
-            class="menu w-60 min-w-60 sm:w-48 sm:min-w-48 bg-base-200 min-h-full fixed sm:relative z-20 wat"
+
+        <!-- Menu -->
+        <div
+            class="w-60 min-w-60 sm:w-48 sm:min-w-48 bg-base-200 min-h-full fixed sm:relative z-20 wat"
             :class="{customShow: showMenu, customHide: !showMenu}">
-            <li>
-                <router-link to="/characters" class="font-bold px-2" active-class="active">Characters</router-link>
-            </li>
-            <li>
-                <router-link to="/chats" class="font-bold px-2" active-class="active">Chats</router-link>
-            </li>
-            <li>
-                <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
-            </li>
-            <li>
-                <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
-                    Theme Settings
-                </router-link>
-            </li>
-            <li>
-                <router-link to="/templates" class="font-bold px-2" active-class="active">Prompt Templates</router-link>
-            </li>
-            <li>
-                <router-link to="/presets" class="font-bold px-2" active-class="active">Generation Presets</router-link>
-            </li>
-            <li>
-                <router-link to="/backend-settings" class="font-bold px-2" active-class="active">Models</router-link>
-            </li>
-            <li>
-                <router-link to="/download-models" class="font-bold px-2" active-class="active">
-                    Download Models
-                </router-link>
-            </li>
-        </ul>
+            <ul class="menu">
+                <li>
+                    <router-link to="/characters" class="font-bold px-2" active-class="active">Characters</router-link>
+                </li>
+                <li>
+                    <router-link to="/chats" class="font-bold px-2" active-class="active">Chats</router-link>
+                </li>
+                <li>
+                    <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
+                </li>
+                <li>
+                    <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
+                        Theme Settings
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/templates" class="font-bold px-2" active-class="active">
+                        Prompt Templates
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/presets" class="font-bold px-2" active-class="active">
+                        Generation Presets
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
+                        Models
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/download-models" class="font-bold px-2" active-class="active">
+                        Download Models
+                    </router-link>
+                </li>
+            </ul>
+
+            <div class="absolute bottom-0 w-full text-center">Version: {{ version }}</div>
+        </div>
 
         <!-- Main -->
         <div class="flex flex-grow min-h-0">
