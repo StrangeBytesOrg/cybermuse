@@ -74,7 +74,7 @@ const stop = async () => {
 </script>
 
 <template>
-    <div class="flex flex-row flex-grow">
+    <div class="flex flex-row min-h-[100vh]">
         <!-- Input -->
         <div class="flex flex-col flex-grow w-1/2 p-2">
             <textarea

@@ -23,25 +23,25 @@ const toggleMenu = () => {
 </script>
 
 <template>
-    <div class="bg-base-200 h-14 sm:hidden fixed top-0 w-full z-30">
-        <button @click="toggleMenu" class="btn btn-sm btn-square w-10 h-10 ml-3 mt-2">
-            <!-- prettier-ignore -->
-            <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
-            </svg>
-        </button>
-    </div>
+    <div :data-theme="themeStore.theme" class="min-h-[100vh]">
+        <div class="bg-base-200 h-14 sm:hidden fixed top-0 w-full z-30">
+            <button @click="toggleMenu" class="btn btn-sm btn-square w-10 h-10 ml-3 mt-2">
+                <!-- prettier-ignore -->
+                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                </svg>
+            </button>
+        </div>
 
-    <div class="flex flex-row pt-14 pb-1 sm:pt-0" style="height: var(--doc-height)" :data-theme="themeStore.theme">
-        <!-- <connection /> -->
+        <!-- Top Bar -->
         <div
             @click="toggleMenu"
             class="menu-overlay z-10 fixed w-full h-full bg-gray-500 opacity-50"
             :class="{hidden: !showMenu}"></div>
 
-        <!-- Menu -->
+        <!-- Sidebar -->
         <div
-            class="w-60 min-w-60 sm:w-48 sm:min-w-48 bg-base-200 min-h-full fixed sm:relative z-20 wat"
+            class="fixed left-0 top-14 sm:top-0 h-full w-52 bg-base-200 z-20 wat"
             :class="{customShow: showMenu, customHide: !showMenu}">
             <ul class="menu">
                 <li>
@@ -84,8 +84,8 @@ const toggleMenu = () => {
         </div>
 
         <!-- Main -->
-        <div class="flex flex-grow min-h-0">
-            <div class="flex flex-col flex-1 overflow-auto mr-1 ml-1">
+        <div class="flex min-h-0 ml-0 sm:ml-52 pt-14 sm:pt-0">
+            <div class="flex flex-col flex-1 mr-1 ml-1">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />

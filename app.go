@@ -109,6 +109,7 @@ func installServer() {
 			return err
 		}
 
+		// Make the server executable
 		if path == "build/llamacpp/server" {
 			os.WriteFile(dst, srcBytes, 0755)
 		} else {

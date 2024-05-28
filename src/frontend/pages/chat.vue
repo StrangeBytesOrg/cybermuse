@@ -16,6 +16,7 @@ const pendingMessage = ref(false)
 const editModeId = ref(0)
 const editedText = ref('')
 const messagesElement = ref<HTMLElement>()
+const signal = new AbortController()
 
 // Check if generation server is actually running
 const checkServer = async () => {
@@ -83,6 +84,7 @@ const generateMessage = async () => {
             chatId: Number(chatId),
         },
         parseAs: 'stream',
+        signal: signal.signal,
     })
     const responseIterable = responseToIterable(response)
     let bufferedResponse = ''
@@ -106,6 +108,11 @@ const generateMessage = async () => {
             console.error('Unknown event', chunk)
         }
     }
+}
+
+const stopGeneration = () => {
+    signal.abort()
+    pendingMessage.value = false
 }
 
 const fullSend = async () => {
@@ -249,7 +256,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="flex flex-col flex-grow min-h-0 pt-2">
+    <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
         <!-- Messages -->
         <div ref="messagesElement" class="flex-grow overflow-auto px-1 md:px-2">
             <div
@@ -351,6 +358,9 @@ onMounted(() => {
             </div>
         </div>
 
+        <!-- expanding spacer -->
+        <div class="flex-grow" />
+
         <!-- Chat Controls -->
         <div class="flex md:px-2 md:pb-2">
             <textarea
@@ -358,15 +368,22 @@ onMounted(() => {
                 id="message-input"
                 v-model="currentMessage"
                 @keydown="checkSend"
-                :disabled="pendingMessage"
                 class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
 
+            <!-- :disabled="pendingMessage || connectionStore.connected === false" -->
             <button
                 @click="fullSend()"
-                :disabled="pendingMessage || connectionStore.connected === false"
+                :disabled="!connectionStore.connected"
+                v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 {{ pendingMessage ? '' : 'Send' }}
                 <span class="loading loading-spinner loading-md" :class="{hidden: !pendingMessage}" />
+            </button>
+            <button
+                @click="stopGeneration"
+                v-show="pendingMessage !== false"
+                class="btn btn-neutral align-middle md:ml-3 ml-[4px] h-20 md:w-32">
+                Stop
             </button>
         </div>
     </main>

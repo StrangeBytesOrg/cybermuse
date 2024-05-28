@@ -2,14 +2,15 @@ html,
 body,
 html:focus-within {
     scroll-behavior: smooth;
-    height: 100vh;
-    height: var(--doc-height);
+    /* height: 100vh; */
+    /* height: var(--doc-height); */ /* Fix for mobile scrollbar */
+    min-height: 100%;
 }
 
 /* Mostly fixes mobile style issues */
-:root {
+/* :root {
     --doc-height: 100%;
-}
+} */
 
 /* Fancy Scrollbar */
 ::-webkit-scrollbar {
