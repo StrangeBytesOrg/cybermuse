@@ -9,13 +9,11 @@ on:
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
   NODE_OPTIONS: "--max-old-space-size=4096"
-  LLAMA_CPP_VERSION: "b2961"
+  LLAMA_CPP_VERSION: "b3037"
   APP_VERSION: "v0.${{ github.run_number }}"
 
 jobs:
   build:
-    env:
-      LLAMA_CPP_VERSION: "b2961"
     strategy:
       fail-fast: false
       matrix:
