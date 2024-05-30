@@ -4,6 +4,7 @@ import (
 	db "chat-app/src/server/db"
 	"context"
 	"fmt"
+	"time"
 )
 
 // Get all chats
@@ -64,7 +65,10 @@ func CreateChat(ctx context.Context, input *struct {
 	}
 }) (*CreateChatResponse, error) {
 	// Create chat
-	chat := &db.Chat{}
+	chat := &db.Chat{
+		CreatedAt: time.Now(), // Bun generates invalid SQL if there isn't at least one field set
+		UpdatedAt: time.Now(),
+	}
 	_, err := db.DB.NewInsert().Model(chat).Exec(ctx)
 	if err != nil {
 		return nil, err

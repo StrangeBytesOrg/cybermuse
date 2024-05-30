@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"time"
 )
 
 func Fixture(ctx context.Context) {
@@ -15,7 +16,7 @@ func Fixture(ctx context.Context) {
 	DB.NewInsert().Model(&Character{Name: "Assistant", Description: "A helpful AI assistant designed to help you test the program.", Type: "character"}).Exec(ctx)
 
 	// Create a default chat
-	DB.NewInsert().Model(&Chat{Id: 1}).Exec(ctx) // Bun generates invalid SQL if there are no columns
+	DB.NewInsert().Model(&Chat{CreatedAt: time.Now(), UpdatedAt: time.Now()}).Exec(ctx) // Bun generates invalid SQL if there are no columns
 	DB.NewInsert().Model(&ChatCharacter{ChatId: 1, CharacterId: 1}).Exec(ctx)
 	DB.NewInsert().Model(&ChatCharacter{ChatId: 1, CharacterId: 2}).Exec(ctx)
 
