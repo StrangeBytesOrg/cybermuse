@@ -51,7 +51,14 @@ const toggleMenu = () => {
                     <router-link to="/chats" class="font-bold px-2" active-class="active">Chats</router-link>
                 </li>
                 <li>
-                    <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
+                    <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
+                        Models
+                    </router-link>
+                </li>
+                <li>
+                    <router-link to="/download-models" class="font-bold px-2" active-class="active">
+                        Download Models
+                    </router-link>
                 </li>
                 <li>
                     <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
@@ -66,16 +73,6 @@ const toggleMenu = () => {
                 <li>
                     <router-link to="/presets" class="font-bold px-2" active-class="active">
                         Generation Presets
-                    </router-link>
-                </li>
-                <li>
-                    <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
-                        Models
-                    </router-link>
-                </li>
-                <li>
-                    <router-link to="/download-models" class="font-bold px-2" active-class="active">
-                        Download Models
                     </router-link>
                 </li>
             </ul>
