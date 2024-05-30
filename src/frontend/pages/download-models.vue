@@ -16,8 +16,8 @@ const hfFiles = ref<HfFile[]>([])
 const requestPending = ref(false)
 const downloadPending = ref(false)
 const downloadProgress = ref(0)
-const selectedPopularModel = ref('')
-const popularModels = [
+const selectedSuggestedModel = ref('')
+const suggestedModels = [
     'NousResearch/Meta-Llama-3-8B-Instruct-GGUF',
     'microsoft/Phi-3-mini-4k-instruct-gguf',
     'NousResearch/Hermes-2-Pro-Llama-3-8B-GGUF',
@@ -85,10 +85,10 @@ const downloadModel = async (repoId: string, path: string) => {
         <div class="flex flex-row mt-3">
             <select
                 class="select select-bordered w-full"
-                v-model="selectedPopularModel"
-                @change.prevent="getModelInfo(selectedPopularModel)">
-                <option value="" disabled>Popular Models</option>
-                <option v-for="model in popularModels" :key="model" :value="model">{{ model }}</option>
+                v-model="selectedSuggestedModel"
+                @change.prevent="getModelInfo(selectedSuggestedModel)">
+                <option value="" disabled>Suggested Models</option>
+                <option v-for="model in suggestedModels" :key="model" :value="model">{{ model }}</option>
             </select>
         </div>
 
