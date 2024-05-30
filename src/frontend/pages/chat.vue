@@ -16,7 +16,7 @@ const pendingMessage = ref(false)
 const editModeId = ref(0)
 const editedText = ref('')
 const messagesElement = ref<HTMLElement>()
-const signal = new AbortController()
+let signal = new AbortController()
 
 // Check if generation server is actually running
 const checkServer = async () => {
@@ -113,6 +113,7 @@ const generateMessage = async () => {
 const stopGeneration = () => {
     signal.abort()
     pendingMessage.value = false
+    signal = new AbortController()
 }
 
 const fullSend = async () => {
