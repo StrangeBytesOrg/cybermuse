@@ -12,6 +12,7 @@ const selectModel = ref('')
 const modelLoaded = ref(false)
 const modelPath = ref('')
 const autoLoad = ref(false)
+const useGPU = ref(false)
 const modelLoadPending = ref(false)
 
 const getStatus = async () => {
@@ -25,6 +26,7 @@ const getStatus = async () => {
         modelPath.value = data.modelPath
         autoLoad.value = data.autoLoad
         selectModel.value = data.currentModel
+        useGPU.value = data.useGPU
     }
 }
 
@@ -96,6 +98,19 @@ const setAutoLoad = async () => {
     }
 }
 
+const setUseGPU = async () => {
+    const {error} = await client.POST('/set-use-gpu', {
+        body: {
+            useGPU: useGPU.value,
+        },
+    })
+    if (error) {
+        toast.error(`Failed to update useGPU\n${error.detail}`)
+    } else {
+        toast.success('UseGPU updated')
+    }
+}
+
 await getStatus()
 await getModels()
 </script>
@@ -127,6 +142,13 @@ await getModels()
                 <label class="cursor-pointer label">
                     <span class="label-text text-lg">Auto load model</span>
                     <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
+                </label>
+            </div>
+
+            <div class="form-control w-52 mt-3">
+                <label class="cursor-pointer label">
+                    <span class="label-text text-lg">Use GPU</span>
+                    <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" @change="setUseGPU" />
                 </label>
             </div>
         </div>

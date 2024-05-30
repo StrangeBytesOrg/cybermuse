@@ -181,6 +181,13 @@ func InitRouter() *chi.Mux {
 		OperationID: "SetAutoLoad",
 	}, controllers.SetAutoLoad)
 
+	huma.Register(api, huma.Operation{
+		Path:        "/set-use-gpu",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetGPU",
+	}, controllers.SetUseGPU)
+
 	sse.Register(api, huma.Operation{
 		Path:        "/download-model",
 		Method:      "POST",

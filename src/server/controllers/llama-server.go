@@ -31,6 +31,7 @@ type ServerStatusResponse struct {
 		CurrentModel string `json:"currentModel"`
 		ModelPath    string `json:"modelPath"`
 		AutoLoad     bool   `json:"autoLoad"`
+		UseGPU       bool   `json:"useGPU"`
 	}
 }
 
@@ -41,6 +42,7 @@ func GetServerStatus(ctx context.Context, input *struct{}) (*ServerStatusRespons
 	response.Body.CurrentModel = serverStatus.CurrentModel
 	response.Body.ModelPath = appConfig.ModelsPath
 	response.Body.AutoLoad = appConfig.AutoLoad
+	response.Body.UseGPU = appConfig.UseGPU
 	fmt.Println("Server status:", response.Body)
 	return response, nil
 }
@@ -88,6 +90,9 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 	}
 
 	cmd := exec.Command(binaryPath, "--model", modelPath, "--log-disable")
+	if appConfig.UseGPU {
+		cmd.Args = append(cmd.Args, "--n-gpu-layers", "128")
+	}
 	cmd.SysProcAttr = GetProcAttr()
 
 	// Capture the stdout and stderr of the process

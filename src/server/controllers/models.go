@@ -103,6 +103,21 @@ func SetAutoLoad(ctx context.Context, input *struct {
 	return nil, nil
 }
 
+// Set the GPU setting
+func SetUseGPU(ctx context.Context, input *struct {
+	Body struct {
+		UseGPU bool `json:"useGPU"`
+	}
+}) (*struct{}, error) {
+	appConfig := config.GetConfig()
+	appConfig.UseGPU = input.Body.UseGPU
+	err := config.SaveConfigToFile(appConfig)
+	if err != nil {
+		return nil, err
+	}
+	return nil, nil
+}
+
 // Download a model from Hugging Face
 type DownloadModelProgress struct {
 	Progress float64 `json:"progress"`

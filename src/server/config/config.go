@@ -11,6 +11,7 @@ type Config struct {
 	ModelsPath  string
 	AutoLoad    bool
 	LastModel   string
+	UseGPU      bool
 }
 
 var config *Config
@@ -60,6 +61,7 @@ func GetConfig() *Config {
 			ModelsPath:  defaultModelsPath,
 			AppDataPath: appDataPath,
 			AutoLoad:    false,
+			UseGPU:      false,
 		}
 		err := SaveConfigToFile(config)
 		if err != nil {

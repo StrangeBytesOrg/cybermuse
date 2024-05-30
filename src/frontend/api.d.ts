@@ -91,6 +91,9 @@ export interface paths {
   "/set-model-path": {
     post: operations["SetModelPath"];
   };
+  "/set-use-gpu": {
+    post: operations["SetGPU"];
+  };
   "/start-server": {
     post: operations["StartServer"];
   };
@@ -531,6 +534,7 @@ export interface components {
       currentModel: string;
       loaded: boolean;
       modelPath: string;
+      useGPU: boolean;
     };
     SetAutoLoadRequest: {
       /**
@@ -539,6 +543,14 @@ export interface components {
        */
       $schema?: string;
       autoLoad: boolean;
+    };
+    SetGPURequest: {
+      /**
+       * Format: uri
+       * @description A URL to the JSON Schema for this object.
+       */
+      $schema?: string;
+      useGPU: boolean;
     };
     SetModelPathRequest: {
       /**
@@ -922,17 +934,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["DownloadModelError"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "error";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["DownloadModelProgress"];
               /**
                * @description The event name.
@@ -950,6 +951,17 @@ export interface operations {
                * @constant
                */
               event: "final";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["DownloadModelError"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */
@@ -1019,17 +1031,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["GenerateMessageErrorResponse"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "error";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["GenerateMessageResponse"];
               /**
                * @description The event name.
@@ -1047,6 +1048,17 @@ export interface operations {
                * @constant
                */
               event: "final";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateMessageErrorResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "error";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */
@@ -1238,6 +1250,25 @@ export interface operations {
     requestBody: {
       content: {
         "application/json": components["schemas"]["SetModelPathRequest"];
+      };
+    };
+    responses: {
+      /** @description No Content */
+      204: {
+        content: never;
+      };
+      /** @description Error */
+      default: {
+        content: {
+          "application/problem+json": components["schemas"]["ErrorModel"];
+        };
+      };
+    };
+  };
+  SetGPU: {
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["SetGPURequest"];
       };
     };
     responses: {
