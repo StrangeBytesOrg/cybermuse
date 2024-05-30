@@ -16,6 +16,8 @@ const pendingMessage = ref(false)
 const editModeId = ref(0)
 const editedText = ref('')
 const messagesElement = ref<HTMLElement>()
+let lastScrollTime = Date.now()
+const showCtxMenu = ref(false)
 let signal = new AbortController()
 
 // Check if generation server is actually running
@@ -50,6 +52,31 @@ const checkSend = (event: KeyboardEvent) => {
     }
 }
 
+const fullSend = async () => {
+    pendingMessage.value = true
+
+    // Only create a new user message if there is text
+    if (currentMessage.value !== '') {
+        await createMessage(1, currentMessage.value, false)
+    }
+
+    const nonUserChacters = data?.chat.characters.filter((character) => character.id !== 1)
+
+    // If there is only one character in the chat, simply use that character
+    if (nonUserChacters.length === 1) {
+        console.log('only one character')
+        const characterId = nonUserChacters[0].id
+        await createMessage(characterId, '', true)
+    } else {
+        console.log('multiple characters, getting character id')
+        const characterId = await getCharacter()
+        await createMessage(characterId, '', true)
+    }
+
+    await generateMessage()
+    pendingMessage.value = false
+}
+
 const createMessage = async (characterId: number, text: string = '', generated: boolean) => {
     const {data, error} = await client.POST('/create-message', {
         body: {
@@ -75,6 +102,8 @@ const createMessage = async (characterId: number, text: string = '', generated: 
             content: [{text, messageId: data.messageId}],
         })
         currentMessage.value = ''
+        await nextTick()
+        scrollMessages('smooth')
     }
 }
 
@@ -98,6 +127,7 @@ const generateMessage = async () => {
             if (lastMessage) {
                 lastMessage.content[lastMessage.activeIndex].text = bufferedResponse
             }
+            scrollMessages('smooth')
         } else if (chunk.event === 'final') {
             console.log('End of response')
             console.log(bufferedResponse)
@@ -116,14 +146,6 @@ const stopGeneration = () => {
     signal = new AbortController()
 }
 
-const fullSend = async () => {
-    pendingMessage.value = true
-    await createMessage(1, currentMessage.value, false)
-    await createMessage(2, '', true)
-    await generateMessage()
-    pendingMessage.value = false
-}
-
 const getCharacter = async () => {
     const {data, error} = await client.POST('/get-response-character/{chatId}', {
         params: {path: {chatId: Number(chatId)}},
@@ -131,7 +153,7 @@ const getCharacter = async () => {
     if (error) {
         toast.error(error.detail || 'Failed getting character')
     }
-    console.log(data)
+    return data?.characterId
 }
 
 const editMessage = async (messageId: number) => {
@@ -233,27 +255,29 @@ const textGoesBrr = (text: string) => {
     return text.replace(/\n/g, '<br />')
 }
 
-const scrollMessages = (behavior: 'auto' | 'instant' | 'smooth' = 'auto') => {
-    messagesElement.value?.scroll({
-        top: messagesElement.value?.scrollHeight,
-        behavior,
-    })
-}
-
 const resizeTextarea = async (event: Event) => {
     const textarea = event.target as HTMLTextAreaElement
     textarea.style.height = 'auto'
     textarea.style.height = `${textarea.scrollHeight}px`
 }
 
-watch(messages, async () => {
-    await nextTick()
-    scrollMessages('smooth')
-})
+const scrollMessages = (behavior: 'auto' | 'instant' | 'smooth' = 'auto') => {
+    if (Date.now() - lastScrollTime < 100 && behavior === 'smooth') return
+    lastScrollTime = Date.now()
+
+    messagesElement.value?.scroll({
+        top: messagesElement.value?.scrollHeight,
+        behavior,
+    })
+}
 
 onMounted(() => {
     scrollMessages('instant')
 })
+
+const toggleCtxMenu = () => {
+    showCtxMenu.value = !showCtxMenu.value
+}
 </script>
 
 <template>
@@ -285,12 +309,11 @@ onMounted(() => {
                             v-show="editModeId === message.id"
                             :id="`message-input-${message.id}`"
                             v-model="message.content[message.activeIndex].text"
-                            zv-model="editedText"
                             @input="resizeTextarea"
                             @focus="resizeTextarea"
                             @keydown.ctrl.enter="updateMessage(message)"
                             @keydown.esc="cancelEdit"
-                            class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none" />
+                            class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]" />
                     </div>
                 </div>
 
@@ -364,6 +387,21 @@ onMounted(() => {
 
         <!-- Chat Controls -->
         <div class="flex md:px-2 md:pb-2">
+            <!-- Context menu -->
+            <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
+                <!-- prettier-ignore -->
+                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
+                </svg>
+                <Transition name="fade">
+                    <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
+                        <li><a>Continue</a></li>
+                        <li><a>Delete Messages</a></li>
+                        <li><a>Impersonate</a></li>
+                    </ul>
+                </Transition>
+            </button>
+
             <textarea
                 ref="inputElement"
                 id="message-input"
@@ -389,3 +427,14 @@ onMounted(() => {
         </div>
     </main>
 </template>
+
+<style>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>
