@@ -107,15 +107,7 @@ func InitDB() error {
 	fmt.Println("Connected to database:", dbPath)
 	DB = bun.NewDB(sqldb, sqlitedialect.New())
 
-	// Goose migrations
-	goose.SetBaseFS(embedMigrations)
-	if err := goose.SetDialect("sqlite"); err != nil {
-		panic(err)
-	}
-	if err := goose.Up(sqldb, "migrations"); err != nil {
-		panic(err)
-	}
-
+	// Relationships must be registered before ResetModel will work
 	DB.RegisterModel((*ChatCharacter)(nil))
 	DB.RegisterModel((*MessageContent)(nil))
 
@@ -124,7 +116,20 @@ func InitDB() error {
 			bundebug.WithVerbose(true),
 			bundebug.FromEnv("BUNDEBUG"),
 		))
+	}
 
+	fmt.Println("Running migrations")
+	goose.SetBaseFS(embedMigrations)
+	if err := goose.SetDialect("sqlite"); err != nil {
+		panic(err)
+	}
+	if err := goose.Up(sqldb, "migrations"); err != nil {
+		panic(err)
+	}
+
+	// Create tables from schema
+	if os.Getenv("INIT_DB") != "" {
+		fmt.Println("Creating tables from schema")
 		ctx := context.Background()
 		DB.ResetModel(ctx, (*Character)(nil))
 		DB.ResetModel(ctx, (*Chat)(nil))
@@ -135,9 +140,9 @@ func InitDB() error {
 		DB.ResetModel(ctx, (*GeneratePreset)(nil))
 	}
 
-	ctx := context.Background()
 	// Check if the database is empty
 	// TODO use a join or similar
+	ctx := context.Background()
 	characterCount, err := DB.NewSelect().Model((*Character)(nil)).Count(ctx)
 	if err != nil {
 		fmt.Println("Error fixturing")

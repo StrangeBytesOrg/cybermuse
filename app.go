@@ -47,6 +47,7 @@ func (app *App) startup(ctx context.Context) {
 	}
 
 	db.InitDB()
+
 	router := server.InitRouter()
 	http.ListenAndServe(":31700", router)
 }
