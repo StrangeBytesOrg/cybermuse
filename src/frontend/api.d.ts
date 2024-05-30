@@ -143,13 +143,14 @@ export interface components {
       type: string;
     };
     Chat: {
-      UpdatedAt: components["schemas"]["NullTime"];
       characters: components["schemas"]["Character"][];
       /** Format: date-time */
       createdAt: string;
       /** Format: int32 */
       id: number;
       messages: components["schemas"]["Message"][];
+      /** Format: date-time */
+      updatedAt: string;
     };
     CreateCharacterRequest: {
       /**
@@ -500,7 +501,6 @@ export interface components {
       /** Format: int64 */
       size: number;
     };
-    NullTime: Record<string, never>;
     ParseTemplateRequest: {
       /**
        * Format: uri

@@ -12,7 +12,7 @@ CREATE TABLE `characters` (
 CREATE TABLE `chats` (
   `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   `created_at` timestamp NOT NULL DEFAULT (current_timestamp),
-  `updated_at` timestamp NULL
+  `updated_at` timestamp NOT NULL DEFAULT (current_timestamp)
 );
 -- create "chat_characters" table
 CREATE TABLE `chat_characters` (

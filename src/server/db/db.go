@@ -46,7 +46,7 @@ type MessageContent struct {
 type Chat struct {
 	Id         uint32       `bun:",pk,autoincrement" json:"id"`
 	CreatedAt  time.Time    `bun:",nullzero,notnull,default:current_timestamp" json:"createdAt"`
-	UpdatedAt  bun.NullTime ``
+	UpdatedAt  time.Time    `bun:",nullzero,notnull,default:current_timestamp" json:"updatedAt"`
 	Characters []*Character `bun:"m2m:chat_characters,join:Chat=Character" json:"characters"`
 	Messages   []*Message   `bun:"rel:has-many,join:id=chat_id" json:"messages"`
 }

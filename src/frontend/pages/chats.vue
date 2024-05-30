@@ -7,8 +7,8 @@ const toast = useToast()
 const {data} = await client.GET('/chats')
 const chats = ref(data?.chats || [])
 
-const formatDate = (timestamp: number) => {
-    return new Date(timestamp).toLocaleDateString(undefined, {
+const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -31,7 +31,7 @@ const deleteChat = async (chatId: number) => {
 </script>
 
 <template>
-    <div class="px-3">
+    <div class="px-2">
         <router-link to="/create-chat" class="btn btn-primary mt-3">Create Chat</router-link>
 
         <div class="flex flex-col">
