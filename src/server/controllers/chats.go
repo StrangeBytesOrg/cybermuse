@@ -85,6 +85,33 @@ func CreateChat(ctx context.Context, input *struct {
 		}
 	}
 
+	// If characters have a first message defined, add it to the chat
+	for _, characterId := range input.Body.CharacterIds {
+		character := &db.Character{}
+		err := db.DB.NewSelect().Model(character).Where("id = ?", characterId).Scan(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if character.FirstMessage != nil {
+			message := &db.Message{
+				ChatId:      chat.Id,
+				CharacterId: characterId,
+				Generated:   false,
+			}
+			_, err := db.DB.NewInsert().Model(message).Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+			_, err = db.DB.NewInsert().Model(&db.MessageContent{
+				Text:      *character.FirstMessage,
+				MessageId: message.Id,
+			}).Exec(ctx)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+
 	response := &CreateChatResponse{}
 	response.Body.ChatId = fmt.Sprint(chat.Id)
 	return response, nil
