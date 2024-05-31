@@ -20,8 +20,7 @@ const createCharacter = async () => {
         body: {
             name: character.value.name,
             description: character.value.description,
-            // firstMessage: character.value.firstMessage,
-            firstMessage: undefined,
+            firstMessage: character.value.firstMessage,
             image: character.value.image,
             type: character.value.type,
         },
