@@ -154,6 +154,15 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 			if os.Getenv("DEV") != "" {
 				fmt.Println("stderr:", line)
 			}
+			// Log the output to the appConfig folder for debugging
+			logPath := filepath.Join(appConfig.AppDataPath, "llama-server-err.log")
+			logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				fmt.Println("Error opening log file:", err)
+			} else {
+				defer logFile.Close()
+				logFile.WriteString(line + "\n")
+			}
 		}
 	}()
 
