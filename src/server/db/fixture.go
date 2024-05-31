@@ -24,14 +24,19 @@ func Fixture(ctx context.Context) {
 	chatMlTemplateString := "{{range .Messages}}<|im_start|>{{if .Generated}}assistant{{else}}user{{end}}\n{{.Text}}<|im_end|>\n{{end}}<|im_start|>assistant\n"
 	llama3TemplateString := "{{range .Messages}}<|start_header_id|>{{if .Generated}}assistant{{else}}user{{end}}<|end_header_id|>\n\n{{.Text}}<|eot_id|>{{end}}<|start_header_id|>assistant<|end_header_id|>\n\n"
 	phi3TemplateString := "{{range .Messages}}<|{{if .Generated}}assistant{{else}}user{{end}}|>{{.Text}}<|end|>\n{{end}}<|assistant|>\n"
-	chatMlRoleplay := "<|im_start|>system\nRoleplay as the selected character using the character descriptions provided below. Respond to the chat with a single message.\n{{if .Characters}}{{range .Characters}}{{.Name}}:{{.Description}}\n{{end}}{{end}}<|im_end|>\n{{range .Messages}}<|im_start|>{{if .Generated}}assistant{{else}}user{{end}}\n{{.Text}}<|im_end|>\n{{end}}<|im_start|>assistant\n"
+	commandRTemplateString := "{{range .Messages}}<|START_OF_TURN_TOKEN|>{{if .Generated}}<|CHATBOT_TOKEN|>{{else}}<|USER_TOKEN|>{{end}}{{.Text}}<|END_OF_TURN_TOKEN|>{{end}}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>"
+
+	chatMlRoleplay := "<|im_start|>system\nRoleplay as the selected character using the character descriptions provided below. Respond to the chat with a single message.\n{{if .Characters}}{{range .Characters}}{{.Name}}: {{.Description}}\n{{end}}{{end}}<|im_end|>\n{{range .Messages}}<|im_start|>{{if .Generated}}assistant{{else}}user{{end}}\n{{.CharacterName}}: {{.Text}}<|im_end|>\n{{end}}<|im_start|>assistant\n"
 	llama3Roleplay := "<|start_header_id|>system<|end_header_id|>\n\nRoleplay as the selected character using the character descriptions provided below. Respond to the chat with a single reply. Reply for only the selected character. Do no speak for anyone else.\n{{range .Characters}}{{.Name}}: {{.Description}}\n{{end}}<|eot_id|>{{range .Messages}}<|start_header_id|>{{if .Generated}}assistant{{else}}user{{end}}<|end_header_id|>\n\n{{.CharacterName}}: {{.Text}}<|eot_id|>{{end}}<|start_header_id|>assistant<|end_header_id|>\n\n"
+	commandRRoleplay := "<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>#System Preamble\n## Task and Context\nRoleplay as the selected character using the character descriptions provided below. Respond to the chat with a single message.\n{{if .Characters}}{{range .Characters}}{{.Name}}: {{.Description}}\n{{end}}{{end}}<|END_OF_TURN_TOKEN|>{{range .Messages}}<|START_OF_TURN_TOKEN|>{{if .Generated}}<|CHATBOT_TOKEN|>{{else}}<|USER_TOKEN|>{{end}}{{.CharacterName}}: {{.Text}}<|END_OF_TURN_TOKEN|>{{end}}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>"
 
 	DB.NewInsert().Model(&PromptTemplate{Name: "ChatML", Content: chatMlTemplateString, Active: true}).Exec(ctx)
 	DB.NewInsert().Model(&PromptTemplate{Name: "Llama3", Content: llama3TemplateString}).Exec(ctx)
 	DB.NewInsert().Model(&PromptTemplate{Name: "Phi3", Content: phi3TemplateString}).Exec(ctx)
+	DB.NewInsert().Model(&PromptTemplate{Name: "Command-R", Content: commandRTemplateString}).Exec(ctx)
 	DB.NewInsert().Model(&PromptTemplate{Name: "ChatML Roleplay", Content: chatMlRoleplay}).Exec(ctx)
 	DB.NewInsert().Model(&PromptTemplate{Name: "Llama3 Roleplay", Content: llama3Roleplay}).Exec(ctx)
+	DB.NewInsert().Model(&PromptTemplate{Name: "Command-R Roleplay", Content: commandRRoleplay}).Exec(ctx)
 
 	// Create a default Generate Preset
 	DB.NewInsert().Model(&GeneratePreset{
