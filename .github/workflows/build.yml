@@ -11,6 +11,7 @@ env:
   NODE_OPTIONS: "--max-old-space-size=4096"
   LLAMA_CPP_VERSION: "b3066"
   APP_VERSION: "v0.${{ github.run_number }}"
+  VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 
 jobs:
   build:
