@@ -9,6 +9,10 @@
     "frontend:dir": "./",
     "wailsjsdir": "./src/",
     "appargs": "-loglevel Info",
+    "postBuildHooks": {
+        "darwin/*": "cp ../llamacpp/server chat.app/Contents/MacOS/llama-server",
+        "linux/*": "cp ../llamacpp/server llama-server"
+    },
     "author": {
         "name": "Strange Bytes",
         "email": "dev@strangebytes.org"

@@ -67,10 +67,20 @@ type StartServerInput struct {
 // TODO probably return some details to the client
 func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error) {
 	appConfig := config.GetConfig()
-	binaryPath := filepath.Join(appConfig.AppDataPath, "llamacpp", "server")
-	if runtime.GOOS == "windows" {
-		binaryPath += ".exe"
+
+	// Get the path to the llama-server binary
+	selfBinPath, err := os.Executable()
+	if err != nil {
+		fmt.Println("Error getting executable path: ", err)
+		return nil, err
 	}
+	binaryName := "llama-server"
+	if runtime.GOOS == "windows" {
+		binaryName = "server.exe"
+	}
+	binaryPath := filepath.Join(filepath.Dir(selfBinPath), binaryName)
+	fmt.Println("Llama Binary path:", binaryPath)
+
 	modelPath := filepath.Join(appConfig.ModelsPath, input.Body.ModelFile)
 
 	// Check if the model file exists
@@ -153,15 +163,6 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 			line := stderrScanner.Text()
 			if os.Getenv("DEV") != "" {
 				fmt.Println("stderr:", line)
-			}
-			// Log the output to the appConfig folder for debugging
-			logPath := filepath.Join(appConfig.AppDataPath, "llama-server-err.log")
-			logFile, err := os.OpenFile(logPath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-			if err != nil {
-				fmt.Println("Error opening log file:", err)
-			} else {
-				defer logFile.Close()
-				logFile.WriteString(line + "\n")
 			}
 		}
 	}()
