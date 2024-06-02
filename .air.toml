@@ -4,9 +4,8 @@ tmp_dir = "tmp"
 
 [build]
 args_bin = []
-# bin = "./tmp/main"
-full_bin = "DEV=1 ./tmp/server"
-cmd = "go build -tags \"server\" -o ./tmp/server ."
+full_bin = "DEV=1 ./build/bin/chat-server"
+cmd = 'go build -tags "server" -o ./build/bin/chat-server .'
 delay = 1000
 exclude_dir = ["assets", "tmp", "vendor", "testdata"]
 exclude_file = []
