@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {ref, defineModel} from 'vue'
 import {watch} from 'vue'
+const props = defineProps(['buttonLabel'])
 const fileString = defineModel<string | null>()
 const fileInput = ref<HTMLInputElement>()
 
@@ -27,6 +28,6 @@ watch(fileString, (newVal) => {
 <template>
     <div>
         <input type="file" @change="onChangeFile" ref="fileInput" class="hidden" />
-        <button class="btn btn-primary" @click="fileInput?.click()">Select File</button>
+        <button class="btn btn-primary" @click="fileInput?.click()">{{ props.buttonLabel ?? 'Select File' }}</button>
     </div>
 </template>

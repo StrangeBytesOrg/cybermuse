@@ -4,6 +4,7 @@ import {useRouter} from 'vue-router'
 import {client} from '../api-client'
 import FileInput from '../components/file-select.vue'
 import {useToast} from 'vue-toastification'
+import {decodeChunks} from '../lib/decode-png-chunks'
 
 const toast = useToast()
 const router = useRouter()
@@ -14,6 +15,7 @@ const character = ref({
     image: '',
     type: 'character',
 })
+const importInput = ref<HTMLInputElement>()
 
 const createCharacter = async () => {
     const {error} = await client.POST('/create-character', {
@@ -39,6 +41,42 @@ const removeImage = () => {
 
 const cancelCharacter = () => {
     router.push('/characters')
+}
+
+const importCharacter = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    const file = target.files?.[0]
+    if (!file) {
+        console.log('No file selected')
+        return
+    }
+
+    const reader = new FileReader()
+    reader.onload = function () {
+        const arrayBuffer = reader.result as ArrayBuffer
+        try {
+            const metaChunks = decodeChunks(arrayBuffer)
+            const characterChunk = metaChunks.find((chunk) => chunk.keyword === 'chara')
+            if (!characterChunk) {
+                throw new Error('Character information not found')
+            }
+            const card = JSON.parse(atob(characterChunk.value))
+
+            character.value.name = card.name
+            character.value.description = card.description
+            character.value.firstMessage = card.first_mes
+        } catch (error) {
+            console.error(error)
+            toast.error('Error importing character\n' + error.message)
+        }
+    }
+    reader.readAsArrayBuffer(file)
+
+    const imageReader = new FileReader()
+    imageReader.onload = function () {
+        character.value.image = imageReader.result as string
+    }
+    imageReader.readAsDataURL(file)
 }
 </script>
 
@@ -85,6 +123,8 @@ const cancelCharacter = () => {
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
             <button class="btn btn-error ml-5" @click="cancelCharacter">Cancel</button>
+            <button class="btn btn-primary ml-5" @click="importInput?.click()">Import</button>
+            <input type="file" @change="importCharacter" ref="importInput" class="hidden" />
         </div>
     </div>
 </template>
