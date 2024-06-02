@@ -12,10 +12,9 @@ const character = ref({
     name: '',
     description: '',
     firstMessage: '',
-    image: '',
     type: 'character',
 })
-const importInput = ref<HTMLInputElement>()
+const characterImage = ref('')
 
 const createCharacter = async () => {
     const {error} = await client.POST('/create-character', {
@@ -23,8 +22,8 @@ const createCharacter = async () => {
             name: character.value.name,
             description: character.value.description,
             firstMessage: character.value.firstMessage,
-            image: character.value.image,
             type: character.value.type,
+            image: characterImage.value,
         },
     })
     if (error) {
@@ -36,47 +35,55 @@ const createCharacter = async () => {
 }
 
 const removeImage = () => {
-    character.value.image = ''
+    characterImage.value = ''
 }
 
 const cancelCharacter = () => {
     router.push('/characters')
 }
 
-const importCharacter = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    const file = target.files?.[0]
-    if (!file) {
-        console.log('No file selected')
-        return
+const imageChanged = (newVal: string) => {
+    if (newVal === '') return
+
+    // If the image is a png, check if it has V2 card data embedded
+    if (newVal.startsWith('data:image/png;base64')) {
+        // Convert the image from a dataurl to an ArrayBuffer
+        const dataurl = newVal.split(',')[1]
+        if (!dataurl) return
+        const binary = atob(dataurl)
+        const arrayBuffer = new ArrayBuffer(binary.length)
+        const uint8Array = new Uint8Array(arrayBuffer)
+        for (let i = 0; i < binary.length; i++) {
+            uint8Array[i] = binary.charCodeAt(i)
+        }
+        const metaChunks = decodeChunks(arrayBuffer)
+        const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
+        if (!cardMeta) return
+        const card = JSON.parse(atob(cardMeta.value))
+        character.value.name = card.name
+        character.value.description = card.description
+        character.value.firstMessage = card.first_mes
     }
 
-    const reader = new FileReader()
-    reader.onload = function () {
-        const arrayBuffer = reader.result as ArrayBuffer
-        try {
-            const metaChunks = decodeChunks(arrayBuffer)
-            const characterChunk = metaChunks.find((chunk) => chunk.keyword === 'chara')
-            if (!characterChunk) {
-                throw new Error('Character information not found')
-            }
-            const card = JSON.parse(atob(characterChunk.value))
-
-            character.value.name = card.name
-            character.value.description = card.description
-            character.value.firstMessage = card.first_mes
-        } catch (error) {
-            console.error(error)
-            toast.error('Error importing character\n' + error.message)
+    // If the image is large, resize it
+    const img = new Image()
+    img.onload = function () {
+        const MAX_WIDTH = 1024
+        let width = img.width
+        let height = img.height
+        if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width
+            width = MAX_WIDTH
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            canvas.width = width
+            canvas.height = height
+            ctx?.drawImage(img, 0, 0, width, height)
+            const resizedImage = canvas.toDataURL('image/webp')
+            characterImage.value = resizedImage
         }
     }
-    reader.readAsArrayBuffer(file)
-
-    const imageReader = new FileReader()
-    imageReader.onload = function () {
-        character.value.image = imageReader.result as string
-    }
-    imageReader.readAsDataURL(file)
+    img.src = newVal
 }
 </script>
 
@@ -110,21 +117,19 @@ const importCharacter = (event: Event) => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img v-if="character.image" :src="character.image" :alt="character.name + ' avatar'" />
+                    <img v-if="characterImage" :src="characterImage" :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
 
-            <FileInput v-model="character.image" class="ml-5 mt-auto" />
-            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <FileInput v-model="characterImage" @changed="imageChanged" class="ml-5 mt-auto" />
+            <button v-if="characterImage" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
             <button class="btn btn-error ml-5" @click="cancelCharacter">Cancel</button>
-            <button class="btn btn-primary ml-5" @click="importInput?.click()">Import</button>
-            <input type="file" @change="importCharacter" ref="importInput" class="hidden" />
         </div>
     </div>
 </template>

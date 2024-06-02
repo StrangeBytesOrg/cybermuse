@@ -2,6 +2,7 @@
 import {ref, defineModel} from 'vue'
 import {watch} from 'vue'
 const props = defineProps(['buttonLabel'])
+const emit = defineEmits(['changed'])
 const fileString = defineModel<string | null>()
 const fileInput = ref<HTMLInputElement>()
 
@@ -22,6 +23,7 @@ watch(fileString, (newVal) => {
     if (newVal === '' && fileInput.value) {
         fileInput.value.value = ''
     }
+    emit('changed', newVal)
 })
 </script>
 
