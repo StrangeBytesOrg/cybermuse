@@ -5,10 +5,12 @@ go 1.22.0
 toolchain go1.22.2
 
 require (
+	github.com/chai2010/webp v1.1.1
 	github.com/danielgtaylor/huma/v2 v2.17.0
 	github.com/go-chi/chi/v5 v5.0.12
 	github.com/go-chi/cors v1.2.1
 	github.com/jclem/sseparser v0.5.0
+	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/pressly/goose/v3 v3.20.0
 	github.com/uptrace/bun v1.2.1
 	github.com/uptrace/bun/dialect/sqlitedialect v1.2.1
