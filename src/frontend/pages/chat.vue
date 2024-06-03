@@ -55,6 +55,12 @@ const checkSend = (event: KeyboardEvent) => {
 const fullSend = async () => {
     pendingMessage.value = true
 
+    if (!connectionStore.connected) {
+        toast.error('Generation server not running or not connected')
+        pendingMessage.value = false
+        return
+    }
+
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
         await createMessage(1, currentMessage.value, false)
