@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import {reactive, ref, nextTick, watch, onMounted} from 'vue'
+import {reactive, ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
-import snarkdown from 'snarkdown'
+import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
 import {responseToIterable} from '../lib/fetch-backend'
@@ -250,9 +250,13 @@ const swipeRight = async (message: Message) => {
     }
 }
 
-// Replace all newlines with <br> tags
-const textGoesBrr = (text: string) => {
-    return text.replace(/\n/g, '<br />')
+const quoteWrap = (text: string) => {
+    const regex = /"([^"]*)"/g
+    return text.replace(regex, '<q>$1</q>')
+}
+
+const formatText = (text: string) => {
+    return marked(quoteWrap(text))
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -283,7 +287,7 @@ const toggleCtxMenu = () => {
 <template>
     <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
         <!-- Messages -->
-        <div ref="messagesElement" class="flex-grow overflow-auto px-1 md:px-2">
+        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2">
             <div
                 v-for="(message, index) in messages"
                 :key="message.id"
@@ -303,8 +307,8 @@ const toggleCtxMenu = () => {
                         </div>
                         <div
                             v-show="editModeId !== message.id"
-                            v-html="snarkdown(textGoesBrr(message.content[message.activeIndex]?.text || ''))"
-                            class="whitespace-pre-wrap mx-[-1px] mt-2 px-[1px] flex-grow" />
+                            v-html="formatText(message.content[message.activeIndex]?.text || '')"
+                            class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word]" />
                         <textarea
                             v-show="editModeId === message.id"
                             :id="`message-input-${message.id}`"
@@ -436,5 +440,17 @@ const toggleCtxMenu = () => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
+}
+
+.messageText p {
+    color: var(--msg);
+}
+
+.messageText em {
+    @apply text-base-content/80;
+}
+
+.messageText q {
+    color: var(--quote);
 }
 </style>

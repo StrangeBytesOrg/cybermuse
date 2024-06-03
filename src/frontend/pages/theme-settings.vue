@@ -7,24 +7,7 @@ const saveSettings = async () => {
     themeStore.update()
 }
 
-const themes = [
-    'dark',
-    'business',
-    'light',
-    'synthwave',
-    'retro',
-    'valentine',
-    'halloween',
-    'forest',
-    'aqua',
-    'lofi',
-    'pastel',
-    'luxury',
-    'dracula',
-    'night',
-    'coffee',
-    'sunset',
-]
+const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 </script>
 
 <template>

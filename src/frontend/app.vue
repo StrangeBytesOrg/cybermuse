@@ -82,7 +82,7 @@ const toggleMenu = () => {
 
         <!-- Main -->
         <div class="flex min-h-0 ml-0 sm:ml-52 pt-14 sm:pt-0">
-            <div class="flex flex-col flex-1 mr-1 ml-1">
+            <div class="flex flex-col flex-1 pr-1 pl-1">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />
