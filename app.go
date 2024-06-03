@@ -10,6 +10,8 @@ import (
 	"net/http"
 )
 
+var version = "dev" // Set by the build system
+
 type App struct {
 	ctx context.Context
 }
@@ -23,6 +25,8 @@ func (app *App) startup(ctx context.Context) {
 	app.ctx = ctx
 
 	config.Init()
+
+	fmt.Println("Server version:", version)
 
 	// If the server is set to autoload, start it
 	if config.GetConfig().AutoLoad && config.GetConfig().LastModel != "" {
