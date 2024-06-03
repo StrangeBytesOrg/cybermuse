@@ -60,9 +60,9 @@ const imageChanged = (newVal: string) => {
         const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
         if (!cardMeta) return
         const card = JSON.parse(atob(cardMeta.value))
-        character.value.name = card.name
-        character.value.description = card.description
-        character.value.firstMessage = card.first_mes
+        character.value.name = card.data.name
+        character.value.description = card.data.description
+        character.value.firstMessage = card.data.first_mes
     }
 
     // If the image is large, resize it
