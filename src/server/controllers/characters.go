@@ -97,8 +97,19 @@ func UpdateCharacter(ctx context.Context, input *struct {
 		Image        string `json:"image,omitempty"`
 	}
 }) (*struct{}, error) {
-	character := &db.Character{}
-	_, err := db.DB.NewUpdate().Model(character).Set("name = ?", input.Body.Name).Set("description = ?", input.Body.Description).Set("type = ?", input.Body.Type).Set("image = ?", input.Body.Image).Set("first_message = ?", input.Body.FirstMessage).Where("id = ?", input.Id).Exec(ctx)
+	fmt.Println("mes:", input.Body.FirstMessage)
+	character := &db.Character{
+		Name:        input.Body.Name,
+		Description: input.Body.Description,
+		Type:        input.Body.Type,
+	}
+	if input.Body.Image != "" {
+		character.Image = &input.Body.Image
+	}
+	if input.Body.FirstMessage != "" {
+		character.FirstMessage = &input.Body.FirstMessage
+	}
+	_, err := db.DB.NewUpdate().Model(character).Where("id = ?", input.Id).Exec(ctx)
 	if err != nil {
 		fmt.Printf("Error updating character: %v\n", err)
 		return nil, err
