@@ -53,11 +53,13 @@ const checkSend = (event: KeyboardEvent) => {
 }
 
 const fullSend = async () => {
-    pendingMessage.value = true
+    if (pendingMessage.value) {
+        toast.error('Message already in progress')
+        return
+    }
 
     if (!connectionStore.connected) {
         toast.error('Generation server not running or not connected')
-        pendingMessage.value = false
         return
     }
 
@@ -80,7 +82,6 @@ const fullSend = async () => {
     }
 
     await generateMessage()
-    pendingMessage.value = false
 }
 
 const createMessage = async (characterId: number, text: string = '', generated: boolean) => {
@@ -114,6 +115,7 @@ const createMessage = async (characterId: number, text: string = '', generated: 
 }
 
 const generateMessage = async () => {
+    pendingMessage.value = true
     const {response} = await client.POST('/generate-message', {
         body: {
             chatId: Number(chatId),
@@ -144,6 +146,7 @@ const generateMessage = async () => {
             console.error('Unknown event', chunk)
         }
     }
+    pendingMessage.value = false
 }
 
 const stopGeneration = () => {
@@ -450,6 +453,7 @@ const toggleCtxMenu = () => {
 
 .messageText p {
     color: var(--msg);
+    margin-bottom: 15px;
 }
 
 .messageText em {
