@@ -4,15 +4,10 @@
 package main
 
 import (
-	"embed"
-
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
-
-//go:embed all:dist
-var assets embed.FS
 
 func main() {
 	// Create an instance of the app structure

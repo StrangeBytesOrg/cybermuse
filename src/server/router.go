@@ -13,12 +13,18 @@ import (
 )
 
 func InitRouter() *chi.Mux {
-	router := chi.NewMux()
+	router := chi.NewRouter()
 	router.Use(cors.Handler(
 		cors.Options{},
 	))
 
-	api := humachi.New(router, huma.DefaultConfig("Chat App", "0.0.1"))
+	apiRouter := chi.NewRouter()
+	router.Mount("/api", apiRouter)
+	humaConfig := huma.DefaultConfig("Chat App", "0.0.1")
+	humaConfig.Servers = []*huma.Server{
+		{URL: "/api"},
+	}
+	api := humachi.New(apiRouter, humaConfig)
 
 	// Characters
 	huma.Register(api, huma.Operation{

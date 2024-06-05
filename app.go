@@ -6,9 +6,14 @@ import (
 	"chat-app/src/server/controllers"
 	"chat-app/src/server/db"
 	"context"
+	"embed"
 	"fmt"
+	"io/fs"
 	"net/http"
 )
+
+//go:embed all:dist
+var assets embed.FS
 
 var version = "dev" // Set by the build system
 
@@ -47,6 +52,15 @@ func (app *App) startup(ctx context.Context) {
 	db.InitDB()
 
 	router := server.InitRouter()
+
+	// Serve the static files as a web app
+	subFS, err := fs.Sub(assets, "dist")
+	if err != nil {
+		fmt.Println("Error getting sub fs:", err)
+	}
+	fs := http.FileServer(http.FS(subFS))
+	router.Handle("/*", http.StripPrefix("/", fs))
+
 	http.ListenAndServe(":31700", router)
 }
 

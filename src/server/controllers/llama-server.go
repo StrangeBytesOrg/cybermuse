@@ -79,7 +79,7 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 		binaryName = "server.exe"
 	}
 	binaryPath := filepath.Join(filepath.Dir(selfBinPath), binaryName)
-	fmt.Println("Llama Binary path:", binaryPath)
+	fmt.Println("Loading llama.cpp server from:", binaryPath)
 
 	modelPath := filepath.Join(appConfig.ModelsPath, input.Body.ModelFile)
 
