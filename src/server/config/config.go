@@ -7,11 +7,10 @@ import (
 )
 
 type Config struct {
-	AppDataPath string
-	ModelsPath  string
-	AutoLoad    bool
-	LastModel   string
-	UseGPU      bool
+	ModelsPath string `json:"modelsPath"`
+	AutoLoad   bool   `json:"autoLoad"`
+	LastModel  string `json:"lastModel"`
+	UseGPU     bool   `json:"useGPU"`
 }
 
 var config *Config
@@ -58,10 +57,9 @@ func GetConfig() *Config {
 		// Create a default config file
 		defaultModelsPath := path.Join(appDataPath, "models")
 		config = &Config{
-			ModelsPath:  defaultModelsPath,
-			AppDataPath: appDataPath,
-			AutoLoad:    false,
-			UseGPU:      false,
+			ModelsPath: defaultModelsPath,
+			AutoLoad:   false,
+			UseGPU:     false,
 		}
 		err := SaveConfigToFile(config)
 		if err != nil {
