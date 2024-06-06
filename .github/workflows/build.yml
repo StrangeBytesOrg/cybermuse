@@ -95,7 +95,7 @@ jobs:
           cd build/bin
           tar -acf chat-linux.tar.gz *
           rclone copy chat-linux.tar.gz r2:chat-app-releases/latest/
-          rclone copy chat-linux.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
+          rclone copyto chat-linux.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
         
       - name: Archive and Upload Mac
         if: matrix.build.target-platform == 'darwin/amd64'
@@ -103,7 +103,7 @@ jobs:
           cd build/bin
           ditto -c -k --keepParent chat.app chat-mac-x86.zip
           rclone copy chat-mac-x86.zip r2:chat-app-releases/latest/
-          rclone copy chat-mac-x86.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-x86.zip
+          rclone copyto chat-mac-x86.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-x86.zip
 
       - name: Archive and Upload Windows
         if: matrix.build.target-platform == 'windows/amd64'
@@ -111,4 +111,4 @@ jobs:
           cd build/bin
           zip chat-windows.zip chat-amd64-installer.exe
           rclone copy chat-windows.zip r2:chat-app-releases/latest/
-          rclone copy chat-windows.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-windows.zip
+          rclone copyto chat-windows.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-windows.zip

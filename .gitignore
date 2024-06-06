@@ -8,3 +8,4 @@ tmp/
 src/openapi.yml
 build/llamacpp
 dev.db
+rclone.conf
