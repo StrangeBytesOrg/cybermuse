@@ -72,7 +72,7 @@ jobs:
         run: unzip -j llamacpp.zip -d build/llamacpp/
 
       - name: Build Wails
-        run: wails build -skipbindings -platform=${{ matrix.build.target-platform }} -nsis=${{ matrix.build.target-platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}
+        run: wails build -skipbindings -platform=${{ matrix.build.target-platform }} -nsis=${{ matrix.build.target-platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
         shell: bash
 
       - name: Archive Linux
