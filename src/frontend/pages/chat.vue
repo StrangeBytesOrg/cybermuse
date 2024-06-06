@@ -57,7 +57,6 @@ const fullSend = async () => {
         toast.error('Message already in progress')
         return
     }
-
     if (!connectionStore.connected) {
         toast.error('Generation server not running or not connected')
         return
@@ -79,6 +78,20 @@ const fullSend = async () => {
         await createMessage(characterId, '', true)
     }
 
+    await generateMessage()
+}
+
+const impersonate = async () => {
+    if (pendingMessage.value) {
+        toast.error('Message already in progress')
+        return
+    }
+    if (!connectionStore.connected) {
+        toast.error('Generation server not running or not connected')
+        return
+    }
+
+    await createMessage(1, '', true)
     await generateMessage()
 }
 
@@ -411,8 +424,7 @@ const toggleCtxMenu = () => {
                 <Transition name="fade">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
                         <li><a @click="generateMessage(true)">Continue</a></li>
-                        <!-- <li><a>Delete Messages</a></li> -->
-                        <li><a>Impersonate</a></li>
+                        <li><a @click="impersonate()">Impersonate</a></li>
                     </ul>
                 </Transition>
             </button>
