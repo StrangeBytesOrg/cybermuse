@@ -173,27 +173,6 @@ func InitRouter() *chi.Mux {
 		OperationID: "ListModels",
 	}, controllers.ListModels)
 
-	huma.Register(api, huma.Operation{
-		Path:        "/set-model-path",
-		Method:      "POST",
-		Tags:        []string{"server"},
-		OperationID: "SetModelPath",
-	}, controllers.SetModelPath)
-
-	huma.Register(api, huma.Operation{
-		Path:        "/set-autoload",
-		Method:      "POST",
-		Tags:        []string{"server"},
-		OperationID: "SetAutoLoad",
-	}, controllers.SetAutoLoad)
-
-	huma.Register(api, huma.Operation{
-		Path:        "/set-use-gpu",
-		Method:      "POST",
-		Tags:        []string{"server"},
-		OperationID: "SetGPU",
-	}, controllers.SetUseGPU)
-
 	sse.Register(api, huma.Operation{
 		Path:        "/download-model",
 		Method:      "POST",
@@ -319,6 +298,28 @@ func InitRouter() *chi.Mux {
 		"final": controllers.GenerateMessageFinalResponse{},
 		"error": controllers.GenerateMessageErrorResponse{},
 	}, controllers.GenerateMessage)
+
+	// Settings/Config
+	huma.Register(api, huma.Operation{
+		Path:        "/set-model-path",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetModelPath",
+	}, controllers.SetModelPath)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-autoload",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetAutoLoad",
+	}, controllers.SetAutoLoad)
+
+	huma.Register(api, huma.Operation{
+		Path:        "/set-use-gpu",
+		Method:      "POST",
+		Tags:        []string{"server"},
+		OperationID: "SetGPU",
+	}, controllers.SetUseGPU)
 
 	// Write the OpenAPI spec to a file
 	if os.Getenv("DEV") != "" {

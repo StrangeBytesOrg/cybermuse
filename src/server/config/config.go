@@ -13,8 +13,6 @@ type Config struct {
 	UseGPU     bool   `json:"useGPU"`
 }
 
-var config *Config
-
 func GetDataPath() string {
 	userConfigDir, err := os.UserConfigDir()
 	if err != nil {
@@ -24,20 +22,35 @@ func GetDataPath() string {
 	return appDataPath
 }
 
-func LoadConfigFromFile(filePath string) (*Config, error) {
-	var cfg *Config
-	data, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
+func GetConfig() *Config {
+	appDataPath := GetDataPath()
+	configPath := path.Join(appDataPath, "config.json")
+	var config *Config
+
+	// Check if the config file exists
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		// If not, create a default config file
+		defaultModelsPath := path.Join(appDataPath, "models")
+		config = &Config{
+			ModelsPath: defaultModelsPath,
+			AutoLoad:   false,
+			UseGPU:     false,
+		}
+	} else {
+		// Load the config file
+		rawData, err := os.ReadFile(configPath)
+		if err != nil {
+			panic(err)
+		}
+		err = json.Unmarshal(rawData, &config)
+		if err != nil {
+			panic(err)
+		}
 	}
-	err = json.Unmarshal(data, &cfg)
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
+	return config
 }
 
-func SaveConfigToFile(cfg *Config) error {
+func SaveConfig(cfg *Config) error {
 	appDataPath := GetDataPath()
 	filePath := path.Join(appDataPath, "config.json")
 	data, err := json.MarshalIndent(cfg, "", "  ")
@@ -45,36 +58,6 @@ func SaveConfigToFile(cfg *Config) error {
 		return err
 	}
 	return os.WriteFile(filePath, data, 0644)
-}
-
-// TODO It's a bit confusing that defaults are written in the GetConfig function, maybe refactor to be more obvious
-func GetConfig() *Config {
-	appDataPath := GetDataPath()
-	configFilePath := path.Join(appDataPath, "config.json")
-
-	// Check if the config file exists
-	if _, err := os.Stat(configFilePath); os.IsNotExist(err) {
-		// Create a default config file
-		defaultModelsPath := path.Join(appDataPath, "models")
-		config = &Config{
-			ModelsPath: defaultModelsPath,
-			AutoLoad:   false,
-			UseGPU:     false,
-		}
-		err := SaveConfigToFile(config)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		// Load the config file
-		var err error
-		config, err = LoadConfigFromFile(configFilePath)
-		if err != nil {
-			panic(err)
-		}
-	}
-
-	return config
 }
 
 func Init() {

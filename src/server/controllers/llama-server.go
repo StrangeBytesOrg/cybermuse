@@ -187,12 +187,12 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 
 	serverStatus.Loaded = true
 	serverStatus.CurrentModel = input.Body.ModelFile
+	// Update the last model used in the config
 	appConfig.LastModel = input.Body.ModelFile
-	err = config.SaveConfigToFile(appConfig)
+	err = config.SaveConfig(appConfig)
 	if err != nil {
-		return nil, err
+		return nil, huma.Error500InternalServerError("Error saving config: " + err.Error())
 	}
-
 	return nil, nil
 }
 
