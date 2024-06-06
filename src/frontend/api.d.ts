@@ -345,6 +345,7 @@ export interface components {
       $schema?: string;
       /** Format: int32 */
       chatId: number;
+      continue: boolean;
     };
     GenerateMessageResponse: {
       text: string;
@@ -934,17 +935,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["DownloadModelProgress"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "progress";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["DownloadModelFinal"];
               /**
                * @description The event name.
@@ -962,6 +952,17 @@ export interface operations {
                * @constant
                */
               event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["DownloadModelProgress"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "progress";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */

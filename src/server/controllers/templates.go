@@ -134,6 +134,9 @@ func ParseTemplate(ctx context.Context, input *struct {
 		{Id: 2, ChatId: 1, CharacterId: 2, Generated: true, Content: []*db.MessageContent{
 			{MessageId: 2, Text: "I'm doing well, thank you."},
 		}},
+		{Id: 3, ChatId: 1, CharacterId: 1, Generated: false, Content: []*db.MessageContent{
+			{MessageId: 3, Text: "Tell me a story"},
+		}},
 	}
 	exampleCharacters := []*db.Character{
 		{Id: 1, Name: "User", Description: "A user", Type: "user"},

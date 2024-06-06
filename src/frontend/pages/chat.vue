@@ -72,11 +72,9 @@ const fullSend = async () => {
 
     // If there is only one character in the chat, simply use that character
     if (nonUserChacters.length === 1) {
-        console.log('only one character')
         const characterId = nonUserChacters[0].id
         await createMessage(characterId, '', true)
     } else {
-        console.log('multiple characters, getting character id')
         const characterId = await getCharacter()
         await createMessage(characterId, '', true)
     }
@@ -114,17 +112,21 @@ const createMessage = async (characterId: number, text: string = '', generated: 
     }
 }
 
-const generateMessage = async () => {
+const generateMessage = async (continueExisting = false) => {
     pendingMessage.value = true
     const {response} = await client.POST('/generate-message', {
         body: {
             chatId: Number(chatId),
+            continue: continueExisting,
         },
         parseAs: 'stream',
         signal: signal.signal,
     })
     const responseIterable = responseToIterable(response)
     let bufferedResponse = ''
+    if (continueExisting) {
+        bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex].text
+    }
     // TODO log error if there is a response after final
     for await (const chunk of responseIterable) {
         const data = JSON.parse(chunk.data)
@@ -408,8 +410,8 @@ const toggleCtxMenu = () => {
                 </svg>
                 <Transition name="fade">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
-                        <li><a>Continue</a></li>
-                        <li><a>Delete Messages</a></li>
+                        <li><a @click="generateMessage(true)">Continue</a></li>
+                        <!-- <li><a>Delete Messages</a></li> -->
                         <li><a>Impersonate</a></li>
                     </ul>
                 </Transition>

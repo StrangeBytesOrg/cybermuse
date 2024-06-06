@@ -116,7 +116,7 @@ func GetResponseCharacter(ctx context.Context, input *struct {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Prompt: ", prompt)
+	fmt.Println("Pick Character Prompt: ", prompt)
 
 	// Create GBNF grammar to pick the next respondent
 	characterNames := []string{}
@@ -201,7 +201,8 @@ type GenerateMessageErrorResponse struct {
 
 func GenerateMessage(ctx context.Context, input *struct {
 	Body struct {
-		ChatId uint32 `json:"chatId"`
+		ChatId   uint32 `json:"chatId"`
+		Continue bool   `json:"continue"`
 	}
 }, send sse.Sender) {
 	chat := &db.Chat{}
@@ -245,6 +246,11 @@ func GenerateMessage(ctx context.Context, input *struct {
 		return
 	}
 
+	// If set to run in continue mode, remove the last message from the prompt so that it can be appended afterwards
+	if input.Body.Continue {
+		chat.Messages = chat.Messages[:len(chat.Messages)-1]
+	}
+
 	prompt, err := util.FormatPrompt(promptTemplate.Content, chat.Messages, chat.Characters)
 	if err != nil {
 		send.Data(&GenerateMessageErrorResponse{Error: "Error formatting prompt"})
@@ -253,6 +259,10 @@ func GenerateMessage(ctx context.Context, input *struct {
 
 	prompt += pickedCharacter.Name + ": "
 	fmt.Println("Prompt: ", prompt)
+
+	if input.Body.Continue {
+		prompt += lastMessage.Content[lastMessage.ActiveIndex].Text
+	}
 
 	// Get generation settings
 	preset := &db.GeneratePreset{}
@@ -315,6 +325,9 @@ func GenerateMessage(ctx context.Context, input *struct {
 
 	scanner := sseparser.NewStreamScanner(resp.Body)
 	bufferedResponse := ""
+	if input.Body.Continue {
+		bufferedResponse = lastMessage.Content[lastMessage.ActiveIndex].Text
+	}
 
 	for {
 		var e event
