@@ -34,14 +34,17 @@ func (app *App) startup(ctx context.Context) {
 	fmt.Println("Server version:", version)
 
 	// If the server is set to autoload, start it
-	if config.GetConfig().AutoLoad && config.GetConfig().LastModel != "" {
-		lastModel := config.GetConfig().LastModel
+	appConfig := config.GetConfig()
+	if appConfig.AutoLoad && appConfig.LastModel != "" {
+		lastModel := appConfig.LastModel
 		fmt.Println("Auto loading model:", lastModel)
 		_, err := controllers.StartServer(ctx, &controllers.StartServerInput{
 			Body: struct {
-				ModelFile string `json:"modelFile"`
+				ModelFile   string `json:"modelFile"`
+				ContextSize int    `json:"contextSize"`
 			}{
-				ModelFile: lastModel,
+				ModelFile:   lastModel,
+				ContextSize: appConfig.ContextSize,
 			},
 		})
 		if err != nil {

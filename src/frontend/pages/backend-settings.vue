@@ -11,6 +11,7 @@ const currentModel = ref('')
 const selectModel = ref('')
 const modelLoaded = ref(false)
 const modelPath = ref('')
+const contextSize = ref(8192)
 const autoLoad = ref(false)
 const useGPU = ref(false)
 const modelLoadPending = ref(false)
@@ -24,6 +25,7 @@ const getStatus = async () => {
         modelLoaded.value = data.loaded
         currentModel.value = data.currentModel
         modelPath.value = data.modelPath
+        contextSize.value = data.contextSize
         autoLoad.value = data.autoLoad
         selectModel.value = data.currentModel
         useGPU.value = data.useGPU
@@ -47,6 +49,7 @@ const loadModel = async () => {
     const {error} = await client.POST('/start-server', {
         body: {
             modelFile: selectModel.value,
+            contextSize: contextSize.value,
         },
     })
     if (error) {
@@ -136,6 +139,13 @@ await getModels()
                 <button @click="getModels" class="btn btn-primary ml-2">Refresh</button>
                 <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Load</button>
                 <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Unload</button>
+            </div>
+
+            <div class="form-control w-52 mt-3">
+                <label class="label">
+                    <span class="label-text min-w-28">Context size</span>
+                    <input type="number" class="input input-bordered" v-model="contextSize" />
+                </label>
             </div>
 
             <div class="form-control w-52 mt-3">

@@ -216,6 +216,8 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
+      /** Format: int64 */
+      context: number;
       /** Format: float */
       frequencyPenalty?: number;
       /** Format: int64 */
@@ -236,6 +238,8 @@ export interface components {
       repeatLastN?: number;
       /** Format: float */
       repeatPenalty?: number;
+      /** Format: int32 */
+      seed?: number;
       /** Format: float */
       temperature: number;
       /** Format: float */
@@ -352,6 +356,8 @@ export interface components {
     };
     GeneratePreset: {
       active: boolean;
+      /** Format: int64 */
+      context: number;
       /** Format: float */
       frequencyPenalty: number;
       /** Format: int32 */
@@ -374,6 +380,8 @@ export interface components {
       repeatLastN: number;
       /** Format: float */
       repeatPenalty: number;
+      /** Format: int32 */
+      seed: number;
       /** Format: float */
       temperature: number;
       /** Format: float */
@@ -532,6 +540,8 @@ export interface components {
        */
       $schema?: string;
       autoLoad: boolean;
+      /** Format: int64 */
+      contextSize: number;
       currentModel: string;
       loaded: boolean;
       modelPath: string;
@@ -567,6 +577,8 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
+      /** Format: int64 */
+      contextSize: number;
       modelFile: string;
     };
     UpdateCharacterRequest: {
@@ -595,6 +607,8 @@ export interface components {
        * @description A URL to the JSON Schema for this object.
        */
       $schema?: string;
+      /** Format: int64 */
+      context: number;
       /** Format: float */
       frequencyPenalty?: number;
       /** Format: int64 */
@@ -615,6 +629,8 @@ export interface components {
       repeatLastN?: number;
       /** Format: float */
       repeatPenalty?: number;
+      /** Format: int32 */
+      seed?: number;
       /** Format: float */
       temperature: number;
       /** Format: float */
@@ -935,17 +951,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["DownloadModelFinal"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "final";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["DownloadModelError"];
               /**
                * @description The event name.
@@ -963,6 +968,17 @@ export interface operations {
                * @constant
                */
               event: "progress";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["DownloadModelFinal"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "final";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */
@@ -1032,17 +1048,6 @@ export interface operations {
       200: {
         content: {
           "text/event-stream": OneOf<[{
-              data: components["schemas"]["GenerateMessageResponse"];
-              /**
-               * @description The event name.
-               * @constant
-               */
-              event: "text";
-              /** @description The event ID. */
-              id?: number;
-              /** @description The retry time in milliseconds. */
-              retry?: number;
-            }, {
               data: components["schemas"]["GenerateMessageFinalResponse"];
               /**
                * @description The event name.
@@ -1060,6 +1065,17 @@ export interface operations {
                * @constant
                */
               event: "error";
+              /** @description The event ID. */
+              id?: number;
+              /** @description The retry time in milliseconds. */
+              retry?: number;
+            }, {
+              data: components["schemas"]["GenerateMessageResponse"];
+              /**
+               * @description The event name.
+               * @constant
+               */
+              event: "text";
               /** @description The event ID. */
               id?: number;
               /** @description The retry time in milliseconds. */

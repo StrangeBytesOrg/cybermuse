@@ -67,12 +67,14 @@ type PromptTemplate struct {
 
 type GeneratePreset struct {
 	// Internal
-	Id     uint32 `bun:",pk,autoincrement" json:"id,omitempty"`
-	Name   string `bun:",notnull,nullzero" json:"name"`
-	Active bool   `bun:",notnull" json:"active"`
+	Id      uint32 `bun:",pk,autoincrement" json:"id,omitempty"`
+	Name    string `bun:",notnull,nullzero" json:"name"`
+	Active  bool   `bun:",notnull" json:"active"`
+	Context uint   `bun:",notnull" json:"context"`
 	// Passed to server
 	MaxTokens        uint    `json:"maxTokens"`
 	Temperature      float32 `json:"temperature"`
+	Seed             int32   `json:"seed"`
 	TopK             float32 `bun:"top_k" json:"topK"`
 	TopP             float32 `bun:"top_p" json:"topP"`
 	MinP             float32 `bun:"min_p" json:"minP"`
@@ -111,7 +113,7 @@ func InitDB() error {
 	DB.RegisterModel((*ChatCharacter)(nil))
 	DB.RegisterModel((*MessageContent)(nil))
 
-	if os.Getenv("DEV") != "" {
+	if os.Getenv("VERBOSE") != "" {
 		DB.AddQueryHook(bundebug.NewQueryHook(
 			bundebug.WithVerbose(true),
 			bundebug.FromEnv("BUNDEBUG"),

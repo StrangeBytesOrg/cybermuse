@@ -30,6 +30,7 @@ type ServerStatusResponse struct {
 		Loaded       bool   `json:"loaded"`
 		CurrentModel string `json:"currentModel"`
 		ModelPath    string `json:"modelPath"`
+		ContextSize  int    `json:"contextSize"`
 		AutoLoad     bool   `json:"autoLoad"`
 		UseGPU       bool   `json:"useGPU"`
 	}
@@ -41,6 +42,7 @@ func GetServerStatus(ctx context.Context, input *struct{}) (*ServerStatusRespons
 	response.Body.Loaded = serverStatus.Loaded
 	response.Body.CurrentModel = serverStatus.CurrentModel
 	response.Body.ModelPath = appConfig.ModelsPath
+	response.Body.ContextSize = appConfig.ContextSize
 	response.Body.AutoLoad = appConfig.AutoLoad
 	response.Body.UseGPU = appConfig.UseGPU
 	fmt.Println("Server status:", response.Body)
@@ -60,7 +62,8 @@ func GetProcAttr() *syscall.SysProcAttr {
 
 type StartServerInput struct {
 	Body struct {
-		ModelFile string `json:"modelFile"`
+		ModelFile   string `json:"modelFile"`
+		ContextSize int    `json:"contextSize"`
 	}
 }
 
@@ -100,6 +103,7 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 	}
 
 	cmd := exec.Command(binaryPath, "--model", modelPath, "--log-disable")
+	cmd.Args = append(cmd.Args, "--ctx-size", fmt.Sprint(input.Body.ContextSize))
 	if appConfig.UseGPU {
 		cmd.Args = append(cmd.Args, "--n-gpu-layers", "128")
 	}
@@ -189,6 +193,7 @@ func StartServer(ctx context.Context, input *StartServerInput) (*struct{}, error
 	serverStatus.CurrentModel = input.Body.ModelFile
 	// Update the last model used in the config
 	appConfig.LastModel = input.Body.ModelFile
+	appConfig.ContextSize = input.Body.ContextSize
 	err = config.SaveConfig(appConfig)
 	if err != nil {
 		return nil, huma.Error500InternalServerError("Error saving config: " + err.Error())

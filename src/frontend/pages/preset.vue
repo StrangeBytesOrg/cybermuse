@@ -13,8 +13,10 @@ const {data} = await client.GET('/preset/{id}', {
     params: {path: {id: String(presetId)}},
 })
 const presetName = ref(data?.preset.name || '')
-const temperature = ref(data?.preset.temperature || 0)
 const maxTokens = ref(data?.preset.maxTokens || 0)
+const context = ref(data?.preset.context || 0)
+const temperature = ref(data?.preset.temperature || 0)
+const seed = ref(data?.preset.seed || 0)
 const minP = ref(data?.preset.minP || 0)
 const topP = ref(data?.preset.topP || 0)
 const topK = ref(data?.preset.topK || 0)
@@ -34,8 +36,10 @@ const updatePreset = async () => {
         params: {path: {id: String(presetId)}},
         body: {
             name: presetName.value,
-            temperature: temperature.value,
             maxTokens: maxTokens.value,
+            context: context.value,
+            temperature: temperature.value,
+            seed: seed.value,
             topK: topK.value,
             topP: topP.value,
             minP: minP.value,
@@ -87,6 +91,26 @@ const deletePreset = async () => {
 
                 <label class="form-control w-full">
                     <div class="label">
+                        <span class="label-text">Max Response Tokens</span>
+                    </div>
+                    <input
+                        type="number"
+                        class="input input-bordered focus:outline-none focus:border-primary"
+                        v-model="maxTokens" />
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Max Context</span>
+                    </div>
+                    <input
+                        type="number"
+                        class="input input-bordered focus:outline-none focus:border-primary"
+                        v-model="context" />
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
                         <span class="label-text">Temperature</span>
                     </div>
                     <input
@@ -97,12 +121,12 @@ const deletePreset = async () => {
 
                 <label class="form-control w-full">
                     <div class="label">
-                        <span class="label-text">Max Tokens</span>
+                        <span class="label-text">Seed</span>
                     </div>
                     <input
                         type="number"
-                        class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="maxTokens" />
+                        v-model="seed"
+                        class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
 
                 <label class="form-control w-full">

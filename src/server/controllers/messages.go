@@ -11,6 +11,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/danielgtaylor/huma/v2/sse"
 	"github.com/jclem/sseparser"
@@ -246,24 +247,6 @@ func GenerateMessage(ctx context.Context, input *struct {
 		return
 	}
 
-	// If set to run in continue mode, remove the last message from the prompt so that it can be appended afterwards
-	if input.Body.Continue {
-		chat.Messages = chat.Messages[:len(chat.Messages)-1]
-	}
-
-	prompt, err := util.FormatPrompt(promptTemplate.Content, chat.Messages, chat.Characters)
-	if err != nil {
-		send.Data(&GenerateMessageErrorResponse{Error: "Error formatting prompt"})
-		return
-	}
-
-	prompt += pickedCharacter.Name + ": "
-	fmt.Println("Prompt: ", prompt)
-
-	if input.Body.Continue {
-		prompt += lastMessage.Content[lastMessage.ActiveIndex].Text
-	}
-
 	// Get generation settings
 	preset := &db.GeneratePreset{}
 	err = db.DB.NewSelect().Model(preset).Where("active = true").Scan(ctx)
@@ -272,12 +255,55 @@ func GenerateMessage(ctx context.Context, input *struct {
 		return
 	}
 
+	// If set to run in continue mode, remove the last message from the prompt so that it can be appended afterwards
+	if input.Body.Continue {
+		chat.Messages = chat.Messages[:len(chat.Messages)-1]
+	}
+
+	// appConfig := config.GetConfig()
+	startTime := time.Now()
+	// tokenLimit := appConfig.ContextSize
+	tokenLimit := preset.Context
+	tokenCount := uint(0)
+	prompt := ""
+	for i := len(chat.Messages) - 1; i >= 0; i-- {
+		messageSubArray := chat.Messages[i:]
+		newPrompt, err := util.FormatPrompt(promptTemplate.Content, messageSubArray, chat.Characters)
+		if err != nil {
+			send.Data(&GenerateMessageErrorResponse{Error: "Error formatting prompt"})
+			return
+		}
+
+		if input.Body.Continue {
+			newPrompt += pickedCharacter.Name + ": " + lastMessage.Content[lastMessage.ActiveIndex].Text
+		} else {
+			newPrompt += pickedCharacter.Name + ": "
+		}
+
+		newTokenCount, err := GetTokenCount(newPrompt)
+		if err != nil {
+			send.Data(&GenerateMessageErrorResponse{Error: "Error tokenizing prompt"})
+			return
+		}
+		fmt.Println("Token Count: ", newTokenCount, " Message Index: ", i)
+		if newTokenCount > tokenLimit {
+			fmt.Println("Count exceeded: ", newTokenCount)
+			break
+		}
+		prompt = newPrompt
+		tokenCount = newTokenCount
+	}
+	fmt.Println("Prompt: ", prompt)
+	fmt.Println("Token Count: ", tokenCount)
+	duration := time.Since(startTime)
+	fmt.Println("Processing time: ", duration)
+
 	// Generate the message content
 	jsonPayload, err := json.Marshal(map[string]any{
 		"stream":            true,
 		"prompt":            prompt,
 		"cache_prompt":      true,
-		"seed":              42,
+		"seed":              preset.Seed,
 		"n_predict":         preset.MaxTokens,
 		"temperature":       preset.Temperature,
 		"top_k":             preset.TopK,
@@ -357,4 +383,34 @@ func GenerateMessage(ctx context.Context, input *struct {
 
 	fmt.Println("Final response: ", bufferedResponse)
 	send.Data(&GenerateMessageFinalResponse{Text: bufferedResponse})
+}
+
+func GetTokenCount(prompt string) (uint, error) {
+	jsonTokenizePayload, err := json.Marshal(map[string]any{
+		"content": prompt,
+	})
+	if err != nil {
+		return 0, err
+	}
+	response, err := http.Post("http://localhost:8080/tokenize", "application/json", bytes.NewBuffer(jsonTokenizePayload))
+	if err != nil {
+		return 0, err
+	}
+	if response.StatusCode != http.StatusOK {
+		return 0, errors.New("error tokenizing prompt")
+	}
+	tokenizeBody, err := io.ReadAll(response.Body)
+	if err != nil {
+		return 0, err
+	}
+	type TokenizeResponse struct {
+		Tokens []int `json:"tokens"`
+	}
+	tokenizeRes := TokenizeResponse{}
+	err = json.Unmarshal(tokenizeBody, &tokenizeRes)
+	if err != nil {
+		return 0, err
+	}
+	tokenCount := uint(len(tokenizeRes.Tokens))
+	return tokenCount, nil
 }

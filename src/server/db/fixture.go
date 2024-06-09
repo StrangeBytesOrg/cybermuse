@@ -44,6 +44,8 @@ func Fixture(ctx context.Context) {
 		Active: true,
 		// Add defaults taken from llama.cpp server defaults
 		MaxTokens:        256,
+		Seed:             42,
+		Context:          4096,
 		Temperature:      0.8,
 		TopK:             40,
 		TopP:             0.95,

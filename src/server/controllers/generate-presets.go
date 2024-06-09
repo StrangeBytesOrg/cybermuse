@@ -51,7 +51,9 @@ type CreatePresetResponse struct {
 
 type GenerationSettings struct {
 	MaxTokens   uint    `json:"maxTokens"`
+	Context     uint    `json:"context"`
 	Temperature float32 `json:"temperature"`
+	Seed        int32   `json:"seed,omitempty"`
 	// dynatemp_range
 	// dynatemp_exponent
 	TopK float32 `json:"topK,omitempty"`
@@ -81,7 +83,9 @@ func CreatePreset(ctx context.Context, input *struct {
 	preset := &db.GeneratePreset{
 		Name:             input.Body.Name,
 		MaxTokens:        input.Body.MaxTokens,
+		Context:          input.Body.Context,
 		Temperature:      input.Body.Temperature,
+		Seed:             input.Body.Seed,
 		TopK:             input.Body.TopK,
 		TopP:             input.Body.TopP,
 		MinP:             input.Body.MinP,
@@ -117,7 +121,9 @@ func UpdatePreset(ctx context.Context, input *struct {
 		Where("id = ?", input.Id).
 		Set("name = ?", input.Body.Name).
 		Set("max_tokens = ?", input.Body.MaxTokens).
+		Set("context = ?", input.Body.Context).
 		Set("temperature = ?", input.Body.Temperature).
+		Set("seed = ?", input.Body.Seed).
 		Set("top_k = ?", input.Body.TopK).
 		Set("top_p = ?", input.Body.TopP).
 		Set("min_p = ?", input.Body.MinP).
