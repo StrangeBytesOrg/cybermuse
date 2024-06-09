@@ -44,6 +44,7 @@ if (error) {
 const messages = reactive(data?.chat.messages ?? [])
 type Message = (typeof messages)[0]
 const characterMap = new Map((data?.chat.characters ?? []).map((character) => [character.id, character]))
+const userCharacter = data?.chat.characters.find((character) => character.type === 'user')
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -64,14 +65,14 @@ const fullSend = async () => {
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
-        await createMessage(1, currentMessage.value, false)
+        await createMessage(userCharacter.id, currentMessage.value, false)
     }
 
-    const nonUserChacters = data?.chat.characters.filter((character) => character.id !== 1)
+    const nonUserCharacters = data?.chat.characters.filter((character) => character.id !== 1)
 
     // If there is only one character in the chat, simply use that character
-    if (nonUserChacters.length === 1) {
-        const characterId = nonUserChacters[0].id
+    if (nonUserCharacters.length === 1) {
+        const characterId = nonUserCharacters[0].id
         await createMessage(characterId, '', true)
     } else {
         const characterId = await getCharacter()
@@ -91,7 +92,7 @@ const impersonate = async () => {
         return
     }
 
-    await createMessage(1, '', true)
+    await createMessage(userCharacter.id, '', true)
     await generateMessage()
 }
 
