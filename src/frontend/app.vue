@@ -14,6 +14,7 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
 onErrorCaptured((error) => {
     toast.error(`An error occurred: ${error.message}`)
+    console.error(error)
     return false
 })
 

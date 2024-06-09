@@ -260,9 +260,7 @@ func GenerateMessage(ctx context.Context, input *struct {
 		chat.Messages = chat.Messages[:len(chat.Messages)-1]
 	}
 
-	// appConfig := config.GetConfig()
 	startTime := time.Now()
-	// tokenLimit := appConfig.ContextSize
 	tokenLimit := preset.Context
 	tokenCount := uint(0)
 	prompt := ""
@@ -285,7 +283,6 @@ func GenerateMessage(ctx context.Context, input *struct {
 			send.Data(&GenerateMessageErrorResponse{Error: "Error tokenizing prompt"})
 			return
 		}
-		fmt.Println("Token Count: ", newTokenCount, " Message Index: ", i)
 		if newTokenCount > tokenLimit {
 			fmt.Println("Count exceeded: ", newTokenCount)
 			break
@@ -293,9 +290,9 @@ func GenerateMessage(ctx context.Context, input *struct {
 		prompt = newPrompt
 		tokenCount = newTokenCount
 	}
+	duration := time.Since(startTime)
 	fmt.Println("Prompt: ", prompt)
 	fmt.Println("Token Count: ", tokenCount)
-	duration := time.Since(startTime)
 	fmt.Println("Processing time: ", duration)
 
 	// Generate the message content

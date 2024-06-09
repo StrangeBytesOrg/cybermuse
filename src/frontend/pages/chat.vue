@@ -128,41 +128,47 @@ const createMessage = async (characterId: number, text: string = '', generated: 
 
 const generateMessage = async (continueExisting = false) => {
     pendingMessage.value = true
-    const {response} = await client.POST('/generate-message', {
-        body: {
-            chatId: Number(chatId),
-            continue: continueExisting,
-        },
-        parseAs: 'stream',
-        signal: signal.signal,
-    })
-    const responseIterable = responseToIterable(response)
-    let bufferedResponse = ''
-    if (continueExisting) {
-        bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex].text
-    }
-    // TODO log error if there is a response after final
-    for await (const chunk of responseIterable) {
-        const data = JSON.parse(chunk.data)
-        if (chunk.event === 'text') {
-            // console.log(data.text)
-            bufferedResponse += data.text
-            const lastMessage = messages[messages.length - 1]
-            if (lastMessage) {
-                lastMessage.content[lastMessage.activeIndex].text = bufferedResponse
-            }
-            scrollMessages('smooth')
-        } else if (chunk.event === 'final') {
-            console.log('End of response')
-            console.log(bufferedResponse)
-        } else if (chunk.event === 'error') {
-            console.error('Error', data.error)
-            toast.error(data.error)
-        } else {
-            console.error('Unknown event', chunk)
+    try {
+        const {response} = await client.POST('/generate-message', {
+            body: {
+                chatId: Number(chatId),
+                continue: continueExisting,
+            },
+            parseAs: 'stream',
+            signal: signal.signal,
+        })
+        const responseIterable = responseToIterable(response)
+        let bufferedResponse = ''
+        if (continueExisting) {
+            bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex].text
         }
+        for await (const chunk of responseIterable) {
+            const data = JSON.parse(chunk.data)
+            if (chunk.event === 'text') {
+                bufferedResponse += data.text
+                const lastMessage = messages[messages.length - 1]
+                if (lastMessage) {
+                    lastMessage.content[lastMessage.activeIndex].text = bufferedResponse
+                }
+                scrollMessages('smooth')
+            } else if (chunk.event === 'final') {
+                if (data.text !== bufferedResponse) {
+                    console.error('Final text does not match buffered response')
+                }
+            } else if (chunk.event === 'error') {
+                console.error('Error', data.error)
+                toast.error(data.error)
+            } else {
+                console.error('Unknown event', chunk)
+            }
+        }
+    } catch (error) {
+        // Ignore abort errors
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        throw error
+    } finally {
+        pendingMessage.value = false
     }
-    pendingMessage.value = false
 }
 
 const stopGeneration = () => {
