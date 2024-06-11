@@ -18,7 +18,8 @@ CREATE TABLE `chats` (
 CREATE TABLE `chat_characters` (
   `chat_id` integer NOT NULL,
   `character_id` integer NOT NULL,
-  PRIMARY KEY (`chat_id`, `character_id`)
+  PRIMARY KEY (`chat_id`, `character_id`),
+  CONSTRAINT `0` FOREIGN KEY (`chat_id`) REFERENCES `chats` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create "messages" table
 CREATE TABLE `messages` (
@@ -26,13 +27,15 @@ CREATE TABLE `messages` (
   `chat_id` integer NOT NULL,
   `character_id` integer NOT NULL,
   `generated` boolean NOT NULL,
-  `active_index` integer NOT NULL
+  `active_index` integer NOT NULL,
+  CONSTRAINT `0` FOREIGN KEY (`chat_id`) REFERENCES `chats` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create "message_contents" table
 CREATE TABLE `message_contents` (
   `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   `text` varchar NOT NULL,
-  `message_id` integer NOT NULL
+  `message_id` integer NOT NULL,
+  CONSTRAINT `0` FOREIGN KEY (`message_id`) REFERENCES `messages` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE
 );
 -- create "prompt_templates" table
 CREATE TABLE `prompt_templates` (
@@ -46,8 +49,8 @@ CREATE TABLE `generate_presets` (
   `id` integer NOT NULL PRIMARY KEY AUTOINCREMENT,
   `name` varchar NOT NULL,
   `active` boolean NOT NULL,
+  `context` integer NOT NULL,
   `max_tokens` integer NULL,
-  `context` integer NULL,
   `temperature` real NULL,
   `seed` integer NULL,
   `top_k` real NULL,

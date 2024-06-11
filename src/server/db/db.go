@@ -90,7 +90,7 @@ type GeneratePreset struct {
 	MirostatEta      float32 `json:"mirostatEta"`
 }
 
-//go:embed migrations/*.sql
+//go:embed migrations
 var embedMigrations embed.FS
 
 func InitDB() error {
@@ -120,6 +120,12 @@ func InitDB() error {
 		))
 	}
 
+	// Actually enable foreign keys. fk=1 doesn't seem to work
+	if _, err := DB.Exec("PRAGMA foreign_keys = ON;"); err != nil {
+		panic(err)
+	}
+
+	// Run Goose migrations
 	fmt.Println("Running migrations")
 	goose.SetBaseFS(embedMigrations)
 	if err := goose.SetDialect("sqlite"); err != nil {
@@ -133,13 +139,33 @@ func InitDB() error {
 	if os.Getenv("INIT_DB") != "" {
 		fmt.Println("Creating tables from schema")
 		ctx := context.Background()
+		// DB.ResetModel(ctx, (*GooseDbVersion)(nil))
 		DB.ResetModel(ctx, (*Character)(nil))
 		DB.ResetModel(ctx, (*Chat)(nil))
-		DB.ResetModel(ctx, (*ChatCharacter)(nil))
-		DB.ResetModel(ctx, (*Message)(nil))
-		DB.ResetModel(ctx, (*MessageContent)(nil))
+		// DB.ResetModel(ctx, (*ChatCharacter)(nil))
+		// DB.ResetModel(ctx, (*Message)(nil))
+		// DB.ResetModel(ctx, (*MessageContent)(nil))
 		DB.ResetModel(ctx, (*PromptTemplate)(nil))
 		DB.ResetModel(ctx, (*GeneratePreset)(nil))
+		DB.NewCreateTable().
+			Model((*ChatCharacter)(nil)).
+			IfNotExists().
+			Table("chat_characters").
+			ForeignKey(`(chat_id) REFERENCES "chats" ("id") ON DELETE CASCADE`).
+			// ForeignKey(`(character_id) REFERENCES "characters" ("id") ON DELETE CASCADE`).
+			Exec(ctx)
+		DB.NewCreateTable().
+			Model((*Message)(nil)).
+			IfNotExists().
+			Table("messages").
+			ForeignKey(`(chat_id) REFERENCES "chats" ("id") ON DELETE CASCADE`).
+			Exec(ctx)
+		DB.NewCreateTable().
+			Model((*MessageContent)(nil)).
+			IfNotExists().
+			Table("message_content").
+			ForeignKey(`(message_id) REFERENCES "messages" ("id") ON DELETE CASCADE`).
+			Exec(ctx)
 	}
 
 	// Check if the database is empty
