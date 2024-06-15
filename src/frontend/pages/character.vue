@@ -34,7 +34,7 @@ const updateCharacter = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(error.message)
+        toast.error(`Error updating character:\n${error.message}`)
     } else {
         router.push('/characters')
     }
@@ -50,7 +50,7 @@ const deleteCharacter = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(error.detail)
+        toast.error(`Error deleting character:\n${error.message}`)
     } else {
         await router.push('/characters')
     }

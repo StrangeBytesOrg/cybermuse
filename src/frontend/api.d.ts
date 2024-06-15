@@ -62,23 +62,20 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
+            id?: number;
             name: string;
-            description: string;
-            firstMessage: string | null;
-            image: string | null;
             /** @enum {string} */
             type: "user" | "character";
+            description: string;
+            firstMessage?: string | null;
+            image?: string | null;
           };
         };
       };
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -94,23 +91,20 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
+            id?: number;
             name: string;
             /** @enum {string} */
             type: "user" | "character";
             description: string;
-            firstMessage: string | null;
-            image: string | null;
+            firstMessage?: string | null;
+            image?: string | null;
           };
         };
       };
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -126,11 +120,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };

@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, character, selectCharacterSchema} from '../db.js'
+import {db, character, selectCharacterSchema, insertCharacterSchema} from '../db.js'
 
 export const characterRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -55,28 +55,16 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
         method: 'POST',
         schema: {
             summary: 'Create a character',
-            body: z.object({
-                name: z.string(),
-                description: z.string(),
-                firstMessage: z.string().nullable(),
-                image: z.string().nullable(),
-                type: z.enum(['user', 'character']),
-            }),
-            response: {
-                200: z.object({
-                    success: z.boolean(),
-                }),
-            },
+            body: insertCharacterSchema,
         },
         handler: async (req) => {
             await db.insert(character).values({
                 name: req.body.name,
+                type: req.body.type,
                 description: req.body.description,
                 firstMessage: req.body.firstMessage,
                 image: req.body.image,
-                type: req.body.type,
             })
-            return {success: true}
         },
     })
 
@@ -88,30 +76,19 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             params: z.object({
                 id: z.string(),
             }),
-            body: z.object({
-                name: z.string(),
-                type: z.enum(['user', 'character']),
-                description: z.string(),
-                firstMessage: z.string().nullable(),
-                image: z.string().nullable(),
-            }),
-            response: {
-                200: z.object({
-                    success: z.boolean(),
-                }),
-            },
+            body: insertCharacterSchema,
         },
         handler: async (req) => {
             await db
                 .update(character)
                 .set({
                     name: req.body.name,
+                    type: req.body.type,
                     description: req.body.description,
                     firstMessage: req.body.firstMessage,
                     image: req.body.image,
                 })
                 .where(eq(character.id, Number(req.params.id)))
-            return {success: true}
         },
     })
 
@@ -123,20 +100,12 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             params: z.object({
                 id: z.string(),
             }),
-            response: {
-                200: z.object({
-                    success: z.boolean(),
-                }),
-            },
         },
         handler: async (req) => {
             if (req.params.id === '1') {
                 throw new Error('Not allowed to delete the user character.')
             }
-
-            const result = await db.delete(character).where(eq(character.id, Number(req.params.id)))
-            console.log(result)
-            return {success: true}
+            await db.delete(character).where(eq(character.id, Number(req.params.id)))
         },
     })
 }

@@ -12,7 +12,7 @@ const character = ref({
     name: '',
     description: '',
     firstMessage: '',
-    type: 'character',
+    type: 'character' as 'character' | 'user',
 })
 const characterImage = ref('')
 

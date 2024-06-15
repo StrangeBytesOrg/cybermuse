@@ -17,6 +17,7 @@ export const character = sqliteTable('character', {
     image: text('image'),
 })
 export const selectCharacterSchema = createSelectSchema(character)
+export const insertCharacterSchema = createInsertSchema(character)
 
 export const chat = sqliteTable('chat', {
     id: integer('id').primaryKey({autoIncrement: true}),
