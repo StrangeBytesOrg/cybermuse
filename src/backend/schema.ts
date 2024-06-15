@@ -51,11 +51,11 @@ export const message = sqliteTable('message', {
     characterId: integer('character_id')
         .references(() => character.id, {onDelete: 'set null'})
         .notNull(),
-    generated: integer('generated').notNull(),
-    // generated: integer('generated').$type<boolean>().notNull(),
+    generated: integer('generated', {mode: 'boolean'}).notNull(),
     activeIndex: integer('active_index').notNull(),
 })
 export const selectMessageSchema = createSelectSchema(message)
+export const insertMessageSchema = createInsertSchema(message)
 
 export const messageContent = sqliteTable('message_content', {
     id: integer('id').primaryKey({autoIncrement: true}),

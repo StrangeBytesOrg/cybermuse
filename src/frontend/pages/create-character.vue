@@ -20,10 +20,10 @@ const createCharacter = async () => {
     const {error} = await client.POST('/create-character', {
         body: {
             name: character.value.name,
-            description: character.value.description,
-            firstMessage: character.value.firstMessage,
             type: character.value.type,
-            image: characterImage.value,
+            description: character.value.description,
+            firstMessage: character.value.firstMessage || undefined,
+            image: characterImage.value || undefined,
         },
     })
     if (error) {

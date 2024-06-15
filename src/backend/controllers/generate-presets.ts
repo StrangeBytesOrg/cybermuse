@@ -62,9 +62,6 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             summary: 'Create a generation preset',
             body: insertPresetSchema,
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             try {
@@ -88,7 +85,6 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                     mirostatTau: req.body.mirostatTau,
                     mirostatEta: req.body.mirostatEta,
                 })
-                return {success: true}
             } catch (err) {
                 console.error(err)
                 throw new Error('Failed to create generate preset')
@@ -105,9 +101,6 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                 id: z.string(),
             }),
             body: insertPresetSchema,
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             try {
@@ -134,7 +127,6 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                         mirostatEta: req.body.mirostatEta,
                     })
                     .where(eq(generatePresets.id, Number(req.params.id)))
-                return {success: true}
             } catch (err) {
                 console.error(err)
                 throw new Error('Failed to update generate preset')

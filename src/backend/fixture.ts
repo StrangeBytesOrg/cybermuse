@@ -1,5 +1,5 @@
 import {eq} from 'drizzle-orm'
-import {db, user, character, promptTemplate, generatePresets} from './db.js'
+import {db, user, character, chat, chatCharacters, promptTemplate, generatePresets} from './db.js'
 
 // Prompt Presets
 const chatMlTemplate = `<|im_start|>system
@@ -41,6 +41,15 @@ export const fixtureData = async () => {
             type: 'character',
             firstMessage: 'Hello!',
         })
+    }
+
+    // Default chat
+    const existingChat = await db.query.chat.findFirst({where: eq(character.id, 1)})
+    if (!existingChat) {
+        console.log('No chat found, creating one')
+        await db.insert(chat).values({})
+        await db.insert(chatCharacters).values({chatId: 1, characterId: 1})
+        await db.insert(chatCharacters).values({chatId: 1, characterId: 2})
     }
 
     // Create a default generate preset if it doesn't exist

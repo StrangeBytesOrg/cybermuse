@@ -86,16 +86,12 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 name: z.string(),
                 content: z.string(),
             }),
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             await db
                 .update(promptTemplate)
                 .set({name: req.body.name, content: req.body.content})
                 .where(eq(promptTemplate.id, Number(req.params.id)))
-            return {success: true}
         },
     })
 
@@ -107,13 +103,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             params: z.object({
                 id: z.string(),
             }),
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             await db.delete(promptTemplate).where(eq(promptTemplate.id, Number(req.params.id)))
-            return {success: true}
         },
     })
 

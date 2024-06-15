@@ -98,9 +98,6 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 modelPath: z.string(),
             }),
             response: {
-                200: z.object({
-                    success: z.boolean(),
-                }),
                 400: z.object({
                     message: z.string(),
                 }),
@@ -127,11 +124,6 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
             body: z.object({
                 autoLoad: z.boolean(),
             }),
-            response: {
-                200: z.object({
-                    success: z.boolean(),
-                }),
-            },
         },
         handler: async (req) => {
             const autoLoad = req.body.autoLoad

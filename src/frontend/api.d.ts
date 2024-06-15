@@ -179,7 +179,7 @@ export interface paths {
                     id: number;
                     chatId: number;
                     characterId: number;
-                    generated: number;
+                    generated: boolean;
                     activeIndex: number;
                     content: {
                         id: number;
@@ -284,11 +284,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -304,11 +300,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -386,14 +378,6 @@ export interface paths {
       };
       responses: {
         /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
-        };
-        /** @description Default Response */
         400: {
           content: {
             "application/json": {
@@ -417,11 +401,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -533,11 +513,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -578,11 +554,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -701,11 +673,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };
@@ -721,11 +689,7 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: {
-            "application/json": {
-              success: boolean;
-            };
-          };
+          content: never;
         };
       };
     };

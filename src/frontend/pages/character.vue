@@ -26,10 +26,10 @@ const updateCharacter = async () => {
         params: {path: {id: String(characterId)}},
         body: {
             name: character.name,
-            description: character.description,
-            firstMessage: character.firstMessage || null,
-            image: character.image || null,
             type: character.type,
+            description: character.description,
+            firstMessage: character.firstMessage,
+            image: character.image,
         },
     })
     if (error) {
