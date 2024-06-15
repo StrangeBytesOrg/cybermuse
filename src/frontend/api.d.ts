@@ -458,7 +458,7 @@ export interface paths {
                   typicalP: number | null;
                   repeatPenalty: number | null;
                   repeatLastN: number | null;
-                  penalizeNL: number | null;
+                  penalizeNL: boolean | null;
                   presencePenalty: number | null;
                   frequencyPenalty: number | null;
                   mirostat: number | null;
@@ -499,7 +499,7 @@ export interface paths {
                 typicalP: number | null;
                 repeatPenalty: number | null;
                 repeatLastN: number | null;
-                penalizeNL: number | null;
+                penalizeNL: boolean | null;
                 presencePenalty: number | null;
                 frequencyPenalty: number | null;
                 mirostat: number | null;
@@ -518,12 +518,25 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
+            id?: number;
             name: string;
-            temperature: number;
+            context: number;
             maxTokens: number;
-            minP: number | null;
-            topP: number | null;
-            topK: number | null;
+            temperature: number;
+            seed: number;
+            topK?: number | null;
+            topP?: number | null;
+            minP?: number | null;
+            tfsz?: number | null;
+            typicalP?: number | null;
+            repeatPenalty?: number | null;
+            repeatLastN?: number | null;
+            penalizeNL?: boolean | null;
+            presencePenalty?: number | null;
+            frequencyPenalty?: number | null;
+            mirostat?: number | null;
+            mirostatTau?: number | null;
+            mirostatEta?: number | null;
           };
         };
       };
@@ -550,12 +563,25 @@ export interface paths {
       requestBody: {
         content: {
           "application/json": {
+            id?: number;
             name: string;
-            temperature: number;
+            context: number;
             maxTokens: number;
-            minP: number | null;
-            topP: number | null;
-            topK: number | null;
+            temperature: number;
+            seed: number;
+            topK?: number | null;
+            topP?: number | null;
+            minP?: number | null;
+            tfsz?: number | null;
+            typicalP?: number | null;
+            repeatPenalty?: number | null;
+            repeatLastN?: number | null;
+            penalizeNL?: boolean | null;
+            presencePenalty?: number | null;
+            frequencyPenalty?: number | null;
+            mirostat?: number | null;
+            mirostatTau?: number | null;
+            mirostatEta?: number | null;
           };
         };
       };

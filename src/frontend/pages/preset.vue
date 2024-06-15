@@ -36,10 +36,10 @@ const updatePreset = async () => {
         params: {path: {id: String(presetId)}},
         body: {
             name: presetName.value,
-            maxTokens: maxTokens.value,
             context: context.value,
-            temperature: temperature.value,
+            maxTokens: maxTokens.value,
             seed: seed.value,
+            temperature: temperature.value,
             topK: topK.value,
             topP: topP.value,
             minP: minP.value,

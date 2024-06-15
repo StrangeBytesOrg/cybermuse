@@ -7,8 +7,10 @@ import {client} from '../api-client'
 const toast = useToast()
 const router = useRouter()
 const presetName = ref('')
+const context = ref(2048)
+const seed = ref(-1)
 const temperature = ref(0)
-const maxTokens = ref(0)
+const maxTokens = ref(250)
 const minP = ref(0)
 const topP = ref(0)
 const topK = ref(0)
@@ -27,8 +29,10 @@ const createTemplate = async () => {
     const {error} = await client.POST('/create-preset', {
         body: {
             name: presetName.value,
-            temperature: temperature.value,
+            context: context.value,
             maxTokens: maxTokens.value,
+            seed: seed.value,
+            temperature: temperature.value,
             topK: topK.value,
             topP: topP.value,
             minP: minP.value,
@@ -46,7 +50,7 @@ const createTemplate = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(`Error creating template\n${error.detail}`)
+        toast.error(`Error creating preset\n${error.detail}`)
     } else {
         toast.success('Template created')
         router.push('/presets')
@@ -70,12 +74,12 @@ const createTemplate = async () => {
 
                 <label class="form-control w-full">
                     <div class="label">
-                        <span class="label-text">Temperature</span>
+                        <span class="label-text">Context Length</span>
                     </div>
                     <input
                         type="number"
-                        v-model="temperature"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
+                        class="input input-bordered focus:outline-none focus:border-primary"
+                        v-model="context" />
                 </label>
 
                 <label class="form-control w-full">
@@ -86,6 +90,26 @@ const createTemplate = async () => {
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
                         v-model="maxTokens" />
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Seed</span>
+                    </div>
+                    <input
+                        type="number"
+                        class="input input-bordered focus:outline-none focus:border-primary"
+                        v-model="seed" />
+                </label>
+
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Temperature</span>
+                    </div>
+                    <input
+                        type="number"
+                        v-model="temperature"
+                        class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
 
                 <label class="form-control w-full">

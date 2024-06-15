@@ -2,7 +2,7 @@ import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
-import {db, generatePresets, selectPresetSchema, user} from '../db.js'
+import {db, generatePresets, selectPresetSchema, insertPresetSchema, user} from '../db.js'
 
 export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -61,22 +61,33 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         method: 'POST',
         schema: {
             summary: 'Create a generation preset',
-            body: z.object({
-                name: z.string(),
-                temperature: z.number(),
-                maxTokens: z.number(),
-                minP: z.number().nullable(),
-                topP: z.number().nullable(),
-                topK: z.number().nullable(),
-            }),
+            body: insertPresetSchema,
             response: {
                 200: z.object({success: z.boolean()}),
             },
         },
         handler: async (req) => {
             try {
-                const {name, maxTokens, temperature, minP, topK, topP} = req.body
-                await db.insert(generatePresets).values({name, maxTokens, temperature, minP, topK, topP})
+                await db.insert(generatePresets).values({
+                    name: req.body.name,
+                    context: req.body.context,
+                    maxTokens: req.body.maxTokens,
+                    temperature: req.body.temperature,
+                    seed: req.body.seed,
+                    topK: req.body.topK,
+                    topP: req.body.topP,
+                    minP: req.body.minP,
+                    tfsz: req.body.tfsz,
+                    typicalP: req.body.typicalP,
+                    repeatPenalty: req.body.repeatPenalty,
+                    repeatLastN: req.body.repeatLastN,
+                    penalizeNL: req.body.penalizeNL,
+                    presencePenalty: req.body.presencePenalty,
+                    frequencyPenalty: req.body.frequencyPenalty,
+                    mirostat: req.body.mirostat,
+                    mirostatTau: req.body.mirostatTau,
+                    mirostatEta: req.body.mirostatEta,
+                })
                 return {success: true}
             } catch (err) {
                 console.error(err)
@@ -93,24 +104,35 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
             params: z.object({
                 id: z.string(),
             }),
-            body: z.object({
-                name: z.string(),
-                temperature: z.number(),
-                maxTokens: z.number(),
-                minP: z.number().nullable(),
-                topP: z.number().nullable(),
-                topK: z.number().nullable(),
-            }),
+            body: insertPresetSchema,
             response: {
                 200: z.object({success: z.boolean()}),
             },
         },
         handler: async (req) => {
             try {
-                const {name, maxTokens, temperature, minP, topK, topP} = req.body
                 await db
                     .update(generatePresets)
-                    .set({name, maxTokens, temperature, minP, topK, topP})
+                    .set({
+                        name: req.body.name,
+                        context: req.body.context,
+                        maxTokens: req.body.maxTokens,
+                        temperature: req.body.temperature,
+                        seed: req.body.seed,
+                        topK: req.body.topK,
+                        topP: req.body.topP,
+                        minP: req.body.minP,
+                        tfsz: req.body.tfsz,
+                        typicalP: req.body.typicalP,
+                        repeatPenalty: req.body.repeatPenalty,
+                        repeatLastN: req.body.repeatLastN,
+                        penalizeNL: req.body.penalizeNL,
+                        presencePenalty: req.body.presencePenalty,
+                        frequencyPenalty: req.body.frequencyPenalty,
+                        mirostat: req.body.mirostat,
+                        mirostatTau: req.body.mirostatTau,
+                        mirostatEta: req.body.mirostatEta,
+                    })
                     .where(eq(generatePresets.id, Number(req.params.id)))
                 return {success: true}
             } catch (err) {

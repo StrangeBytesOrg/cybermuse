@@ -1,6 +1,6 @@
 import {sqliteTable, text, integer, real} from 'drizzle-orm/sqlite-core'
 import {sql, relations} from 'drizzle-orm'
-import {createSelectSchema} from 'drizzle-zod'
+import {createSelectSchema, createInsertSchema} from 'drizzle-zod'
 
 export const user = sqliteTable('user', {
     id: integer('id').primaryKey({autoIncrement: true}),
@@ -88,7 +88,7 @@ export const generatePresets = sqliteTable('generate_presets', {
     typicalP: real('typical_p'),
     repeatPenalty: real('repeat_penalty'),
     repeatLastN: real('repeat_last_n'),
-    penalizeNL: integer('penalize_nl'),
+    penalizeNL: integer('penalize_nl', {mode: 'boolean'}),
     presencePenalty: real('presence_penalty'),
     frequencyPenalty: real('frequency_penalty'),
     mirostat: integer('mirostat'),
@@ -96,6 +96,7 @@ export const generatePresets = sqliteTable('generate_presets', {
     mirostatEta: real('mirostat_eta'),
 })
 export const selectPresetSchema = createSelectSchema(generatePresets)
+export const insertPresetSchema = createInsertSchema(generatePresets)
 
 /**
  * Relations
