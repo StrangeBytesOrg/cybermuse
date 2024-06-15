@@ -7,7 +7,7 @@ const toast = useToast()
 const {data} = await client.GET('/templates')
 
 const templates = ref(data?.templates) || ref([])
-const selectedTemplate = ref(data?.templates?.find((template) => template.active)?.id || 0)
+const selectedTemplate = ref(data?.activeTemplateId || 0)
 
 const setActiveTemplate = async () => {
     if (!selectedTemplate.value) {

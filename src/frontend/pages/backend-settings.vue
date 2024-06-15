@@ -40,7 +40,6 @@ const getModels = async () => {
         toast.error('Failed to get models')
     } else {
         models.value = data.models
-        modelPath.value = data.modelPath
     }
 }
 
@@ -50,10 +49,11 @@ const loadModel = async () => {
         body: {
             modelFile: selectModel.value,
             contextSize: contextSize.value,
+            useGPU: useGPU.value,
         },
     })
     if (error) {
-        toast.error(`Failed to load model\n${error.detail}`)
+        toast.error(`Failed to load model\n${error.message}`)
         console.error(error)
     } else {
         toast.success('Model loaded')
@@ -98,19 +98,6 @@ const setAutoLoad = async () => {
         toast.error(`Failed to update autoload\n${error.detail}`)
     } else {
         toast.success('Autoload updated')
-    }
-}
-
-const setUseGPU = async () => {
-    const {error} = await client.POST('/set-use-gpu', {
-        body: {
-            useGPU: useGPU.value,
-        },
-    })
-    if (error) {
-        toast.error(`Failed to update useGPU\n${error.detail}`)
-    } else {
-        toast.success('UseGPU updated')
     }
 }
 

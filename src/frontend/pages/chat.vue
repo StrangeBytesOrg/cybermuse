@@ -24,6 +24,7 @@ let signal = new AbortController()
 const checkServer = async () => {
     const {data, error} = await client.GET('/status')
     if (error) {
+        console.error(error)
         toast.error('Error getting server status')
     }
     if (data && data.loaded) {
@@ -43,8 +44,9 @@ if (error) {
 
 const messages = reactive(data?.chat.messages ?? [])
 type Message = (typeof messages)[0]
-const characterMap = new Map((data?.chat.characters ?? []).map((character) => [character.id, character]))
-const userCharacter = data?.chat.characters.find((character) => character.type === 'user')
+const characterMap = new Map((data?.characters ?? []).map((character) => [character.id, character]))
+const userCharacter = data?.characters.find((character) => character.type === 'user')
+const nonUserCharacters = data?.characters.filter((character) => character.id !== 1)
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -67,8 +69,6 @@ const fullSend = async () => {
     if (currentMessage.value !== '') {
         await createMessage(userCharacter.id, currentMessage.value, false)
     }
-
-    const nonUserCharacters = data?.chat.characters.filter((character) => character.id !== 1)
 
     // If there is only one character in the chat, simply use that character
     if (nonUserCharacters.length === 1) {
@@ -123,6 +123,8 @@ const createMessage = async (characterId: number, text: string = '', generated: 
         currentMessage.value = ''
         await nextTick()
         scrollMessages('smooth')
+    } else {
+        toast.error('Server did not return a message ID')
     }
 }
 
@@ -215,7 +217,7 @@ const cancelEdit = () => {
 
 const updateMessage = async (message: Message) => {
     const {error} = await client.POST('/update-message/{id}', {
-        params: {path: {id: message.id}},
+        params: {path: {id: String(message.id)}},
         body: {
             text: message.content[message.activeIndex]?.text || '',
         },
@@ -229,7 +231,7 @@ const updateMessage = async (message: Message) => {
 
 const deleteMessage = async (messageId: number) => {
     const {error} = await client.POST('/delete-message/{id}', {
-        params: {path: {id: messageId}},
+        params: {path: {id: String(messageId)}},
     })
 
     if (error) {
@@ -348,6 +350,7 @@ const toggleCtxMenu = () => {
                             @focus="resizeTextarea"
                             @keydown.ctrl.enter="updateMessage(message)"
                             @keydown.esc="cancelEdit"
+                            data-1p-ignore
                             class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]" />
                     </div>
                 </div>

@@ -1,0 +1,15 @@
+{
+    "include": ["./**/*"],
+    "compilerOptions": {
+        "strict": true,
+        "module": "NodeNext",
+        "target": "ESNext",
+        "sourceMap": true,
+        "baseUrl": ".",
+        "noEmit": true, // Build with script, not tsc
+        "esModuleInterop": true,
+        "moduleResolution": "NodeNext",
+        "allowSyntheticDefaultImports": true
+        // "noUncheckedIndexedAccess": true // Recommended by OpenAPI ts
+    }
+}

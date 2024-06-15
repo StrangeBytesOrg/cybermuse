@@ -1,11 +1,7 @@
 node_modules
 dist
-build/bin
 out
 archive
-src/wailsjs
-tmp/
-src/openapi.yml
 build/llamacpp
 dev.db
 rclone.conf

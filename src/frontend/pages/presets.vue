@@ -11,7 +11,8 @@ if (error) {
 }
 
 const presets = ref(data?.presets || [])
-const selectedPreset = ref(presets?.value.find((preset) => preset.active)?.id || 0)
+// const selectedPreset = ref(presets?.value.find((preset) => preset.active)?.id || 0)
+const selectedPreset = ref(data?.activePresetId || 0)
 
 const setActivePreset = async () => {
     const {error} = await client.POST('/set-active-preset/{id}', {

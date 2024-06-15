@@ -22,8 +22,8 @@ const createChat = async () => {
         toast.error(error.detail || 'Failed to create chat')
         return
     }
-    if (data && data.chat_id) {
-        router.push(`/chat?id=${data.chat_id}`)
+    if (data && data.id) {
+        router.push(`/chat?id=${data.id}`)
     }
 }
 

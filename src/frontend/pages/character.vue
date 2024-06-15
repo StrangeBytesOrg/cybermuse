@@ -22,17 +22,22 @@ if (!data) {
 const character = reactive(data.character)
 
 const updateCharacter = async () => {
-    await client.POST('/update-character/{id}', {
+    const {error} = await client.POST('/update-character/{id}', {
         params: {path: {id: String(characterId)}},
         body: {
             name: character.name,
             description: character.description,
-            firstMessage: character.firstMessage || undefined,
-            image: character.image || undefined,
+            firstMessage: character.firstMessage || null,
+            image: character.image || null,
             type: character.type,
         },
     })
-    router.push('/characters')
+    if (error) {
+        console.error(error)
+        toast.error(error.message)
+    } else {
+        router.push('/characters')
+    }
 }
 
 const removeImage = () => {

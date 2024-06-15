@@ -8,10 +8,12 @@ const {data} = await client.GET('/chats')
 const chats = ref(data?.chats || [])
 
 const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(undefined, {
+    return new Date(dateString + ' UTC').toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
     })
 }
 
@@ -44,7 +46,10 @@ const deleteChat = async (chatId: number) => {
                 <div class="avatar-group -space-x-4 rtl:space-x-reverse">
                     <div v-for="character in chat.characters" :key="character.id" class="avatar">
                         <div class="h-14">
-                            <img v-if="character.image" :src="character.image" alt="Character Image" />
+                            <img
+                                v-if="character.character.image"
+                                :src="character.character.image"
+                                alt="Character Image" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
