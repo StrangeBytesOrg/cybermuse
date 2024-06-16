@@ -8,11 +8,9 @@ import {
     chatCharacters,
     character,
     message,
-    messageContent,
     selectChatSchema,
     selectMessageSchema,
     selectCharacterSchema,
-    selectMessageContentSchema,
     selectChatCharactersSchema,
 } from '../db.js'
 
@@ -60,7 +58,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                     chat: selectChatSchema.extend({
                         messages: z.array(
                             selectMessageSchema.extend({
-                                content: z.array(selectMessageContentSchema),
+                                content: z.array(z.string()),
                             }),
                         ),
                     }),
@@ -72,11 +70,14 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             const dbChat = await db.query.chat.findFirst({
                 where: eq(chat.id, Number(req.params.id)),
                 with: {
-                    messages: {
-                        with: {content: true},
-                    },
+                    messages: true,
                     characters: {with: {character: true}},
                 },
+            })
+
+            dbChat?.messages.forEach((m) => {
+                console.log(m)
+                const content = m.content
             })
 
             const dbCharacters = dbChat?.characters.map((c) => {
@@ -137,15 +138,16 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                         .values({
                             chatId: newChat.id,
                             characterId,
-                            generated: 0,
+                            generated: false,
                             activeIndex: 0,
+                            content: [resCharacter.firstMessage],
                         })
                         .returning({id: message.id})
                     console.log(newMessage.id)
-                    await db.insert(messageContent).values({
-                        messageId: newMessage.id,
-                        text: resCharacter.firstMessage,
-                    })
+                    // await db.insert(messageContent).values({
+                    //     messageId: newMessage.id,
+                    //     text: resCharacter.firstMessage,
+                    // })
                 }
             }
 

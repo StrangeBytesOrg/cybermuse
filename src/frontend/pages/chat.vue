@@ -118,7 +118,7 @@ const createMessage = async (characterId: number, text: string = '', generated: 
             characterId,
             generated,
             activeIndex: 0,
-            content: [{text, messageId: data.messageId}],
+            content: [text],
         })
         currentMessage.value = ''
         await nextTick()
@@ -195,7 +195,7 @@ const editMessage = async (messageId: number) => {
     } else {
         editModeId.value = messageId
         const message = messages.find((message) => message.id === messageId)
-        editedText.value = message?.content[message.activeIndex]?.text || ''
+        editedText.value = message?.content[message.activeIndex] || ''
         // Focus the input
         await nextTick()
         const inputElement = document.getElementById(`message-input-${messageId}`) as HTMLTextAreaElement
@@ -219,7 +219,7 @@ const updateMessage = async (message: Message) => {
     const {error} = await client.POST('/update-message/{id}', {
         params: {path: {id: String(message.id)}},
         body: {
-            text: message.content[message.activeIndex]?.text || '',
+            text: message.content[message.activeIndex] || '',
         },
     })
     if (error) {
@@ -253,7 +253,7 @@ const newSwipe = async (message: Message) => {
         toast.error(error.detail || 'Failed generating alt')
     } else {
         if (message) {
-            message.content.push({text: ''})
+            message.content.push('')
             message.activeIndex = message.content.length - 1
         }
     }
@@ -338,14 +338,16 @@ const toggleCtxMenu = () => {
                         <div class="font-bold">
                             {{ characterMap.get(message.characterId)?.name || 'Missing Character' }}
                         </div>
+                        <!-- v-html="formatText(message.content[message.activeIndex]?.text || '')" -->
                         <div
                             v-show="editModeId !== message.id"
-                            v-html="formatText(message.content[message.activeIndex]?.text || '')"
+                            v-html="formatText(message.content[message.activeIndex])"
                             class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word]" />
+                        <!-- v-model="message.content[message.activeIndex].text" -->
                         <textarea
                             v-show="editModeId === message.id"
                             :id="`message-input-${message.id}`"
-                            v-model="message.content[message.activeIndex].text"
+                            v-model="message.content[message.activeIndex]"
                             @input="resizeTextarea"
                             @focus="resizeTextarea"
                             @keydown.ctrl.enter="updateMessage(message)"

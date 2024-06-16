@@ -2,8 +2,8 @@ import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
-import {Template} from '@huggingface/jinja'
-import {db, chat, message, messageContent, user} from '../db.js'
+// import {Template} from '@huggingface/jinja'
+import {db, message} from '../db.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -17,6 +17,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 text: z.string(),
                 generated: z.boolean(),
             }),
+            // body: insertMessageSchema.extend({
+            //     text: z.string(),
+            // }),
             response: {
                 200: z.object({
                     messageId: z.number().optional(),
@@ -24,13 +27,12 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (request) => {
-            const {chatId, characterId, text} = request.body
+            const {chatId, characterId, generated, text} = request.body
             try {
                 const [newMessage] = await db
                     .insert(message)
-                    .values({chatId, characterId, generated: 1, activeIndex: 0})
+                    .values({chatId, characterId, generated, activeIndex: 0, content: [text]})
                     .returning({id: message.id})
-                await db.insert(messageContent).values({messageId: newMessage.id, text})
 
                 return {messageId: newMessage.id}
             } catch (err) {
@@ -50,24 +52,20 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             body: z.object({
                 text: z.string(),
             }),
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             const dbMessage = await db.query.message.findFirst({
                 where: eq(message.id, Number(req.params.id)),
-                with: {content: true},
             })
             if (!dbMessage) {
                 throw new Error('Message not found')
             }
-            const activeContent = dbMessage.content[dbMessage.activeIndex]
-            if (!activeContent) {
-                throw new Error('No active content')
-            }
-            await db.update(messageContent).set({text: req.body.text}).where(eq(messageContent.id, activeContent.id))
-            return {success: true}
+            const content = dbMessage.content
+            content[dbMessage.activeIndex] = req.body.text
+            await db
+                .update(message)
+                .set({content})
+                .where(eq(message.id, Number(req.params.id)))
         },
     })
 
@@ -77,13 +75,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
         schema: {
             summary: 'Delete a Message',
             params: z.object({id: z.string()}),
-            response: {
-                200: z.object({success: z.boolean()}),
-            },
         },
         handler: async (req) => {
             await db.delete(message).where(eq(message.id, Number(req.params.id)))
-            return {success: true}
         },
     })
 

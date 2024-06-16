@@ -181,11 +181,7 @@ export interface paths {
                     characterId: number;
                     generated: boolean;
                     activeIndex: number;
-                    content: {
-                        id: number;
-                        text: string;
-                        messageId: number;
-                      }[];
+                    content: string[];
                   }[];
               };
               characters: ({

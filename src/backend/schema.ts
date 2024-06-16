@@ -53,18 +53,10 @@ export const message = sqliteTable('message', {
         .notNull(),
     generated: integer('generated', {mode: 'boolean'}).notNull(),
     activeIndex: integer('active_index').notNull(),
+    content: text('content', {mode: 'json'}).$type<string[]>().notNull(),
 })
 export const selectMessageSchema = createSelectSchema(message)
 export const insertMessageSchema = createInsertSchema(message)
-
-export const messageContent = sqliteTable('message_content', {
-    id: integer('id').primaryKey({autoIncrement: true}),
-    text: text('text').notNull(),
-    messageId: integer('message_id')
-        .references(() => message.id, {onDelete: 'cascade'})
-        .notNull(),
-})
-export const selectMessageContentSchema = createSelectSchema(messageContent)
 
 export const promptTemplate = sqliteTable('prompt_template', {
     id: integer('id').primaryKey(),
@@ -111,14 +103,9 @@ export const characterRelations = relations(character, ({many}) => ({
     charactersToChats: many(chatCharacters),
 }))
 
-export const messageRelations = relations(message, ({one, many}) => ({
+export const messageRelations = relations(message, ({one}) => ({
     chat: one(chat, {fields: [message.chatId], references: [chat.id]}),
     character: one(character, {fields: [message.characterId], references: [character.id]}),
-    content: many(messageContent),
-}))
-
-export const messageContentRelations = relations(messageContent, ({one}) => ({
-    message: one(message, {fields: [messageContent.messageId], references: [message.id]}),
 }))
 
 export const charactersToChatsRelations = relations(chatCharacters, ({one}) => ({
