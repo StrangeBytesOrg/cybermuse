@@ -2,8 +2,9 @@ import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
-// import {Template} from '@huggingface/jinja'
-import {db, message} from '../db.js'
+import {Template} from '@huggingface/jinja'
+import {db, message, chat, user} from '../db.js'
+import {responseToIterable} from '../lib/sse.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -17,9 +18,6 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 text: z.string(),
                 generated: z.boolean(),
             }),
-            // body: insertMessageSchema.extend({
-            //     text: z.string(),
-            // }),
             response: {
                 200: z.object({
                     messageId: z.number().optional(),
@@ -88,6 +86,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Generate a new response message',
             body: z.object({
                 chatId: z.number(),
+                continue: z.boolean(),
             }),
             produces: ['text/event-stream'],
             response: {
@@ -95,133 +94,153 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (request, reply) => {
-            reply.send('wat')
-            // const {chatId} = request.body
+            const {chatId} = request.body
 
-            // // Setup headers for server-sent events
-            // reply.raw.writeHead(200, {
-            //     'Content-Type': 'text/event-stream',
-            //     'Cache-Control': 'no-store',
-            //     'Connection': 'keep-alive',
-            //     'access-control-allow-origin': '*',
-            // })
+            // Setup headers for server-sent events
+            reply.raw.setHeader('Content-Type', 'text/event-stream')
+            reply.raw.setHeader('Cache-Control', 'no-store')
+            reply.raw.setHeader('Connection', 'keep-alive')
+            reply.raw.setHeader('Access-Control-Allow-Origin', '*')
 
-            // const existingChat = await db.query.chat.findFirst({
-            //     where: eq(chat.id, chatId),
-            //     with: {chatCharacters: {with: {character: true}}},
-            // })
-            // const notUserCharacters = existingChat?.chatCharacters.filter(
-            //     (chatCharacter) => chatCharacter.characterId !== existingChat.userCharacter,
-            // )
+            const controller = new AbortController()
+            request.socket.on('close', () => {
+                console.log('User disconnected')
+                controller.abort()
+            })
 
-            // const previousMessages = await db.query.message.findMany({
-            //     where: eq(message.chatId, chatId),
-            //     with: {character: true},
-            // })
-            // // console.log(previousMessages)
-            // previousMessages.forEach((message) => {
-            //     if (message.character?.type === 'user') {
-            //         message.role = 'user'
-            //     } else if (message.character?.type === 'character') {
-            //         message.role = 'assistant'
-            //     }
-            // })
+            const existingChat = await db.query.chat.findFirst({
+                where: eq(chat.id, chatId),
+                with: {
+                    characters: {with: {character: true}},
+                    messages: true,
+                },
+            })
 
-            // const userSettings = await db.query.user.findFirst({
-            //     where: eq(user.id, 1),
-            //     with: {promptSetting: true, generatePreset: true},
-            //     columns: {promptSetting: true, generatePreset: true},
-            // })
-            // if (!userSettings) {
-            //     throw new Error('Prompt settings not set')
-            // }
-            // const promptSettings = userSettings.promptSetting
-            // const generationSettings = userSettings.generatePreset
+            // Get the message response character
+            const lastMessage = existingChat?.messages[existingChat.messages.length - 1]
+            if (!lastMessage) {
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No messages found'})}\n\n`)
+                return
+            }
+            const pickedCharacter = existingChat?.characters.find(
+                ({character}) => character.id === lastMessage.characterId,
+            )
+            console.log('Picked Character:', pickedCharacter)
 
-            // let prompt = ''
-            // try {
-            //     // Parse character descriptions
-            //     const parsedCharacters = notUserCharacters.map(({character}) => {
-            //         const characterTemplate = new Template(character.description)
-            //         const description = characterTemplate.render({char: character.name})
-            //         return {name: character.name, description}
-            //     })
+            const userSettings = await db.query.user.findFirst({
+                where: eq(user.id, 1),
+                with: {promptTemplate: true, generatePreset: true},
+            })
+            if (!userSettings) {
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No user settings found'})}\n\n`)
+                return
+            }
+            const promptTemplate = userSettings.promptTemplate
+            const generatePreset = userSettings.generatePreset
+            if (!promptTemplate) {
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No prompt template found'})}\n\n`)
+                return
+            }
+            if (!generatePreset) {
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No generate preset found'})}\n\n`)
+                return
+            }
 
-            //     const instructionTemplate = new Template(promptSettings?.instruction || '')
-            //     const template = new Template(promptSettings?.promptTemplate || '')
-            //     const instruction = instructionTemplate.render({
-            //         characters: parsedCharacters,
-            //     })
-            //     console.log('i:', instruction)
-            //     prompt = template.render({
-            //         messages: previousMessages,
-            //         instruction,
-            //         characters: parsedCharacters,
-            //     })
-            //     console.log('template:', promptSettings?.promptTemplate)
-            // } catch (err) {
-            //     console.error('Failed to render template')
-            //     console.error(err)
-            // }
+            // If set to continue an existing message, pop the last message
+            if (request.body.continue) {
+                existingChat.messages.pop()
+            }
 
-            // console.log('prompt:', prompt)
+            // Format the messages and characters for the template
+            const formattedMessages = existingChat?.messages.map((message) => {
+                return {
+                    text: message.content[message.activeIndex],
+                    generated: message.generated,
+                }
+            })
+            const formattedCharacters = existingChat?.characters.map(({character}) => {
+                return {
+                    name: character.name,
+                    description: character.description,
+                }
+            })
 
-            // console.log('Getting response character')
-            // const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
-            // const gbnfNameString = characterNames.join(' | ')
-            // const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
+            let prompt = ''
+            try {
+                const template = new Template(promptTemplate.content || '')
+                prompt = template.render({
+                    messages: formattedMessages,
+                    characters: formattedCharacters,
+                })
+            } catch (err) {
+                console.error('Failed to render template')
+                console.error(err)
+            }
 
-            // const pickedCharacter = await generate(prompt, {
-            //     grammar: gram,
-            //     // onToken: (token) => {
-            //     //     // TODO strip special tokens, especially end token
-            //     // },
-            // })
+            if (request.body.continue) {
+                prompt += lastMessage.content[lastMessage.activeIndex]
+            }
 
-            // console.log('Decider Response:', pickedCharacter)
-            // const chosenCharacter = notUserCharacters.find(({character}) => character.name === pickedCharacter)
-            // console.log('Chosen Character:', chosenCharacter)
+            console.log('prompt:', prompt)
+            try {
+                const response = await fetch('http://localhost:8080/completion', {
+                    method: 'POST',
+                    signal: controller.signal,
+                    body: JSON.stringify({
+                        stream: true,
+                        cache_prompt: true,
+                        prompt,
+                        n_predict: generatePreset.maxTokens,
+                        seed: generatePreset.seed,
+                        temperature: generatePreset.temperature,
+                        top_k: generatePreset.topK,
+                        top_p: generatePreset.topP,
+                        min_p: generatePreset.minP,
+                        tfs_z: generatePreset.tfsz,
+                        typical_p: generatePreset.typicalP,
+                        repeat_penalty: generatePreset.repeatPenalty,
+                        repeat_last_n: generatePreset.repeatLastN,
+                        penalize_nl: generatePreset.penalizeNL,
+                        presence_penalty: generatePreset.presencePenalty,
+                        frequency_penalty: generatePreset.frequencyPenalty,
+                        mirostat: generatePreset.mirostat,
+                        mirostat_tau: generatePreset.mirostatTau,
+                        mirostat_eta: generatePreset.mirostatEta,
+                    }),
+                })
+                const responseIterable = responseToIterable(response)
+                let bufferedResponse = ''
+                for await (const chunk of responseIterable) {
+                    const data = JSON.parse(chunk.data)
+                    bufferedResponse += data.content
+                    await db
+                        .update(message)
+                        .set({content: [bufferedResponse]})
+                        .where(eq(message.id, lastMessage.id))
+                    reply.raw.write(`event:text\ndata: ${JSON.stringify({text: data.content})}\n\n`)
+                }
 
-            // // Create a new message in the database which will be updated with the response
-            // const [newMessage] = await db
-            //     .insert(message)
-            //     .values({text: '', chatId, characterId: chosenCharacter?.characterId})
-            //     .returning({id: message.id, characterId: message.characterId})
-
-            // // Send an initial response with a message ID and characterId
-            // let initialResponse = `event: initial\n`
-            // initialResponse += `data: ${JSON.stringify({id: newMessage.id, characterId: newMessage.characterId})}\n\n`
-            // reply.raw.write(initialResponse)
-
-            // prompt += `${chosenCharacter?.character.name}: `
-            // const bufferedResponse = ''
-            // // const fullResponse = await generate(prompt, {
-            // //     maxTokens: generationSettings.maxTokens,
-            // //     temperature: generationSettings.temperature,
-            // //     minP: generationSettings.minP ?? undefined,
-            // //     topP: generationSettings.topP ?? undefined,
-            // //     topK: generationSettings.topK ?? undefined,
-            // //     // stopGenerationTriggers
-            // //     onToken: async (token) => {
-            // //         const text = detokenize(token)
-            // //         console.log(`Token: ${token}, text: ${text}`)
-            // //         if (text === '<|im_end|>') {
-            // //             console.log('Got end token')
-            // //             return
-            // //         }
-            // //         bufferedResponse += text
-            // //         await db.update(message).set({text: bufferedResponse}).where(eq(message.id, newMessage.id))
-            // //         reply.raw.write(`event: message\ndata: ${JSON.stringify({text})}\n\n`)
-            // //     },
-            // // })
-            // const fullResponse = 'wat'
-
-            // // TODO check if final response matches buffered response
-
-            // let finalResponse = `event: final\n`
-            // finalResponse += `data: ${JSON.stringify({text: fullResponse})}\n\n`
-            // reply.raw.end(finalResponse)
-            // request.socket.destroy()
+                // Send a final event with the full message text
+                console.log('Buffered Response:', bufferedResponse)
+                reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
+            } catch (err) {
+                if (err instanceof DOMException && err.name === 'AbortError') {
+                    console.log('Request aborted')
+                } else {
+                    console.error('Failed to generate response')
+                    console.error(err)
+                    reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
+                }
+            } finally {
+                request.socket.removeAllListeners('close')
+                reply.raw.end()
+                request.socket.destroy()
+            }
         },
     })
+
+    // console.log('Getting response character')
+    // const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
+    // const gbnfNameString = characterNames.join(' | ')
+    // const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
 }

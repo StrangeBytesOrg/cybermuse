@@ -308,6 +308,7 @@ export interface paths {
         content: {
           "application/json": {
             chatId: number;
+            continue: boolean;
           };
         };
       };

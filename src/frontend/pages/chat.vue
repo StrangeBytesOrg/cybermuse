@@ -32,6 +32,7 @@ const checkServer = async () => {
     }
 }
 await checkServer()
+connectionStore.connected = true
 
 const {data, error} = await client.GET('/chat/{id}', {
     params: {path: {id: String(chatId)}},
@@ -131,7 +132,7 @@ const createMessage = async (characterId: number, text: string = '', generated: 
 const generateMessage = async (continueExisting = false) => {
     pendingMessage.value = true
     try {
-        const {response} = await client.POST('/generate-message', {
+        const {response, error} = await client.POST('/generate-message', {
             body: {
                 chatId: Number(chatId),
                 continue: continueExisting,
@@ -139,10 +140,14 @@ const generateMessage = async (continueExisting = false) => {
             parseAs: 'stream',
             signal: signal.signal,
         })
+        if (response.status !== 200) {
+            console.log(error)
+            throw new Error('Failed to generate message')
+        }
         const responseIterable = responseToIterable(response)
         let bufferedResponse = ''
         if (continueExisting) {
-            bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex].text
+            bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex]
         }
         for await (const chunk of responseIterable) {
             const data = JSON.parse(chunk.data)
@@ -150,10 +155,11 @@ const generateMessage = async (continueExisting = false) => {
                 bufferedResponse += data.text
                 const lastMessage = messages[messages.length - 1]
                 if (lastMessage) {
-                    lastMessage.content[lastMessage.activeIndex].text = bufferedResponse
+                    lastMessage.content[lastMessage.activeIndex] = bufferedResponse
                 }
                 scrollMessages('smooth')
             } else if (chunk.event === 'final') {
+                console.log('done')
                 if (data.text !== bufferedResponse) {
                     console.error('Final text does not match buffered response')
                 }

@@ -74,12 +74,6 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                     characters: {with: {character: true}},
                 },
             })
-
-            dbChat?.messages.forEach((m) => {
-                console.log(m)
-                const content = m.content
-            })
-
             const dbCharacters = dbChat?.characters.map((c) => {
                 return c.character
             })
