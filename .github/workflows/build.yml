@@ -9,7 +9,7 @@ on:
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
   NODE_OPTIONS: "--max-old-space-size=4096"
-  LLAMA_CPP_VERSION: "b3066"
+  LLAMA_CPP_VERSION: "b3158"
   APP_VERSION: "v0.${{ github.run_number }}"
   VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 
@@ -19,14 +19,14 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: build-linux
-            os: ubuntu-latest
-            target-platform: linux/amd64
-          - name: build-mac
-            os: macos-latest
-            target-platform: darwin/amd64
+          # - name: build-linux
+          #   os: ubuntu-latest
+          #   target-platform: linux/amd64
+          # - name: build-mac
+          #   os: macos-latest
+          #   target-platform: darwin/amd64
           - name: build-windows
-            os: ubuntu-latest
+            os: windows-latest
             target-platform: windows/amd64
 
     runs-on: ${{ matrix.build.os }}
@@ -41,11 +41,6 @@ jobs:
       - name: Linux specific dependencies
         if: matrix.build.target-platform == 'linux/amd64'
         run: sudo apt-get update && sudo apt-get install -y libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.22.2'
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -66,9 +61,6 @@ jobs:
             acl = private
             no_check_bucket = true
 
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
       # Get llama.cpp binaries specific to the platform
       - name: Get llama.cpp server binary
         if: matrix.build.target-platform == 'linux/amd64'
@@ -85,14 +77,16 @@ jobs:
       - name: Extract
         run: unzip -j llamacpp.zip -d build/llamacpp/
 
-      - name: Build Wails
-        run: wails build -skipbindings -platform=${{ matrix.build.target-platform }} -nsis=${{ matrix.build.target-platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
-        shell: bash
+      - name: Build Electron App
+        run: |
+          npm install
+          npm run build
+          npm run make
 
       - name: Archive and Upload Linux
         if: matrix.build.target-platform == 'linux/amd64'
         run: |
-          cd build/bin
+          cd out
           tar -acf chat-linux.tar.gz *
           rclone copy chat-linux.tar.gz r2:chat-app-releases/latest/
           rclone copyto chat-linux.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
@@ -108,7 +102,9 @@ jobs:
       - name: Archive and Upload Windows
         if: matrix.build.target-platform == 'windows/amd64'
         run: |
-          cd build/bin
-          zip chat-windows.zip chat-amd64-installer.exe
-          rclone copy chat-windows.zip r2:chat-app-releases/latest/
-          rclone copyto chat-windows.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-windows.zip
+          cd out
+          ls -l
+          rclone copy chat-win-x64.zip r2:chat-app-releases/latest/
+
+        # rclone copyto chat-windows.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-win-x64.zip
+        # rclone copy chat-windows.zip r2:chat-app-releases/latest/
