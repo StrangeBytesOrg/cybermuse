@@ -74,6 +74,9 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             if (process.env.DEV) {
                 serverBinPath = path.resolve(esmDirname, '../../../build/llamacpp/llama-server')
             }
+            if (process.platform === 'win32') {
+                serverBinPath += '.exe'
+            }
             console.log(`Server bin path: ${serverBinPath}`)
             if (!fs.existsSync(serverBinPath)) {
                 throw new Error('LlamaCPP Server binary not found')
