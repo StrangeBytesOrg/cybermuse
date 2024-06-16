@@ -103,7 +103,6 @@ jobs:
         if: matrix.build.target-platform == 'windows/amd64'
         run: |
           cd out
-          ls -l
           rclone copy chat-win-x64.zip r2:chat-app-releases/latest/
 
         # rclone copyto chat-windows.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-win-x64.zip
