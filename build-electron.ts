@@ -21,13 +21,13 @@ const artifacts = await builder.build({
         linux: {
             target: 'dir', // electron-builder uses 7za which is comically slow on linux
             asar: dev === false,
-            extraResources: [{from: './build/llamacpp/llama-server', to: 'llamacpp/llama-server'}],
+            extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
         },
         win: {
             target: ['zip'],
             extraResources: [
-                {from: './build/llamacpp/llama-server.exe', to: 'llamacpp/llama-server.exe'},
-                {from: './build/llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
+                {from: './llamacpp/llama-server.exe', to: 'llamacpp/llama-server.exe'},
+                {from: './llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
             ],
         },
         mac: {
@@ -35,7 +35,7 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['x64']},
                 {target: 'zip', arch: ['arm64']},
             ],
-            extraResources: [{from: './build/llamacpp/llama-server', to: 'llamacpp/llama-server'}],
+            extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
         // TODO implement fuse flipping correctly for all platforms

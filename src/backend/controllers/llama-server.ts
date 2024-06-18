@@ -72,7 +72,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             // Run llama.cpp server
             let serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
             if (process.env.DEV) {
-                serverBinPath = path.resolve(esmDirname, '../../../build/llamacpp/llama-server')
+                serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
             }
             if (process.platform === 'win32') {
                 serverBinPath += '.exe'
