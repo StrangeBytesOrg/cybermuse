@@ -20,6 +20,7 @@ const artifacts = await builder.build({
         ],
         linux: {
             target: dev ? 'dir' : [{target: 'zip', arch: 'x64'}],
+            asar: dev === false,
             extraResources: [{from: './build/llamacpp/llama-server', to: 'llamacpp/llama-server'}],
         },
         win: {
