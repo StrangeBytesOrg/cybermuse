@@ -32,7 +32,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 for (let i = 0; i < models.length; i++) {
                     const model = models[i]
                     if (model.isFile() && model.name.endsWith('.gguf')) {
-                        const modelSize = fs.statSync(path.join(config.modelsPath, model.name)).size
+                        const modelSize = fs.statSync(path.join(model.parentPath, model.name)).size
                         modelList.push({name: model.name, size: modelSize})
                     }
                 }
