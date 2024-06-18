@@ -75,7 +75,7 @@ jobs:
         run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-bin-win-vulkan-x64.zip > llamacpp.zip
 
       - name: Extract
-        run: unzip -j llamacpp.zip -d build/llamacpp/
+        run: unzip -j llamacpp.zip -d llamacpp/
 
       - name: Build Electron App
         run: |
