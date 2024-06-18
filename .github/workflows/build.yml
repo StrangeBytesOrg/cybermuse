@@ -19,12 +19,12 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          # - name: build-linux
-          #   os: ubuntu-latest
-          #   target-platform: linux/amd64
-          # - name: build-mac
-          #   os: macos-latest
-          #   target-platform: darwin/amd64
+          - name: build-linux
+            os: ubuntu-latest
+            target-platform: linux/amd64
+          - name: build-mac
+            os: macos-latest
+            target-platform: darwin/amd64
           - name: build-windows
             os: windows-latest
             target-platform: windows/amd64
