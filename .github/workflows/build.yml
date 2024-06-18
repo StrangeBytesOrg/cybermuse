@@ -87,17 +87,18 @@ jobs:
         if: matrix.build.target-platform == 'linux/amd64'
         run: |
           cd out
-          tar -acf chat-linux.tar.gz *
+          tar -acf chat-linux.tar.gz linux-unpacked
           rclone copy chat-linux.tar.gz r2:chat-app-releases/latest/
           rclone copyto chat-linux.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
         
       - name: Archive and Upload Mac
         if: matrix.build.target-platform == 'darwin/amd64'
         run: |
-          cd build/bin
-          ditto -c -k --keepParent chat.app chat-mac-x86.zip
-          rclone copy chat-mac-x86.zip r2:chat-app-releases/latest/
-          rclone copyto chat-mac-x86.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-x86.zip
+          cd out
+          rclone copy chat-mac-x64.zip r2:chat-app-releases/latest/
+          rclone copyto chat-mac-x64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-x64.zip
+          rclone copy chat-mac-arm64.zip r2:chat-app-releases/latest/
+          rclone copyto chat-mac-arm64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-arm64.zip
 
       - name: Archive and Upload Windows
         if: matrix.build.target-platform == 'windows/amd64'

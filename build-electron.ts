@@ -19,7 +19,7 @@ const artifacts = await builder.build({
             {from: './src/migrations/', to: './migrations/'},
         ],
         linux: {
-            target: dev ? 'dir' : [{target: 'zip', arch: 'x64'}],
+            target: 'dir', // electron-builder uses 7za which is comically slow on linux
             asar: dev === false,
             extraResources: [{from: './build/llamacpp/llama-server', to: 'llamacpp/llama-server'}],
         },
