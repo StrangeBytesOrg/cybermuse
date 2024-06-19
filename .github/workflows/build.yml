@@ -38,11 +38,8 @@ jobs:
       - name: Mac Dependencies
         if: runner.os == 'macOS'
         run: |
-          brew install python@3.12
-          echo 'export PATH="/usr/local/opt/python@3.12/bin:$PATH"' >> $GITHUB_ENV
           python3 -m ensurepip
-          python3 -m pip install --upgrade pip setuptools wheel
-          python3 -m pip install distutils
+          python3 -m pip install distutils --break-system-packages
 
       - name: Setup Node
         uses: actions/setup-node@v4
