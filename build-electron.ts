@@ -36,6 +36,7 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['arm64']},
             ],
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
+            publish: 'never',
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
         // TODO implement fuse flipping correctly for all platforms

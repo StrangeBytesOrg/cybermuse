@@ -21,7 +21,7 @@
         "@fastify/swagger-ui": "^4.0.0",
         "@huggingface/hub": "^0.15.1",
         "@huggingface/jinja": "^0.2.2",
-        "better-sqlite3": "^11.0.0",
+        "better-sqlite3": "^9.6.0",
         "drizzle-orm": "^0.31.2",
         "drizzle-zod": "^0.5.1",
         "eventsource-parser": "^1.1.2",
