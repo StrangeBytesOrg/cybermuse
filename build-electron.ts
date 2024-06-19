@@ -17,7 +17,6 @@ const artifacts = await builder.build({
             {from: './src/migrations/', to: './migrations/'},
         ],
         extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
-        publish: [],
         linux: {
             target: 'dir', // electron-builder uses 7za which is comically slow on linux
             asar: dev === false,
@@ -36,6 +35,7 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['arm64']},
             ],
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
+            publish: null,
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
         // TODO implement fuse flipping correctly for all platforms
