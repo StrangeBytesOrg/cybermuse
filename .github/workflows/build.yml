@@ -39,11 +39,6 @@ jobs:
         with:
           node-version: '20.14.0'
 
-      # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
-      - name: Mac Dependencies
-        if: runner.os == 'macOS'
-        run: npm install -g node-gyp
-
       - name: Setup RClone
         uses: AnimMouse/setup-rclone@v1
         with:
@@ -81,8 +76,15 @@ jobs:
         run: npm run build
 
       - name: Build Electron
+        if: runner.os != 'macOs'
         run: |
-          npx @electron/rebuild
+          npm run make
+
+        # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
+      - name: Build Electron Mac
+        if: runner.os == 'macOS'
+        run: |
+          npm install -g node-gyp@10.1.0
           npm run make
 
       - name: Archive and Upload Linux
