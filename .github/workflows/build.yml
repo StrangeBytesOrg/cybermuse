@@ -75,14 +75,14 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-      - name: Build Electron Mac
-        if: runner.os == 'macOS'
-        run: npm install -D node-gyp@10.1.0
+      # - name: Build Electron Mac
+      #   if: runner.os == 'macOS'
+      #   run: npm install -D node-gyp@10.1.0
 
         # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
       - name: Build Electron Mac
         if: runner.os == 'macOS'
-        run: npx @electron/rebuild --force --arch=darwin-x64
+        run: python3 -m pip install --break-system-packages setuptools && npx @electron/rebuild --force --arch=darwin-x64
 
       - name: Build Electron
         run: npm run make
