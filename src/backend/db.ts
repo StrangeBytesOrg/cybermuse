@@ -3,12 +3,13 @@ import path from 'node:path'
 import {drizzle} from 'drizzle-orm/better-sqlite3'
 import {migrate} from 'drizzle-orm/better-sqlite3/migrator'
 import Database from 'better-sqlite3'
-import appDataPath from './util/app-data.js'
+import envPaths from 'env-paths'
 
 import * as schema from './schema.js'
 export * from './schema.js'
 
-let databasePath = path.resolve(appDataPath, 'app-data.db')
+const paths = envPaths('chat', {suffix: ''})
+let databasePath = path.resolve(paths.config, 'app-data.db')
 if (process.env.DEV) {
     databasePath = path.resolve('./dev.db')
 }
