@@ -1,13 +1,11 @@
 import builder from 'electron-builder'
 // import path from 'node:path'
-// import {Configuration} from 'electron-builder'
 // import {flipFuses, FuseV1Options, FuseVersion} from '@electron/fuses'
 
 const dev = Boolean(process.env.DEV)
 
 const artifacts = await builder.build({
     config: {
-        // buildNumber: process.env.BUILD_NUMBER || 'manual',
         appId: 'chat',
         directories: {
             output: 'out',
@@ -18,6 +16,7 @@ const artifacts = await builder.build({
             {from: './dist', to: ''},
             {from: './src/migrations/', to: './migrations/'},
         ],
+        extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
         linux: {
             target: 'dir', // electron-builder uses 7za which is comically slow on linux
             asar: dev === false,
@@ -36,7 +35,6 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['arm64']},
             ],
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
-            publish: 'never',
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
         // TODO implement fuse flipping correctly for all platforms
