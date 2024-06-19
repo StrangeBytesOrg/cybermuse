@@ -84,6 +84,8 @@ jobs:
       - name: Build Electron Mac
         if: runner.os == 'macOS'
         run: |
+          which node-gyp
+          npm uninstall -g node-gyp
           npm install -g node-gyp@10.1.0
           npm run make
 
