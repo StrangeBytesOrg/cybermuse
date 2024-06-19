@@ -17,6 +17,7 @@ const artifacts = await builder.build({
             {from: './src/migrations/', to: './migrations/'},
         ],
         extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
+        publish: [],
         linux: {
             target: 'dir', // electron-builder uses 7za which is comically slow on linux
             asar: dev === false,
