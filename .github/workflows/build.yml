@@ -75,19 +75,17 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-      - name: Build Electron
-        if: runner.os != 'macOs'
-        run: |
-          npm run make
+      - name: Build Electron Mac
+        if: runner.os == 'macOS'
+        run: npm install -g node-gyp@10.1.0
 
         # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
       - name: Build Electron Mac
         if: runner.os == 'macOS'
-        run: |
-          npm uninstall -g node-gyp
-          npm install -g node-gyp@10.1.0
-          npx @electron/rebuild --force --arch=darwin-x64
-          npm run make
+        run: npx @electron/rebuild --force --arch=darwin-x64
+
+      - name: Build Electron
+        run: npm run make
 
       - name: Archive and Upload Linux
         if: matrix.build.target-platform == 'linux/amd64'
