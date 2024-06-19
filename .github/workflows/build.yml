@@ -84,9 +84,9 @@ jobs:
       - name: Build Electron Mac
         if: runner.os == 'macOS'
         run: |
-          which node-gyp
           npm uninstall -g node-gyp
           npm install -g node-gyp@10.1.0
+          npx @electron/rebuild --force --arch=darwin-x64
           npm run make
 
       - name: Archive and Upload Linux
