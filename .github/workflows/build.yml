@@ -77,10 +77,15 @@ jobs:
       - name: Extract
         run: unzip -j llamacpp.zip -d llamacpp/
 
-      - name: Build Electron App
+      - name: Install Node Dependencies
+        run: npm ci
+
+      - name: Build Frontend
+        run: npm run build
+
+      - name: Build Electron
         run: |
-          npm install
-          npm run build
+          npx @electron/rebuild
           npm run make
 
       - name: Archive and Upload Linux
