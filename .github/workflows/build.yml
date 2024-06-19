@@ -35,14 +35,14 @@ jobs:
         uses: actions/checkout@v4
 
       # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
-      - name: Mac Dependencies
-        if: runner.os == 'macOS'
-        run: python3 -m pip install distutils --break-system-packages
+      # - name: Mac Dependencies
+      #   if: runner.os == 'macOS'
+      #   run: python3 -m pip install distutils --break-system-packages
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.14.0'
 
       - name: Setup RClone
         uses: AnimMouse/setup-rclone@v1
