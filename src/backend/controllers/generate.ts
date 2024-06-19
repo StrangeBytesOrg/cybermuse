@@ -2,8 +2,11 @@ import type {ZodTypeProvider} from 'fastify-type-provider-zod'
 import type {FastifyPluginAsync} from 'fastify'
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
-import {Template} from '@huggingface/jinja'
+// import {Template} from '@huggingface/jinja'
+import {responseToIterable} from '../lib/sse.js'
 import {db, user} from '../db.js'
+
+const llamaCppBaseUrl = 'http://localhost:8080'
 
 export const generateRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
@@ -11,73 +14,91 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
         method: 'POST',
         schema: {
             summary: 'Generate a completion stream',
-            description:
-                'Generates text and returns it using Server-Sent Events (SSE) to stream the response.\n```\nevent: message | final\ndata: {text}\n```\n\nThe `message` event is sent for each token generated and the `final` event is sent at the end with the full response.\n\nThis is a non standard SSE implementation in order to support sending a body and using POST requests so it will not work with the browser EventSource API.',
+            description: 'Generates text and stream the response using Server-Sent Events (SSE).',
             body: z.object({
                 prompt: z.string(),
-                instruction: z.string().optional(),
             }),
             produces: ['text/event-stream'],
             response: {
                 200: z.string().describe('data: {text}'),
             },
         },
-        handler: async (req, reply) => {
+        handler: async (request, reply) => {
             const controller = new AbortController()
 
-            req.socket.on('close', () => {
+            request.socket.on('close', () => {
                 console.log('socket closed, aborting')
                 controller.abort()
             })
 
-            reply.raw.writeHead(200, {
-                'Content-Type': 'text/event-stream',
-                'Cache-Control': 'no-store',
-                'Connection': 'keep-alive',
-                'access-control-allow-origin': '*',
-            })
+            // Setup headers for server-sent events
+            reply.raw.setHeader('Content-Type', 'text/event-stream')
+            reply.raw.setHeader('Cache-Control', 'no-store')
+            reply.raw.setHeader('Connection', 'keep-alive')
+            reply.raw.setHeader('Access-Control-Allow-Origin', '*')
 
             const userSettings = await db.query.user.findFirst({
                 where: eq(user.id, 1),
-                with: {promptSetting: true, generatePreset: true},
-                columns: {promptSetting: true, generatePreset: true},
+                with: {generatePreset: true},
             })
-            const generationSettings = userSettings?.generatePreset
+            const generatePreset = userSettings?.generatePreset
+            if (!generatePreset) {
+                reply.raw.write('event: error\ndata: {error: "No generate preset found"}\n\n')
+                reply.raw.end()
+                request.socket.destroy()
+                return
+            }
 
             try {
-                const promptTemplate = new Template(userSettings?.promptSetting?.promptTemplate || '')
-                const prompt = promptTemplate.render({
-                    instruction: req.body.instruction || '',
-                    messages: [{text: req.body.prompt, role: 'user'}],
-                })
-                console.log(prompt)
-
-                const fullResponse = await generate(prompt, {
-                    maxTokens: generationSettings?.maxTokens,
-                    temperature: generationSettings?.temperature,
-                    minP: generationSettings?.minP || undefined,
-                    topP: generationSettings?.topP || undefined,
-                    topK: generationSettings?.topK || undefined,
+                const response = await fetch(`${llamaCppBaseUrl}/completion`, {
+                    method: 'POST',
                     signal: controller.signal,
-                    // repeatPenalty: req.body.repeatPenalty,
-                    onToken: (token) => {
-                        const text = detokenize(token)
-                        reply.raw.write(`event: message\ndata: ${JSON.stringify({text})}\n\n`)
-                    },
+                    body: JSON.stringify({
+                        stream: true,
+                        cache_prompt: true,
+                        prompt: request.body.prompt,
+                        n_predict: generatePreset.maxTokens,
+                        seed: generatePreset.seed,
+                        temperature: generatePreset.temperature,
+                        top_k: generatePreset.topK,
+                        top_p: generatePreset.topP,
+                        min_p: generatePreset.minP,
+                        tfs_z: generatePreset.tfsz,
+                        typical_p: generatePreset.typicalP,
+                        repeat_penalty: generatePreset.repeatPenalty,
+                        repeat_last_n: generatePreset.repeatLastN,
+                        penalize_nl: generatePreset.penalizeNL,
+                        presence_penalty: generatePreset.presencePenalty,
+                        frequency_penalty: generatePreset.frequencyPenalty,
+                        mirostat: generatePreset.mirostat,
+                        mirostat_tau: generatePreset.mirostatTau,
+                        mirostat_eta: generatePreset.mirostatEta,
+                    }),
                 })
+                const responseIterable = responseToIterable(response)
+                let bufferedResponse = ''
+                for await (const chunk of responseIterable) {
+                    const data = JSON.parse(chunk.data)
+                    bufferedResponse += data.content
+                    reply.raw.write(`event:text\ndata: ${JSON.stringify({text: data.content})}\n\n`)
+                }
 
                 // Send the full response at the end as an extra check
-                const finalResponse = `event: final\ndata: ${JSON.stringify({text: fullResponse})}\n\n`
-                reply.raw.end(finalResponse)
-                req.socket.removeAllListeners('close')
-                req.socket.destroy()
+                const finalResponse = `event: final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`
+                reply.raw.write(finalResponse)
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     reply.raw.end('event: final\ndata: {text: "Aborted"}\n\n')
+                    console.log('Request aborted')
                 } else {
-                    console.log('Unknown error:', err)
-                    reply.raw.end('event: final\ndata: {text: "Error"}\n\n')
+                    console.error('Failed to generate response')
+                    console.error(err)
+                    reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
                 }
+            } finally {
+                request.socket.removeAllListeners('close')
+                reply.raw.end()
+                request.socket.destroy()
             }
         },
     })

@@ -6,6 +6,8 @@ import {Template} from '@huggingface/jinja'
 import {db, message, chat, user} from '../db.js'
 import {responseToIterable} from '../lib/sse.js'
 
+const llamaCppBaseUrl = 'http://localhost:8080'
+
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<ZodTypeProvider>().route({
         url: '/create-message',
@@ -183,7 +185,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             console.log('prompt:', prompt)
             try {
-                const response = await fetch('http://localhost:8080/completion', {
+                const response = await fetch(`${llamaCppBaseUrl}/completion`, {
                     method: 'POST',
                     signal: controller.signal,
                     body: JSON.stringify({

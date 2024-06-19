@@ -12,7 +12,7 @@ import {messageRoutes} from './controllers/message.js'
 import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
-// import {generateRoutes} from './controllers/generate.js'
+import {generateRoutes} from './controllers/generate.js'
 import {llamaServerRoutes} from './controllers/llama-server.js'
 
 // Fixture DB data
@@ -69,7 +69,7 @@ await server.register(chatRoutes, {prefix: '/api'})
 await server.register(messageRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
-// await server.register(generateRoutes, {prefix: '/api'})
+await server.register(generateRoutes, {prefix: '/api'})
 await server.register(templateRoutes, {prefix: '/api'})
 await server.register(llamaServerRoutes, {prefix: '/api'})
 
