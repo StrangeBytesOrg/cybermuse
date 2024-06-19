@@ -34,13 +34,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install System Dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y zip nsis
-
-      - name: Linux specific dependencies
-        if: matrix.build.target-platform == 'linux/amd64'
-        run: sudo apt-get update && sudo apt-get install -y libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+      # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
+      - name: Mac Dependencies
+        if: runner.os == 'macOS'
+        run: |
+          python3 -m ensurepip
+          python3 -m pip install distutils
 
       - name: Setup Node
         uses: actions/setup-node@v4
