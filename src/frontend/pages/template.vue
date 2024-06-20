@@ -1,7 +1,8 @@
 <script lang="ts" setup>
-import {ref, onMounted} from 'vue'
+import {ref, onMounted, computed} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
+import {Template} from '@huggingface/jinja'
 import {client} from '../api-client'
 
 const route = useRoute()
@@ -14,7 +15,23 @@ const {data} = await client.GET('/template/{id}', {
 })
 const templateName = ref(data?.template.name || '')
 const templateContent = ref(data?.template.content || '')
-const exampleOutput = ref('')
+
+const exampleOutput = computed(() => {
+    let parsed = ''
+    try {
+        const template = new Template(templateContent.value)
+        parsed = template.render({
+            characters: [{name: 'Alice'}, {name: 'Bob'}],
+            messages: [
+                {text: 'Hello', generated: false, role: 'user'},
+                {text: 'Hi', generated: true, role: 'assistant'},
+            ],
+        })
+    } catch (err) {
+        parsed = `Error parsing template\n${err}`
+    }
+    return parsed.replace(/\n/g, '<br>')
+})
 
 const updateTemplate = async () => {
     const {error} = await client.POST('/update-template/{id}', {
@@ -44,22 +61,6 @@ const deleteTemplate = async (id: number) => {
     } else {
         router.push('/templates')
     }
-}
-
-const testTemplate = async () => {
-    const {data, error} = await client.POST('/parse-template', {
-        body: {
-            templateString: templateContent.value,
-        },
-    })
-    if (error) {
-        console.error(error.detail)
-        exampleOutput.value = 'Error parsing template'
-        exampleOutput.value += '\n' + error.detail
-        return
-    }
-
-    exampleOutput.value = data?.parsed.replace(/\n/g, '<br>') || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -99,7 +100,6 @@ onMounted(() => {
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
-            <button @click="testTemplate" class="btn btn-primary flex-grow">Test Template</button>
             <button @click="deleteTemplate(templateId)" class="btn btn-error flex-grow">Delete</button>
         </div>
     </div>

@@ -1,14 +1,31 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
+import {Template} from '@huggingface/jinja'
 import {client} from '../api-client'
 
 const toast = useToast()
 const router = useRouter()
 const templateName = ref('')
 const templateContent = ref('')
-const exampleOutput = ref('')
+
+const exampleOutput = computed(() => {
+    let parsed = ''
+    try {
+        const template = new Template(templateContent.value)
+        parsed = template.render({
+            characters: [{name: 'Alice'}, {name: 'Bob'}],
+            messages: [
+                {text: 'Hello', generated: false, role: 'user'},
+                {text: 'Hi', generated: true, role: 'assistant'},
+            ],
+        })
+    } catch (err) {
+        parsed = `Error parsing template\n${err}`
+    }
+    return parsed.replace(/\n/g, '<br>')
+})
 
 const createTemplate = async () => {
     const {error} = await client.POST('/create-template', {
@@ -18,28 +35,12 @@ const createTemplate = async () => {
         },
     })
     if (error) {
+        toast.error('Error creating template')
         console.error(error)
-        toast.error(`Error creating template\n${error.detail}`)
     } else {
         toast.success('Template created')
         router.push('/templates')
     }
-}
-
-const testTemplate = async () => {
-    const {data, error} = await client.POST('/parse-template', {
-        body: {
-            templateString: templateContent.value,
-        },
-    })
-    if (error) {
-        console.error(error.detail)
-        exampleOutput.value = 'Error parsing template'
-        exampleOutput.value += '\n' + error.detail
-        return
-    }
-
-    exampleOutput.value = data?.parsed.replace(/\n/g, '<br>') || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -72,7 +73,6 @@ const resizeTextarea = async (event: Event) => {
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="createTemplate" class="btn btn-primary flex-grow">Create Template</button>
-            <button @click="testTemplate" class="btn btn-primary flex-grow">Test Template</button>
         </div>
     </div>
 
