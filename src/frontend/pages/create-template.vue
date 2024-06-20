@@ -10,15 +10,21 @@ const router = useRouter()
 const templateName = ref('')
 const templateContent = ref('')
 
+const characters = [
+    {name: 'Alice', description: 'A character named Alice.'},
+    {name: 'Bob', description: 'A character named Bob.'},
+]
+
 const exampleOutput = computed(() => {
     let parsed = ''
     try {
         const template = new Template(templateContent.value)
         parsed = template.render({
-            characters: [{name: 'Alice'}, {name: 'Bob'}],
+            characters: characters,
             messages: [
-                {text: 'Hello', generated: false, role: 'user'},
-                {text: 'Hi', generated: true, role: 'assistant'},
+                {text: 'Hello', generated: false, role: 'user', character: characters[0]},
+                {text: 'Hi, how are you?', generated: true, role: 'assistant', character: characters[1]},
+                {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
             ],
         })
     } catch (err) {

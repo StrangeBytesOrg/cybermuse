@@ -588,6 +588,29 @@ export interface paths {
       };
     };
   };
+  "/generate-stream": {
+    /**
+     * Generate a completion stream
+     * @description Generates text and stream the response using Server-Sent Events (SSE).
+     */
+    post: {
+      requestBody: {
+        content: {
+          "application/json": {
+            prompt: string;
+          };
+        };
+      };
+      responses: {
+        /** @description data: {text} */
+        200: {
+          content: {
+            "text/event-stream": string;
+          };
+        };
+      };
+    };
+  };
   "/templates": {
     /** Get all prompt templates */
     get: {
@@ -646,7 +669,11 @@ export interface paths {
       responses: {
         /** @description Default Response */
         200: {
-          content: never;
+          content: {
+            "application/json": {
+              id: number;
+            };
+          };
         };
       };
     };

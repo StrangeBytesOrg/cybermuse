@@ -155,28 +155,47 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             // Format the messages and characters for the template
             const formattedMessages = existingChat?.messages.map((message) => {
+                const messageCharacter = existingChat.characters.find(
+                    ({character}) => character.id === message.characterId,
+                )
                 return {
                     text: message.content[message.activeIndex],
                     generated: message.generated,
+                    role: message.generated ? 'assistant' : 'user',
+                    character: messageCharacter?.character,
                 }
             })
             const formattedCharacters = existingChat?.characters.map(({character}) => {
-                return {
-                    name: character.name,
-                    description: character.description,
-                }
+                return character
             })
+            console.log(formattedMessages)
+            console.log(formattedCharacters)
 
+            const tokenLimit = generatePreset.context
             let prompt = ''
+            let tokenCount = 0
             try {
-                const template = new Template(promptTemplate.content || '')
-                prompt = template.render({
-                    messages: formattedMessages,
-                    characters: formattedCharacters,
-                })
+                for (let i = formattedMessages.length - 1; i >= 0; i -= 1) {
+                    const messagesSubset = formattedMessages.slice(i, formattedMessages.length - 1)
+                    const template = new Template(promptTemplate.content || '')
+                    const newPrompt = template.render({
+                        messages: messagesSubset,
+                        characters: formattedCharacters,
+                        char: pickedCharacter?.character.name,
+                    })
+                    tokenCount = await getTokenCount(prompt)
+                    if (tokenCount < tokenLimit) {
+                        prompt = newPrompt
+                    } else {
+                        console.log(`Token limit reached: ${tokenCount}`)
+                        break
+                    }
+                }
             } catch (err) {
                 console.error('Failed to render template')
                 console.error(err)
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed creating prompt'})}\n\n`)
+                return
             }
 
             if (request.body.continue) {
@@ -184,6 +203,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             }
 
             console.log('prompt:', prompt)
+            console.log('token count:', tokenCount)
+
             try {
                 const response = await fetch(`${llamaCppBaseUrl}/completion`, {
                     method: 'POST',
@@ -212,6 +233,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 })
                 const responseIterable = responseToIterable(response)
                 let bufferedResponse = ''
+                if (request.body.continue) {
+                    bufferedResponse = lastMessage.content[lastMessage.activeIndex]
+                }
                 for await (const chunk of responseIterable) {
                     const data = JSON.parse(chunk.data)
                     bufferedResponse += data.content
@@ -245,4 +269,18 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     // const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
     // const gbnfNameString = characterNames.join(' | ')
     // const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
+}
+
+const getTokenCount = async (prompt: string) => {
+    const response = await fetch(`${llamaCppBaseUrl}/tokenize`, {
+        method: 'POST',
+        body: JSON.stringify({
+            content: prompt,
+        }),
+    })
+    const {tokens} = await response.json()
+    if (!tokens || !Array.isArray(tokens)) {
+        throw new Error('Invalid response from tokenization')
+    }
+    return tokens.length
 }

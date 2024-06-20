@@ -1,29 +1,14 @@
 import {eq} from 'drizzle-orm'
 import {db, user, character, chat, chatCharacters, promptTemplate, generatePresets} from './db.js'
 
+const defaultSystemMessage = `Roleplay as the character specified.`
+
 // Prompt Presets
-const chatMlTemplate = `<|im_start|>system
-{{instruction}}<|im_end|>
-{% for message in messages %}
-<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}
-{{message.character.name}}: {{message.text}}<|im_end|>
-{% endfor %}
-<|im_start|>assistant\n`
-
-const llama3Template = `<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-{{instruction}}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>
-
-{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>
-
-`
-
-const phi3Template = `{{ bos_token }}{% for message in messages %}{{'<|' + message['role'] + '|>' + ' ' + message['text'] + '<|end|> ' }}{% endfor %}{{ '<|assistant|> ' }}`
-
-// const defaultInstruction = `Write a single response to the dialogue. Roleplay as the chosen character, and respond to the previous messages.
-// {% for character in characters %}
-// Description of {{character.name}}: {{character.description}}
-// {% endfor %}`
+const chatMl = `<|im_start|>system\n{{instruction}}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n`
+const llama3 = `<|start_header_id|>system<|end_header_id|>\n\n{{instruction}}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n`
+const phi3 = `{% for message in messages %}<|{{message.role}}|>{{message.text}}<|end|>\n{% endfor %}<|assistant|>`
+const phi3Roleplay = `<|user|>${defaultSystemMessage}{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|end|>\n{% for message in messages %}<|{{message.role}}|>\n{{message.character.name}}: {{message.text}}<|end|>\n{% endfor %}<|assistant|>\n{{char}}: `
+const llama3Roleplay = `<|start_header_id|>system<|end_header_id|>\n\n${defaultSystemMessage}{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n{{char}}: `
 
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
@@ -52,7 +37,7 @@ export const fixtureData = async () => {
         await db.insert(chatCharacters).values({chatId: 1, characterId: 2})
     }
 
-    // Create a default generate preset if it doesn't exist
+    // Generation Preset
     const existingPreset = await db.query.generatePresets.findFirst({where: eq(generatePresets.id, 1)})
     if (!existingPreset) {
         console.log('No generate preset found, creating one')
@@ -66,21 +51,14 @@ export const fixtureData = async () => {
         })
     }
 
-    // Create default prompt presets
+    // Create prompt templates
     const existingPromptPreset = await db.query.promptTemplate.findFirst({where: eq(promptTemplate.id, 1)})
     if (!existingPromptPreset) {
-        await db.insert(promptTemplate).values({
-            name: 'ChatML',
-            content: chatMlTemplate,
-        })
-        await db.insert(promptTemplate).values({
-            name: 'Llama3',
-            content: llama3Template,
-        })
-        await db.insert(promptTemplate).values({
-            name: 'Phi3',
-            content: phi3Template,
-        })
+        await db.insert(promptTemplate).values({name: 'ChatML', content: chatMl})
+        await db.insert(promptTemplate).values({name: 'Llama3', content: llama3})
+        await db.insert(promptTemplate).values({name: 'Phi3', content: phi3})
+        await db.insert(promptTemplate).values({name: 'Phi 3 Roleplay', content: phi3Roleplay})
+        await db.insert(promptTemplate).values({name: 'Llama 3 Roleplay', content: llama3Roleplay})
     }
 
     // Initialize a user

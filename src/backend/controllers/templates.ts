@@ -64,6 +64,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 name: z.string(),
                 content: z.string(),
             }),
+            response: {
+                200: z.object({id: z.number()}),
+            },
         },
         handler: async (req) => {
             const [newTemplate] = await db

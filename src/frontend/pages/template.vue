@@ -16,17 +16,27 @@ const {data} = await client.GET('/template/{id}', {
 const templateName = ref(data?.template.name || '')
 const templateContent = ref(data?.template.content || '')
 
+const characters = [
+    {name: 'Alice', description: 'A character named Alice.'},
+    {name: 'Bob', description: 'A character named Bob.'},
+]
+
 const exampleOutput = computed(() => {
     let parsed = ''
     try {
+        console.log(`|${templateContent.value}|`)
         const template = new Template(templateContent.value)
         parsed = template.render({
-            characters: [{name: 'Alice'}, {name: 'Bob'}],
+            characters: characters,
             messages: [
-                {text: 'Hello', generated: false, role: 'user'},
-                {text: 'Hi', generated: true, role: 'assistant'},
+                {text: 'Hello', generated: false, role: 'user', character: characters[0]},
+                {text: 'Hi, how are you?', generated: true, role: 'assistant', character: characters[1]},
+                {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
+                {text: '', generated: true, role: 'assistant', character: characters[1]},
             ],
+            char: characters[0]?.name,
         })
+        console.log(`|${parsed}|`)
     } catch (err) {
         parsed = `Error parsing template\n${err}`
     }
@@ -43,7 +53,7 @@ const updateTemplate = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(`Error updating template\n${error.detail}`)
+        toast.error('Error updating template')
     } else {
         toast.success('Template updated')
         router.push('/templates')
