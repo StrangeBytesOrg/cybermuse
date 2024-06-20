@@ -19,15 +19,15 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          # - name: build-linux
-          #   os: ubuntu-latest
-          #   target-platform: linux/amd64
+          - name: build-linux
+            os: ubuntu-latest
+            target-platform: linux/amd64
           - name: build-mac
             os: macos-latest
             target-platform: darwin/amd64
-          # - name: build-windows
-          #   os: windows-latest
-          #   target-platform: windows/amd64
+          - name: build-windows
+            os: windows-latest
+            target-platform: windows/amd64
 
     runs-on: ${{ matrix.build.os }}
     steps:
@@ -75,11 +75,6 @@ jobs:
       - name: Build Frontend
         run: npm run build
 
-        # This is only necessary temporarily because better-sqlite3 prebuilds for darwin-x64 are currently failing
-      # - name: Build Electron Mac
-      #   if: runner.os == 'macOS'
-      #   run: python3 -m pip install --break-system-packages setuptools && npx @electron/rebuild --force --arch=darwin-x64
-
       - name: Build Electron
         run: npm run make
 
@@ -88,8 +83,8 @@ jobs:
         run: |
           cd out
           tar -acf chat-linux.tar.gz linux-unpacked
-          rclone copy chat-linux.tar.gz r2:chat-app-releases/latest/
-          rclone copyto chat-linux.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
+          rclone copy chat-linux-x64.tar.gz r2:chat-app-releases/latest/
+          rclone copyto chat-linux-x64.tar.gz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
         
       - name: Archive and Upload Mac
         if: matrix.build.target-platform == 'darwin/amd64'
