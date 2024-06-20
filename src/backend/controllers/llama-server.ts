@@ -67,62 +67,9 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const modelName = req.body.modelFile
-
-            // Run llama.cpp server
-            let serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
-            if (process.env.DEV) {
-                serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
-            }
-            if (process.platform === 'win32') {
-                serverBinPath += '.exe'
-            }
-            console.log(`Server bin path: ${serverBinPath}`)
-            if (!fs.existsSync(serverBinPath)) {
-                throw new Error('LlamaCPP Server binary not found')
-            }
-
-            const config = getConfig()
-            const modelPath = path.resolve(config.modelsPath, modelName)
-            console.log(modelPath)
-            if (!fs.existsSync(modelPath)) {
-                throw new Error('Model file not found')
-            }
-
-            return new Promise((resolve, reject) => {
-                const args = ['-m', modelPath]
-                args.push('--ctx-size', String(req.body.contextSize))
-                if (req.body.useGPU) {
-                    args.push('--gpu-layers', '128')
-                }
-                llamaServerProc = spawn(serverBinPath, args, {})
-                llamaServerProc.stdout.on('data', (data) => {
-                    const output: string = data.toString()
-                    console.log(`Stdout: ${output}`)
-                    if (output.includes('HTTP server listening')) {
-                        console.log('Server actually started')
-                        loaded = true
-                        currentModel = modelName
-                        config.contextSize = req.body.contextSize
-                        config.useGPU = req.body.useGPU
-                        config.lastModel = modelName
-                        setConfig(config)
-                        resolve({success: true})
-                    }
-                })
-
-                llamaServerProc.stderr.on('data', (data) => {
-                    const output: string = data.toString()
-                    console.error(`Stderr: ${output}`)
-                    if (output.includes('error')) {
-                        reject(new Error(output))
-                    }
-                })
-
-                llamaServerProc.on('error', (err) => {
-                    console.error('server error:', err)
-                })
-            })
+            const {modelFile, contextSize, useGPU} = req.body
+            await startLlamaServer(modelFile, contextSize, useGPU)
+            return {success: true}
         },
     })
 
@@ -141,5 +88,62 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             })
             llamaServerProc.kill()
         },
+    })
+}
+
+export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
+    // Run llama.cpp server
+    let serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
+    if (process.env.DEV) {
+        serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
+    }
+    if (process.platform === 'win32') {
+        serverBinPath += '.exe'
+    }
+    console.log(`Server bin path: ${serverBinPath}`)
+    if (!fs.existsSync(serverBinPath)) {
+        throw new Error('LlamaCPP Server binary not found')
+    }
+
+    const config = getConfig()
+    const modelPath = path.resolve(config.modelsPath, modelName)
+    console.log(modelPath)
+    if (!fs.existsSync(modelPath)) {
+        throw new Error('Model file not found')
+    }
+
+    return new Promise((resolve, reject) => {
+        const args = ['-m', modelPath]
+        args.push('--ctx-size', String(contextSize))
+        if (useGPU) {
+            args.push('--gpu-layers', '128')
+        }
+        llamaServerProc = spawn(serverBinPath, args, {})
+        llamaServerProc.stdout.on('data', (data) => {
+            const output: string = data.toString()
+            console.log(`Stdout: ${output}`)
+            if (output.includes('HTTP server listening')) {
+                console.log('Server actually started')
+                loaded = true
+                currentModel = modelName
+                config.contextSize = contextSize
+                config.useGPU = useGPU
+                config.lastModel = modelName
+                setConfig(config)
+                resolve({success: true})
+            }
+        })
+
+        llamaServerProc.stderr.on('data', (data) => {
+            const output: string = data.toString()
+            console.error(`Stderr: ${output}`)
+            if (output.includes('error')) {
+                reject(new Error(output))
+            }
+        })
+
+        llamaServerProc.on('error', (err) => {
+            console.error('server error:', err)
+        })
     })
 }

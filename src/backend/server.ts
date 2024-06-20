@@ -13,7 +13,7 @@ import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
-import {llamaServerRoutes} from './controllers/llama-server.js'
+import {llamaServerRoutes, startLlamaServer} from './controllers/llama-server.js'
 
 // Fixture DB data
 import {fixtureData} from './fixture.js'
@@ -26,9 +26,12 @@ await fixtureData()
 
 const config = getConfig()
 
-// if (config.autoLoad) {
-//     await loadModel(config.lastModel)
-// }
+if (config.autoLoad) {
+    const modelName = config.lastModel
+    const contextSize = config.contextSize
+    const useGPU = config.useGPU
+    await startLlamaServer(modelName, contextSize, useGPU)
+}
 
 export const server = Fastify({
     // logger: true,
