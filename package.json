@@ -48,7 +48,7 @@
         "eslint": "^8.57.0",
         "marked": "^13.0.0",
         "openapi-fetch": "^0.9.7",
-        "openapi-typescript": "^6.7.5",
+        "openapi-typescript": "^7.0.0",
         "pinia": "^2.1.7",
         "prettier": "^3.2.5",
         "tailwindcss": "^3.4.1",

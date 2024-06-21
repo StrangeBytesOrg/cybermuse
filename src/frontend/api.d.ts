@@ -3,808 +3,1499 @@
  * Do not make direct changes to the file.
  */
 
-
 export interface paths {
-  "/characters": {
-    /** Get all characters */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              characters: ({
-                  id: number;
-                  name: string;
-                  /** @enum {string} */
-                  type: "user" | "character";
-                  description: string;
-                  firstMessage: string | null;
-                  image: string | null;
-                })[];
+    "/characters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all characters */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/character/{id}": {
-    /** Get a character by ID */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              character: {
-                id: number;
-                name: string;
-                /** @enum {string} */
-                type: "user" | "character";
-                description: string;
-                firstMessage: string | null;
-                image: string | null;
-              };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            characters: {
+                                id: number;
+                                name: string;
+                                /** @enum {string} */
+                                type: "user" | "character";
+                                description: string;
+                                firstMessage: string | null;
+                                image: string | null;
+                            }[];
+                        };
+                    };
+                };
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/create-character": {
-    /** Create a character */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id?: number;
-            name: string;
-            /** @enum {string} */
-            type: "user" | "character";
-            description: string;
-            firstMessage?: string | null;
-            image?: string | null;
-          };
+    "/character/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
+        /** Get a character by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            character: {
+                                id: number;
+                                name: string;
+                                /** @enum {string} */
+                                type: "user" | "character";
+                                description: string;
+                                firstMessage: string | null;
+                                image: string | null;
+                            };
+                        };
+                    };
+                };
+            };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/update-character/{id}": {
-    /** Update a character */
-    post: {
-      parameters: {
-        path: {
-          id: string;
+    "/create-character": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            id?: number;
-            name: string;
-            /** @enum {string} */
-            type: "user" | "character";
-            description: string;
-            firstMessage?: string | null;
-            image?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/delete-character/{id}": {
-    /** Delete a character */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/chats": {
-    /** Get all Chats */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              chats: ({
-                  id: number;
-                  createdAt: string;
-                  updatedAt: string;
-                  characters: ({
-                      id: number;
-                      chatId: number;
-                      characterId: number;
-                      character: {
-                        id: number;
+        get?: never;
+        put?: never;
+        /** Create a character */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        id?: number;
                         name: string;
                         /** @enum {string} */
                         type: "user" | "character";
                         description: string;
-                        firstMessage: string | null;
-                        image: string | null;
-                      };
-                    })[];
-                })[];
+                        firstMessage?: string | null;
+                        image?: string | null;
+                    };
+                };
             };
-          };
-        };
-      };
-    };
-  };
-  "/chat/{id}": {
-    /** Get a Chat by ID */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              chat: {
-                id: number;
-                createdAt: string;
-                updatedAt: string;
-                messages: {
-                    id: number;
-                    chatId: number;
-                    characterId: number;
-                    generated: boolean;
-                    activeIndex: number;
-                    content: string[];
-                  }[];
-              };
-              characters: ({
-                  id: number;
-                  name: string;
-                  /** @enum {string} */
-                  type: "user" | "character";
-                  description: string;
-                  firstMessage: string | null;
-                  image: string | null;
-                })[];
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/create-chat": {
-    /** Create a Chat */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            characters: number[];
-          };
+    "/update-character/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
+        get?: never;
+        put?: never;
+        /** Update a character */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/delete-chat/{id}": {
-    /** Delete a Chat */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/create-message": {
-    /** Add a message to the chat */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            chatId: number;
-            characterId: number;
-            text: string;
-            generated: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              messageId?: number;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        id?: number;
+                        name: string;
+                        /** @enum {string} */
+                        type: "user" | "character";
+                        description: string;
+                        firstMessage?: string | null;
+                        image?: string | null;
+                    };
+                };
             };
-          };
-        };
-      };
-    };
-  };
-  "/update-message/{id}": {
-    /** Update an existing message */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            text: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/delete-message/{id}": {
-    /** Delete a Message */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/generate-message": {
-    /** Generate a new response message */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            chatId: number;
-            continue: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description data: {text} */
-        200: {
-          content: {
-            "text/event-stream": string;
-          };
-        };
-      };
-    };
-  };
-  "/models": {
-    /** Get all models */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              models: {
-                  name: string;
-                  size: number;
-                }[];
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/download-model": {
-    /** Download a model */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            repoId: string;
-            path: string;
-          };
+    "/delete-character/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
+        get?: never;
+        put?: never;
+        /** Delete a character */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/set-model-path": {
-    /** Set the model folder */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            modelPath: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        400: {
-          content: {
-            "application/json": {
-              message: string;
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/set-autoload": {
-    /** Set auto load */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            autoLoad: boolean;
-          };
+    "/chats": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/presets": {
-    /** Get all generation presets */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              presets: ({
-                  id: number;
-                  name: string;
-                  context: number;
-                  maxTokens: number;
-                  temperature: number;
-                  seed: number;
-                  topK: number | null;
-                  topP: number | null;
-                  minP: number | null;
-                  tfsz: number | null;
-                  typicalP: number | null;
-                  repeatPenalty: number | null;
-                  repeatLastN: number | null;
-                  penalizeNL: boolean | null;
-                  presencePenalty: number | null;
-                  frequencyPenalty: number | null;
-                  mirostat: number | null;
-                  mirostatTau: number | null;
-                  mirostatEta: number | null;
-                })[];
-              activePresetId: number | null;
+        /** Get all Chats */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/preset/{id}": {
-    /** Get a generation preset */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              preset: {
-                id: number;
-                name: string;
-                context: number;
-                maxTokens: number;
-                temperature: number;
-                seed: number;
-                topK: number | null;
-                topP: number | null;
-                minP: number | null;
-                tfsz: number | null;
-                typicalP: number | null;
-                repeatPenalty: number | null;
-                repeatLastN: number | null;
-                penalizeNL: boolean | null;
-                presencePenalty: number | null;
-                frequencyPenalty: number | null;
-                mirostat: number | null;
-                mirostatTau: number | null;
-                mirostatEta: number | null;
-              };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            chats: {
+                                id: number;
+                                createdAt: string;
+                                updatedAt: string;
+                                characters: {
+                                    id: number;
+                                    chatId: number;
+                                    characterId: number;
+                                    character: {
+                                        id: number;
+                                        name: string;
+                                        /** @enum {string} */
+                                        type: "user" | "character";
+                                        description: string;
+                                        firstMessage: string | null;
+                                        image: string | null;
+                                    };
+                                }[];
+                            }[];
+                        };
+                    };
+                };
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/create-preset": {
-    /** Create a generation preset */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            id?: number;
-            name: string;
-            context: number;
-            maxTokens: number;
-            temperature: number;
-            seed: number;
-            topK?: number | null;
-            topP?: number | null;
-            minP?: number | null;
-            tfsz?: number | null;
-            typicalP?: number | null;
-            repeatPenalty?: number | null;
-            repeatLastN?: number | null;
-            penalizeNL?: boolean | null;
-            presencePenalty?: number | null;
-            frequencyPenalty?: number | null;
-            mirostat?: number | null;
-            mirostatTau?: number | null;
-            mirostatEta?: number | null;
-          };
+    "/chat/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/update-preset/{id}": {
-    /** Update a generation preset */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            id?: number;
-            name: string;
-            context: number;
-            maxTokens: number;
-            temperature: number;
-            seed: number;
-            topK?: number | null;
-            topP?: number | null;
-            minP?: number | null;
-            tfsz?: number | null;
-            typicalP?: number | null;
-            repeatPenalty?: number | null;
-            repeatLastN?: number | null;
-            penalizeNL?: boolean | null;
-            presencePenalty?: number | null;
-            frequencyPenalty?: number | null;
-            mirostat?: number | null;
-            mirostatTau?: number | null;
-            mirostatEta?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/delete-preset/{id}": {
-    /** Delete a generation preset */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/set-active-preset/{id}": {
-    /** Set the active generation preset */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/generate-stream": {
-    /**
-     * Generate a completion stream
-     * @description Generates text and stream the response using Server-Sent Events (SSE).
-     */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            prompt: string;
-          };
-        };
-      };
-      responses: {
-        /** @description data: {text} */
-        200: {
-          content: {
-            "text/event-stream": string;
-          };
-        };
-      };
-    };
-  };
-  "/templates": {
-    /** Get all prompt templates */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              templates: {
-                  id: number;
-                  name: string;
-                  content: string;
-                }[];
-              activeTemplateId: number;
+        /** Get a Chat by ID */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/template/{id}": {
-    /** Get a prompt template */
-    get: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              template: {
-                id: number;
-                name: string;
-                content: string;
-              };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            chat: {
+                                id: number;
+                                createdAt: string;
+                                updatedAt: string;
+                                messages: {
+                                    id: number;
+                                    chatId: number;
+                                    characterId: number;
+                                    generated: boolean;
+                                    activeIndex: number;
+                                    content: string[];
+                                }[];
+                            };
+                            characters: {
+                                id: number;
+                                name: string;
+                                /** @enum {string} */
+                                type: "user" | "character";
+                                description: string;
+                                firstMessage: string | null;
+                                image: string | null;
+                            }[];
+                        };
+                    };
+                };
             };
-          };
         };
-      };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/create-template": {
-    /** Create a prompt template */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            content: string;
-          };
+    "/create-chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              id: number;
+        get?: never;
+        put?: never;
+        /** Create a Chat */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
             };
-          };
-        };
-      };
-    };
-  };
-  "/update-template/{id}": {
-    /** Update a prompt template */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      requestBody: {
-        content: {
-          "application/json": {
-            name: string;
-            content: string;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/delete-template/{id}": {
-    /** Delete a prompt template */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/set-active-template/{id}": {
-    /** Set active prompt template */
-    post: {
-      parameters: {
-        path: {
-          id: string;
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
-        };
-      };
-    };
-  };
-  "/status": {
-    /** Get status info about the server */
-    get: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              currentModel: string;
-              modelPath?: string;
-              autoLoad: boolean;
-              loaded: boolean;
-              useGPU: boolean;
-              contextSize: number;
+            requestBody: {
+                content: {
+                    "application/json": {
+                        characters: number[];
+                    };
+                };
             };
-          };
-        };
-      };
-    };
-  };
-  "/start-server": {
-    /** Load a model */
-    post: {
-      requestBody: {
-        content: {
-          "application/json": {
-            modelFile: string;
-            contextSize: number;
-            useGPU: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: {
-            "application/json": {
-              success: boolean;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                        };
+                    };
+                };
             };
-          };
         };
-      };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
-  "/stop-server": {
-    /** Stop the llama server */
-    post: {
-      responses: {
-        /** @description Default Response */
-        200: {
-          content: never;
+    "/delete-chat/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
         };
-      };
+        get?: never;
+        put?: never;
+        /** Delete a Chat */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-  };
+    "/create-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a message to the chat */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        chatId: number;
+                        characterId: number;
+                        text: string;
+                        generated: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            messageId?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/update-message/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update an existing message */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        text: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/delete-message/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a Message */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generate-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a new response message */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        chatId: number;
+                        continue: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description data: {text} */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/event-stream": string;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all models */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            models: {
+                                name: string;
+                                size: number;
+                            }[];
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/download-model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Download a model */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        repoId: string;
+                        path: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            success: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-model-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the model folder */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        modelPath: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            message: string;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-autoload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set auto load */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        autoLoad: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/presets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all generation presets */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            presets: {
+                                id: number;
+                                name: string;
+                                context: number;
+                                maxTokens: number;
+                                temperature: number;
+                                seed: number;
+                                topK: number | null;
+                                topP: number | null;
+                                minP: number | null;
+                                tfsz: number | null;
+                                typicalP: number | null;
+                                repeatPenalty: number | null;
+                                repeatLastN: number | null;
+                                penalizeNL: boolean | null;
+                                presencePenalty: number | null;
+                                frequencyPenalty: number | null;
+                                mirostat: number | null;
+                                mirostatTau: number | null;
+                                mirostatEta: number | null;
+                            }[];
+                            activePresetId: number | null;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/preset/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a generation preset */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            preset: {
+                                id: number;
+                                name: string;
+                                context: number;
+                                maxTokens: number;
+                                temperature: number;
+                                seed: number;
+                                topK: number | null;
+                                topP: number | null;
+                                minP: number | null;
+                                tfsz: number | null;
+                                typicalP: number | null;
+                                repeatPenalty: number | null;
+                                repeatLastN: number | null;
+                                penalizeNL: boolean | null;
+                                presencePenalty: number | null;
+                                frequencyPenalty: number | null;
+                                mirostat: number | null;
+                                mirostatTau: number | null;
+                                mirostatEta: number | null;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/create-preset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a generation preset */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        id?: number;
+                        name: string;
+                        context: number;
+                        maxTokens: number;
+                        temperature: number;
+                        seed: number;
+                        topK?: number | null;
+                        topP?: number | null;
+                        minP?: number | null;
+                        tfsz?: number | null;
+                        typicalP?: number | null;
+                        repeatPenalty?: number | null;
+                        repeatLastN?: number | null;
+                        penalizeNL?: boolean | null;
+                        presencePenalty?: number | null;
+                        frequencyPenalty?: number | null;
+                        mirostat?: number | null;
+                        mirostatTau?: number | null;
+                        mirostatEta?: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/update-preset/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update a generation preset */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        id?: number;
+                        name: string;
+                        context: number;
+                        maxTokens: number;
+                        temperature: number;
+                        seed: number;
+                        topK?: number | null;
+                        topP?: number | null;
+                        minP?: number | null;
+                        tfsz?: number | null;
+                        typicalP?: number | null;
+                        repeatPenalty?: number | null;
+                        repeatLastN?: number | null;
+                        penalizeNL?: boolean | null;
+                        presencePenalty?: number | null;
+                        frequencyPenalty?: number | null;
+                        mirostat?: number | null;
+                        mirostatTau?: number | null;
+                        mirostatEta?: number | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/delete-preset/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a generation preset */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-active-preset/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the active generation preset */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generate-stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate a completion stream
+         * @description Generates text and stream the response using Server-Sent Events (SSE).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        prompt: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description data: {text} */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "text/event-stream": string;
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all prompt templates */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            templates: {
+                                id: number;
+                                name: string;
+                                content: string;
+                            }[];
+                            activeTemplateId: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/template/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a prompt template */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            template: {
+                                id: number;
+                                name: string;
+                                content: string;
+                            };
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/create-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a prompt template */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        content: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            id: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/update-template/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update a prompt template */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        name: string;
+                        content: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/delete-template/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a prompt template */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-active-template/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set active prompt template */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get status info about the server */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            currentModel: string;
+                            modelPath?: string;
+                            autoLoad: boolean;
+                            loaded: boolean;
+                            useGPU: boolean;
+                            contextSize: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/start-server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Load a model */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        modelFile: string;
+                        contextSize: number;
+                        useGPU: boolean;
+                    };
+                };
+            };
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            success: boolean;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/stop-server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop the llama server */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Default Response */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
-
 export type webhooks = Record<string, never>;
-
 export interface components {
-  schemas: {
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    schemas: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
-
 export type $defs = Record<string, never>;
-
-export type external = Record<string, never>;
-
 export type operations = Record<string, never>;

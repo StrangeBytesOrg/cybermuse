@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, defineModel} from 'vue'
+import {ref} from 'vue'
 import {watch} from 'vue'
 const props = defineProps(['buttonLabel'])
 const emit = defineEmits(['changed'])
