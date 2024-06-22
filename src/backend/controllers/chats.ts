@@ -1,6 +1,6 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {
     db,
@@ -15,17 +15,21 @@ import {
 } from '../db.js'
 
 export const chatRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/chats',
         method: 'GET',
         schema: {
+            operationId: 'GetAllChats',
+            tags: ['chats'],
             summary: 'Get all Chats',
             response: {
-                200: z.object({
-                    chats: z.array(
-                        selectChatSchema.extend({
-                            characters: z.array(
-                                selectChatCharactersSchema.extend({
+                200: t.Object({
+                    chats: t.Array(
+                        t.Object({
+                            ...selectChatSchema.properties,
+                            characters: t.Array(
+                                t.Object({
+                                    ...selectChatCharactersSchema.properties,
                                     character: selectCharacterSchema,
                                 }),
                             ),
@@ -45,24 +49,23 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/chat/:id',
         method: 'GET',
         schema: {
+            operationId: 'GetChatById',
+            tags: ['chats'],
             summary: 'Get a Chat by ID',
-            params: z.object({
-                id: z.string(),
+            params: t.Object({
+                id: t.String(),
             }),
             response: {
-                200: z.object({
-                    chat: selectChatSchema.extend({
-                        messages: z.array(
-                            selectMessageSchema.extend({
-                                content: z.array(z.string()),
-                            }),
-                        ),
+                200: t.Object({
+                    chat: t.Object({
+                        ...selectChatSchema.properties,
+                        messages: t.Array(selectMessageSchema),
                     }),
-                    characters: z.array(selectCharacterSchema),
+                    characters: t.Array(selectCharacterSchema),
                 }),
             },
         },
@@ -90,17 +93,19 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/create-chat',
         method: 'POST',
         schema: {
+            operationId: 'CreateChat',
+            tags: ['chats'],
             summary: 'Create a Chat',
-            body: z.object({
-                characters: z.array(z.number()),
+            body: t.Object({
+                characters: t.Array(t.Number()),
             }),
             response: {
-                200: z.object({
-                    id: z.number(),
+                200: t.Object({
+                    id: t.Number(),
                 }),
             },
         },
@@ -127,7 +132,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                     where: eq(character.id, characterId),
                 })
                 if (resCharacter?.firstMessage) {
-                    const [newMessage] = await db
+                    await db
                         .insert(message)
                         .values({
                             chatId: newChat.id,
@@ -137,11 +142,6 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                             content: [resCharacter.firstMessage],
                         })
                         .returning({id: message.id})
-                    console.log(newMessage.id)
-                    // await db.insert(messageContent).values({
-                    //     messageId: newMessage.id,
-                    //     text: resCharacter.firstMessage,
-                    // })
                 }
             }
 
@@ -149,12 +149,14 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/delete-chat/:id',
         method: 'POST',
         schema: {
+            operationId: 'DeleteChat',
+            tags: ['chats'],
             summary: 'Delete a Chat',
-            params: z.object({id: z.string()}),
+            params: t.Object({id: t.String()}),
         },
         handler: async (req) => {
             await db.delete(chat).where(eq(chat.id, Number(req.params.id)))

@@ -1,6 +1,6 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, message, chat, user} from '../db.js'
@@ -9,20 +9,22 @@ import {responseToIterable} from '../lib/sse.js'
 const llamaCppBaseUrl = 'http://localhost:8080'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/create-message',
         method: 'POST',
         schema: {
+            operationId: 'CreateMessage',
+            tags: ['messages'],
             summary: 'Add a message to the chat',
-            body: z.object({
-                chatId: z.number(),
-                characterId: z.number(),
-                text: z.string(),
-                generated: z.boolean(),
+            body: t.Object({
+                chatId: t.Number(),
+                characterId: t.Number(),
+                text: t.String(),
+                generated: t.Boolean(),
             }),
             response: {
-                200: z.object({
-                    messageId: z.number().optional(),
+                200: t.Object({
+                    messageId: t.Number(),
                 }),
             },
         },
@@ -43,14 +45,16 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/update-message/:id',
         method: 'POST',
         schema: {
+            operationId: 'UpdateMessage',
+            tags: ['messages'],
             summary: 'Update an existing message',
-            params: z.object({id: z.string()}),
-            body: z.object({
-                text: z.string(),
+            params: t.Object({id: t.String()}),
+            body: t.Object({
+                text: t.String(),
             }),
         },
         handler: async (req) => {
@@ -69,30 +73,34 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/delete-message/:id',
         method: 'POST',
         schema: {
+            operationId: 'DeleteMessage',
+            tags: ['messages'],
             summary: 'Delete a Message',
-            params: z.object({id: z.string()}),
+            params: t.Object({id: t.String()}),
         },
         handler: async (req) => {
             await db.delete(message).where(eq(message.id, Number(req.params.id)))
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/generate-message',
         method: 'POST',
         schema: {
+            operationId: 'GenerateMessage',
+            tags: ['messages'],
             summary: 'Generate a new response message',
-            body: z.object({
-                chatId: z.number(),
-                continue: z.boolean(),
+            body: t.Object({
+                chatId: t.Number(),
+                continue: t.Boolean(),
             }),
             produces: ['text/event-stream'],
             response: {
-                200: z.string().describe('data: {text}'),
+                200: t.String({description: 'data: {text}'}),
             },
         },
         handler: async (request, reply) => {

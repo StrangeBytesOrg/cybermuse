@@ -1,19 +1,21 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {db, generatePresets, selectPresetSchema, insertPresetSchema, user} from '../db.js'
 
 export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/presets',
         method: 'GET',
         schema: {
+            operationId: 'GetAllGenerationPresets',
+            tags: ['generate-presets'],
             summary: 'Get all generation presets',
             response: {
-                200: z.object({
-                    presets: z.array(selectPresetSchema),
-                    activePresetId: z.number().nullable(),
+                200: t.Object({
+                    presets: t.Array(selectPresetSchema),
+                    activePresetId: t.Number(),
                 }),
             },
         },
@@ -33,16 +35,18 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/preset/:id',
         method: 'GET',
         schema: {
+            operationId: 'GetGenerationPresetById',
+            tags: ['generate-presets'],
             summary: 'Get a generation preset',
-            params: z.object({
-                id: z.string(),
+            params: t.Object({
+                id: t.String(),
             }),
             response: {
-                200: z.object({preset: selectPresetSchema}),
+                200: t.Object({preset: selectPresetSchema}),
             },
         },
         handler: async (req) => {
@@ -56,10 +60,12 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/create-preset',
         method: 'POST',
         schema: {
+            operationId: 'CreateGenerationPreset',
+            tags: ['generate-presets'],
             summary: 'Create a generation preset',
             body: insertPresetSchema,
         },
@@ -92,13 +98,15 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/update-preset/:id',
         method: 'POST',
         schema: {
+            operationId: 'UpdateGenerationPreset',
+            tags: ['generate-presets'],
             summary: 'Update a generation preset',
-            params: z.object({
-                id: z.string(),
+            params: t.Object({
+                id: t.String(),
             }),
             body: insertPresetSchema,
         },
@@ -134,13 +142,15 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/delete-preset/:id',
         method: 'POST',
         schema: {
+            operationId: 'DeleteGenerationPreset',
+            tags: ['generate-presets'],
             summary: 'Delete a generation preset',
-            params: z.object({
-                id: z.string(),
+            params: t.Object({
+                id: t.String(),
             }),
         },
         handler: async (req) => {
@@ -154,13 +164,15 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/set-active-preset/:id',
         method: 'POST',
         schema: {
+            operationId: 'SetActiveGenerationPreset',
+            tags: ['generate-presets'],
             summary: 'Set the active generation preset',
-            params: z.object({
-                id: z.string(),
+            params: t.Object({
+                id: t.String(),
             }),
         },
         handler: async (req) => {

@@ -1,6 +1,7 @@
 import {sqliteTable, text, integer, real} from 'drizzle-orm/sqlite-core'
 import {sql, relations} from 'drizzle-orm'
-import {createSelectSchema, createInsertSchema} from 'drizzle-zod'
+import {createSelectSchema, createInsertSchema} from 'drizzle-typebox'
+import {Type as t} from '@sinclair/typebox'
 
 export const user = sqliteTable('user', {
     id: integer('id').primaryKey({autoIncrement: true}),
@@ -55,7 +56,9 @@ export const message = sqliteTable('message', {
     activeIndex: integer('active_index').notNull(),
     content: text('content', {mode: 'json'}).$type<string[]>().notNull(),
 })
-export const selectMessageSchema = createSelectSchema(message)
+export const selectMessageSchema = createSelectSchema(message, {
+    content: t.Array(t.String()),
+})
 export const insertMessageSchema = createInsertSchema(message)
 
 export const promptTemplate = sqliteTable('prompt_template', {

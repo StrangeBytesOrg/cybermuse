@@ -1,19 +1,21 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {db, user, promptTemplate, selectPromptTemplateSchema} from '../db.js'
 
 export const templateRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/templates',
         method: 'GET',
         schema: {
             summary: 'Get all prompt templates',
+            operationId: 'GetAllPromptTemplates',
+            tags: ['templates'],
             response: {
-                200: z.object({
-                    templates: z.array(selectPromptTemplateSchema),
-                    activeTemplateId: z.number(),
+                200: t.Object({
+                    templates: t.Array(selectPromptTemplateSchema),
+                    activeTemplateId: t.Number(),
                 }),
             },
         },
@@ -32,16 +34,18 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/template/:id',
         method: 'GET',
         schema: {
             summary: 'Get a prompt template',
-            params: z.object({
-                id: z.string(),
+            operationId: 'GetPromptTemplateById',
+            tags: ['templates'],
+            params: t.Object({
+                id: t.String(),
             }),
             response: {
-                200: z.object({template: selectPromptTemplateSchema}),
+                200: t.Object({template: selectPromptTemplateSchema}),
             },
         },
         handler: async (req) => {
@@ -55,17 +59,19 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/create-template',
         method: 'POST',
         schema: {
             summary: 'Create a prompt template',
-            body: z.object({
-                name: z.string(),
-                content: z.string(),
+            operationId: 'CreatePromptTemplate',
+            tags: ['templates'],
+            body: t.Object({
+                name: t.String(),
+                content: t.String(),
             }),
             response: {
-                200: z.object({id: z.number()}),
+                200: t.Object({id: t.Number()}),
             },
         },
         handler: async (req) => {
@@ -77,17 +83,19 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/update-template/:id',
         method: 'POST',
         schema: {
             summary: 'Update a prompt template',
-            params: z.object({
-                id: z.string(),
+            operationId: 'UpdatePromptTemplate',
+            tags: ['templates'],
+            params: t.Object({
+                id: t.String(),
             }),
-            body: z.object({
-                name: z.string(),
-                content: z.string(),
+            body: t.Object({
+                name: t.String(),
+                content: t.String(),
             }),
         },
         handler: async (req) => {
@@ -98,13 +106,15 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/delete-template/:id',
         method: 'POST',
         schema: {
             summary: 'Delete a prompt template',
-            params: z.object({
-                id: z.string(),
+            operationId: 'DeletePromptTemplate',
+            tags: ['templates'],
+            params: t.Object({
+                id: t.String(),
             }),
         },
         handler: async (req) => {
@@ -112,13 +122,15 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/set-active-template/:id',
         method: 'POST',
         schema: {
             summary: 'Set active prompt template',
-            params: z.object({
-                id: z.string(),
+            operationId: 'SetActivePromptTemplate',
+            tags: ['templates'],
+            params: t.Object({
+                id: t.String(),
             }),
         },
         handler: async (req) => {

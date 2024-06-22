@@ -1,9 +1,9 @@
 import fs from 'node:fs'
 import url from 'node:url'
 import path from 'node:path'
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {type ChildProcessWithoutNullStreams, spawn} from 'node:child_process'
 import {getConfig, setConfig} from '../config.js'
 
@@ -21,19 +21,21 @@ process.on('exit', () => {
 })
 
 export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/status',
         method: 'GET',
         schema: {
+            operationId: 'GetLlamaServerStatus',
+            tags: ['llama-server'],
             summary: 'Get status info about the server',
             response: {
-                200: z.object({
-                    currentModel: z.string(),
-                    modelPath: z.string().optional(),
-                    autoLoad: z.boolean(),
-                    loaded: z.boolean(),
-                    useGPU: z.boolean(),
-                    contextSize: z.number(),
+                200: t.Object({
+                    currentModel: t.String(),
+                    modelPath: t.String(),
+                    autoLoad: t.Boolean(),
+                    loaded: t.Boolean(),
+                    useGPU: t.Boolean(),
+                    contextSize: t.Number(),
                 }),
             },
         },
@@ -50,19 +52,21 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/start-server',
         method: 'POST',
         schema: {
-            summary: 'Load a model',
-            body: z.object({
-                modelFile: z.string(),
-                contextSize: z.number(),
-                useGPU: z.boolean(),
+            operationId: 'StartLlamaServer',
+            tags: ['llama-server'],
+            summary: 'Startup the llama server',
+            body: t.Object({
+                modelFile: t.String(),
+                contextSize: t.Number(),
+                useGPU: t.Boolean(),
             }),
             response: {
-                200: z.object({
-                    success: z.boolean(),
+                200: t.Object({
+                    success: t.Boolean(),
                 }),
             },
         },
@@ -73,10 +77,12 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/stop-server',
         method: 'POST',
         schema: {
+            operationId: 'StopLlamaServer',
+            tags: ['llama-server'],
             summary: 'Stop the llama server',
         },
         handler: async () => {

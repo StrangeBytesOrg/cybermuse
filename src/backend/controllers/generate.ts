@@ -1,6 +1,6 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 // import {Template} from '@huggingface/jinja'
 import {responseToIterable} from '../lib/sse.js'
@@ -9,18 +9,20 @@ import {db, user} from '../db.js'
 const llamaCppBaseUrl = 'http://localhost:8080'
 
 export const generateRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/generate-stream',
         method: 'POST',
         schema: {
+            operationId: 'GenerateStream',
+            tags: ['generate'],
             summary: 'Generate a completion stream',
             description: 'Generates text and stream the response using Server-Sent Events (SSE).',
-            body: z.object({
-                prompt: z.string(),
+            body: t.Object({
+                prompt: t.String(),
             }),
             produces: ['text/event-stream'],
             response: {
-                200: z.string().describe('data: {text}'),
+                200: t.String({description: 'data: {text}'}),
             },
         },
         handler: async (request, reply) => {

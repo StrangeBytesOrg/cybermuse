@@ -1,23 +1,25 @@
-import type {ZodTypeProvider} from 'fastify-type-provider-zod'
+import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import fs from 'node:fs'
 import path from 'node:path'
-import {z} from 'zod'
+import {Type as t} from '@sinclair/typebox'
 import {fileExists} from '@huggingface/hub'
 import {getConfig, setConfig} from '../config.js'
 
 export const modelRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/models',
         method: 'GET',
         schema: {
+            operationId: 'GetAllModels',
+            tags: ['models'],
             summary: 'Get all models',
             response: {
-                200: z.object({
-                    models: z.array(
-                        z.object({
-                            name: z.string(),
-                            size: z.number(),
+                200: t.Object({
+                    models: t.Array(
+                        t.Object({
+                            name: t.String(),
+                            size: t.Number(),
                         }),
                     ),
                 }),
@@ -44,18 +46,20 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/download-model',
         method: 'POST',
         schema: {
+            operationId: 'DownloadModel',
+            tags: ['models'],
             summary: 'Download a model',
-            body: z.object({
-                repoId: z.string(),
-                path: z.string(),
+            body: t.Object({
+                repoId: t.String(),
+                path: t.String(),
             }),
             response: {
-                200: z.object({
-                    success: z.boolean(),
+                200: t.Object({
+                    success: t.Boolean(),
                 }),
             },
         },
@@ -67,11 +71,15 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
 
             const config = getConfig()
             const response = await fetch(`https://huggingface.co/${req.body.repoId}/resolve/main/${req.body.path}`)
+            if (response.body === null || !response.ok) {
+                console.error('Failed to download model')
+                return {success: false}
+            }
             const reader = response.body.getReader()
             const contentLength = Number(response.headers.get('content-length'))
             console.log(`Downloading ${req.body.path}, Size: ${(contentLength / 1024 / 1024).toFixed(2)} MB`)
 
-            const finalPath = path.resolve(config.modelDir, req.body.path)
+            const finalPath = path.resolve(config.modelsPath, req.body.path)
             console.log(`Model will be downloaded to: ${finalPath}`)
             const fileStream = fs.createWriteStream(finalPath)
 
@@ -89,17 +97,19 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/set-model-path',
         method: 'POST',
         schema: {
+            operationId: 'SetModelPath',
+            tags: ['models'],
             summary: 'Set the model folder',
-            body: z.object({
-                modelPath: z.string(),
+            body: t.Object({
+                modelPath: t.String(),
             }),
             response: {
-                400: z.object({
-                    message: z.string(),
+                400: t.Object({
+                    message: t.String(),
                 }),
             },
         },
@@ -116,13 +126,15 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
     })
 
-    fastify.withTypeProvider<ZodTypeProvider>().route({
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
         url: '/set-autoload',
         method: 'POST',
         schema: {
+            operationId: 'SetAutoLoad',
+            tags: ['models'],
             summary: 'Set auto load',
-            body: z.object({
-                autoLoad: z.boolean(),
+            body: t.Object({
+                autoLoad: t.Boolean(),
             }),
         },
         handler: async (req) => {

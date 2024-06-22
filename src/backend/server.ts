@@ -2,7 +2,7 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import {serializerCompiler, validatorCompiler, jsonSchemaTransform} from 'fastify-type-provider-zod'
+import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {getConfig} from './config.js'
 
 // Routes
@@ -47,23 +47,67 @@ export const server = Fastify({
     bodyLimit: 1024 * 1024 * 5, // 5MB
 })
 server.register(cors)
-server.setSerializerCompiler(serializerCompiler)
-server.setValidatorCompiler(validatorCompiler)
+server.setValidatorCompiler(TypeBoxValidatorCompiler)
 
 await server.register(fastifySwagger, {
-    transform: jsonSchemaTransform,
     openapi: {
-        openapi: '3.0.0',
+        openapi: '3.1.0',
         info: {
             title: 'Chat App builtin server API',
             version: '0.1.0',
         },
         servers: [{url: '/api'}],
     },
+    refResolver: {
+        buildLocalReference(json, baseUrl, fragment, i) {
+            return String(json.$id) || `def-${i}`
+        },
+    },
 })
 
 await server.register(fastifySwaggerUI, {
     routePrefix: '/docs',
+})
+
+// Set media type for error responses
+// server.setErrorHandler((error, request, reply) => {
+//     reply.headers({'Content-Type': 'application/problem+json'})
+//     if (error.validation) {
+//         reply.status(400).send({
+//             statusCode: 400,
+//             error: 'Bad Request',
+//             message: error.message,
+//         })
+//     }
+// })
+
+// Create error schema
+server.addSchema({
+    $id: 'err',
+    type: 'object',
+    title: 'Default Error',
+    properties: {
+        statusCode: {type: 'integer'},
+        code: {type: 'string'},
+        error: {type: 'string'},
+        message: {type: 'string'},
+    },
+})
+
+// Add default error response to all routes
+server.addHook('onRoute', (routeOptions) => {
+    if (!routeOptions.schema) {
+        routeOptions.schema = {}
+    }
+    if (!routeOptions.schema.response) {
+        routeOptions.schema.response = {}
+    }
+    if (!routeOptions.schema.response.default) {
+        routeOptions.schema.response.default = {
+            description: 'Default error response',
+            content: {'application/problem+json': {schema: {$ref: 'err#'}}},
+        }
+    }
 })
 
 // Register controller routes

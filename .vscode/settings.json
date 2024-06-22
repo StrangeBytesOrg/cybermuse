@@ -13,7 +13,8 @@
         "roleplay",
         "snarkdown",
         "tailwindcss",
-        "toastification"
+        "toastification",
+        "typebox"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }
