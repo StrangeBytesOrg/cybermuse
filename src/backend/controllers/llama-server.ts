@@ -1,11 +1,9 @@
 import fs from 'node:fs'
-import url from 'node:url'
 import path from 'node:path'
 import {Elysia, t} from 'elysia'
 import {type ChildProcessWithoutNullStreams, spawn} from 'node:child_process'
 import {getConfig, setConfig} from '../config.js'
 
-const esmDirname = url.fileURLToPath(new URL('.', import.meta.url)) // Works like __dirname
 let llamaServerProc: ChildProcessWithoutNullStreams
 let loaded = false
 let currentModel: string = ''
@@ -99,10 +97,11 @@ llamaServerRoutes.post(
 )
 
 export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
-    // Run llama.cpp server
-    let serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
-    if (process.env.DEV) {
-        serverBinPath = path.resolve(esmDirname, '../../../llamacpp/llama-server')
+    let serverBinPath: string
+    if (import.meta.dirname === '/$bunfs/root') {
+        serverBinPath = path.resolve(path.dirname(process.execPath), './llamacpp/llama-server')
+    } else {
+        serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')
     }
     if (process.platform === 'win32') {
         serverBinPath += '.exe'

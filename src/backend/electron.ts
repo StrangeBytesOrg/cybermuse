@@ -1,12 +1,9 @@
 import path from 'node:path'
-import url from 'node:url'
 import {app, shell, BrowserWindow} from 'electron'
 import './server.js'
 
 // import sourcemapSupport from 'source-map-support'
 // sourcemapSupport.install()
-
-const esmDirname = url.fileURLToPath(new URL('.', import.meta.url)) // Works like __dirname
 
 app.disableHardwareAcceleration()
 const lock = app.requestSingleInstanceLock()
@@ -34,7 +31,7 @@ app.on('ready', () => {
     })
 
     if (app.isPackaged) {
-        win.loadFile(path.resolve(esmDirname, '../index.html'))
+        win.loadFile(path.resolve(import.meta.dirname, '../index.html'))
     } else {
         win.webContents.openDevTools({
             mode: 'bottom', // 'undocked'

@@ -1,4 +1,3 @@
-import url from 'node:url'
 import path from 'node:path'
 import {drizzle} from 'drizzle-orm/bun-sqlite'
 import {migrate} from 'drizzle-orm/bun-sqlite/migrator'
@@ -14,13 +13,18 @@ if (process.env.DEV) {
     databasePath = path.resolve('./dev.db')
 }
 
-const esmDirName = url.fileURLToPath(new URL('.', import.meta.url))
 const sqlite = new Database(databasePath)
 export const db = drizzle(sqlite, {schema, logger: true})
 
-if (!process.env.DEV) {
-    console.log(`Running migrations from ${path.resolve(esmDirName, '../migrations')}`)
-    migrate(db, {migrationsFolder: path.resolve(esmDirName, '../migrations')})
-} else {
+if (process.env.DEV) {
     console.log('DEV mode skipping migrations')
+} else {
+    let migrationsPath: string
+    if (import.meta.dirname === '/$bunfs/root') {
+        migrationsPath = path.resolve(path.dirname(process.execPath), './src/migrations')
+    } else {
+        migrationsPath = path.resolve(import.meta.dir, '../migrations')
+    }
+    console.log(`Running migrations from ${migrationsPath}`)
+    migrate(db, {migrationsFolder: migrationsPath})
 }
