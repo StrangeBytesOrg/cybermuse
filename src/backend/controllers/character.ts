@@ -33,12 +33,12 @@ characterRoutes.get(
 
 characterRoutes.get(
     '/character/:id',
-    async ({params}) => {
+    async ({params, error}) => {
         const resCharacter = await db.query.character.findFirst({
             where: eq(character.id, Number(params.id)),
         })
         if (!resCharacter) {
-            throw new Error('Character not found')
+            return error(400, "Character doesn't exist.")
         }
         return {character: resCharacter}
     },
@@ -55,6 +55,7 @@ characterRoutes.get(
             200: t.Object({
                 character: selectCharacterSchema,
             }),
+            400: t.String(),
         },
     },
 )
@@ -111,15 +112,16 @@ characterRoutes.post(
         body: insertCharacterSchema,
         response: {
             204: t.Void(),
+            422: t.Object({message: t.String()}),
         },
     },
 )
 
 characterRoutes.post(
     '/delete-character/:id',
-    async ({params}) => {
+    async ({params, error}) => {
         if (params.id === '1') {
-            throw new Error('Not allowed to delete the user character.')
+            return error(400, {message: 'Not allowed to delete the user character.'})
         }
         await db.delete(character).where(eq(character.id, Number(params.id)))
     },
@@ -134,6 +136,7 @@ characterRoutes.post(
         }),
         response: {
             204: t.Void(),
+            400: t.Object({message: t.String()}),
         },
     },
 )

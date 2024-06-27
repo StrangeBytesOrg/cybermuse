@@ -98,7 +98,7 @@ llamaServerRoutes.post(
 
 export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
     let serverBinPath: string
-    if (import.meta.dirname === '/$bunfs/root') {
+    if (import.meta.dirname.includes('$bunfs') || import.meta.dirname.includes('~BUN')) {
         serverBinPath = path.resolve(path.dirname(process.execPath), './llamacpp/llama-server')
     } else {
         serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')

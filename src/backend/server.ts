@@ -58,7 +58,7 @@ server.group('/api', (group) => {
     return group
 })
 
-// TODO add error handlingZ
+// TODO add error handling
 server.listen({port: config.serverPort, maxRequestBodySize: 1024 * 1024 * 5}, () => {
     console.log(`Server running on port ${config.serverPort}`)
 })

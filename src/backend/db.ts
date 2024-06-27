@@ -13,6 +13,7 @@ if (process.env.DEV) {
     databasePath = path.resolve('./dev.db')
 }
 
+console.log(`Using database at ${databasePath}`)
 const sqlite = new Database(databasePath)
 export const db = drizzle(sqlite, {schema, logger: true})
 
@@ -20,7 +21,7 @@ if (process.env.DEV) {
     console.log('DEV mode skipping migrations')
 } else {
     let migrationsPath: string
-    if (import.meta.dirname === '/$bunfs/root') {
+    if (import.meta.dirname === '/$bunfs/root' || import.meta.dirname.includes('~BUN')) {
         migrationsPath = path.resolve(path.dirname(process.execPath), './src/migrations')
     } else {
         migrationsPath = path.resolve(import.meta.dir, '../migrations')
