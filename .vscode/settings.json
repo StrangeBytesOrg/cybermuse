@@ -14,7 +14,9 @@
         "snarkdown",
         "tailwindcss",
         "toastification",
-        "typebox"
+        "typebox",
+        "elysia",
+        "elysiajs"
     ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }

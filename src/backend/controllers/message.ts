@@ -1,6 +1,5 @@
-import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
-import type {FastifyPluginAsync} from 'fastify'
-import {Type as t} from '@sinclair/typebox'
+import {Elysia, t} from 'elysia'
+import {Stream} from '@elysiajs/stream'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, message, chat, user} from '../db.js'
@@ -8,115 +7,104 @@ import {responseToIterable} from '../lib/sse.js'
 
 const llamaCppBaseUrl = 'http://localhost:8080'
 
-export const messageRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/create-message',
-        method: 'POST',
-        schema: {
+// TODO get response character route
+// const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
+// const gbnfNameString = characterNames.join(' | ')
+// const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
+
+export const messageRoutes = new Elysia()
+
+messageRoutes.post(
+    '/create-message',
+    async ({body}) => {
+        const {chatId, characterId, generated, text} = body
+        try {
+            const [newMessage] = await db
+                .insert(message)
+                .values({chatId, characterId, generated, activeIndex: 0, content: [text]})
+                .returning({id: message.id})
+
+            return {messageId: newMessage.id}
+        } catch (err) {
+            // TODO proper error handling
+            console.error(err)
+            throw new Error('Failed to create message')
+        }
+    },
+    {
+        tags: ['messages'],
+        detail: {
             operationId: 'CreateMessage',
-            tags: ['messages'],
             summary: 'Add a message to the chat',
-            body: t.Object({
-                chatId: t.Number(),
-                characterId: t.Number(),
-                text: t.String(),
-                generated: t.Boolean(),
+        },
+        body: t.Object({
+            chatId: t.Number(),
+            characterId: t.Number(),
+            text: t.String(),
+            generated: t.Boolean(),
+        }),
+        response: {
+            200: t.Object({
+                messageId: t.Number(),
             }),
-            response: {
-                200: t.Object({
-                    messageId: t.Number(),
-                }),
-            },
         },
-        handler: async (request) => {
-            const {chatId, characterId, generated, text} = request.body
-            try {
-                const [newMessage] = await db
-                    .insert(message)
-                    .values({chatId, characterId, generated, activeIndex: 0, content: [text]})
-                    .returning({id: message.id})
+    },
+)
 
-                return {messageId: newMessage.id}
-            } catch (err) {
-                // TODO proper error handling
-                console.error(err)
-                throw new Error('Failed to create message')
-            }
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/update-message/:id',
-        method: 'POST',
-        schema: {
+messageRoutes.post(
+    '/update-message/:id',
+    async ({params, body}) => {
+        const dbMessage = await db.query.message.findFirst({
+            where: eq(message.id, Number(params.id)),
+        })
+        if (!dbMessage) {
+            throw new Error('Message not found')
+        }
+        const content = dbMessage.content
+        content[dbMessage.activeIndex] = body.text
+        await db
+            .update(message)
+            .set({content})
+            .where(eq(message.id, Number(params.id)))
+    },
+    {
+        tags: ['messages'],
+        detail: {
             operationId: 'UpdateMessage',
-            tags: ['messages'],
             summary: 'Update an existing message',
-            params: t.Object({id: t.String()}),
-            body: t.Object({
-                text: t.String(),
-            }),
         },
-        handler: async (req) => {
-            const dbMessage = await db.query.message.findFirst({
-                where: eq(message.id, Number(req.params.id)),
-            })
-            if (!dbMessage) {
-                throw new Error('Message not found')
-            }
-            const content = dbMessage.content
-            content[dbMessage.activeIndex] = req.body.text
-            await db
-                .update(message)
-                .set({content})
-                .where(eq(message.id, Number(req.params.id)))
-        },
-    })
+        params: t.Object({id: t.String()}),
+        body: t.Object({
+            text: t.String(),
+        }),
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/delete-message/:id',
-        method: 'POST',
-        schema: {
+messageRoutes.post(
+    '/delete-message/:id',
+    async ({params}) => {
+        await db.delete(message).where(eq(message.id, Number(params.id)))
+    },
+    {
+        tags: ['messages'],
+        detail: {
             operationId: 'DeleteMessage',
-            tags: ['messages'],
             summary: 'Delete a Message',
-            params: t.Object({id: t.String()}),
         },
-        handler: async (req) => {
-            await db.delete(message).where(eq(message.id, Number(req.params.id)))
-        },
-    })
+        params: t.Object({id: t.String()}),
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/generate-message',
-        method: 'POST',
-        schema: {
-            operationId: 'GenerateMessage',
-            tags: ['messages'],
-            summary: 'Generate a new response message',
-            body: t.Object({
-                chatId: t.Number(),
-                continue: t.Boolean(),
-            }),
-            produces: ['text/event-stream'],
-            response: {
-                200: t.String({description: 'data: {text}'}),
-            },
-        },
-        handler: async (request, reply) => {
-            const {chatId} = request.body
-
-            // Setup headers for server-sent events
-            reply.raw.setHeader('Content-Type', 'text/event-stream')
-            reply.raw.setHeader('Cache-Control', 'no-store')
-            reply.raw.setHeader('Connection', 'keep-alive')
-            reply.raw.setHeader('Access-Control-Allow-Origin', '*')
-
+messageRoutes.post(
+    '/generate-message',
+    async ({request, body}) => {
+        const {chatId} = body
+        return new Stream(async (stream) => {
             const controller = new AbortController()
-            request.socket.on('close', () => {
-                console.log('User disconnected')
+            request.signal.onabort = () => {
+                console.log('User aborted or disconnected')
                 controller.abort()
-            })
+            }
 
             const existingChat = await db.query.chat.findFirst({
                 where: eq(chat.id, chatId),
@@ -129,7 +117,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             // Get the message response character
             const lastMessage = existingChat?.messages[existingChat.messages.length - 1]
             if (!lastMessage) {
-                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No messages found'})}\n\n`)
+                stream.event = 'error'
+                stream.send({error: 'No messages found'})
                 return
             }
             const pickedCharacter = existingChat?.characters.find(
@@ -142,22 +131,25 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 with: {promptTemplate: true, generatePreset: true},
             })
             if (!userSettings) {
-                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No user settings found'})}\n\n`)
+                stream.event = 'error'
+                stream.send({error: 'No user settings found'})
                 return
             }
             const promptTemplate = userSettings.promptTemplate
             const generatePreset = userSettings.generatePreset
             if (!promptTemplate) {
-                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No prompt template found'})}\n\n`)
+                stream.event = 'error'
+                stream.send({error: 'No prompt template found'})
                 return
             }
             if (!generatePreset) {
-                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No generate preset found'})}\n\n`)
+                stream.event = 'error'
+                stream.send({error: 'No generate preset found'})
                 return
             }
 
             // If set to continue an existing message, pop the last message
-            if (request.body.continue) {
+            if (body.continue) {
                 existingChat.messages.pop()
             }
 
@@ -202,11 +194,12 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             } catch (err) {
                 console.error('Failed to render template')
                 console.error(err)
-                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed creating prompt'})}\n\n`)
+                stream.event = 'error'
+                stream.send({error: 'Failed creating prompt'})
                 return
             }
 
-            if (request.body.continue) {
+            if (body.continue) {
                 prompt += lastMessage.content[lastMessage.activeIndex]
             }
 
@@ -241,7 +234,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 })
                 const responseIterable = responseToIterable(response)
                 let bufferedResponse = ''
-                if (request.body.continue) {
+                if (body.continue) {
                     bufferedResponse = lastMessage.content[lastMessage.activeIndex]
                 }
                 for await (const chunk of responseIterable) {
@@ -251,33 +244,40 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                         .update(message)
                         .set({content: [bufferedResponse]})
                         .where(eq(message.id, lastMessage.id))
-                    reply.raw.write(`event:text\ndata: ${JSON.stringify({text: data.content})}\n\n`)
+                    stream.event = 'text'
+                    stream.send({text: data.content})
                 }
 
                 // Send a final event with the full message text
                 console.log('Buffered Response:', bufferedResponse)
-                reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
+                stream.event = 'final'
+                stream.send({text: bufferedResponse})
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     console.log('Request aborted')
                 } else {
                     console.error('Failed to generate response')
                     console.error(err)
-                    reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
+                    stream.event = 'error'
+                    stream.send({error: 'Failed to generate response'})
                 }
             } finally {
-                request.socket.removeAllListeners('close')
-                reply.raw.end()
-                request.socket.destroy()
+                stream.close()
             }
+        })
+    },
+    {
+        tags: ['messages'],
+        detail: {
+            operationId: 'GenerateMessage',
+            summary: 'Generate a message for the chat',
         },
-    })
-
-    // console.log('Getting response character')
-    // const characterNames = notUserCharacters.map(({character}) => `"${character.name}"`)
-    // const gbnfNameString = characterNames.join(' | ')
-    // const gram = getGrammar(`root ::= ( ${gbnfNameString} )`)
-}
+        body: t.Object({
+            chatId: t.Number(),
+            continue: t.Boolean(),
+        }),
+    },
+)
 
 const getTokenCount = async (prompt: string) => {
     const response = await fetch(`${llamaCppBaseUrl}/tokenize`, {
@@ -286,7 +286,7 @@ const getTokenCount = async (prompt: string) => {
             content: prompt,
         }),
     })
-    const {tokens} = await response.json()
+    const {tokens} = (await response.json()) as {tokens: string[]}
     if (!tokens || !Array.isArray(tokens)) {
         throw new Error('Invalid response from tokenization')
     }

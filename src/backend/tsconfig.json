@@ -1,15 +1,24 @@
 {
     "include": ["./**/*"],
     "compilerOptions": {
-        "strict": true,
-        "module": "NodeNext",
         "target": "ESNext",
-        "sourceMap": true,
+        "lib": ["ESNext"],
+        "module": "ESNext",
+        "moduleDetection": "force",
+        "allowJs": true,
+
+        // Resolution and bundling
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": true,
+        "noEmit": true,
         "baseUrl": ".",
-        "noEmit": true, // Build with script, not tsc
-        "esModuleInterop": true,
-        "moduleResolution": "NodeNext",
-        "allowSyntheticDefaultImports": true
-        // "noUncheckedIndexedAccess": true // Recommended by OpenAPI ts
+
+        // Strictness
+        "strict": true
+        // "noUncheckedIndexedAccess": true // Probably should be enabled but it's pretty annoying
+
+        // "esModuleInterop": true,
+        // "allowSyntheticDefaultImports": true
     }
 }

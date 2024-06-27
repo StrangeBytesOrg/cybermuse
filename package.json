@@ -13,22 +13,21 @@
         "build:frontend": "vite build",
         "build:backend": "node --import tsx build.ts",
         "make": "node --import tsx build-electron.ts",
-        "update-api": "openapi-typescript http://localhost:31700/docs/json -o ./src/frontend/api.d.ts"
+        "update-api": "openapi-typescript http://localhost:31700/api/docs/json -o ./src/frontend/api.d.ts"
     },
     "dependencies": {
-        "@fastify/cors": "^9.0.1",
-        "@fastify/swagger": "^8.14.0",
-        "@fastify/swagger-ui": "^3.1.0",
-        "@fastify/type-provider-typebox": "^4.0.0",
+        "@elysiajs/cors": "^1.0.2",
+        "@elysiajs/stream": "^1.0.3",
+        "@elysiajs/swagger": "^1.0.5",
         "@huggingface/hub": "^0.15.1",
         "@huggingface/jinja": "^0.2.2",
-        "@sinclair/typebox": "^0.32.33",
+        "@sinclair/typebox": "^0.32.34",
         "better-sqlite3": "^9.6.0",
         "drizzle-orm": "^0.31.2",
         "drizzle-typebox": "^0.1.1",
+        "elysia": "^1.0.25",
         "env-paths": "^3.0.0",
         "eventsource-parser": "^1.1.2",
-        "fastify": "^4.28.0",
         "zod": "^3.23.8"
     },
     "devDependencies": {
@@ -41,6 +40,7 @@
         "@vue/eslint-config-typescript": "^12.0.0",
         "@vue/tsconfig": "^0.5.1",
         "autoprefixer": "^10.4.18",
+        "bun-types": "latest",
         "daisyui": "^4.12.2",
         "drizzle-kit": "^0.22.7",
         "electron": "^30.1.0",
@@ -58,5 +58,8 @@
         "vue": "^3.4.29",
         "vue-router": "^4.3.3",
         "vue-toastification": "^2.0.0-rc.5"
+    },
+    "peerDependencies": {
+        "typescript": "^5.0.0"
     }
 }

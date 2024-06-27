@@ -1,9 +1,7 @@
 import fs from 'node:fs'
 import url from 'node:url'
 import path from 'node:path'
-import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
-import type {FastifyPluginAsync} from 'fastify'
-import {Type as t} from '@sinclair/typebox'
+import {Elysia, t} from 'elysia'
 import {type ChildProcessWithoutNullStreams, spawn} from 'node:child_process'
 import {getConfig, setConfig} from '../config.js'
 
@@ -20,82 +18,85 @@ process.on('exit', () => {
     }
 })
 
-export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/status',
-        method: 'GET',
-        schema: {
+export const llamaServerRoutes = new Elysia()
+
+llamaServerRoutes.get(
+    '/status',
+    async () => {
+        const config = getConfig()
+        return {
+            loaded,
+            currentModel,
+            modelPath: config.modelsPath,
+            autoLoad: config.autoLoad,
+            useGPU: config.useGPU,
+            contextSize: config.contextSize,
+        }
+    },
+    {
+        tags: ['llama-server'],
+        detail: {
             operationId: 'GetLlamaServerStatus',
-            tags: ['llama-server'],
             summary: 'Get status info about the server',
-            response: {
-                200: t.Object({
-                    currentModel: t.String(),
-                    modelPath: t.String(),
-                    autoLoad: t.Boolean(),
-                    loaded: t.Boolean(),
-                    useGPU: t.Boolean(),
-                    contextSize: t.Number(),
-                }),
-            },
         },
-        handler: async () => {
-            const config = getConfig()
-            return {
-                loaded,
-                currentModel,
-                modelPath: config.modelsPath,
-                autoLoad: config.autoLoad,
-                useGPU: config.useGPU,
-                contextSize: config.contextSize,
-            }
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/start-server',
-        method: 'POST',
-        schema: {
-            operationId: 'StartLlamaServer',
-            tags: ['llama-server'],
-            summary: 'Startup the llama server',
-            body: t.Object({
-                modelFile: t.String(),
-                contextSize: t.Number(),
+        response: {
+            200: t.Object({
+                loaded: t.Boolean(),
+                currentModel: t.String(),
+                modelPath: t.String(),
+                autoLoad: t.Boolean(),
                 useGPU: t.Boolean(),
+                contextSize: t.Number(),
             }),
-            response: {
-                200: t.Object({
-                    success: t.Boolean(),
-                }),
-            },
         },
-        handler: async (req) => {
-            const {modelFile, contextSize, useGPU} = req.body
-            await startLlamaServer(modelFile, contextSize, useGPU)
-            return {success: true}
-        },
-    })
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/stop-server',
-        method: 'POST',
-        schema: {
+llamaServerRoutes.post(
+    '/start-server',
+    async ({body}) => {
+        const {modelFile, contextSize, useGPU} = body
+        await startLlamaServer(modelFile, contextSize, useGPU)
+        return {success: true}
+    },
+    {
+        tags: ['llama-server'],
+        detail: {
+            operationId: 'StartLlamaServer',
+            summary: 'Startup the llama server',
+        },
+        body: t.Object({
+            modelFile: t.String(),
+            contextSize: t.Number(),
+            useGPU: t.Boolean(),
+        }),
+        response: {
+            200: t.Object({
+                success: t.Boolean(),
+            }),
+        },
+    },
+)
+
+llamaServerRoutes.post(
+    '/stop-server',
+    async () => {
+        llamaServerProc.on('exit', (code) => {
+            console.log(`Llama Server exited with code ${code}`)
+            loaded = false
+            currentModel = ''
+            return {success: true}
+        })
+        llamaServerProc.kill()
+    },
+    {
+        tags: ['llama-server'],
+        detail: {
             operationId: 'StopLlamaServer',
-            tags: ['llama-server'],
             summary: 'Stop the llama server',
         },
-        handler: async () => {
-            llamaServerProc.on('exit', (code) => {
-                console.log(`Llama Server exited with code ${code}`)
-                loaded = false
-                currentModel = ''
-                return {success: true}
-            })
-            llamaServerProc.kill()
-        },
-    })
-}
+    },
+)
 
 export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
     // Run llama.cpp server

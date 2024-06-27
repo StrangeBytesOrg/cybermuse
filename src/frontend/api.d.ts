@@ -157,142 +157,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/create-message": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Add a message to the chat */
-        post: operations["CreateMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/update-message/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Update an existing message */
-        post: operations["UpdateMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/delete-message/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Delete a Message */
-        post: operations["DeleteMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/generate-message": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Generate a new response message */
-        post: operations["GenerateMessage"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/models": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get all models */
-        get: operations["GetAllModels"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/download-model": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Download a model */
-        post: operations["DownloadModel"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/set-model-path": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Set the model folder */
-        post: operations["SetModelPath"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/set-autoload": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Set auto load */
-        post: operations["SetAutoLoad"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/presets": {
         parameters: {
             query?: never;
@@ -415,6 +279,193 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get status info about the server */
+        get: operations["GetLlamaServerStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/start-server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Startup the llama server */
+        post: operations["StartLlamaServer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/stop-server": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Stop the llama server */
+        post: operations["StopLlamaServer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/create-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a message to the chat */
+        post: operations["CreateMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/update-message/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update an existing message */
+        post: operations["UpdateMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/delete-message/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a Message */
+        post: operations["DeleteMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/generate-message": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Generate a message for the chat */
+        post: operations["GenerateMessage"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/models": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all models */
+        get: operations["GetAllModels"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/download-model": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Download a model */
+        post: operations["DownloadModel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-model-path": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set the model folder */
+        post: operations["SetModelPath"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-autoload": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set auto load */
+        post: operations["SetAutoLoad"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/templates": {
         parameters: {
             query?: never;
@@ -517,69 +568,10 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get status info about the server */
-        get: operations["GetLlamaServerStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/start-server": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Startup the llama server */
-        post: operations["StartLlamaServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/stop-server": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Stop the llama server */
-        post: operations["StopLlamaServer"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: {
-        /** Default Error */
-        err: {
-            statusCode?: number;
-            code?: string;
-            error?: string;
-            message?: string;
-        };
-    };
+    schemas: never;
     responses: never;
     parameters: never;
     requestBodies: never;
@@ -597,7 +589,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -613,15 +604,26 @@ export interface operations {
                             image: string | null;
                         }[];
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        characters: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        }[];
+                    };
+                    "text/plain": {
+                        characters: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        }[];
+                    };
                 };
             };
         };
@@ -637,7 +639,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -653,15 +654,26 @@ export interface operations {
                             image: string | null;
                         };
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        character: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        };
+                    };
+                    "text/plain": {
+                        character: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        };
+                    };
                 };
             };
         };
@@ -683,17 +695,30 @@ export interface operations {
                     firstMessage?: string | null;
                     image?: string | null;
                 };
+                "multipart/form-data": {
+                    id?: number;
+                    name: string;
+                    type: "user" | "character";
+                    description: string;
+                    firstMessage?: string | null;
+                    image?: string | null;
+                };
+                "text/plain": {
+                    id?: number;
+                    name: string;
+                    type: "user" | "character";
+                    description: string;
+                    firstMessage?: string | null;
+                    image?: string | null;
+                };
             };
         };
         responses: {
-            /** @description Default error response */
-            default: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -716,28 +741,30 @@ export interface operations {
                     firstMessage?: string | null;
                     image?: string | null;
                 };
+                "multipart/form-data": {
+                    id?: number;
+                    name: string;
+                    type: "user" | "character";
+                    description: string;
+                    firstMessage?: string | null;
+                    image?: string | null;
+                };
+                "text/plain": {
+                    id?: number;
+                    name: string;
+                    type: "user" | "character";
+                    description: string;
+                    firstMessage?: string | null;
+                    image?: string | null;
+                };
             };
         };
         responses: {
-            /** @description Default Response */
-            200: {
+            204: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        id: number;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -752,21 +779,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description No Content */
             204: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
             };
         };
     };
@@ -779,7 +796,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -805,15 +821,46 @@ export interface operations {
                             }[];
                         }[];
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        chats: {
+                            id: number;
+                            createdAt: string;
+                            updatedAt: string;
+                            characters: {
+                                id: number;
+                                chatId: number;
+                                characterId: number;
+                                character: {
+                                    id: number;
+                                    name: string;
+                                    type: "user" | "character";
+                                    description: string;
+                                    firstMessage: string | null;
+                                    image: string | null;
+                                };
+                            }[];
+                        }[];
+                    };
+                    "text/plain": {
+                        chats: {
+                            id: number;
+                            createdAt: string;
+                            updatedAt: string;
+                            characters: {
+                                id: number;
+                                chatId: number;
+                                characterId: number;
+                                character: {
+                                    id: number;
+                                    name: string;
+                                    type: "user" | "character";
+                                    description: string;
+                                    firstMessage: string | null;
+                                    image: string | null;
+                                };
+                            }[];
+                        }[];
+                    };
                 };
             };
         };
@@ -829,7 +876,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -858,15 +904,52 @@ export interface operations {
                             image: string | null;
                         }[];
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        chat: {
+                            id: number;
+                            createdAt: string;
+                            updatedAt: string;
+                            messages: {
+                                id: number;
+                                chatId: number;
+                                characterId: number;
+                                generated: boolean;
+                                activeIndex: number;
+                                content: string[];
+                            }[];
+                        };
+                        characters: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        }[];
+                    };
+                    "text/plain": {
+                        chat: {
+                            id: number;
+                            createdAt: string;
+                            updatedAt: string;
+                            messages: {
+                                id: number;
+                                chatId: number;
+                                characterId: number;
+                                generated: boolean;
+                                activeIndex: number;
+                                content: string[];
+                            }[];
+                        };
+                        characters: {
+                            id: number;
+                            name: string;
+                            type: "user" | "character";
+                            description: string;
+                            firstMessage: string | null;
+                            image: string | null;
+                        }[];
+                    };
                 };
             };
         };
@@ -883,10 +966,15 @@ export interface operations {
                 "application/json": {
                     characters: number[];
                 };
+                "multipart/form-data": {
+                    characters: number[];
+                };
+                "text/plain": {
+                    characters: number[];
+                };
             };
         };
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -895,15 +983,12 @@ export interface operations {
                     "application/json": {
                         id: number;
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        id: number;
+                    };
+                    "text/plain": {
+                        id: number;
+                    };
                 };
             };
         };
@@ -919,275 +1004,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    CreateMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    chatId: number;
-                    characterId: number;
-                    text: string;
-                    generated: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        messageId: number;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    UpdateMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    text: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    DeleteMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    GenerateMessage: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    chatId: number;
-                    continue: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description data: {text} */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "text/event-stream": string;
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    GetAllModels: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Default Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        models: {
-                            name: string;
-                            size: number;
-                        }[];
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    DownloadModel: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    repoId: string;
-                    path: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Default Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    SetModelPath: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    modelPath: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Default Response */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        message: string;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    SetAutoLoad: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    autoLoad: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1200,7 +1021,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1230,15 +1050,54 @@ export interface operations {
                         }[];
                         activePresetId: number;
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        presets: {
+                            id: number;
+                            name: string;
+                            context: number;
+                            maxTokens: number;
+                            temperature: number;
+                            seed: number;
+                            topK: number | null;
+                            topP: number | null;
+                            minP: number | null;
+                            tfsz: number | null;
+                            typicalP: number | null;
+                            repeatPenalty: number | null;
+                            repeatLastN: number | null;
+                            penalizeNL: boolean | null;
+                            presencePenalty: number | null;
+                            frequencyPenalty: number | null;
+                            mirostat: number | null;
+                            mirostatTau: number | null;
+                            mirostatEta: number | null;
+                        }[];
+                        activePresetId: number;
+                    };
+                    "text/plain": {
+                        presets: {
+                            id: number;
+                            name: string;
+                            context: number;
+                            maxTokens: number;
+                            temperature: number;
+                            seed: number;
+                            topK: number | null;
+                            topP: number | null;
+                            minP: number | null;
+                            tfsz: number | null;
+                            typicalP: number | null;
+                            repeatPenalty: number | null;
+                            repeatLastN: number | null;
+                            penalizeNL: boolean | null;
+                            presencePenalty: number | null;
+                            frequencyPenalty: number | null;
+                            mirostat: number | null;
+                            mirostatTau: number | null;
+                            mirostatEta: number | null;
+                        }[];
+                        activePresetId: number;
+                    };
                 };
             };
         };
@@ -1254,7 +1113,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1283,15 +1141,52 @@ export interface operations {
                             mirostatEta: number | null;
                         };
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        preset: {
+                            id: number;
+                            name: string;
+                            context: number;
+                            maxTokens: number;
+                            temperature: number;
+                            seed: number;
+                            topK: number | null;
+                            topP: number | null;
+                            minP: number | null;
+                            tfsz: number | null;
+                            typicalP: number | null;
+                            repeatPenalty: number | null;
+                            repeatLastN: number | null;
+                            penalizeNL: boolean | null;
+                            presencePenalty: number | null;
+                            frequencyPenalty: number | null;
+                            mirostat: number | null;
+                            mirostatTau: number | null;
+                            mirostatEta: number | null;
+                        };
+                    };
+                    "text/plain": {
+                        preset: {
+                            id: number;
+                            name: string;
+                            context: number;
+                            maxTokens: number;
+                            temperature: number;
+                            seed: number;
+                            topK: number | null;
+                            topP: number | null;
+                            minP: number | null;
+                            tfsz: number | null;
+                            typicalP: number | null;
+                            repeatPenalty: number | null;
+                            repeatLastN: number | null;
+                            penalizeNL: boolean | null;
+                            presencePenalty: number | null;
+                            frequencyPenalty: number | null;
+                            mirostat: number | null;
+                            mirostatTau: number | null;
+                            mirostatEta: number | null;
+                        };
+                    };
                 };
             };
         };
@@ -1326,17 +1221,56 @@ export interface operations {
                     mirostatTau?: number | null;
                     mirostatEta?: number | null;
                 };
+                "multipart/form-data": {
+                    id?: number;
+                    name: string;
+                    context: number;
+                    maxTokens: number;
+                    temperature: number;
+                    seed: number;
+                    topK?: number | null;
+                    topP?: number | null;
+                    minP?: number | null;
+                    tfsz?: number | null;
+                    typicalP?: number | null;
+                    repeatPenalty?: number | null;
+                    repeatLastN?: number | null;
+                    penalizeNL?: boolean | null;
+                    presencePenalty?: number | null;
+                    frequencyPenalty?: number | null;
+                    mirostat?: number | null;
+                    mirostatTau?: number | null;
+                    mirostatEta?: number | null;
+                };
+                "text/plain": {
+                    id?: number;
+                    name: string;
+                    context: number;
+                    maxTokens: number;
+                    temperature: number;
+                    seed: number;
+                    topK?: number | null;
+                    topP?: number | null;
+                    minP?: number | null;
+                    tfsz?: number | null;
+                    typicalP?: number | null;
+                    repeatPenalty?: number | null;
+                    repeatLastN?: number | null;
+                    penalizeNL?: boolean | null;
+                    presencePenalty?: number | null;
+                    frequencyPenalty?: number | null;
+                    mirostat?: number | null;
+                    mirostatTau?: number | null;
+                    mirostatEta?: number | null;
+                };
             };
         };
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1372,17 +1306,56 @@ export interface operations {
                     mirostatTau?: number | null;
                     mirostatEta?: number | null;
                 };
+                "multipart/form-data": {
+                    id?: number;
+                    name: string;
+                    context: number;
+                    maxTokens: number;
+                    temperature: number;
+                    seed: number;
+                    topK?: number | null;
+                    topP?: number | null;
+                    minP?: number | null;
+                    tfsz?: number | null;
+                    typicalP?: number | null;
+                    repeatPenalty?: number | null;
+                    repeatLastN?: number | null;
+                    penalizeNL?: boolean | null;
+                    presencePenalty?: number | null;
+                    frequencyPenalty?: number | null;
+                    mirostat?: number | null;
+                    mirostatTau?: number | null;
+                    mirostatEta?: number | null;
+                };
+                "text/plain": {
+                    id?: number;
+                    name: string;
+                    context: number;
+                    maxTokens: number;
+                    temperature: number;
+                    seed: number;
+                    topK?: number | null;
+                    topP?: number | null;
+                    minP?: number | null;
+                    tfsz?: number | null;
+                    typicalP?: number | null;
+                    repeatPenalty?: number | null;
+                    repeatLastN?: number | null;
+                    penalizeNL?: boolean | null;
+                    presencePenalty?: number | null;
+                    frequencyPenalty?: number | null;
+                    mirostat?: number | null;
+                    mirostatTau?: number | null;
+                    mirostatEta?: number | null;
+                };
             };
         };
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1397,14 +1370,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1419,14 +1389,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1442,26 +1409,400 @@ export interface operations {
                 "application/json": {
                     prompt: string;
                 };
+                "multipart/form-data": {
+                    prompt: string;
+                };
+                "text/plain": {
+                    prompt: string;
+                };
             };
         };
         responses: {
-            /** @description data: {text} */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetLlamaServerStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "text/event-stream": string;
+                    "application/json": {
+                        loaded: boolean;
+                        currentModel: string;
+                        modelPath: string;
+                        autoLoad: boolean;
+                        useGPU: boolean;
+                        contextSize: number;
+                    };
+                    "multipart/form-data": {
+                        loaded: boolean;
+                        currentModel: string;
+                        modelPath: string;
+                        autoLoad: boolean;
+                        useGPU: boolean;
+                        contextSize: number;
+                    };
+                    "text/plain": {
+                        loaded: boolean;
+                        currentModel: string;
+                        modelPath: string;
+                        autoLoad: boolean;
+                        useGPU: boolean;
+                        contextSize: number;
+                    };
                 };
             };
-            /** @description Default error response */
-            default: {
+        };
+    };
+    StartLlamaServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    modelFile: string;
+                    contextSize: number;
+                    useGPU: boolean;
+                };
+                "multipart/form-data": {
+                    modelFile: string;
+                    contextSize: number;
+                    useGPU: boolean;
+                };
+                "text/plain": {
+                    modelFile: string;
+                    contextSize: number;
+                    useGPU: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "application/json": {
+                        success: boolean;
+                    };
+                    "multipart/form-data": {
+                        success: boolean;
+                    };
+                    "text/plain": {
+                        success: boolean;
+                    };
                 };
+            };
+        };
+    };
+    StopLlamaServer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    CreateMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    chatId: number;
+                    characterId: number;
+                    text: string;
+                    generated: boolean;
+                };
+                "multipart/form-data": {
+                    chatId: number;
+                    characterId: number;
+                    text: string;
+                    generated: boolean;
+                };
+                "text/plain": {
+                    chatId: number;
+                    characterId: number;
+                    text: string;
+                    generated: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        messageId: number;
+                    };
+                    "multipart/form-data": {
+                        messageId: number;
+                    };
+                    "text/plain": {
+                        messageId: number;
+                    };
+                };
+            };
+        };
+    };
+    UpdateMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    text: string;
+                };
+                "multipart/form-data": {
+                    text: string;
+                };
+                "text/plain": {
+                    text: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    DeleteMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GenerateMessage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    chatId: number;
+                    continue: boolean;
+                };
+                "multipart/form-data": {
+                    chatId: number;
+                    continue: boolean;
+                };
+                "text/plain": {
+                    chatId: number;
+                    continue: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    GetAllModels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        models: {
+                            name: string;
+                            size: number;
+                        }[];
+                    };
+                    "multipart/form-data": {
+                        models: {
+                            name: string;
+                            size: number;
+                        }[];
+                    };
+                    "text/plain": {
+                        models: {
+                            name: string;
+                            size: number;
+                        }[];
+                    };
+                };
+            };
+        };
+    };
+    DownloadModel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    repoId: string;
+                    path: string;
+                };
+                "multipart/form-data": {
+                    repoId: string;
+                    path: string;
+                };
+                "text/plain": {
+                    repoId: string;
+                    path: string;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                    "multipart/form-data": {
+                        success: boolean;
+                    };
+                    "text/plain": {
+                        success: boolean;
+                    };
+                };
+            };
+        };
+    };
+    SetModelPath: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    modelPath: string;
+                };
+                "multipart/form-data": {
+                    modelPath: string;
+                };
+                "text/plain": {
+                    modelPath: string;
+                };
+            };
+        };
+        responses: {
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        message: string;
+                    };
+                    "multipart/form-data": {
+                        message: string;
+                    };
+                    "text/plain": {
+                        message: string;
+                    };
+                };
+            };
+        };
+    };
+    SetAutoLoad: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    autoLoad: boolean;
+                };
+                "multipart/form-data": {
+                    autoLoad: boolean;
+                };
+                "text/plain": {
+                    autoLoad: boolean;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -1474,7 +1815,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1488,15 +1828,22 @@ export interface operations {
                         }[];
                         activeTemplateId: number;
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        templates: {
+                            id: number;
+                            name: string;
+                            content: string;
+                        }[];
+                        activeTemplateId: number;
+                    };
+                    "text/plain": {
+                        templates: {
+                            id: number;
+                            name: string;
+                            content: string;
+                        }[];
+                        activeTemplateId: number;
+                    };
                 };
             };
         };
@@ -1512,7 +1859,6 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1525,15 +1871,20 @@ export interface operations {
                             content: string;
                         };
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        template: {
+                            id: number;
+                            name: string;
+                            content: string;
+                        };
+                    };
+                    "text/plain": {
+                        template: {
+                            id: number;
+                            name: string;
+                            content: string;
+                        };
+                    };
                 };
             };
         };
@@ -1551,10 +1902,17 @@ export interface operations {
                     name: string;
                     content: string;
                 };
+                "multipart/form-data": {
+                    name: string;
+                    content: string;
+                };
+                "text/plain": {
+                    name: string;
+                    content: string;
+                };
             };
         };
         responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -1563,15 +1921,12 @@ export interface operations {
                     "application/json": {
                         id: number;
                     };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
+                    "multipart/form-data": {
+                        id: number;
+                    };
+                    "text/plain": {
+                        id: number;
+                    };
                 };
             };
         };
@@ -1591,17 +1946,22 @@ export interface operations {
                     name: string;
                     content: string;
                 };
+                "multipart/form-data": {
+                    name: string;
+                    content: string;
+                };
+                "text/plain": {
+                    name: string;
+                    content: string;
+                };
             };
         };
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1616,14 +1976,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default error response */
-            default: {
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };
@@ -1638,109 +1995,11 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    GetLlamaServerStatus: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Default Response */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": {
-                        currentModel: string;
-                        modelPath: string;
-                        autoLoad: boolean;
-                        loaded: boolean;
-                        useGPU: boolean;
-                        contextSize: number;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    StartLlamaServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    modelFile: string;
-                    contextSize: number;
-                    useGPU: boolean;
-                };
-            };
-        };
-        responses: {
-            /** @description Default Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        success: boolean;
-                    };
-                };
-            };
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    StopLlamaServer: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Default error response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/problem+json": components["schemas"]["err"];
-                };
+                content?: never;
             };
         };
     };

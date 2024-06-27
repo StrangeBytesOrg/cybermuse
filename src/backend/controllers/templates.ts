@@ -1,143 +1,147 @@
-import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
-import type {FastifyPluginAsync} from 'fastify'
-import {Type as t} from '@sinclair/typebox'
+import {Elysia, t} from 'elysia'
 import {eq} from 'drizzle-orm'
 import {db, user, promptTemplate, selectPromptTemplateSchema} from '../db.js'
 
-export const templateRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/templates',
-        method: 'GET',
-        schema: {
-            summary: 'Get all prompt templates',
+export const templateRoutes = new Elysia()
+templateRoutes.get(
+    '/templates',
+    async () => {
+        const dbTemplates = await db.query.promptTemplate.findMany()
+        const dbUser = await db.query.user.findFirst({
+            with: {promptTemplate: true},
+        })
+        if (!dbTemplates) {
+            throw new Error('No templates found')
+        }
+        if (!dbUser || !dbUser.promptTemplate) {
+            throw new Error('No user found')
+        }
+        return {templates: dbTemplates, activeTemplateId: dbUser.promptTemplate.id}
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'GetAllPromptTemplates',
-            tags: ['templates'],
-            response: {
-                200: t.Object({
-                    templates: t.Array(selectPromptTemplateSchema),
-                    activeTemplateId: t.Number(),
-                }),
-            },
+            summary: 'Get all prompt templates',
         },
-        handler: async () => {
-            const dbTemplates = await db.query.promptTemplate.findMany()
-            const dbUser = await db.query.user.findFirst({
-                with: {promptTemplate: true},
-            })
-            if (!dbTemplates) {
-                throw new Error('No templates found')
-            }
-            if (!dbUser || !dbUser.promptTemplate) {
-                throw new Error('No user found')
-            }
-            return {templates: dbTemplates, activeTemplateId: dbUser.promptTemplate.id}
+        response: {
+            200: t.Object({
+                templates: t.Array(selectPromptTemplateSchema),
+                activeTemplateId: t.Number(),
+            }),
         },
-    })
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/template/:id',
-        method: 'GET',
-        schema: {
-            summary: 'Get a prompt template',
+templateRoutes.get(
+    '/template/:id',
+    async ({params}) => {
+        const dbTemplate = await db.query.promptTemplate.findFirst({
+            where: eq(promptTemplate.id, Number(params.id)),
+        })
+        if (!dbTemplate) {
+            throw new Error('Template not found')
+        }
+        return {template: dbTemplate}
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'GetPromptTemplateById',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String(),
-            }),
-            response: {
-                200: t.Object({template: selectPromptTemplateSchema}),
-            },
+            summary: 'Get a prompt template',
         },
-        handler: async (req) => {
-            const dbTemplate = await db.query.promptTemplate.findFirst({
-                where: eq(promptTemplate.id, Number(req.params.id)),
-            })
-            if (!dbTemplate) {
-                throw new Error('Template not found')
-            }
-            return {template: dbTemplate}
+        params: t.Object({
+            id: t.String(),
+        }),
+        response: {
+            200: t.Object({template: selectPromptTemplateSchema}),
         },
-    })
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/create-template',
-        method: 'POST',
-        schema: {
-            summary: 'Create a prompt template',
+templateRoutes.post(
+    '/create-template',
+    async ({body}) => {
+        const [newTemplate] = await db
+            .insert(promptTemplate)
+            .values({name: body.name, content: body.content})
+            .returning({id: promptTemplate.id})
+        // TODO throw an error if a template wasn't created
+        return {id: newTemplate.id}
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'CreatePromptTemplate',
-            tags: ['templates'],
-            body: t.Object({
-                name: t.String(),
-                content: t.String(),
-            }),
-            response: {
-                200: t.Object({id: t.Number()}),
-            },
+            summary: 'Create a prompt template',
         },
-        handler: async (req) => {
-            const [newTemplate] = await db
-                .insert(promptTemplate)
-                .values({name: req.body.name, content: req.body.content})
-                .returning({id: promptTemplate.id})
-            return {id: newTemplate.id}
+        body: t.Object({
+            name: t.String(),
+            content: t.String(),
+        }),
+        response: {
+            200: t.Object({id: t.Number()}),
         },
-    })
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/update-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Update a prompt template',
+templateRoutes.post(
+    '/update-template/:id',
+    async ({params, body}) => {
+        await db
+            .update(promptTemplate)
+            .set({name: body.name, content: body.content})
+            .where(eq(promptTemplate.id, Number(params.id)))
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'UpdatePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String(),
-            }),
-            body: t.Object({
-                name: t.String(),
-                content: t.String(),
-            }),
+            summary: 'Update a prompt template',
         },
-        handler: async (req) => {
-            await db
-                .update(promptTemplate)
-                .set({name: req.body.name, content: req.body.content})
-                .where(eq(promptTemplate.id, Number(req.params.id)))
-        },
-    })
+        params: t.Object({
+            id: t.String(),
+        }),
+        body: t.Object({
+            name: t.String(),
+            content: t.String(),
+        }),
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/delete-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Delete a prompt template',
+templateRoutes.post(
+    '/delete-template/:id',
+    async ({params}) => {
+        await db.delete(promptTemplate).where(eq(promptTemplate.id, Number(params.id)))
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'DeletePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String(),
-            }),
+            summary: 'Delete a prompt template',
         },
-        handler: async (req) => {
-            await db.delete(promptTemplate).where(eq(promptTemplate.id, Number(req.params.id)))
-        },
-    })
+        params: t.Object({
+            id: t.String(),
+        }),
+    },
+)
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/set-active-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Set active prompt template',
+templateRoutes.post(
+    '/set-active-template/:id',
+    async ({params}) => {
+        await db
+            .update(user)
+            .set({promptTemplate: Number(params.id)})
+            .where(eq(user.id, 1))
+    },
+    {
+        tags: ['templates'],
+        detail: {
             operationId: 'SetActivePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String(),
-            }),
+            summary: 'Set active prompt template',
         },
-        handler: async (req) => {
-            await db
-                .update(user)
-                .set({promptTemplate: Number(req.params.id)})
-                .where(eq(user.id, 1))
-        },
-    })
-}
+        params: t.Object({
+            id: t.String(),
+        }),
+    },
+)

@@ -1,8 +1,8 @@
 import url from 'node:url'
 import path from 'node:path'
-import {drizzle} from 'drizzle-orm/better-sqlite3'
-import {migrate} from 'drizzle-orm/better-sqlite3/migrator'
-import Database from 'better-sqlite3'
+import {drizzle} from 'drizzle-orm/bun-sqlite'
+import {migrate} from 'drizzle-orm/bun-sqlite/migrator'
+import Database from 'bun:sqlite'
 import envPaths from 'env-paths'
 
 import * as schema from './schema.js'
@@ -19,6 +19,7 @@ const sqlite = new Database(databasePath)
 export const db = drizzle(sqlite, {schema, logger: true})
 
 if (!process.env.DEV) {
+    console.log(`Running migrations from ${path.resolve(esmDirName, '../migrations')}`)
     migrate(db, {migrationsFolder: path.resolve(esmDirName, '../migrations')})
 } else {
     console.log('DEV mode skipping migrations')

@@ -1,4 +1,5 @@
 import {EventSourceParserStream, type ParsedEvent} from 'eventsource-parser/stream'
+import {TextDecoderStream} from './text-decoder-ponyfill.js'
 
 export const convertToAsyncIterable = async function* <T>(stream: ReadableStream<T>): AsyncGenerator<T> {
     const reader = stream.getReader()
