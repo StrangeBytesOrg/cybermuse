@@ -20,14 +20,14 @@ const artifacts = await builder.build({
         ],
         extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
         linux: {
-            target: 'dir', // electron-builder uses 7za which is comically slow on linux
+            artifactName: '${name}-linux-${arch}.${ext}',
+            target: ['dir', 'tar.xz'], // electron-builder uses 7za which is comically slow on linux
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
+            compression: 'store', // Seems like "normal" actually does max and "store" does normal
         },
         win: {
-            target: [
-                // 'zip',
-                'nsis',
-            ],
+            artifactName: '${name}-win-${arch}.${ext}',
+            target: ['nsis'],
             extraResources: [
                 {from: './llamacpp/llama-server.exe', to: 'llamacpp/llama-server.exe'},
                 {from: './llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
@@ -35,6 +35,7 @@ const artifacts = await builder.build({
             ],
         },
         mac: {
+            artifactName: '${name}-mac-${arch}.${ext}',
             target: [
                 {target: 'zip', arch: ['x64']},
                 {target: 'zip', arch: ['arm64']},
@@ -58,5 +59,4 @@ const artifacts = await builder.build({
         // },
     },
 })
-
-console.log(artifacts)
+console.log(`Built artifacts: \n${artifacts.join('\n')}`)
