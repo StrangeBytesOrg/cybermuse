@@ -27,9 +27,13 @@ jobs:
           - name: build-mac
             os: macos-latest
             platform: darwin/amd64
+            vars:
+              llama_cpp_zip: "bin-macos-x64.zip"
           - name: build-windows
             os: windows-latest
             platform: windows/amd64
+            vars:
+              llama_cpp_zip: "bin-win-vulkan-x64.zip"
 
     runs-on: ${{ matrix.build.os }}
     steps:
@@ -55,26 +59,15 @@ jobs:
             acl = private
             no_check_bucket = true
 
-      # Get llama.cpp binaries specific to the platform
       - name: Get llama.cpp server binary
-        if: matrix.build.platform == 'linux/amd64'
-        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-${{matrix.build.vars.llama_cpp_zip}} > llamacpp.zip
-
-      - name: Get llama.cpp server binary
-        if: matrix.build.platform == 'darwin/amd64'
-        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-bin-macos-x64.zip > llamacpp.zip
-
-      - name: Get llama.cpp server binary
-        if: matrix.build.platform == 'windows/amd64'
-        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-bin-win-vulkan-x64.zip > llamacpp.zip
-
-      - name: Extract
-        run: unzip -j llamacpp.zip -d llamacpp/
+        run: |
+          curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-${{matrix.build.vars.llama_cpp_zip}} > llamacpp.zip
+          unzip -j llamacpp.zip -d llamacpp/
 
       - name: Install Node Dependencies
         run: npm ci
 
-      - name: Build Frontend
+      - name: Build Frontend and Backend
         run: npm run build
 
       - name: Build Electron
@@ -100,6 +93,6 @@ jobs:
         if: matrix.build.platform == 'windows/amd64'
         run: |
           cd out
-          Compress-Archive -Path chat-win-x64.zip -DestinationPath chat-win-x64.zip
+          Compress-Archive -Path chat-win-x64.exe -DestinationPath chat-win-x64.zip
           rclone copy chat-win-x64.zip r2:chat-app-releases/latest/
           rclone copyto chat-win-x64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-win-x64.zip
