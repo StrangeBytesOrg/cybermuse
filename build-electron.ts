@@ -33,6 +33,7 @@ const artifacts = await builder.build({
                 {from: './llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
                 {from: './llamacpp/ggml.dll', to: 'llamacpp/ggml.dll'},
             ],
+            publish: null, // Prevent publishing to GitHub
         },
         mac: {
             artifactName: '${name}-mac-${arch}.${ext}',
@@ -41,7 +42,7 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['arm64']},
             ],
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
-            publish: null,
+            publish: null, // Prevent publishing to GitHub
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
         nsis: {

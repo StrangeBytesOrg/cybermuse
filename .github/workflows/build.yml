@@ -22,15 +22,18 @@ jobs:
           - name: build-linux
             os: ubuntu-latest
             target-platform: linux/amd64
-            llama-arch: "bin-ubuntu-x64"
+            include:
+              - llamazip: bin-ubuntu-x64.zip
           - name: build-mac
             os: macos-latest
             target-platform: darwin/amd64
-            llama-arch: "bin-macos-x64"
+            include:
+              - llamazip: bin-macos-x64.zip
           - name: build-windows
             os: windows-latest
             target-platform: windows/amd64
-            llama-arch: "bin-win-vulkan-x64"
+            include:
+              - llamazip: bin-win-vulkan-x64.zip
 
     runs-on: ${{ matrix.build.os }}
     steps:
@@ -59,7 +62,7 @@ jobs:
       # Get llama.cpp binaries specific to the platform
       - name: Get llama.cpp server binary
         if: matrix.build.target-platform == 'linux/amd64'
-        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-${{matrix.llama-arch}}.zip > llamacpp.zip
+        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-${{matrix.llamazip}} > llamacpp.zip
 
       - name: Get llama.cpp server binary
         if: matrix.build.target-platform == 'darwin/amd64'
