@@ -1,11 +1,10 @@
 {
     "cSpell.words": [
+        "cybermuse",
         "daisyui",
         "detokenize",
         "dotenv",
         "huggingface",
-        "huma",
-        "humachi",
         "llamacpp",
         "mirostat",
         "openapi",
