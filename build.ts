@@ -1,6 +1,5 @@
 import esbuild, {BuildOptions} from 'esbuild'
 import path from 'node:path'
-import url from 'node:url'
 import fs from 'node:fs/promises'
 import chokidar from 'chokidar'
 import electron from 'electron'
@@ -9,15 +8,10 @@ import {createServer} from 'vite'
 // import tcpPortUsed from 'tcp-port-used'
 import openapiTs from 'openapi-typescript'
 
-const esmDirName = url.fileURLToPath(new URL('.', import.meta.url))
 const devMode = process.argv.some((argv) => argv === '-d' || argv === '--dev')
 
-const electronPath = electron.toString()
-const sourceDir = path.resolve(esmDirName, 'src', 'backend')
-const distMain = path.resolve(esmDirName, 'dist', 'backend', 'main.js')
-
 // https://esbuild.github.io/api/
-const outputPath = path.resolve(esmDirName, 'dist/backend')
+const outputPath = path.resolve(import.meta.dirname, 'dist/backend')
 const buildOptions: BuildOptions = {
     platform: 'node',
     format: 'esm', // Works best with electron
