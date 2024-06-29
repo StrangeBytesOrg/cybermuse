@@ -9,7 +9,7 @@ on:
 env:
   # Necessary for most environments as build failure can occur due to OOM issues
   NODE_OPTIONS: "--max-old-space-size=4096"
-  LLAMA_CPP_VERSION: "b3158"
+  LLAMA_CPP_VERSION: "b3265"
   APP_VERSION: "v0.${{ github.run_number }}"
   VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 

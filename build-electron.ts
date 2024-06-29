@@ -2,10 +2,12 @@ import builder from 'electron-builder'
 // import path from 'node:path'
 // import {flipFuses, FuseV1Options, FuseVersion} from '@electron/fuses'
 
-const dev = Boolean(process.env.DEV)
+// const dev = Boolean(process.env.DEV)
 
 const artifacts = await builder.build({
+    // targets: builder.createTargets([builder.Platform.WINDOWS]),
     config: {
+        asar: false, // Electron-builder has an issue with folders named "constructor"
         appId: 'chat',
         directories: {
             output: 'out',
@@ -19,14 +21,17 @@ const artifacts = await builder.build({
         extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
         linux: {
             target: 'dir', // electron-builder uses 7za which is comically slow on linux
-            asar: dev === false,
             extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
         },
         win: {
-            target: ['zip'],
+            target: [
+                // 'zip',
+                'nsis',
+            ],
             extraResources: [
                 {from: './llamacpp/llama-server.exe', to: 'llamacpp/llama-server.exe'},
                 {from: './llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
+                {from: './llamacpp/ggml.dll', to: 'llamacpp/ggml.dll'},
             ],
         },
         mac: {
@@ -38,6 +43,10 @@ const artifacts = await builder.build({
             publish: null,
         },
         artifactName: 'chat-${os}-${arch}.${ext}',
+        nsis: {
+            oneClick: false,
+            runAfterFinish: false,
+        },
         // TODO implement fuse flipping correctly for all platforms
         // afterPack: async ({appOutDir, packager}) => {
         //     const {productFilename} = packager.info.appInfo
