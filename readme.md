@@ -6,7 +6,7 @@
 
 ### Manage and run models locally
 
-Chat app uses llama.cpp under the hood, and includes a model manager to directly download compatible models from Huggingface.
+Cybermuse uses llama.cpp under the hood, and includes a model manager to directly download compatible models from Huggingface.
 
 ### Create and Import characters
 
@@ -18,20 +18,16 @@ Group chats utilize the LLM itself to pick which character should respond next i
 
 ### Template based prompt formatting
 
-Chat app uses Go's built in templating language to give you complete control over how to format your prompt. Templates for the most popular models are included out of the box.
+Jinja is used for templating giving you complete control over how the prompt is formatted. Templates for the most popular models are included out of the box.
 
 ## Building Locally
 
-Building locally requires Go, Wails, and NodeJS
+Building locally requires NodeJS
 
-Client Build:
-
-```bash
-wails build
-```
-
-A server only build can be created using go tags:
+Build the frontend, backend, and electron app:
 
 ```bash
-go build -tags server -o build/bin/chat-server
+npm install
+npm run build
+npm run make
 ```
