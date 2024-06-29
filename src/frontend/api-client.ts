@@ -15,12 +15,14 @@ export const client = createClient<paths>({
 })
 
 // Fix for sending empty body
+// TODO remove when these are fixed
 // https://github.com/drwpow/openapi-typescript/issues/1694
+// https://github.com/openapi-ts/openapi-typescript/pull/1702
 client.use({
-    onRequest: (req) => {
-        if (req.body === null) {
-            req.headers.delete('Content-Type')
+    onRequest: ({request}) => {
+        if (request.body === null) {
+            request.headers.delete('Content-Type')
         }
-        return req
+        return request
     },
 })
