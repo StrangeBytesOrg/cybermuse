@@ -22,6 +22,8 @@ jobs:
           - name: build-linux
             os: ubuntu-latest
             platform: linux/amd64
+            vars:
+              llama_cpp_zip: "bin-ubuntu-x64.zip"
           - name: build-mac
             os: macos-latest
             platform: darwin/amd64
@@ -56,7 +58,7 @@ jobs:
       # Get llama.cpp binaries specific to the platform
       - name: Get llama.cpp server binary
         if: matrix.build.platform == 'linux/amd64'
-        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-bin-ubuntu-x64.zip > llamacpp.zip
+        run: curl --silent -L https://github.com/ggerganov/llama.cpp/releases/download/${{env.LLAMA_CPP_VERSION}}/llama-${{env.LLAMA_CPP_VERSION}}-${{matrix.build.vars.llama_cpp_zip}} > llamacpp.zip
 
       - name: Get llama.cpp server binary
         if: matrix.build.platform == 'darwin/amd64'
@@ -79,14 +81,14 @@ jobs:
         run: npm run make
 
       - name: Upload Linux
-        if: matrix.build.target-platform == 'linux/amd64'
+        if: matrix.build.platform == 'linux/amd64'
         run: |
           cd out
           rclone copy chat-linux-x64.tar.xz r2:chat-app-releases/latest/
           rclone copyto chat-linux-x64.tar.xz r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-linux.tar.gz
         
       - name: Upload Mac
-        if: matrix.build.target-platform == 'darwin/amd64'
+        if: matrix.build.platform == 'darwin/amd64'
         run: |
           cd out
           rclone copy chat-mac-x64.zip r2:chat-app-releases/latest/
@@ -95,7 +97,7 @@ jobs:
           rclone copyto chat-mac-arm64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-arm64.zip
 
       - name: Archive and Upload Windows
-        if: matrix.build.target-platform == 'windows/amd64'
+        if: matrix.build.platform == 'windows/amd64'
         run: |
           cd out
           Compress-Archive -Path chat-win-x64.zip -DestinationPath chat-win-x64.zip
