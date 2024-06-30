@@ -97,7 +97,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
 
 export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
     // Run llama.cpp server
-    let serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')
+    let serverBinPath = path.resolve(import.meta.dirname, '../../llamacpp/llama-server')
     if (process.env.DEV) {
         serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')
     }
