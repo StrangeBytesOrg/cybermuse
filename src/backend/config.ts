@@ -3,7 +3,7 @@ import path from 'node:path'
 import {z} from 'zod'
 import envPaths from 'env-paths'
 
-const paths = envPaths('chat', {suffix: ''})
+const paths = envPaths('cybermuse-desktop', {suffix: ''})
 const configPath = path.resolve(paths.config, 'config.json')
 
 const configSchema = z.object({

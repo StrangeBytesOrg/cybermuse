@@ -7,7 +7,7 @@ import envPaths from 'env-paths'
 import * as schema from './schema.js'
 export * from './schema.js'
 
-const paths = envPaths('chat', {suffix: ''})
+const paths = envPaths('cybermuse-desktop', {suffix: ''})
 let databasePath = path.resolve(paths.config, 'app-data.db')
 if (process.env.DEV) {
     databasePath = path.resolve('./dev.db')
