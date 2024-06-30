@@ -6,10 +6,11 @@
         "target": "ESNext",
         "sourceMap": true,
         "baseUrl": ".",
-        "noEmit": true, // Build with script, not tsc
+        "outDir": "../../dist/backend/",
         "esModuleInterop": true,
         "moduleResolution": "NodeNext",
-        "allowSyntheticDefaultImports": true
-        // "noUncheckedIndexedAccess": true // Recommended by OpenAPI ts
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true
+        // "noUncheckedIndexedAccess": true
     }
 }

@@ -10,7 +10,7 @@ const artifacts = await builder.build({
         directories: {
             output: 'out',
         },
-        asar: false, // Electron-builder has an issue with folders named "constructor"
+        // asar: false,
         files: [
             //
             'package.json',

@@ -30,12 +30,12 @@ app.on('ready', () => {
         mode: 'bottom', // 'undocked'
     })
 
-    if (app.isPackaged) {
-        win.loadFile(path.resolve(import.meta.dirname, '../index.html'))
-    } else {
+    if (process.env.DEV) {
         win.webContents.openDevTools({
             mode: 'bottom', // 'undocked'
         })
         win.loadURL('http://localhost:5173')
+    } else {
+        win.loadFile(path.resolve(import.meta.dirname, '../index.html'))
     }
 })
