@@ -26,13 +26,9 @@ app.on('ready', () => {
         return {action: 'deny'} // Prevent the app from opening the URL.
     })
 
-    win.webContents.openDevTools({
-        mode: 'bottom', // 'undocked'
-    })
-
     if (process.env.DEV) {
         win.webContents.openDevTools({
-            mode: 'bottom', // 'undocked'
+            mode: 'bottom',
         })
         win.loadURL('http://localhost:5173')
     } else {
