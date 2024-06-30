@@ -78,16 +78,16 @@ jobs:
         working-directory: out
         run: |
           rclone copy cybermuse-desktop-linux-x64.tar.xz r2:chat-app-releases/latest/
-          rclone copyto cybermuse-desktop-linux-x64.tar.xz r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-linux.tar.xz
+          rclone copy cybermuse-desktop-linux-x64.tar.xz r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-linux.tar.xz
         
       - name: Upload Mac
         if: matrix.build.platform == 'darwin/amd64'
         working-directory: out
         run: |
           rclone copy cybermuse-desktop-mac-x64.zip r2:chat-app-releases/latest/
-          rclone copyto cybermuse-desktop-mac-x64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-x64.zip
+          rclone copy cybermuse-desktop-mac-x64.zip r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-mac-x64.zip
           rclone copy cybermuse-desktop-mac-arm64.zip r2:chat-app-releases/latest/
-          rclone copyto cybermuse-desktop-mac-arm64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-mac-arm64.zip
+          rclone copy cybermuse-desktop-mac-arm64.zip r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-mac-arm64.zip
 
       - name: Archive and Upload Windows
         if: matrix.build.platform == 'windows/amd64'
@@ -95,4 +95,4 @@ jobs:
         run: |
           Compress-Archive -Path cybermuse-desktop-win-x64.exe -DestinationPath cybermuse-desktop-win-x64.zip
           rclone copy cybermuse-desktop-win-x64.zip r2:chat-app-releases/latest/
-          rclone copyto cybermuse-desktop-win-x64.zip r2:chat-app-releases/versions/chat-${{env.APP_VERSION}}-win-x64.zip
+          rclone copy cybermuse-desktop-win-x64.zip r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-win-x64.zip

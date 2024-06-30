@@ -18,7 +18,7 @@ export const fixtureData = async () => {
         await db.insert(character).values({id: 1, name: 'User', description: 'The user.', type: 'user'})
     }
 
-    const existingCharacter = await db.query.character.findFirst({where: eq(character.id, 2)})
+    const existingCharacter = await db.query.character.findFirst({where: eq(character.type, 'character')})
     if (!existingCharacter) {
         await db.insert(character).values({
             name: 'Assistant',
