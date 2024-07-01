@@ -3,13 +3,10 @@ import {sql, relations} from 'drizzle-orm'
 import {createSelectSchema, createInsertSchema} from 'drizzle-typebox'
 import {Type as t} from '@sinclair/typebox'
 
-export const user = sqliteTable('user', {
-    id: integer('id').primaryKey({autoIncrement: true}),
-    generatePreset: integer('generate_preset').references(() => generatePresets.id),
-    promptTemplate: integer('prompt_template').references(() => promptTemplate.id),
-})
-
-export const character = sqliteTable('character', {
+/**
+ * Character
+ */
+export const Character = sqliteTable('character', {
     id: integer('id').primaryKey({autoIncrement: true}),
     name: text('name').notNull(),
     type: text('type', {enum: ['user', 'character']}).notNull(),
@@ -17,10 +14,16 @@ export const character = sqliteTable('character', {
     firstMessage: text('firstMessage'),
     image: text('image'),
 })
-export const selectCharacterSchema = createSelectSchema(character)
-export const insertCharacterSchema = createInsertSchema(character)
+export const characterRelations = relations(Character, ({many}) => ({
+    charactersToChats: many(ChatCharacters),
+}))
+export const selectCharacterSchema = createSelectSchema(Character)
+export const insertCharacterSchema = createInsertSchema(Character)
 
-export const chat = sqliteTable('chat', {
+/**
+ * Chat
+ */
+export const Chat = sqliteTable('chat', {
     id: integer('id').primaryKey({autoIncrement: true}),
     createdAt: text('created')
         .default(sql`(CURRENT_TIMESTAMP)`)
@@ -31,44 +34,85 @@ export const chat = sqliteTable('chat', {
     // characters via relation
     // messages via relation
 })
-export const selectChatSchema = createSelectSchema(chat)
+export const chatRelations = relations(Chat, ({many}) => ({
+    messages: many(Message),
+    characters: many(ChatCharacters),
+}))
+export const selectChatSchema = createSelectSchema(Chat)
 
-export const chatCharacters = sqliteTable('chat_characters', {
+// Chat Characters join table
+export const ChatCharacters = sqliteTable('chat_characters', {
     id: integer('id').primaryKey({autoIncrement: true}),
     chatId: integer('chat_id')
-        .references(() => chat.id, {onDelete: 'cascade'})
+        .references(() => Chat.id, {onDelete: 'cascade'})
         .notNull(),
     characterId: integer('character_id')
-        .references(() => character.id, {onDelete: 'cascade'})
+        .references(() => Character.id, {onDelete: 'cascade'})
         .notNull(),
 })
-export const selectChatCharactersSchema = createSelectSchema(chatCharacters)
+export const charactersToChatsRelations = relations(ChatCharacters, ({one}) => ({
+    chat: one(Chat, {
+        fields: [ChatCharacters.chatId],
+        references: [Chat.id],
+    }),
+    character: one(Character, {
+        fields: [ChatCharacters.characterId],
+        references: [Character.id],
+    }),
+}))
+export const selectChatCharactersSchema = createSelectSchema(ChatCharacters)
 
-export const message = sqliteTable('message', {
+/**
+ * Message
+ */
+export const Message = sqliteTable('message', {
     id: integer('id').primaryKey({autoIncrement: true}),
     chatId: integer('chat_id')
-        .references(() => chat.id, {onDelete: 'cascade'})
+        .references(() => Chat.id, {onDelete: 'cascade'})
         .notNull(),
     characterId: integer('character_id')
-        .references(() => character.id, {onDelete: 'set null'})
+        .references(() => Character.id, {onDelete: 'set null'})
         .notNull(),
     generated: integer('generated', {mode: 'boolean'}).notNull(),
     activeIndex: integer('active_index').notNull(),
     content: text('content', {mode: 'json'}).$type<string[]>().notNull(),
 })
-export const selectMessageSchema = createSelectSchema(message, {
+export const messageRelations = relations(Message, ({one}) => ({
+    chat: one(Chat, {fields: [Message.chatId], references: [Chat.id]}),
+    character: one(Character, {fields: [Message.characterId], references: [Character.id]}),
+}))
+export const selectMessageSchema = createSelectSchema(Message, {
     content: t.Array(t.String()),
 })
-export const insertMessageSchema = createInsertSchema(message)
+export const insertMessageSchema = createInsertSchema(Message)
 
-export const promptTemplate = sqliteTable('prompt_template', {
+/**
+ * User
+ */
+export const User = sqliteTable('user', {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    generatePreset: integer('generate_preset').references(() => GeneratePreset.id),
+    promptTemplate: integer('prompt_template').references(() => PromptTemplate.id),
+})
+export const userSettings = relations(User, ({one}) => ({
+    promptTemplate: one(PromptTemplate, {fields: [User.promptTemplate], references: [PromptTemplate.id]}),
+    generatePreset: one(GeneratePreset, {fields: [User.generatePreset], references: [GeneratePreset.id]}),
+}))
+
+/**
+ * Prompt Template
+ */
+export const PromptTemplate = sqliteTable('prompt_template', {
     id: integer('id').primaryKey(),
     name: text('name').notNull(),
     content: text('instruction').notNull(),
 })
-export const selectPromptTemplateSchema = createSelectSchema(promptTemplate)
+export const selectPromptTemplateSchema = createSelectSchema(PromptTemplate)
 
-export const generatePresets = sqliteTable('generate_presets', {
+/**
+ * Generate Presets
+ */
+export const GeneratePreset = sqliteTable('generate_preset', {
     // Internal
     id: integer('id').primaryKey(),
     name: text('name').notNull(),
@@ -91,38 +135,5 @@ export const generatePresets = sqliteTable('generate_presets', {
     mirostatTau: real('mirostat_tau'),
     mirostatEta: real('mirostat_eta'),
 })
-export const selectPresetSchema = createSelectSchema(generatePresets)
-export const insertPresetSchema = createInsertSchema(generatePresets)
-
-/**
- * Relations
- */
-export const chatRelations = relations(chat, ({many}) => ({
-    messages: many(message),
-    characters: many(chatCharacters),
-}))
-
-export const characterRelations = relations(character, ({many}) => ({
-    charactersToChats: many(chatCharacters),
-}))
-
-export const messageRelations = relations(message, ({one}) => ({
-    chat: one(chat, {fields: [message.chatId], references: [chat.id]}),
-    character: one(character, {fields: [message.characterId], references: [character.id]}),
-}))
-
-export const charactersToChatsRelations = relations(chatCharacters, ({one}) => ({
-    chat: one(chat, {
-        fields: [chatCharacters.chatId],
-        references: [chat.id],
-    }),
-    character: one(character, {
-        fields: [chatCharacters.characterId],
-        references: [character.id],
-    }),
-}))
-
-export const userSettings = relations(user, ({one}) => ({
-    promptTemplate: one(promptTemplate, {fields: [user.promptTemplate], references: [promptTemplate.id]}),
-    generatePreset: one(generatePresets, {fields: [user.generatePreset], references: [generatePresets.id]}),
-}))
+export const selectPresetSchema = createSelectSchema(GeneratePreset)
+export const insertPresetSchema = createInsertSchema(GeneratePreset)

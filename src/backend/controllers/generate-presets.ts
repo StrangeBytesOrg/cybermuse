@@ -2,7 +2,7 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
-import {db, generatePresets, selectPresetSchema, insertPresetSchema, user} from '../db.js'
+import {db, GeneratePreset, selectPresetSchema, insertPresetSchema, User} from '../db.js'
 
 export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -20,18 +20,18 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            const dbPresets = await db.query.generatePresets.findMany()
-            const dbUser = await db.query.user.findFirst({
+            const presets = await db.query.GeneratePreset.findMany()
+            const user = await db.query.User.findFirst({
                 with: {generatePreset: true},
             })
-            if (!dbPresets) {
+            if (!presets) {
                 throw new Error('No presets found')
             }
-            if (!dbUser || !dbUser.generatePreset) {
+            if (!user || !user.generatePreset) {
                 throw new Error('No user found')
             }
 
-            return {presets: dbPresets, activePresetId: dbUser.generatePreset.id}
+            return {presets, activePresetId: user.generatePreset.id}
         },
     })
 
@@ -50,13 +50,13 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const dbPreset = await db.query.generatePresets.findFirst({
-                where: eq(generatePresets.id, Number(req.params.id)),
+            const preset = await db.query.GeneratePreset.findFirst({
+                where: eq(GeneratePreset.id, Number(req.params.id)),
             })
-            if (!dbPreset) {
+            if (!preset) {
                 throw new Error('Preset not found')
             }
-            return {preset: dbPreset}
+            return {preset}
         },
     })
 
@@ -71,7 +71,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             try {
-                await db.insert(generatePresets).values({
+                await db.insert(GeneratePreset).values({
                     name: req.body.name,
                     context: req.body.context,
                     maxTokens: req.body.maxTokens,
@@ -113,7 +113,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         handler: async (req) => {
             try {
                 await db
-                    .update(generatePresets)
+                    .update(GeneratePreset)
                     .set({
                         name: req.body.name,
                         context: req.body.context,
@@ -134,7 +134,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                         mirostatTau: req.body.mirostatTau,
                         mirostatEta: req.body.mirostatEta,
                     })
-                    .where(eq(generatePresets.id, Number(req.params.id)))
+                    .where(eq(GeneratePreset.id, Number(req.params.id)))
             } catch (err) {
                 console.error(err)
                 throw new Error('Failed to update generate preset')
@@ -155,7 +155,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             try {
-                await db.delete(generatePresets).where(eq(generatePresets.id, Number(req.params.id)))
+                await db.delete(GeneratePreset).where(eq(GeneratePreset.id, Number(req.params.id)))
             } catch (err) {
                 if (err instanceof Error && err.message === 'FOREIGN KEY constraint failed') {
                     throw new Error('Cannot delete set preset')
@@ -177,9 +177,9 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             await db
-                .update(user)
+                .update(User)
                 .set({generatePreset: Number(req.params.id)})
-                .where(eq(user.id, 1))
+                .where(eq(User.id, 1))
         },
     })
 }

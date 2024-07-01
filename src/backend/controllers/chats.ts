@@ -4,10 +4,10 @@ import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {
     db,
-    chat,
-    chatCharacters,
-    character,
-    message,
+    Chat,
+    ChatCharacters,
+    Character,
+    Message,
     selectChatSchema,
     selectMessageSchema,
     selectCharacterSchema,
@@ -39,7 +39,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            const chats = await db.query.chat.findMany({
+            const chats = await db.query.Chat.findMany({
                 with: {characters: {with: {character: true}}},
             })
             if (!chats) {
@@ -70,23 +70,23 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const dbChat = await db.query.chat.findFirst({
-                where: eq(chat.id, Number(req.params.id)),
+            const chat = await db.query.Chat.findFirst({
+                where: eq(Chat.id, Number(req.params.id)),
                 with: {
                     messages: true,
                     characters: {with: {character: true}},
                 },
             })
-            const dbCharacters = dbChat?.characters.map((c) => {
+            const characters = chat?.characters.map((c) => {
                 return c.character
             })
 
-            if (!dbCharacters) {
+            if (!characters) {
                 throw new Error('No characters found')
             }
 
-            if (dbChat) {
-                return {chat: dbChat, characters: dbCharacters}
+            if (chat) {
+                return {chat, characters}
             } else {
                 throw new Error('Chat not found')
             }
@@ -115,25 +115,25 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                 throw new Error('At least one character is required')
             }
 
-            const [newChat] = await db.insert(chat).values({}).returning({id: chat.id})
+            const [newChat] = await db.insert(Chat).values({}).returning({id: Chat.id})
 
             // Add chat characters
             // TODO change to a multi insert
             for (let i = 0; i < characters.length; i += 1) {
                 const characterId = characters[i]
                 console.log('inserting', characterId)
-                await db.insert(chatCharacters).values({
+                await db.insert(ChatCharacters).values({
                     chatId: newChat.id,
                     characterId,
                 })
 
                 // If characters have a first message, add it
-                const resCharacter = await db.query.character.findFirst({
-                    where: eq(character.id, characterId),
+                const resCharacter = await db.query.Character.findFirst({
+                    where: eq(Character.id, characterId),
                 })
                 if (resCharacter?.firstMessage) {
                     await db
-                        .insert(message)
+                        .insert(Message)
                         .values({
                             chatId: newChat.id,
                             characterId,
@@ -141,7 +141,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                             activeIndex: 0,
                             content: [resCharacter.firstMessage],
                         })
-                        .returning({id: message.id})
+                        .returning({id: Message.id})
                 }
             }
 
@@ -159,7 +159,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             params: t.Object({id: t.String()}),
         },
         handler: async (req) => {
-            await db.delete(chat).where(eq(chat.id, Number(req.params.id)))
+            await db.delete(Chat).where(eq(Chat.id, Number(req.params.id)))
         },
     })
 }

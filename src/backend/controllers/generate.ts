@@ -4,7 +4,7 @@ import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 // import {Template} from '@huggingface/jinja'
 import {responseToIterable} from '../lib/sse.js'
-import {db, user} from '../db.js'
+import {db, User} from '../db.js'
 
 const llamaCppBaseUrl = 'http://localhost:8080'
 
@@ -39,8 +39,8 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
             reply.raw.setHeader('Connection', 'keep-alive')
             reply.raw.setHeader('Access-Control-Allow-Origin', '*')
 
-            const userSettings = await db.query.user.findFirst({
-                where: eq(user.id, 1),
+            const userSettings = await db.query.User.findFirst({
+                where: eq(User.id, 1),
                 with: {generatePreset: true},
             })
             const generatePreset = userSettings?.generatePreset

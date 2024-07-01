@@ -21,7 +21,7 @@ CREATE TABLE `chat_characters` (
 	FOREIGN KEY (`character_id`) REFERENCES `character`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `generate_presets` (
+CREATE TABLE `generate_preset` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
 	`context` integer NOT NULL,
@@ -64,6 +64,6 @@ CREATE TABLE `user` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`generate_preset` integer,
 	`prompt_template` integer,
-	FOREIGN KEY (`generate_preset`) REFERENCES `generate_presets`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`generate_preset`) REFERENCES `generate_preset`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`prompt_template`) REFERENCES `prompt_template`(`id`) ON UPDATE no action ON DELETE no action
 );

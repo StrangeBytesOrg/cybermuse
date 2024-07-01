@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "f624de51-b609-4641-ba01-32b950947d50",
+  "id": "cb85e91b-975d-4b70-8be6-7c13d02b4879",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -144,8 +144,8 @@
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
-    "generate_presets": {
-      "name": "generate_presets",
+    "generate_preset": {
+      "name": "generate_preset",
       "columns": {
         "id": {
           "name": "id",
@@ -421,10 +421,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "user_generate_preset_generate_presets_id_fk": {
-          "name": "user_generate_preset_generate_presets_id_fk",
+        "user_generate_preset_generate_preset_id_fk": {
+          "name": "user_generate_preset_generate_preset_id_fk",
           "tableFrom": "user",
-          "tableTo": "generate_presets",
+          "tableTo": "generate_preset",
           "columnsFrom": [
             "generate_preset"
           ],

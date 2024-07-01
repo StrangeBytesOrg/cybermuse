@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, character, selectCharacterSchema, insertCharacterSchema} from '../db.js'
+import {db, Character, selectCharacterSchema, insertCharacterSchema} from '../db.js'
 
 export const characterRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -20,7 +20,7 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            const characters = await db.select().from(character)
+            const characters = await db.select().from(Character)
             characters.forEach((character) => {
                 const descriptionTemplate = new Template(character.description)
                 character.description = descriptionTemplate.render({char: character.name})
@@ -46,11 +46,11 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const resCharacter = await db.query.character.findFirst({where: eq(character.id, Number(req.params.id))})
-            if (!resCharacter) {
+            const character = await db.query.Character.findFirst({where: eq(Character.id, Number(req.params.id))})
+            if (!character) {
                 throw new Error('Character not found')
             }
-            return {character: resCharacter}
+            return {character: character}
         },
     })
 
@@ -64,7 +64,7 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             body: insertCharacterSchema,
         },
         handler: async (req) => {
-            await db.insert(character).values({
+            await db.insert(Character).values({
                 name: req.body.name,
                 type: req.body.type,
                 description: req.body.description,
@@ -96,7 +96,7 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             await db
-                .update(character)
+                .update(Character)
                 .set({
                     name: req.body.name,
                     type: req.body.type,
@@ -104,7 +104,7 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
                     firstMessage: req.body.firstMessage,
                     image: req.body.image,
                 })
-                .where(eq(character.id, Number(req.params.id)))
+                .where(eq(Character.id, Number(req.params.id)))
         },
     })
 
@@ -126,7 +126,7 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             if (req.params.id === '1') {
                 throw new Error('Not allowed to delete the user character.')
             }
-            await db.delete(character).where(eq(character.id, Number(req.params.id)))
+            await db.delete(Character).where(eq(Character.id, Number(req.params.id)))
         },
     })
 }

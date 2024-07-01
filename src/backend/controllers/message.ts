@@ -3,7 +3,7 @@ import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import {db, message, chat, user} from '../db.js'
+import {db, Message, Chat, User} from '../db.js'
 import {responseToIterable} from '../lib/sse.js'
 
 const llamaCppBaseUrl = 'http://localhost:8080'
@@ -32,9 +32,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             const {chatId, characterId, generated, text} = request.body
             try {
                 const [newMessage] = await db
-                    .insert(message)
+                    .insert(Message)
                     .values({chatId, characterId, generated, activeIndex: 0, content: [text]})
-                    .returning({id: message.id})
+                    .returning({id: Message.id})
 
                 return {messageId: newMessage.id}
             } catch (err) {
@@ -58,18 +58,18 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             }),
         },
         handler: async (req) => {
-            const dbMessage = await db.query.message.findFirst({
-                where: eq(message.id, Number(req.params.id)),
+            const message = await db.query.Message.findFirst({
+                where: eq(Message.id, Number(req.params.id)),
             })
-            if (!dbMessage) {
+            if (!message) {
                 throw new Error('Message not found')
             }
-            const content = dbMessage.content
-            content[dbMessage.activeIndex] = req.body.text
+            const content = message.content
+            content[message.activeIndex] = req.body.text
             await db
-                .update(message)
+                .update(Message)
                 .set({content})
-                .where(eq(message.id, Number(req.params.id)))
+                .where(eq(Message.id, Number(req.params.id)))
         },
     })
 
@@ -83,7 +83,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             params: t.Object({id: t.String()}),
         },
         handler: async (req) => {
-            await db.delete(message).where(eq(message.id, Number(req.params.id)))
+            await db.delete(Message).where(eq(Message.id, Number(req.params.id)))
         },
     })
 
@@ -118,8 +118,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 controller.abort()
             })
 
-            const existingChat = await db.query.chat.findFirst({
-                where: eq(chat.id, chatId),
+            const existingChat = await db.query.Chat.findFirst({
+                where: eq(Chat.id, chatId),
                 with: {
                     characters: {with: {character: true}},
                     messages: true,
@@ -137,8 +137,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             )
             console.log('Picked Character:', pickedCharacter)
 
-            const userSettings = await db.query.user.findFirst({
-                where: eq(user.id, 1),
+            const userSettings = await db.query.User.findFirst({
+                where: eq(User.id, 1),
                 with: {promptTemplate: true, generatePreset: true},
             })
             if (!userSettings) {
@@ -248,9 +248,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                     const data = JSON.parse(chunk.data)
                     bufferedResponse += data.content
                     await db
-                        .update(message)
+                        .update(Message)
                         .set({content: [bufferedResponse]})
-                        .where(eq(message.id, lastMessage.id))
+                        .where(eq(Message.id, lastMessage.id))
                     reply.raw.write(`event:text\ndata: ${JSON.stringify({text: data.content})}\n\n`)
                 }
 

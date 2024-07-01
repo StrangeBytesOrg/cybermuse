@@ -2,7 +2,7 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
-import {db, user, promptTemplate, selectPromptTemplateSchema} from '../db.js'
+import {db, User, PromptTemplate, selectPromptTemplateSchema} from '../db.js'
 
 export const templateRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -20,17 +20,17 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            const dbTemplates = await db.query.promptTemplate.findMany()
-            const dbUser = await db.query.user.findFirst({
+            const templates = await db.query.PromptTemplate.findMany()
+            const user = await db.query.User.findFirst({
                 with: {promptTemplate: true},
             })
-            if (!dbTemplates) {
+            if (!templates) {
                 throw new Error('No templates found')
             }
-            if (!dbUser || !dbUser.promptTemplate) {
+            if (!user || !user.promptTemplate) {
                 throw new Error('No user found')
             }
-            return {templates: dbTemplates, activeTemplateId: dbUser.promptTemplate.id}
+            return {templates, activeTemplateId: user.promptTemplate.id}
         },
     })
 
@@ -49,13 +49,13 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const dbTemplate = await db.query.promptTemplate.findFirst({
-                where: eq(promptTemplate.id, Number(req.params.id)),
+            const template = await db.query.PromptTemplate.findFirst({
+                where: eq(PromptTemplate.id, Number(req.params.id)),
             })
-            if (!dbTemplate) {
+            if (!template) {
                 throw new Error('Template not found')
             }
-            return {template: dbTemplate}
+            return {template}
         },
     })
 
@@ -76,9 +76,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             const [newTemplate] = await db
-                .insert(promptTemplate)
+                .insert(PromptTemplate)
                 .values({name: req.body.name, content: req.body.content})
-                .returning({id: promptTemplate.id})
+                .returning({id: PromptTemplate.id})
             return {id: newTemplate.id}
         },
     })
@@ -100,9 +100,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             await db
-                .update(promptTemplate)
+                .update(PromptTemplate)
                 .set({name: req.body.name, content: req.body.content})
-                .where(eq(promptTemplate.id, Number(req.params.id)))
+                .where(eq(PromptTemplate.id, Number(req.params.id)))
         },
     })
 
@@ -118,7 +118,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             }),
         },
         handler: async (req) => {
-            await db.delete(promptTemplate).where(eq(promptTemplate.id, Number(req.params.id)))
+            await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(req.params.id)))
         },
     })
 
@@ -135,9 +135,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             await db
-                .update(user)
+                .update(User)
                 .set({promptTemplate: Number(req.params.id)})
-                .where(eq(user.id, 1))
+                .where(eq(User.id, 1))
         },
     })
 }
