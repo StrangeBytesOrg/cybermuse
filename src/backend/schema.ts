@@ -110,7 +110,7 @@ export const PromptTemplate = sqliteTable('prompt_template', {
 export const selectPromptTemplateSchema = createSelectSchema(PromptTemplate)
 
 /**
- * Generate Presets
+ * Generate Preset
  */
 export const GeneratePreset = sqliteTable('generate_preset', {
     // Internal

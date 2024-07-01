@@ -1,22 +1,22 @@
 import {createRouter, createWebHashHistory} from 'vue-router'
 
 import Index from './pages/index.vue'
-import CreateCharacter from './pages/create-character.vue'
-import Characters from './pages/characters.vue'
-import CreateChat from './pages/create-chat.vue'
-import Chats from './pages/chats.vue'
 import Character from './pages/character.vue'
+import Characters from './pages/characters.vue'
+import CreateCharacter from './pages/character-create.vue'
 import Chat from './pages/chat.vue'
-import ThemeSettings from './pages/theme-settings.vue'
-import Templates from './pages/templates.vue'
+import Chats from './pages/chats.vue'
+import CreateChat from './pages/chat-create.vue'
 import Template from './pages/template.vue'
-import CreateTemplate from './pages/create-template.vue'
-import Presets from './pages/presets.vue'
+import Templates from './pages/templates.vue'
+import CreateTemplate from './pages/template-create.vue'
 import Preset from './pages/preset.vue'
+import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
 import DownloadModels from './pages/download-models.vue'
 import Instruct from './pages/instruct.vue'
+import ThemeSettings from './pages/theme-settings.vue'
 
 export default createRouter({
     history: createWebHashHistory(),
@@ -25,11 +25,6 @@ export default createRouter({
             path: '/',
             name: 'index',
             component: Index,
-        },
-        {
-            path: '/create-character',
-            name: 'create-character',
-            component: CreateCharacter,
         },
         {
             path: '/characters',
@@ -42,9 +37,9 @@ export default createRouter({
             component: Character,
         },
         {
-            path: '/create-chat',
-            name: 'create-chat',
-            component: CreateChat,
+            path: '/create-character',
+            name: 'create-character',
+            component: CreateCharacter,
         },
         {
             path: '/chats',
@@ -57,19 +52,9 @@ export default createRouter({
             component: Chat,
         },
         {
-            path: '/instruct',
-            name: 'instruct',
-            component: Instruct,
-        },
-        {
-            path: '/theme-settings',
-            name: 'settings',
-            component: ThemeSettings,
-        },
-        {
-            path: '/create-template',
-            name: 'create-template',
-            component: CreateTemplate,
+            path: '/create-chat',
+            name: 'create-chat',
+            component: CreateChat,
         },
         {
             path: '/templates',
@@ -80,6 +65,11 @@ export default createRouter({
             path: '/template/:id',
             name: 'template',
             component: Template,
+        },
+        {
+            path: '/create-template',
+            name: 'create-template',
+            component: CreateTemplate,
         },
         {
             path: '/presets',
@@ -105,6 +95,16 @@ export default createRouter({
             path: '/download-models',
             name: 'download-models',
             component: DownloadModels,
+        },
+        {
+            path: '/instruct',
+            name: 'instruct',
+            component: Instruct,
+        },
+        {
+            path: '/theme-settings',
+            name: 'settings',
+            component: ThemeSettings,
         },
     ],
 })
