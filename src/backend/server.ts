@@ -9,6 +9,7 @@ import {getConfig} from './config.js'
 import {characterRoutes} from './controllers/character.js'
 import {chatRoutes} from './controllers/chats.js'
 import {messageRoutes} from './controllers/message.js'
+import {swipeRoutes} from './controllers/swipes.js'
 import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
@@ -114,6 +115,7 @@ server.addHook('onRoute', (routeOptions) => {
 await server.register(characterRoutes, {prefix: '/api'})
 await server.register(chatRoutes, {prefix: '/api'})
 await server.register(messageRoutes, {prefix: '/api'})
+await server.register(swipeRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
 await server.register(generateRoutes, {prefix: '/api'})

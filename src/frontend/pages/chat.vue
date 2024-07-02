@@ -108,7 +108,7 @@ const createMessage = async (characterId: number, text: string = '', generated: 
     })
 
     if (error) {
-        toast.error(error.detail || 'Failed sending message')
+        toast.error(error.message || 'Failed sending message')
         return
     }
 
@@ -229,7 +229,7 @@ const updateMessage = async (message: Message) => {
         },
     })
     if (error) {
-        toast.error(error.detail || 'Failed updating message')
+        toast.error(error.message || 'Failed updating message')
     } else {
         editModeId.value = 0
     }
@@ -241,7 +241,7 @@ const deleteMessage = async (messageId: number) => {
     })
 
     if (error) {
-        toast.error(error.detail || 'Failed deleting message')
+        toast.error(error.message || 'Failed deleting message')
         return
     }
 
@@ -252,11 +252,11 @@ const deleteMessage = async (messageId: number) => {
 }
 
 const newSwipe = async (message: Message) => {
-    const {error} = await client.POST('/new-swipe/{messageId}', {
-        params: {path: {messageId: message.id}},
+    const {error} = await client.POST('/new-swipe', {
+        body: {messageId: message.id},
     })
     if (error) {
-        toast.error(error.detail || 'Failed generating alt')
+        toast.error(error.message || 'Failed generating alt')
     } else {
         if (message) {
             message.content.push('')
@@ -268,22 +268,28 @@ const newSwipe = async (message: Message) => {
 }
 
 const swipeLeft = async (message: Message) => {
-    const {error} = await client.POST('/swipe-left/{messageId}', {
-        params: {path: {messageId: message.id}},
+    const {error} = await client.POST('/set-swipe-index', {
+        body: {
+            messageId: message.id,
+            activeIndex: message.activeIndex - 1,
+        },
     })
     if (error) {
-        toast.error(error.detail || 'Failed swiping left')
+        toast.error(error.message || 'Failed swiping left')
     } else {
         message.activeIndex -= 1
     }
 }
 
 const swipeRight = async (message: Message) => {
-    const {error} = await client.POST('/swipe-right/{messageId}', {
-        params: {path: {messageId: message.id}},
+    const {error} = await client.POST('/set-swipe-index', {
+        body: {
+            messageId: message.id,
+            activeIndex: message.activeIndex + 1,
+        },
     })
     if (error) {
-        toast.error(error.detail || 'Failed swiping right')
+        toast.error(error.message || 'Failed swiping right')
     } else {
         message.activeIndex += 1
     }

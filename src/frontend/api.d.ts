@@ -225,6 +225,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/new-swipe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add a new swipe to the message */
+        post: operations["NewSwipe"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/set-swipe-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set a message's active swipe index */
+        post: operations["SetSwipeIndex"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/models": {
         parameters: {
             query?: never;
@@ -1045,6 +1079,59 @@ export interface operations {
                     "text/event-stream": string;
                 };
             };
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    NewSwipe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    messageId: number;
+                };
+            };
+        };
+        responses: {
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    SetSwipeIndex: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    messageId: number;
+                    activeIndex: number;
+                };
+            };
+        };
+        responses: {
             /** @description Default error response */
             default: {
                 headers: {

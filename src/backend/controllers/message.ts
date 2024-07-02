@@ -247,10 +247,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 for await (const chunk of responseIterable) {
                     const data = JSON.parse(chunk.data)
                     bufferedResponse += data.content
-                    await db
-                        .update(Message)
-                        .set({content: [bufferedResponse]})
-                        .where(eq(Message.id, lastMessage.id))
+                    lastMessage.content[lastMessage.activeIndex] = bufferedResponse
+                    await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
                     reply.raw.write(`event:text\ndata: ${JSON.stringify({text: data.content})}\n\n`)
                 }
 
