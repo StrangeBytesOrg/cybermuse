@@ -86,9 +86,6 @@ export const characterRoutes: FastifyPluginAsync = async (fastify) => {
             }),
             body: insertCharacterSchema,
             response: {
-                // 400: t.Object({
-                //     message: t.String(),
-                // }),
                 200: t.Object({
                     id: t.Number(),
                 }),

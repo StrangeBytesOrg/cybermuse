@@ -3,6 +3,7 @@ import cors from '@fastify/cors'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
+import {logger} from './logging.js'
 import {getConfig} from './config.js'
 
 // Routes
@@ -19,11 +20,6 @@ import {llamaServerRoutes, startLlamaServer} from './controllers/llama-server.js
 // Fixture DB data
 import {fixtureData} from './fixture.js'
 await fixtureData()
-
-// const outLogFile = fs.createWriteStream('./out.log', {flags: 'a'})
-// const errLogFile = fs.createWriteStream('./err.log', {flags: 'a'})
-// process.stdout.write = outLogFile.write.bind(outLogFile)
-// process.stderr.write = errLogFile.write.bind(errLogFile)
 
 const config = getConfig()
 
@@ -97,18 +93,18 @@ server.addSchema({
 
 // Add default error response to all routes
 server.addHook('onRoute', (routeOptions) => {
+    const defaultSchema = {
+        description: 'Default error response',
+        content: {'application/problem+json': {schema: {$ref: 'err#'}}},
+    }
     if (!routeOptions.schema) {
         routeOptions.schema = {}
     }
     if (!routeOptions.schema.response) {
-        routeOptions.schema.response = {}
+        routeOptions.schema.response = {default: defaultSchema}
     }
-    if (!routeOptions.schema.response.default) {
-        routeOptions.schema.response.default = {
-            description: 'Default error response',
-            content: {'application/problem+json': {schema: {$ref: 'err#'}}},
-        }
-    }
+    // @ts-expect-error - Hack because I'm pretty sure that the Fastify type is intentionally overly vague
+    if (!routeOptions.schema.response.default) routeOptions.schema.response.default = defaultSchema
 })
 
 // Register controller routes
@@ -124,9 +120,9 @@ await server.register(llamaServerRoutes, {prefix: '/api'})
 
 server.listen({port: config.serverPort}, (error) => {
     if (error) {
-        console.error(error)
+        logger.error(error)
     }
-    console.log(`Server running on port ${config.serverPort}`)
+    logger.info(`Server running on port ${config.serverPort}`)
 })
 
 process.on('SIGINT', () => {

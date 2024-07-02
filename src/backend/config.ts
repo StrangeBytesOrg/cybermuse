@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {z} from 'zod'
 import envPaths from 'env-paths'
+import {logger} from './logging.js'
 
 const paths = envPaths('cybermuse-desktop', {suffix: ''})
 const configPath = path.resolve(paths.config, 'config.json')
@@ -18,13 +19,13 @@ type Config = z.infer<typeof configSchema>
 
 // Create the app data directory if it doesn't exist
 if (!fs.existsSync(paths.config)) {
-    console.log(`Creating config directory at ${paths.config}`)
+    logger.info(`Creating config directory at ${paths.config}`)
     fs.mkdirSync(paths.config, {recursive: true})
 }
 // Make the models folder if it doesn't exist
 const modelPath = path.resolve(paths.config, 'models')
 if (!fs.existsSync(modelPath)) {
-    console.log(`Creating models directory at ${modelPath}`)
+    logger.info(`Creating models directory at ${modelPath}`)
     fs.mkdirSync(modelPath)
 }
 
@@ -34,7 +35,7 @@ export const getConfig = () => {
         const parsedConfig = configSchema.parse(config)
         return parsedConfig
     } catch {
-        console.log('No config file found, using defaults')
+        logger.info('No config file found, using defaults')
         return configSchema.parse({})
     }
 }

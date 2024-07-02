@@ -1,5 +1,6 @@
 import path from 'node:path'
 import {app, shell, BrowserWindow} from 'electron'
+import './logging.js'
 import './server.js'
 
 // import sourcemapSupport from 'source-map-support'

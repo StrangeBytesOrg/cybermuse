@@ -6,6 +6,7 @@
         "target": "ESNext",
         "sourceMap": true,
         "baseUrl": ".",
+        "noEmit": true,
         "outDir": "../../dist/backend/",
         "esModuleInterop": true,
         "moduleResolution": "NodeNext",
