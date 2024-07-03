@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "cb85e91b-975d-4b70-8be6-7c13d02b4879",
+  "id": "6db57d43-fba0-4b62-8c73-04e200d7a4a7",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -408,14 +408,14 @@
           "name": "generate_preset",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         },
         "prompt_template": {
           "name": "prompt_template",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false,
+          "notNull": true,
           "autoincrement": false
         }
       },

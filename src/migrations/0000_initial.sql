@@ -62,8 +62,8 @@ CREATE TABLE `prompt_template` (
 --> statement-breakpoint
 CREATE TABLE `user` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`generate_preset` integer,
-	`prompt_template` integer,
+	`generate_preset` integer NOT NULL,
+	`prompt_template` integer NOT NULL,
 	FOREIGN KEY (`generate_preset`) REFERENCES `generate_preset`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`prompt_template`) REFERENCES `prompt_template`(`id`) ON UPDATE no action ON DELETE no action
 );

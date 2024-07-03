@@ -91,8 +91,12 @@ export const insertMessageSchema = createInsertSchema(Message)
  */
 export const User = sqliteTable('user', {
     id: integer('id').primaryKey({autoIncrement: true}),
-    generatePreset: integer('generate_preset').references(() => GeneratePreset.id),
-    promptTemplate: integer('prompt_template').references(() => PromptTemplate.id),
+    generatePreset: integer('generate_preset')
+        .notNull()
+        .references(() => GeneratePreset.id),
+    promptTemplate: integer('prompt_template')
+        .notNull()
+        .references(() => PromptTemplate.id),
 })
 export const userSettings = relations(User, ({one}) => ({
     promptTemplate: one(PromptTemplate, {fields: [User.promptTemplate], references: [PromptTemplate.id]}),
