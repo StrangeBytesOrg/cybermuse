@@ -5,8 +5,9 @@ import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
 import {responseToIterable} from '../lib/sse.js'
+import {logger} from '../logging.js'
 
-const llamaCppBaseUrl = 'http://localhost:8080'
+const llamaCppBaseUrl = process.env.LLAMA_SERVER_URL || 'http://localhost:8080'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -39,7 +40,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 return {messageId: newMessage.id}
             } catch (err) {
                 // TODO proper error handling
-                console.error(err)
+                logger.error(err)
                 throw new Error('Failed to create message')
             }
         },
@@ -114,7 +115,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             const controller = new AbortController()
             request.socket.on('close', () => {
-                console.log('User disconnected')
+                logger.debug('User disconnected')
                 controller.abort()
             })
 
@@ -135,7 +136,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             const pickedCharacter = existingChat?.characters.find(
                 ({character}) => character.id === lastMessage.characterId,
             )
-            console.log('Picked Character:', pickedCharacter)
+            logger.debug('Picked Character:', pickedCharacter)
+
+            const userCharacter = existingChat?.characters.find(({character}) => character.type === 'user')
 
             const userSettings = await db.query.User.findFirst({
                 where: eq(User.id, 1),
@@ -174,10 +177,14 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 }
             })
             const formattedCharacters = existingChat?.characters.map(({character}) => {
+                character.description = new Template(character.description).render({
+                    char: character.name,
+                    user: userCharacter?.character.name || 'User',
+                })
                 return character
             })
-            console.log(formattedMessages)
-            console.log(formattedCharacters)
+            logger.debug(`Formatted Messages: ${formattedMessages}`)
+            logger.debug(`Formatted Characters: ${formattedCharacters}`)
 
             const tokenLimit = generatePreset.context
             let prompt = ''
@@ -195,13 +202,13 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                     if (tokenCount < tokenLimit) {
                         prompt = newPrompt
                     } else {
-                        console.log(`Token limit reached: ${tokenCount}`)
+                        logger.debug(`Token limit reached: ${tokenCount}`)
                         break
                     }
                 }
             } catch (err) {
-                console.error('Failed to render template')
-                console.error(err)
+                logger.error(`Failed to render template`)
+                logger.error(err)
                 reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed creating prompt'})}\n\n`)
                 return
             }
@@ -210,8 +217,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 prompt += lastMessage.content[lastMessage.activeIndex]
             }
 
-            console.log('prompt:', prompt)
-            console.log('token count:', tokenCount)
+            logger.debug(`Prompt: ${prompt}`)
+            logger.debug(`Token Count: ${tokenCount}`)
 
             try {
                 const response = await fetch(`${llamaCppBaseUrl}/completion`, {
@@ -253,14 +260,14 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 }
 
                 // Send a final event with the full message text
-                console.log('Buffered Response:', bufferedResponse)
+                logger.debug('Buffered Response:', bufferedResponse)
                 reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
-                    console.log('Request aborted')
+                    logger.debug('Request aborted')
                 } else {
-                    console.error('Failed to generate response')
-                    console.error(err)
+                    logger.error('Failed to generate response')
+                    logger.error(err)
                     reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
                 }
             } finally {

@@ -20,7 +20,7 @@ const dbLogger = logger.getSubLogger({
 })
 class DrizzleLogger implements Logger {
     logQuery(query: string, params: unknown[]): void {
-        dbLogger.info({query, params: params.join(',')})
+        dbLogger.debug({query, params: params.join(',')})
     }
 }
 

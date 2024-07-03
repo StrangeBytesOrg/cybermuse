@@ -26,6 +26,8 @@ const exampleOutput = computed(() => {
                 {text: 'Hi, how are you?', generated: true, role: 'assistant', character: characters[1]},
                 {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
             ],
+            char: characters[0]?.name,
+            user: characters[1]?.name,
         })
     } catch (err) {
         parsed = `Error parsing template\n${err}`
@@ -41,7 +43,7 @@ const createTemplate = async () => {
         },
     })
     if (error) {
-        toast.error('Error creating template')
+        toast.error(`Error creating template\n${error.message}`)
         console.error(error)
     } else {
         toast.success('Template created')

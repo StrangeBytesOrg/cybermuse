@@ -7,6 +7,7 @@ const defaultSystemMessage = `Roleplay as the character specified.`
 const chatMl = `<|im_start|>system\n{{instruction}}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n`
 const llama3 = `<|start_header_id|>system<|end_header_id|>\n\n{{instruction}}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n`
 const phi3 = `{% for message in messages %}<|{{message.role}}|>{{message.text}}<|end|>\n{% endfor %}<|assistant|>`
+const chatMlRoleplay = `<|im_start|>system\nRespond as the indicated character using one of the provided descriptions below.\nCharacter Descriptions:\n{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n{{char}}: `
 const phi3Roleplay = `<|user|>${defaultSystemMessage}{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|end|>\n{% for message in messages %}<|{{message.role}}|>\n{{message.character.name}}: {{message.text}}<|end|>\n{% endfor %}<|assistant|>\n{{char}}: `
 const llama3Roleplay = `<|start_header_id|>system<|end_header_id|>\n\n${defaultSystemMessage}{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n{{char}}: `
 
@@ -57,6 +58,7 @@ export const fixtureData = async () => {
         await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl})
         await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3})
         await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3})
+        await db.insert(PromptTemplate).values({name: 'ChatML Roleplay', content: chatMlRoleplay})
         await db.insert(PromptTemplate).values({name: 'Phi 3 Roleplay', content: phi3Roleplay})
         await db.insert(PromptTemplate).values({name: 'Llama 3 Roleplay', content: llama3Roleplay})
     }

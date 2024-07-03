@@ -15,6 +15,7 @@ const logStream = createStream(path.resolve(paths.log, 'out.log'), {
 })
 export const logger = new Logger({
     type: process.env.DEV ? 'pretty' : 'json',
+    prettyLogTemplate: '{{logLevelName}} {{fileNameWithLine}} \t',
 })
 logger.attachTransport((logObject) => {
     logStream.write(JSON.stringify(logObject) + '\n')

@@ -28,7 +28,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 throw new Error('No templates found')
             }
             if (!user || !user.promptTemplate) {
-                throw new Error('No user found')
+                throw new Error('No user found or no active template set')
             }
             return {templates, activeTemplateId: user.promptTemplate.id}
         },
@@ -67,8 +67,8 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'CreatePromptTemplate',
             tags: ['templates'],
             body: t.Object({
-                name: t.String(),
-                content: t.String(),
+                name: t.String({minLength: 1}),
+                content: t.String({minLength: 1}),
             }),
             response: {
                 200: t.Object({id: t.Number()}),
@@ -79,6 +79,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 .insert(PromptTemplate)
                 .values({name: req.body.name, content: req.body.content})
                 .returning({id: PromptTemplate.id})
+            await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
             return {id: newTemplate.id}
         },
     })
@@ -91,18 +92,21 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'UpdatePromptTemplate',
             tags: ['templates'],
             params: t.Object({
-                id: t.String(),
+                id: t.String({pattern: '^[0-9]+$'}),
             }),
             body: t.Object({
                 name: t.String(),
                 content: t.String(),
             }),
         },
-        handler: async (req) => {
-            await db
+        handler: async (req, reply) => {
+            const {changes} = await db
                 .update(PromptTemplate)
                 .set({name: req.body.name, content: req.body.content})
                 .where(eq(PromptTemplate.id, Number(req.params.id)))
+            if (changes === 0) {
+                return reply.status(404).send('Template not found')
+            }
         },
     })
 
@@ -114,10 +118,14 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'DeletePromptTemplate',
             tags: ['templates'],
             params: t.Object({
-                id: t.String(),
+                id: t.String({pattern: '^[0-9]+$'}),
             }),
         },
-        handler: async (req) => {
+        handler: async (req, reply) => {
+            if (req.params.id === '1') {
+                return reply.status(400).send('Cannot delete the default template')
+            }
+            await db.update(User).set({promptTemplate: 1}).where(eq(User.id, 1))
             await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(req.params.id)))
         },
     })
@@ -130,14 +138,17 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'SetActivePromptTemplate',
             tags: ['templates'],
             params: t.Object({
-                id: t.String(),
+                id: t.String({pattern: '^[0-9]+$'}),
             }),
         },
-        handler: async (req) => {
-            await db
+        handler: async (req, reply) => {
+            const {changes} = await db
                 .update(User)
                 .set({promptTemplate: Number(req.params.id)})
                 .where(eq(User.id, 1))
+            if (changes === 0) {
+                return reply.status(404).send('User not found')
+            }
         },
     })
 }

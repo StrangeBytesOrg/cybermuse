@@ -1,7 +1,9 @@
 import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
-import {eq} from 'drizzle-orm'
+import {eq, inArray} from 'drizzle-orm'
+import {Template} from '@huggingface/jinja'
+import {logger} from '../logging.js'
 import {
     db,
     Chat,
@@ -116,12 +118,17 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             }
 
             const [newChat] = await db.insert(Chat).values({}).returning({id: Chat.id})
+            const chatCharacters = await db.query.Character.findMany({
+                where: inArray(Character.id, characters),
+            })
+            const userCharacter = chatCharacters.find((character) => character.type === 'user')
+            logger.debug(`User character: ${userCharacter?.name}`)
 
             // Add chat characters
             // TODO change to a multi insert
             for (let i = 0; i < characters.length; i += 1) {
                 const characterId = characters[i]
-                console.log('inserting', characterId)
+                logger.debug(`Inserting character ${characterId} into chat ${newChat.id}`)
                 await db.insert(ChatCharacters).values({
                     chatId: newChat.id,
                     characterId,
@@ -132,6 +139,10 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                     where: eq(Character.id, characterId),
                 })
                 if (resCharacter?.firstMessage) {
+                    const firstMessage = new Template(resCharacter.firstMessage).render({
+                        char: resCharacter.name,
+                        user: userCharacter?.name || 'User',
+                    })
                     await db
                         .insert(Message)
                         .values({
@@ -139,7 +150,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                             characterId,
                             generated: false,
                             activeIndex: 0,
-                            content: [resCharacter.firstMessage],
+                            content: [firstMessage],
                         })
                         .returning({id: Message.id})
                 }
