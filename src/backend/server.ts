@@ -118,7 +118,7 @@ await server.register(generateRoutes, {prefix: '/api'})
 await server.register(templateRoutes, {prefix: '/api'})
 await server.register(llamaServerRoutes, {prefix: '/api'})
 
-server.listen({port: config.serverPort}, (error) => {
+server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
     if (error) {
         logger.error(error)
     }
