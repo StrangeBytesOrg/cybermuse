@@ -32,7 +32,6 @@ const checkServer = async () => {
     }
 }
 await checkServer()
-connectionStore.connected = true
 
 const {data, error} = await client.GET('/chat/{id}', {
     params: {path: {id: String(chatId)}},
@@ -210,13 +209,10 @@ const editMessage = async (messageId: number) => {
 }
 
 const cancelEdit = () => {
-    // Reset the text to the original
+    // Reset the text to the original value
     const message = messages.find((message) => message.id === editModeId.value)
     if (message) {
-        const content = message.content[message.activeIndex]
-        if (content) {
-            content.text = editedText.value
-        }
+        message.content[message.activeIndex] = editedText.value
     }
     editModeId.value = 0
 }
