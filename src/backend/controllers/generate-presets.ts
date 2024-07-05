@@ -93,6 +93,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                 })
             } catch (err) {
                 console.error(err)
+                // TODO use proper error handling and response
                 throw new Error('Failed to create generate preset')
             }
         },
@@ -137,6 +138,7 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                     .where(eq(GeneratePreset.id, Number(req.params.id)))
             } catch (err) {
                 console.error(err)
+                // TODO use proper error handling and response
                 throw new Error('Failed to update generate preset')
             }
         },
@@ -153,14 +155,12 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                 id: t.String(),
             }),
         },
-        handler: async (req) => {
-            try {
-                await db.delete(GeneratePreset).where(eq(GeneratePreset.id, Number(req.params.id)))
-            } catch (err) {
-                if (err instanceof Error && err.message === 'FOREIGN KEY constraint failed') {
-                    throw new Error('Cannot delete set preset')
-                }
+        handler: async (req, reply) => {
+            if (req.params.id === '1') {
+                return reply.status(400).send({message: 'Cannot delete the default preset'})
             }
+            await db.update(User).set({generatePreset: 1}).where(eq(User.id, 1))
+            await db.delete(GeneratePreset).where(eq(GeneratePreset.id, Number(req.params.id)))
         },
     })
 

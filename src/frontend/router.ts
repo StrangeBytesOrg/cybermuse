@@ -9,7 +9,6 @@ import Chats from './pages/chats.vue'
 import CreateChat from './pages/chat-create.vue'
 import Templates from './pages/templates.vue'
 import CreateTemplate from './pages/template-create.vue'
-import Preset from './pages/preset.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
@@ -69,11 +68,6 @@ export default createRouter({
             path: '/presets',
             name: 'presets',
             component: Presets,
-        },
-        {
-            path: '/preset/:id',
-            name: 'preset',
-            component: Preset,
         },
         {
             path: '/create-preset',

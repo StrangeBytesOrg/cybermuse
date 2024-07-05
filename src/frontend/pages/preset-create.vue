@@ -50,7 +50,7 @@ const createTemplate = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(`Error creating preset\n${error.detail}`)
+        toast.error(`Error creating preset\n${error.message}`)
     } else {
         toast.success('Template created')
         router.push('/presets')

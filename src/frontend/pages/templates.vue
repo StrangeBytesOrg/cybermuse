@@ -10,7 +10,7 @@ if (error) {
     toast.error(`Error fetching templates: ${error.message}`)
 }
 
-const templates = ref(data?.templates) || ref([])
+const templates = ref(data?.templates || [])
 const selectedTemplate = ref(data?.activeTemplateId || 0)
 const showPreview = ref(false)
 
@@ -62,11 +62,11 @@ const deleteTemplate = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error('Error deleting template')
+        toast.error(`Error deleting template\n${error.message}`)
         return
     } else {
         toast.success('Template deleted')
-        templates.value?.splice(
+        templates.value.splice(
             templates.value?.findIndex((template) => template.id === activeTemplate.value.id),
             1,
         )
@@ -119,7 +119,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="p-3">
+    <div class="py-3 px-2">
         <div class="flex flex-row">
             <div class="flex flex-col">
                 <select v-model="selectedTemplate" @change="setActiveTemplate" class="select select-bordered min-w-60">

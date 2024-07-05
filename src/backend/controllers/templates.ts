@@ -105,7 +105,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 .set({name: req.body.name, content: req.body.content})
                 .where(eq(PromptTemplate.id, Number(req.params.id)))
             if (changes === 0) {
-                return reply.status(404).send('Template not found')
+                return reply.status(404).send({message: 'Template not found'})
             }
         },
     })
@@ -123,7 +123,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req, reply) => {
             if (req.params.id === '1') {
-                return reply.status(400).send('Cannot delete the default template')
+                return reply.status(400).send({message: 'Cannot delete the default template'})
             }
             await db.update(User).set({promptTemplate: 1}).where(eq(User.id, 1))
             await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(req.params.id)))
@@ -147,7 +147,8 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 .set({promptTemplate: Number(req.params.id)})
                 .where(eq(User.id, 1))
             if (changes === 0) {
-                return reply.status(404).send('User not found')
+                // TODO handle other reasons for this to fail
+                return reply.status(404).send({message: 'User not found'})
             }
         },
     })
