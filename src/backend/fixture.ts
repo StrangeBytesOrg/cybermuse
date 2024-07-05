@@ -1,5 +1,6 @@
 import {eq} from 'drizzle-orm'
 import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePreset} from './db.js'
+import {logger} from './logging.js'
 
 const defaultSystemMessage = `Roleplay as the character specified.`
 
@@ -15,24 +16,20 @@ export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
     const existingUserCharacter = await db.query.Character.findFirst({where: eq(Character.id, 1)})
     if (!existingUserCharacter) {
-        console.log('No character found, creating one')
+        logger.info('Creating a default user character')
         await db.insert(Character).values({id: 1, name: 'User', description: 'The user.', type: 'user'})
     }
 
     const existingCharacter = await db.query.Character.findFirst({where: eq(Character.type, 'character')})
     if (!existingCharacter) {
+        logger.info('Creating a default character')
         await db.insert(Character).values({
             name: 'Assistant',
             description: 'An AI assistant.',
             type: 'character',
             firstMessage: 'Hello!',
         })
-    }
-
-    // Default chat
-    const existingChat = await db.query.Chat.findFirst({where: eq(Character.id, 1)})
-    if (!existingChat) {
-        console.log('No chat found, creating one')
+        logger.info('Creating an initial chat')
         await db.insert(Chat).values({})
         await db.insert(ChatCharacters).values({chatId: 1, characterId: 1})
         await db.insert(ChatCharacters).values({chatId: 1, characterId: 2})
@@ -41,7 +38,7 @@ export const fixtureData = async () => {
     // Generation Preset
     const existingPreset = await db.query.GeneratePreset.findFirst({where: eq(GeneratePreset.id, 1)})
     if (!existingPreset) {
-        console.log('No generate preset found, creating one')
+        logger.info('Creating default generate preset')
         await db.insert(GeneratePreset).values({
             id: 1,
             name: 'Default',
@@ -55,6 +52,7 @@ export const fixtureData = async () => {
     // Create prompt templates
     const existingPromptPreset = await db.query.PromptTemplate.findFirst({where: eq(PromptTemplate.id, 1)})
     if (!existingPromptPreset) {
+        logger.info('Creating default prompt templates')
         await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl})
         await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3})
         await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3})
@@ -66,6 +64,7 @@ export const fixtureData = async () => {
     // Initialize a user
     const existingUser = await db.query.User.findFirst({where: eq(User.id, 1)})
     if (!existingUser) {
+        logger.info('Creating a default user')
         await db.insert(User).values({id: 1, generatePreset: 1, promptTemplate: 1})
     }
 }
