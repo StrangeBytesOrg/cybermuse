@@ -7,7 +7,6 @@ import CreateCharacter from './pages/character-create.vue'
 import Chat from './pages/chat.vue'
 import Chats from './pages/chats.vue'
 import CreateChat from './pages/chat-create.vue'
-import Template from './pages/template.vue'
 import Templates from './pages/templates.vue'
 import CreateTemplate from './pages/template-create.vue'
 import Preset from './pages/preset.vue'
@@ -60,11 +59,6 @@ export default createRouter({
             path: '/templates',
             name: 'templates',
             component: Templates,
-        },
-        {
-            path: '/template/:id',
-            name: 'template',
-            component: Template,
         },
         {
             path: '/create-template',
