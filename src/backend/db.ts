@@ -4,6 +4,7 @@ import {migrate} from 'drizzle-orm/better-sqlite3/migrator'
 import type {Logger} from 'drizzle-orm/logger'
 import Database from 'better-sqlite3'
 import envPaths from 'env-paths'
+import {env} from './env.js'
 
 import * as schema from './schema.js'
 export * from './schema.js'
@@ -11,7 +12,7 @@ import {logger} from './logging.js'
 
 const paths = envPaths('cybermuse-desktop', {suffix: ''})
 let databasePath = path.resolve(paths.config, 'app-data.db')
-if (process.env.DEV) {
+if (env.DEV) {
     databasePath = path.resolve('./dev.db')
 }
 
@@ -25,10 +26,10 @@ class DrizzleLogger implements Logger {
 }
 
 const sqlite = new Database(databasePath)
-export const db = drizzle(sqlite, {schema, logger: process.env.VERBOSE ? new DrizzleLogger() : undefined})
+export const db = drizzle(sqlite, {schema, logger: env.VERBOSE ? new DrizzleLogger() : undefined})
 
-if (!process.env.DEV) {
+if (!env.DEV) {
     migrate(db, {migrationsFolder: path.resolve(import.meta.dirname, '../migrations')})
 } else {
-    console.log('DEV mode skipping migrations')
+    dbLogger.info('DEV mode skipping migrations')
 }

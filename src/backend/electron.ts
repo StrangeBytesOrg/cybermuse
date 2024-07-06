@@ -2,6 +2,7 @@ import path from 'node:path'
 import {app, shell, BrowserWindow} from 'electron'
 import './logging.js'
 import './server.js'
+import {env} from './env.js'
 
 // import sourcemapSupport from 'source-map-support'
 // sourcemapSupport.install()
@@ -27,7 +28,7 @@ app.on('ready', () => {
         return {action: 'deny'} // Prevent the app from opening the URL.
     })
 
-    if (process.env.DEV) {
+    if (env.DEV) {
         win.webContents.openDevTools({
             mode: 'bottom',
         })

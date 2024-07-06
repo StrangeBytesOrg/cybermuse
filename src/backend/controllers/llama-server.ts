@@ -7,6 +7,7 @@ import {type ChildProcessWithoutNullStreams, spawn} from 'node:child_process'
 import chalk from 'chalk'
 import {getConfig, setConfig} from '../config.js'
 import {logger} from '../logging.js'
+import {env} from '../env.js'
 
 let llamaServerProc: ChildProcessWithoutNullStreams
 let loaded = false
@@ -100,7 +101,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
 export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
     // Run llama.cpp server
     let serverBinPath = path.resolve(import.meta.dirname, '../../llamacpp/llama-server')
-    if (process.env.DEV) {
+    if (env.DEV) {
         serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')
     }
     if (process.platform === 'win32') {

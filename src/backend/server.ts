@@ -5,7 +5,7 @@ import fastifySwaggerUI from '@fastify/swagger-ui'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
-
+import {env} from './env.js'
 // Routes
 import {characterRoutes} from './controllers/character.js'
 import {chatRoutes} from './controllers/chats.js'
@@ -23,7 +23,7 @@ await fixtureData()
 
 const config = getConfig()
 
-if (config.autoLoad) {
+if (config.autoLoad && !env.LLAMA_SERVER_URL) {
     const modelName = config.lastModel
     const contextSize = config.contextSize
     const useGPU = config.useGPU
@@ -32,19 +32,15 @@ if (config.autoLoad) {
 
 export const server = Fastify({
     // logger: true,
-    // logger: {
-    //     transport: {
-    //         target: 'pino-pretty',
-    //         options: {
-    //             translateTime: 'HH:MM:ss Z',
-    //             ignore: 'pid,hostname',
-    //         },
-    //     },
-    // },
     bodyLimit: 1024 * 1024 * 5, // 5MB
 })
 server.register(cors)
 server.setValidatorCompiler(TypeBoxValidatorCompiler)
+server.setErrorHandler((error, request, reply) => {
+    console.error(error)
+    // logger.error(error)
+    reply.status(500).send(error)
+})
 
 await server.register(fastifySwagger, {
     openapi: {
