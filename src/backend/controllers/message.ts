@@ -183,8 +183,6 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 })
                 return character
             })
-            logger.debug('Formatted messages', formattedMessages)
-            logger.debug('Formatted characters', formattedCharacters)
 
             const tokenLimit = generatePreset.context
             let prompt = ''

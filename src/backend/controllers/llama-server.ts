@@ -4,7 +4,9 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {type ChildProcessWithoutNullStreams, spawn} from 'node:child_process'
+import chalk from 'chalk'
 import {getConfig, setConfig} from '../config.js'
+import {logger} from '../logging.js'
 
 let llamaServerProc: ChildProcessWithoutNullStreams
 let loaded = false
@@ -13,7 +15,7 @@ let currentModel: string = ''
 // Cleanup subprocess on exit
 process.on('exit', () => {
     if (llamaServerProc) {
-        console.log('Killing llama server')
+        logger.info('Killing llama server')
         llamaServerProc.kill('SIGKILL')
     }
 })
@@ -85,7 +87,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async () => {
             llamaServerProc.on('exit', (code) => {
-                console.log(`Llama Server exited with code ${code}`)
+                logger.info(`Llama Server exited with code ${code}`)
                 loaded = false
                 currentModel = ''
                 return {success: true}
@@ -104,14 +106,14 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
     if (process.platform === 'win32') {
         serverBinPath += '.exe'
     }
-    console.log(`Server bin path: ${serverBinPath}`)
+    logger.info(`LlamaCPP server bin path: ${serverBinPath}`)
     if (!fs.existsSync(serverBinPath)) {
         throw new Error('LlamaCPP Server binary not found')
     }
 
     const config = getConfig()
     const modelPath = path.resolve(config.modelsPath, modelName)
-    console.log(modelPath)
+    logger.info(`Attempting to start server with model: ${modelPath}`)
     if (!fs.existsSync(modelPath)) {
         throw new Error('Model file not found')
     }
@@ -119,15 +121,16 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
     return new Promise((resolve, reject) => {
         const args = ['-m', modelPath]
         args.push('--ctx-size', String(contextSize))
+        args.push('--log-disable') // Prevent creating a llama.log file
         if (useGPU) {
             args.push('--gpu-layers', '128')
         }
         llamaServerProc = spawn(serverBinPath, args, {})
         llamaServerProc.stdout.on('data', (data) => {
             const output: string = data.toString()
-            console.log(`Stdout: ${output}`)
+            process.stdout.write(chalk.cyan(output))
             if (output.includes('HTTP server listening')) {
-                console.log('Server actually started')
+                logger.info('Detected server startup')
                 loaded = true
                 currentModel = modelName
                 config.contextSize = contextSize
@@ -140,14 +143,14 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
 
         llamaServerProc.stderr.on('data', (data) => {
             const output: string = data.toString()
-            console.error(`Stderr: ${output}`)
+            process.stderr.write(chalk.blue(output))
             if (output.includes('error')) {
                 reject(new Error(output))
             }
         })
 
         llamaServerProc.on('error', (err) => {
-            console.error('server error:', err)
+            logger.error('LlamaCPP server error:', err)
         })
     })
 }

@@ -25,7 +25,7 @@ class DrizzleLogger implements Logger {
 }
 
 const sqlite = new Database(databasePath)
-export const db = drizzle(sqlite, {schema, logger: new DrizzleLogger()})
+export const db = drizzle(sqlite, {schema, logger: process.env.VERBOSE ? new DrizzleLogger() : undefined})
 
 if (!process.env.DEV) {
     migrate(db, {migrationsFolder: path.resolve(import.meta.dirname, '../migrations')})
