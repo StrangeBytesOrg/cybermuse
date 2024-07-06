@@ -6,8 +6,9 @@ import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
 import {responseToIterable} from '../lib/sse.js'
 import {logger} from '../logging.js'
+import {env} from '../env.js'
 
-const llamaCppBaseUrl = process.env.LLAMA_SERVER_URL || 'http://localhost:8080'
+const llamaCppBaseUrl = env.LLAMA_SERVER_URL || 'http://localhost:8080'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -136,7 +137,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             const pickedCharacter = existingChat?.characters.find(
                 ({character}) => character.id === lastMessage.characterId,
             )
-            logger.debug('Picked Character:', pickedCharacter)
+            logger.debug('Picked Character:', pickedCharacter?.character.name)
 
             const userCharacter = existingChat?.characters.find(({character}) => character.type === 'user')
 
@@ -219,6 +220,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             logger.debug(`Token Count: ${tokenCount}`)
 
             try {
+                const startTime = Date.now()
                 const response = await fetch(`${llamaCppBaseUrl}/completion`, {
                     method: 'POST',
                     signal: controller.signal,
@@ -258,8 +260,10 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 }
 
                 // Send a final event with the full message text
+                const generationTime = Date.now() - startTime
                 logger.debug('Buffered Response:', bufferedResponse)
-                reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
+                reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse, generationTime})}\n\n`)
+                logger.info(`Response time: ${generationTime}ms`)
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     logger.debug('Request aborted')

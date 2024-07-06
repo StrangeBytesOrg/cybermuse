@@ -46,7 +46,7 @@ const messages = reactive(data?.chat.messages ?? [])
 type Message = (typeof messages)[0]
 const characterMap = new Map((data?.characters ?? []).map((character) => [character.id, character]))
 const userCharacter = data?.characters.find((character) => character.type === 'user')
-const nonUserCharacters = data?.characters.filter((character) => character.id !== 1)
+const nonUserCharacters = data?.characters.filter((character) => character.type === 'character')
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -346,12 +346,17 @@ const toggleCtxMenu = () => {
                         <div class="font-bold">
                             {{ characterMap.get(message.characterId)?.name || 'Missing Character' }}
                         </div>
-                        <!-- v-html="formatText(message.content[message.activeIndex]?.text || '')" -->
+                        <span
+                            v-if="
+                                pendingMessage &&
+                                index === messages.length - 1 &&
+                                message.content[message.activeIndex] === ''
+                            "
+                            class="loading loading-dots loading-sm mt-2"></span>
                         <div
                             v-show="editModeId !== message.id"
                             v-html="formatText(message.content[message.activeIndex])"
                             class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word]" />
-                        <!-- v-model="message.content[message.activeIndex].text" -->
                         <textarea
                             v-show="editModeId === message.id"
                             :id="`message-input-${message.id}`"

@@ -42,6 +42,9 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async () => {
             const config = getConfig()
+            if (env.LLAMA_SERVER_URL) {
+                loaded = true
+            }
             return {
                 loaded,
                 currentModel,

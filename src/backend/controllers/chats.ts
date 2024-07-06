@@ -148,7 +148,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                         .values({
                             chatId: newChat.id,
                             characterId,
-                            generated: false,
+                            generated: true, // Makes less sense semantically, but formats as most models typically expect it
                             activeIndex: 0,
                             content: [firstMessage],
                         })
