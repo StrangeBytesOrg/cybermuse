@@ -65,7 +65,7 @@ const loadModel = async () => {
 const unloadModel = async () => {
     const {error} = await client.POST('/stop-server')
     if (error) {
-        toast.error(`Failed to unload model\n${error.detail}`)
+        toast.error(`Failed to unload model\n${error.message}`)
     } else {
         toast.success('Model unloaded')
         currentModel.value = ''
@@ -81,7 +81,7 @@ const setModelDir = async () => {
     })
     if (error) {
         console.error(error)
-        toast.error(error.detail)
+        toast.error(error.message)
     } else {
         toast.success('Model path updated')
         await getModels()
@@ -95,7 +95,7 @@ const setAutoLoad = async () => {
         },
     })
     if (error) {
-        toast.error(`Failed to update autoload\n${error.detail}`)
+        toast.error(`Failed to update autoload\n${error.message}`)
     } else {
         toast.success('Autoload updated')
     }
@@ -137,15 +137,15 @@ await getModels()
 
             <div class="form-control w-52 mt-3">
                 <label class="cursor-pointer label">
-                    <span class="label-text text-lg">Auto load model</span>
-                    <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
+                    <span class="label-text text-lg">Use GPU</span>
+                    <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" />
                 </label>
             </div>
 
             <div class="form-control w-52 mt-3">
                 <label class="cursor-pointer label">
-                    <span class="label-text text-lg">Use GPU</span>
-                    <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" @change="setUseGPU" />
+                    <span class="label-text text-lg">Auto load model</span>
+                    <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
                 </label>
             </div>
         </div>

@@ -85,14 +85,14 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['llama-server'],
             summary: 'Stop the llama server',
         },
-        handler: async () => {
-            llamaServerProc.on('exit', (code) => {
-                logger.info(`Llama Server exited with code ${code}`)
-                loaded = false
-                currentModel = ''
-                return {success: true}
-            })
+        handler: async (request, reply) => {
             llamaServerProc.kill()
+            if (llamaServerProc.killed && 0) {
+                return {success: true}
+            } else {
+                logger.error('Failed to kill llama server')
+                return reply.status(500).send({message: 'Failed to kill server'})
+            }
         },
     })
 }
@@ -151,6 +151,11 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
 
         llamaServerProc.on('error', (err) => {
             logger.error('LlamaCPP server error:', err)
+        })
+
+        llamaServerProc.on('exit', (code) => {
+            logger.info(`Llama Server exited with code ${code}`)
+            loaded = false
         })
     })
 }
