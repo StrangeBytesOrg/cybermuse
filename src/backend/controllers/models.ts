@@ -5,6 +5,7 @@ import path from 'node:path'
 import {Type as t} from '@sinclair/typebox'
 import {fileExists} from '@huggingface/hub'
 import {getConfig, setConfig} from '../config.js'
+import {logger} from '../logging.js'
 
 export const modelRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -28,7 +29,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         handler: async () => {
             try {
                 const config = getConfig()
-                console.log('Models Path: ', config.modelsPath)
+                logger.debug(`Models path: ${config.modelsPath}`)
                 const models = fs.readdirSync(config.modelsPath, {withFileTypes: true, recursive: true})
                 const modelList = []
                 for (let i = 0; i < models.length; i++) {
@@ -57,31 +58,35 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 repoId: t.String(),
                 path: t.String(),
             }),
-            response: {
-                200: t.Object({
-                    success: t.Boolean(),
-                }),
-            },
         },
-        handler: async (req) => {
-            const exists = await fileExists({repo: req.body.repoId, path: req.body.path})
+        handler: async (request, reply) => {
+            // TODO handle canceling
+            const exists = await fileExists({repo: request.body.repoId, path: request.body.path})
             if (!exists) {
-                return {success: false}
+                return reply.status(404).send({message: 'Model not found'})
             }
 
             const config = getConfig()
-            const response = await fetch(`https://huggingface.co/${req.body.repoId}/resolve/main/${req.body.path}`)
+            const response = await fetch(
+                `https://huggingface.co/${request.body.repoId}/resolve/main/${request.body.path}`,
+            )
             if (response.body === null || !response.ok) {
-                console.error('Failed to download model')
-                return {success: false}
+                logger.error('Failed to download model')
+                return reply.status(500).send({message: 'Failed to download model'})
             }
             const reader = response.body.getReader()
             const contentLength = Number(response.headers.get('content-length'))
-            console.log(`Downloading ${req.body.path}, Size: ${(contentLength / 1024 / 1024).toFixed(2)} MB`)
+            logger.info(`Downloading ${request.body.path}, Size: ${(contentLength / 1024 / 1024).toFixed(2)} MB`)
 
-            const finalPath = path.resolve(config.modelsPath, req.body.path)
-            console.log(`Model will be downloaded to: ${finalPath}`)
+            const finalPath = path.resolve(config.modelsPath, request.body.path)
+            logger.info(`Model will be downloaded to: ${finalPath}`)
             const fileStream = fs.createWriteStream(finalPath)
+
+            // Setup headers for server-sent events
+            reply.raw.setHeader('Content-Type', 'text/event-stream')
+            reply.raw.setHeader('Cache-Control', 'no-store')
+            reply.raw.setHeader('Connection', 'keep-alive')
+            reply.raw.setHeader('Access-Control-Allow-Origin', '*')
 
             let receivedLength = 0
             while (true) {
@@ -89,11 +94,15 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
                 if (done) break
                 fileStream.write(value)
                 receivedLength += value.length
-                const progress = receivedLength / contentLength
-                console.log(`Progress: ${(progress * 100).toFixed(2)}%`)
+                const progress = (receivedLength / contentLength) * 100
+                logger.info(`Progress: ${progress.toFixed(2)}%`)
+                reply.raw.write(`event:progress\ndata: ${JSON.stringify({progress})}\n\n`)
             }
             fileStream.end()
-            return {success: true}
+            logger.info('Model downloaded')
+            reply.raw.write(`event:final\ndata: {"progress": 100}\n\n`)
+            reply.raw.end()
+            request.socket.destroy()
         },
     })
 
@@ -115,10 +124,10 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req, reply) => {
             const config = getConfig()
-            console.log(`Setting Model Folder: ${req.body.modelPath}`)
+            logger.info(`Setting Model Folder: ${req.body.modelPath}`)
             // Check if the directory exists
             if (!fs.existsSync(req.body.modelPath)) {
-                console.log('Directory does not exist')
+                logger.error('Directory does not exist')
                 return reply.status(400).send({message: 'Directory does not exist'})
             }
             config.modelsPath = req.body.modelPath
@@ -139,7 +148,7 @@ export const modelRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             const autoLoad = req.body.autoLoad
-            console.log(`Setting Auto Load: ${autoLoad}`)
+            logger.info(`Setting Auto Load: ${autoLoad}`)
             const config = getConfig()
             config.autoLoad = autoLoad
             setConfig(config)

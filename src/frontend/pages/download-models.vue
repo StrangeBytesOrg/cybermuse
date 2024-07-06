@@ -6,7 +6,6 @@ import {client} from '../api-client'
 import {responseToIterable} from '../lib/fetch-backend'
 
 type HfFile = {
-    repo: string
     name: string
     size: number
 }
@@ -17,6 +16,8 @@ const requestPending = ref(false)
 const downloadPending = ref(false)
 const downloadProgress = ref(0)
 const selectedSuggestedModel = ref('')
+const selectedRepo = ref('')
+const selectedQuant = ref('')
 const suggestedModels = [
     'NousResearch/Meta-Llama-3-8B-Instruct-GGUF',
     'microsoft/Phi-3-mini-4k-instruct-gguf',
@@ -32,7 +33,7 @@ const getModelInfo = async (repo: string) => {
         const files = listFiles({repo})
         for await (const file of files) {
             if (file.path.endsWith('.gguf')) {
-                hfFiles.value.push({repo, name: file.path, size: file.size})
+                hfFiles.value.push({name: file.path, size: file.size})
             }
         }
         if (!hfFiles.value.length) {
@@ -41,31 +42,38 @@ const getModelInfo = async (repo: string) => {
     } catch (err) {
         toast.error('Model not found')
     }
+    selectedRepo.value = repo
     requestPending.value = false
 }
 
-const downloadModel = async (repoId: string, path: string) => {
+const downloadModel = async () => {
     downloadPending.value = true
-    const {response} = await client.POST('/download-model', {
-        body: {
-            repoId,
-            path,
-        },
-        parseAs: 'stream',
-    })
-    const iterable = responseToIterable(response)
-    for await (const chunk of iterable) {
-        const data = JSON.parse(chunk.data)
-        if (chunk.event === 'progress') {
-            downloadProgress.value = data.progress.toFixed(2)
-        } else if (chunk.event === 'final') {
-            toast.success('Model downloaded')
-            downloadProgress.value = 0
-            downloadPending.value = false
-        } else if (chunk.event === 'error') {
-            toast.error(data.error)
-            downloadPending.value = false
+    try {
+        const {response} = await client.POST('/download-model', {
+            body: {
+                repoId: selectedRepo.value,
+                path: selectedQuant.value,
+            },
+            parseAs: 'stream',
+        })
+        const iterable = responseToIterable(response)
+        for await (const chunk of iterable) {
+            const data = JSON.parse(chunk.data)
+            console.log(data, chunk.event)
+            if (chunk.event === 'progress') {
+                downloadProgress.value = data.progress.toFixed(2)
+            } else if (chunk.event === 'final') {
+                toast.success('Model downloaded')
+                downloadProgress.value = 0
+                downloadPending.value = false
+            } else if (chunk.event === 'error') {
+                toast.error(data.error)
+                downloadPending.value = false
+            }
         }
+    } catch (err) {
+        toast.error('Failed to download model')
+        downloadPending.value = false
     }
 }
 
@@ -101,22 +109,19 @@ const downloadModel = async (repoId: string, path: string) => {
                 placeholder="Model Id, eg: TheBloke/Phi-2-GGUF" />
             <button @click="getModelInfo(hfUrl)" class="btn btn-primary w-40 ml-2">Get Model Info</button>
         </div>
-        <div v-if="hfFiles.length" class="mt-2">
-            <div v-for="file in hfFiles" :key="file.name" class="flex flex-row bg-base-200 rounded-md p-2 mt-1">
-                <div class="flex flex-col flex-grow">
-                    <div>{{ file.name }}</div>
-                    <div>{{ (file.size / 1024 / 1024 / 1024).toFixed(2) }}GB</div>
-                </div>
-                <button
-                    class="btn btn-primary"
-                    @click="downloadModel(file.repo, file.name)"
-                    :disabled="downloadPending">
-                    Download
-                </button>
-            </div>
+        <div v-if="hfFiles.length" class="flex flex-row mt-3">
+            <select v-model="selectedQuant" class="select select-bordered w-full">
+                <option value="" disabled>Select Quantization</option>
+                <option v-for="file in hfFiles" :key="file.name" :value="file.name">
+                    {{ file.name }} - {{ (file.size / 1024 / 1024 / 1024).toFixed(2) }}GB
+                </option>
+            </select>
+            <button class="btn btn-primary w-40 ml-2" @click="downloadModel" :disabled="downloadPending">
+                Download
+            </button>
         </div>
-        <span v-if="requestPending" class="loading loading-spinner loading-lg mt-5"></span>
 
+        <span v-if="requestPending" class="loading loading-spinner loading-lg mt-5"></span>
         <div v-if="downloadPending" class="mt-3">Download Progress: {{ downloadProgress }}%</div>
 
         <!-- HF Search -->
