@@ -188,6 +188,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             const tokenLimit = generatePreset.context
             let prompt = ''
             let tokenCount = 0
+            const startTime = Date.now()
             try {
                 for (let i = formattedMessages.length - 1; i >= 0; i -= 1) {
                     const messagesSubset = formattedMessages.slice(i, formattedMessages.length - 1)
@@ -216,7 +217,9 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 prompt += lastMessage.content[lastMessage.activeIndex]
             }
 
+            const promptTime = Date.now() - startTime
             logger.debug(`Prompt: ${prompt}`)
+            logger.info(`Prompt generation time: ${(promptTime / 1000).toFixed(2)}s`)
             logger.debug(`Token Count: ${tokenCount}`)
 
             try {
@@ -263,7 +266,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 const generationTime = Date.now() - startTime
                 logger.debug('Buffered Response:', bufferedResponse)
                 reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse, generationTime})}\n\n`)
-                logger.info(`Response time: ${generationTime}ms`)
+                logger.info(`Response time: ${(generationTime / 1000).toFixed(1)}s`)
             } catch (err) {
                 if (err instanceof DOMException && err.name === 'AbortError') {
                     logger.debug('Request aborted')

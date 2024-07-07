@@ -91,7 +91,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (request, reply) => {
             llamaServerProc.kill()
-            if (llamaServerProc.killed && 0) {
+            if (llamaServerProc.killed) {
                 return {success: true}
             } else {
                 logger.error('Failed to kill llama server')
