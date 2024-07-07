@@ -2,15 +2,8 @@ import {eq} from 'drizzle-orm'
 import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePreset} from './db.js'
 import {logger} from './logging.js'
 
-const defaultSystemMessage = `Roleplay as the character specified.`
-
-// Prompt Presets
-const chatMl = `<|im_start|>system\n{{instruction}}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n`
-const llama3 = `<|start_header_id|>system<|end_header_id|>\n\n{{instruction}}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n`
-const phi3 = `{% for message in messages %}<|{{message.role}}|>{{message.text}}<|end|>\n{% endfor %}<|assistant|>`
-const chatMlRoleplay = `<|im_start|>system\nRespond as the indicated character using one of the provided descriptions below.\nCharacter Descriptions:\n{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|im_end|>\n{% for message in messages %}\n<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}\n{{message.character.name}}: {{message.text}}<|im_end|>\n{% endfor %}\n<|im_start|>assistant\n{{char}}: `
-const phi3Roleplay = `<|user|>${defaultSystemMessage}\n{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|end|>\n{% for message in messages %}<|{{message.role}}|>\n{{message.character.name}}: {{message.text}}<|end|>\n{% endfor %}<|assistant|>\n{{char}}: `
-const llama3Roleplay = `<|start_header_id|>system<|end_header_id|>\n\n${defaultSystemMessage}\n{% for character in characters %}{{character.name}}: {{character.description}}\n{% endfor %}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>\n\n{{message.character.name}}: {{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>\n\n{{char}}: `
+// Fixture data
+import {chatMLRoleplay, llama3Roleplay, phi3Roleplay, chatMl, llama3, phi3} from './fixtures/prompt-templates.js'
 
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
@@ -53,12 +46,12 @@ export const fixtureData = async () => {
     const existingPromptPreset = await db.query.PromptTemplate.findFirst({where: eq(PromptTemplate.id, 1)})
     if (!existingPromptPreset) {
         logger.info('Creating default prompt templates')
+        await db.insert(PromptTemplate).values({name: 'ChatML Roleplay', content: chatMLRoleplay})
+        await db.insert(PromptTemplate).values({name: 'Llama 3 Roleplay', content: llama3Roleplay})
+        await db.insert(PromptTemplate).values({name: 'Phi 3 Roleplay', content: phi3Roleplay})
         await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl})
         await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3})
         await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3})
-        await db.insert(PromptTemplate).values({name: 'ChatML Roleplay', content: chatMlRoleplay})
-        await db.insert(PromptTemplate).values({name: 'Phi 3 Roleplay', content: phi3Roleplay})
-        await db.insert(PromptTemplate).values({name: 'Llama 3 Roleplay', content: llama3Roleplay})
     }
 
     // Initialize a user

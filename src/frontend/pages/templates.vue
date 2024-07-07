@@ -101,6 +101,8 @@ const exampleOutput = computed(() => {
     } catch (err) {
         parsed = `Error parsing template\n${err}`
     }
+    // Escape xml characters
+    parsed = parsed.replace(/</g, '&lt;').replace(/>/g, '&gt;')
     return parsed.replace(/\n/g, '<br>')
 })
 
