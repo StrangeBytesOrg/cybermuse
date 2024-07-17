@@ -8,7 +8,7 @@ Roleplay in this chat with the user using the provided character description bel
 {{message.character.name}}: {{message.text}}<|im_end|>
 {% endfor %}
 <|im_start|>assistant
-{{char}}: `
+`
 
 export const llama3Roleplay = `<|start_header_id|>system<|end_header_id|>
 
@@ -18,7 +18,7 @@ Roleplay in this chat with the user using the provided character description bel
 
 {{message.character.name}}: {{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>
 
-{{char}}: `
+`
 
 export const phi3Roleplay = `<|user|>Roleplay in this chat with the user using the provided character description below.
 {% for character in characters %}{{character.name}}: {{character.description}}
@@ -26,7 +26,7 @@ export const phi3Roleplay = `<|user|>Roleplay in this chat with the user using t
 {% for message in messages %}<|{{message.role}}|>
 {{message.character.name}}: {{message.text}}<|end|>
 {% endfor %}<|assistant|>
-{{char}}: `
+`
 
 export const chatMl = `{% for message in messages %}
 <|im_start|>{{"user" if message.character.type == "user" else "assistant"}}

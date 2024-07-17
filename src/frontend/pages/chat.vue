@@ -71,14 +71,25 @@ const fullSend = async () => {
     }
 
     // If there is only one character in the chat, simply use that character
+    let characterId
     if (nonUserCharacters.length === 1) {
-        const characterId = nonUserCharacters[0].id
-        await createMessage(characterId, '', true)
+        characterId = nonUserCharacters[0].id
     } else {
-        const characterId = await getCharacter()
-        await createMessage(characterId, '', true)
+        try {
+            characterId = await getCharacter()
+            console.log(`Picked character ${characterId}`)
+        } catch (err) {
+            console.error(`Failed getting response character: ${err}`)
+            toast.error('Failed getting response character')
+            return
+        }
     }
 
+    if (!characterId) {
+        return
+    }
+
+    await createMessage(characterId, '', true)
     await generateMessage()
 }
 
@@ -185,11 +196,13 @@ const stopGeneration = () => {
 }
 
 const getCharacter = async () => {
-    const {data, error} = await client.POST('/get-response-character/{chatId}', {
-        params: {path: {chatId: Number(chatId)}},
+    const {data, error} = await client.POST('/get-response-character', {
+        body: {
+            chatId: Number(chatId),
+        },
     })
     if (error) {
-        toast.error(error.detail || 'Failed getting character')
+        toast.error(error.message || 'Failed getting character')
     }
     return data?.characterId
 }
