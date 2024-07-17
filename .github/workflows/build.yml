@@ -96,3 +96,50 @@ jobs:
           Compress-Archive -Path cybermuse-desktop-win-x64.exe -DestinationPath cybermuse-desktop-win-x64.zip
           rclone copy cybermuse-desktop-win-x64.zip r2:chat-app-releases/latest/
           rclone copyto cybermuse-desktop-win-x64.zip r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-win-x64.zip
+
+      # Github Release
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.APP_VERSION }}
+          release_name: Release ${{ env.APP_VERSION }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Mac Build to Release
+        if: matrix.build.platform == 'darwin/amd64'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: out/cybermuse-desktop-mac-x64.zip
+          asset_name: cybermuse-desktop-mac-x64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Mac Arm64 Build to Release
+        if: matrix.build.platform == 'darwin/amd64'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: out/cybermuse-desktop-mac-arm64.zip
+          asset_name: cybermuse-desktop-mac-arm64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Windows Build to Release
+        if: matrix.build.platform == 'windows/amd64'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: out/cybermuse-desktop-win-x64.zip
+          asset_name: cybermuse-desktop-win-x64.zip
+          asset_content_type: application/zip
+      
+      # TODO add linux build after GPU acceleration is added
