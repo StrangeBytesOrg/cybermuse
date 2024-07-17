@@ -14,7 +14,24 @@ env:
   VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 
 jobs:
+  create_release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with: 
+          tag_name: ${{ env.APP_VERSION }}
+          release_name: ${{ env.APP_VERSION }}
+          draft: false
+          prerelease: false
   build:
+    needs: create_release
     strategy:
       fail-fast: false
       matrix:
@@ -96,18 +113,6 @@ jobs:
           Compress-Archive -Path cybermuse-desktop-win-x64.exe -DestinationPath cybermuse-desktop-win-x64.zip
           rclone copy cybermuse-desktop-win-x64.zip r2:chat-app-releases/latest/
           rclone copyto cybermuse-desktop-win-x64.zip r2:chat-app-releases/versions/cybermuse-desktop-${{env.APP_VERSION}}-win-x64.zip
-
-      # Github Release
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ env.APP_VERSION }}
-          release_name: Release ${{ env.APP_VERSION }}
-          draft: false
-          prerelease: false
 
       - name: Upload Mac Build to Release
         if: matrix.build.platform == 'darwin/amd64'
