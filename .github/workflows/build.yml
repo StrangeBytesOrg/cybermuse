@@ -29,6 +29,7 @@ jobs:
           prerelease: false
   build:
     needs: create_release
+    permissions: write-all
     strategy:
       fail-fast: false
       matrix:
