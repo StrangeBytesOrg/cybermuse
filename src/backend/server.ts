@@ -1,11 +1,14 @@
+import path from 'node:path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
 import {env} from './env.js'
+
 // Routes
 import {characterRoutes} from './controllers/character.js'
 import {chatRoutes} from './controllers/chats.js'
@@ -113,6 +116,11 @@ await server.register(generatePresetsRoutes, {prefix: '/api'})
 await server.register(generateRoutes, {prefix: '/api'})
 await server.register(templateRoutes, {prefix: '/api'})
 await server.register(llamaServerRoutes, {prefix: '/api'})
+
+// Serve frontend
+await server.register(fastifyStatic, {
+    root: path.resolve(import.meta.dirname, '../../dist/'),
+})
 
 server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
     if (error) {
