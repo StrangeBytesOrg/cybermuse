@@ -108,14 +108,41 @@ await getModels()
 <template>
     <div class="p-3">
         <div class="flex flex-col">
-            <h2 class="text-md mt-3">Model Folder</h2>
-            <div class="flex flex-row mt-1">
-                <input type="text" class="input input-bordered max-w-96 flex-grow" v-model="modelPath" />
-                <button class="btn btn-primary ml-2" @click="setModelDir">Update</button>
-            </div>
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Model Folder</span>
+                </div>
+                <div>
+                    <input type="text" class="input input-bordered w-full md:max-w-96" v-model="modelPath" />
+                    <button class="btn btn-primary mt-2 md:w-32 md:mt-0 md:ml-2" @click="setModelDir">Update</button>
+                </div>
+            </label>
 
-            <h2 class="text-md mt-3">Model</h2>
-            <div class="flex flex-row mt-1">
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Context size</span>
+                </div>
+                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="contextSize" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Use GPU</span>
+                </div>
+                <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Auto load model</span>
+                </div>
+                <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Model</span>
+                </div>
                 <select v-model="selectModel" class="select select-bordered max-w-96 flex-grow">
                     <option v-for="model in models" :key="model.name">
                         {{ model.name }}
@@ -123,31 +150,16 @@ await getModels()
                     <option v-if="!models.length" disabled>No models found</option>
                 </select>
 
-                <button @click="getModels" class="btn btn-primary ml-2">Refresh</button>
-                <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Load</button>
-                <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary ml-2">Unload</button>
-            </div>
-
-            <div class="form-control w-52 mt-3">
-                <label class="label">
-                    <span class="label-text min-w-28">Context size</span>
-                    <input type="number" class="input input-bordered" v-model="contextSize" />
-                </label>
-            </div>
-
-            <div class="form-control w-52 mt-3">
-                <label class="cursor-pointer label">
-                    <span class="label-text text-lg">Use GPU</span>
-                    <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" />
-                </label>
-            </div>
-
-            <div class="form-control w-52 mt-3">
-                <label class="cursor-pointer label">
-                    <span class="label-text text-lg">Auto load model</span>
-                    <input type="checkbox" class="toggle toggle-primary" v-model="autoLoad" @change="setAutoLoad" />
-                </label>
-            </div>
+                <div class="flex flex-row mt-3 md:max-w-96 space-x-2">
+                    <button @click="getModels" class="btn btn-primary flex-grow">Refresh</button>
+                    <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">
+                        Load
+                    </button>
+                    <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">
+                        Unload
+                    </button>
+                </div>
+            </label>
         </div>
     </div>
 </template>
