@@ -8,7 +8,7 @@ import {useToast} from 'vue-toastification'
 const connectionStore = useConnectionStore()
 const pendingMessage = ref(false)
 const currentInput = ref('')
-const systemPrompt = ref('')
+// const systemPrompt = ref('')
 const generatedResponse = ref('')
 const toast = useToast()
 let controller: AbortController
@@ -31,7 +31,7 @@ const getGeneration = async () => {
     controller = new AbortController()
 
     try {
-        const {response} = await client.POST('/generate', {
+        const {response} = await client.POST('/generate-stream', {
             body: {
                 prompt: currentInput.value,
                 // instruction: systemPrompt.value || undefined,
@@ -53,15 +53,9 @@ const getGeneration = async () => {
                 console.error('Unknown event', chunk)
             }
         }
-    } catch (err) {
-        switch (err.name) {
-            case 'AbortError':
-                console.log('Aborted')
-                break
-            default:
-                console.error(err)
-                toast.error(`Error generating message: ${err.message}`)
-        }
+    } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return
+        throw error
     } finally {
         pendingMessage.value = false
     }
@@ -77,13 +71,13 @@ const stop = async () => {
     <div class="flex flex-row min-h-[100vh]">
         <!-- Input -->
         <div class="flex flex-col flex-grow w-1/2 p-2">
-            <textarea
+            <!-- <textarea
                 class="textarea textarea-bordered flex-grow text-base focus:outline-none focus:border-secondary border-2"
                 placeholder="System Instruction"
-                v-model="systemPrompt" />
+                v-model="systemPrompt" /> -->
             <textarea
                 class="textarea textarea-bordered mt-1 flex-grow text-base focus:outline-none focus:border-secondary border-2"
-                placeholder="Instruction"
+                placeholder="Prompt"
                 @keydown.ctrl.enter="getGeneration"
                 :disabled="pendingMessage"
                 v-model="currentInput" />

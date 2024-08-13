@@ -7,13 +7,13 @@ import CreateCharacter from './pages/character-create.vue'
 import Chat from './pages/chat.vue'
 import Chats from './pages/chats.vue'
 import CreateChat from './pages/chat-create.vue'
+import Instruct from './pages/instruct.vue'
 import Templates from './pages/templates.vue'
 import CreateTemplate from './pages/template-create.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
 import DownloadModels from './pages/download-models.vue'
-import Instruct from './pages/instruct.vue'
 import ThemeSettings from './pages/theme-settings.vue'
 
 export default createRouter({
@@ -53,6 +53,11 @@ export default createRouter({
             path: '/create-chat',
             name: 'create-chat',
             component: CreateChat,
+        },
+        {
+            path: '/instruct',
+            name: 'instruct',
+            component: Instruct,
         },
         {
             path: '/templates',

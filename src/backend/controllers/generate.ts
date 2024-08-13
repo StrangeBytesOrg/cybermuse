@@ -2,11 +2,12 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
-// import {Template} from '@huggingface/jinja'
+import {Template} from '@huggingface/jinja'
 import {responseToIterable} from '../lib/sse.js'
 import {db, User} from '../db.js'
+import {env} from '../env.js'
 
-const llamaCppBaseUrl = 'http://localhost:8080'
+const llamaCppBaseUrl = env.LLAMA_SERVER_URL || 'http://localhost:8080'
 
 export const generateRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -41,7 +42,7 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
 
             const userSettings = await db.query.User.findFirst({
                 where: eq(User.id, 1),
-                with: {generatePreset: true},
+                with: {generatePreset: true, promptTemplate: true},
             })
             const generatePreset = userSettings?.generatePreset
             if (!generatePreset) {
@@ -50,6 +51,33 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                 request.socket.destroy()
                 return
             }
+            const promptTemplate = userSettings.promptTemplate
+            if (!promptTemplate) {
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'No prompt template found'})}\n\n`)
+                return
+            }
+
+            console.log(`Prompt: ${request.body.prompt}`)
+            const template = new Template(promptTemplate.content || '')
+            let prompt = ''
+            try {
+                prompt = template.render({
+                    messages: [
+                        {
+                            text: request.body.prompt,
+                        },
+                    ],
+                    characters: [],
+                })
+            } catch (err) {
+                console.error('Failed to render prompt template')
+                console.error(err)
+                reply.raw.write(
+                    `event: error\ndata: ${JSON.stringify({error: 'Failed to render prompt template'})}\n\n`,
+                )
+                return
+            }
+            console.log(`Parsed prompt: ${prompt}`)
 
             try {
                 const response = await fetch(`${llamaCppBaseUrl}/completion`, {
@@ -58,7 +86,7 @@ export const generateRoutes: FastifyPluginAsync = async (fastify) => {
                     body: JSON.stringify({
                         stream: true,
                         cache_prompt: true,
-                        prompt: request.body.prompt,
+                        prompt,
                         n_predict: generatePreset.maxTokens,
                         seed: generatePreset.seed,
                         temperature: generatePreset.temperature,
