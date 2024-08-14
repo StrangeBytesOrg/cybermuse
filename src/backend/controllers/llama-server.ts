@@ -126,6 +126,8 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
         const args = ['-m', modelPath]
         args.push('--ctx-size', String(contextSize))
         args.push('--log-disable') // Prevent creating a llama.log file
+        args.push('--host', '0.0.0.0') // TODO make this configurable
+        args.push('--port', '8080') // TODO make this configurable
         if (useGPU) {
             args.push('--gpu-layers', '128')
         }
