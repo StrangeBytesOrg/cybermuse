@@ -8,6 +8,13 @@
       "when": 1719992646853,
       "tag": "0000_initial",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1723846339027,
+      "tag": "0001_daily_george_stacy",
+      "breakpoints": true
     }
   ]
 }
