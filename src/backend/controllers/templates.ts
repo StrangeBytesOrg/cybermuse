@@ -2,7 +2,9 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
+import {Template} from '@huggingface/jinja'
 import {db, User, PromptTemplate, selectPromptTemplateSchema} from '../db.js'
+import {logger} from '../logging.js'
 
 export const templateRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -69,6 +71,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             body: t.Object({
                 name: t.String({minLength: 1}),
                 content: t.String({minLength: 1}),
+                instruction: t.String({minLength: 1}),
             }),
             response: {
                 200: t.Object({id: t.Number()}),
@@ -77,7 +80,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         handler: async (req) => {
             const [newTemplate] = await db
                 .insert(PromptTemplate)
-                .values({name: req.body.name, content: req.body.content})
+                .values({name: req.body.name, content: req.body.content, instruction: req.body.instruction})
                 .returning({id: PromptTemplate.id})
             await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
             return {id: newTemplate.id}
@@ -96,13 +99,14 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             }),
             body: t.Object({
                 name: t.String(),
-                content: t.String(),
+                content: t.String({minLength: 1}),
+                instruction: t.String({minLength: 1}),
             }),
         },
         handler: async (req, reply) => {
             const {changes} = await db
                 .update(PromptTemplate)
-                .set({name: req.body.name, content: req.body.content})
+                .set({name: req.body.name, content: req.body.content, instruction: req.body.instruction})
                 .where(eq(PromptTemplate.id, Number(req.params.id)))
             if (changes === 0) {
                 return reply.status(404).send({message: 'Template not found'})
@@ -150,6 +154,38 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 // TODO handle other reasons for this to fail
                 return reply.status(404).send({message: 'User not found'})
             }
+        },
+    })
+
+    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
+        url: '/parse-template',
+        method: 'POST',
+        schema: {
+            summary: 'Parse a prompt template',
+            operationId: 'ParsePromptTemplate',
+            tags: ['templates'],
+            body: t.Object({
+                content: t.String({minLength: 1}),
+                instruction: t.String({minLength: 1}),
+                messages: t.Array(t.Any()),
+                characters: t.Array(t.Any()),
+            }),
+            response: {
+                200: t.String(),
+            },
+        },
+        handler: async (req) => {
+            const instructionTemplate = new Template(req.body.instruction)
+            const contentTemplate = new Template(req.body.content)
+            const parsedInstruction = instructionTemplate.render({
+                characters: req.body.characters,
+            })
+            logger.info('Parsed instruction:', parsedInstruction)
+            const parsedContent = contentTemplate.render({
+                instruction: parsedInstruction,
+                messages: req.body.messages,
+            })
+            return parsedContent
         },
     })
 }

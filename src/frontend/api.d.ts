@@ -568,6 +568,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/parse-template": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Parse a prompt template */
+        post: operations["ParsePromptTemplate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/status": {
         parameters: {
             query?: never;
@@ -1617,6 +1634,7 @@ export interface operations {
                             id: number;
                             name: string;
                             content: string;
+                            instruction: string;
                         }[];
                         activeTemplateId: number;
                     };
@@ -1655,6 +1673,7 @@ export interface operations {
                             id: number;
                             name: string;
                             content: string;
+                            instruction: string;
                         };
                     };
                 };
@@ -1682,6 +1701,7 @@ export interface operations {
                 "application/json": {
                     name: string;
                     content: string;
+                    instruction: string;
                 };
             };
         };
@@ -1722,6 +1742,7 @@ export interface operations {
                 "application/json": {
                     name: string;
                     content: string;
+                    instruction: string;
                 };
             };
         };
@@ -1770,6 +1791,44 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    ParsePromptTemplate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    content: string;
+                    instruction: string;
+                    messages: unknown[];
+                    characters: unknown[];
+                };
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
             /** @description Default error response */
             default: {
                 headers: {

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {ref, computed, onMounted} from 'vue'
 import {useToast} from 'vue-toastification'
-import {Template} from '@huggingface/jinja'
 import {client} from '../api-client'
 
 const toast = useToast()
@@ -12,14 +11,15 @@ if (error) {
 
 const templates = ref(data?.templates || [])
 const selectedTemplate = ref(data?.activeTemplateId || 0)
-const showPreview = ref(false)
+const exampleOutput = ref('')
 
 const activeTemplate = computed(() => {
-    const missingTemplate = {id: 0, name: '', content: ''}
+    const missingTemplate = {id: 0, name: '', content: '', instruction: ''}
     return templates.value?.find((template) => template.id === selectedTemplate.value) || missingTemplate
 })
 
 const setActiveTemplate = async () => {
+    exampleOutput.value = ''
     if (!selectedTemplate.value) {
         toast.error('No template selected')
         return
@@ -46,6 +46,7 @@ const updateTemplate = async () => {
         body: {
             name: activeTemplate.value.name,
             content: activeTemplate.value.content,
+            instruction: activeTemplate.value.instruction,
         },
     })
     if (error) {
@@ -74,37 +75,33 @@ const deleteTemplate = async () => {
     }
 }
 
-const previewTemplate = () => {
-    showPreview.value = !showPreview.value
-}
+const getPreview = async () => {
+    const characters = [
+        {name: 'Alice', description: 'A character named Alice.'},
+        {name: 'Bob', description: 'A character named Bob.'},
+    ]
+    const messages = [
+        {text: 'Hello', generated: false, role: 'user', character: characters[0]},
+        {text: 'Hi, how are you {{user}}?', generated: true, role: 'assistant', character: characters[1]},
+        {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
+        {text: '', generated: true, role: 'assistant', character: characters[1]},
+    ]
 
-const characters = [
-    {name: 'Alice', description: 'A character named Alice.'},
-    {name: 'Bob', description: 'A character named Bob.'},
-]
-
-const exampleOutput = computed(() => {
-    let parsed = ''
-    try {
-        const template = new Template(activeTemplate.value.content)
-        parsed = template.render({
-            characters: characters,
-            messages: [
-                {text: 'Hello', generated: false, role: 'user', character: characters[0]},
-                {text: 'Hi, how are you {{user}}?', generated: true, role: 'assistant', character: characters[1]},
-                {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
-                {text: '', generated: true, role: 'assistant', character: characters[1]},
-            ],
-            char: characters[0]?.name,
-            user: characters[1]?.name,
-        })
-    } catch (err) {
-        parsed = `Error parsing template\n${err}`
+    const {data, error} = await client.POST('/parse-template', {
+        body: {
+            content: activeTemplate.value.content,
+            instruction: activeTemplate.value.instruction,
+            characters,
+            messages,
+        },
+        parseAs: 'text',
+    })
+    if (error) {
+        toast.error(`Error parsing template: ${error.message}`)
     }
-    // Escape xml characters
-    parsed = parsed.replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    return parsed.replace(/\n/g, '<br>')
-})
+    console.log(data)
+    exampleOutput.value = data?.replace(/\n/g, '<br>') || ''
+}
 
 const resizeTextarea = async (event: Event) => {
     const textarea = event.target as HTMLTextAreaElement
@@ -153,14 +150,23 @@ onMounted(() => {
                     @input="resizeTextarea"
                     class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
             </label>
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">System Instruction</span>
+                </div>
+                <textarea
+                    v-model="activeTemplate.instruction"
+                    @input="resizeTextarea"
+                    class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+            </label>
 
             <div class="flex flex-row space-x-2 mt-3">
                 <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
-                <button @click="previewTemplate" class="btn btn-neutral flex-grow">Preview</button>
+                <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
                 <button @click="deleteTemplate()" class="btn btn-error flex-grow">Delete</button>
             </div>
         </div>
 
-        <div class="bg-base-200 rounded-lg p-3 mt-2" v-if="exampleOutput && showPreview" v-html="exampleOutput"></div>
+        <div v-if="exampleOutput" v-html="exampleOutput" class="bg-base-200 rounded-lg p-3 mt-2"></div>
     </div>
 </template>

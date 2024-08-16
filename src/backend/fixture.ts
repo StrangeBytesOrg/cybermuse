@@ -3,7 +3,7 @@ import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePrese
 import {logger} from './logging.js'
 
 // Fixture data
-import {chatMLRoleplay, llama3Roleplay, phi3Roleplay, chatMl, llama3, phi3} from './fixtures/prompt-templates.js'
+import {defaultInstruction, chatMl, llama3, phi3} from './fixtures/prompt-templates.js'
 
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
@@ -46,12 +46,9 @@ export const fixtureData = async () => {
     const existingPromptPreset = await db.query.PromptTemplate.findFirst({where: eq(PromptTemplate.id, 1)})
     if (!existingPromptPreset) {
         logger.info('Creating default prompt templates')
-        await db.insert(PromptTemplate).values({name: 'ChatML Roleplay', content: chatMLRoleplay})
-        await db.insert(PromptTemplate).values({name: 'Llama 3 Roleplay', content: llama3Roleplay})
-        await db.insert(PromptTemplate).values({name: 'Phi 3 Roleplay', content: phi3Roleplay})
-        await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl})
-        await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3})
-        await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3})
+        await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl, instruction: defaultInstruction})
+        await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3, instruction: defaultInstruction})
+        await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3, instruction: defaultInstruction})
     }
 
     // Initialize a user
