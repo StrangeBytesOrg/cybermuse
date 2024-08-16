@@ -12,8 +12,13 @@ const selectModel = ref('')
 const modelLoaded = ref(false)
 const modelPath = ref('')
 const contextSize = ref(8192)
+const batchSize = ref(512)
 const autoLoad = ref(false)
-const useGPU = ref(false)
+const gpuLayers = ref(0)
+const useFlashAttn = ref(false)
+const splitMode = ref<'layer' | 'row'>('layer')
+const cacheTypeK = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
+const cacheTypeV = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
 const modelLoadPending = ref(false)
 
 const getStatus = async () => {
@@ -28,7 +33,12 @@ const getStatus = async () => {
         contextSize.value = data.contextSize
         autoLoad.value = data.autoLoad
         selectModel.value = data.currentModel
-        useGPU.value = data.useGPU
+        batchSize.value = data.batchSize
+        gpuLayers.value = data.gpuLayers
+        useFlashAttn.value = data.useFlashAttn
+        splitMode.value = data.splitMode
+        cacheTypeK.value = data.cacheTypeK
+        cacheTypeV.value = data.cacheTypeV
     }
 }
 
@@ -44,12 +54,22 @@ const getModels = async () => {
 }
 
 const loadModel = async () => {
+    if (!selectModel.value) {
+        toast.error('No model selected')
+        return
+    }
+
     modelLoadPending.value = true
     const {error} = await client.POST('/start-server', {
         body: {
             modelFile: selectModel.value,
             contextSize: contextSize.value,
-            useGPU: useGPU.value,
+            batchSize: batchSize.value,
+            gpuLayers: gpuLayers.value,
+            useFlashAttn: useFlashAttn.value,
+            splitMode: splitMode.value,
+            cacheTypeK: cacheTypeK.value,
+            cacheTypeV: cacheTypeV.value,
         },
     })
     if (error) {
@@ -127,9 +147,55 @@ await getModels()
 
             <label class="form-control w-full mt-3">
                 <div class="label">
-                    <span class="label-text">Use GPU</span>
+                    <span class="label-text">Batch size</span>
                 </div>
-                <input type="checkbox" class="toggle toggle-primary" v-model="useGPU" />
+                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="batchSize" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">GPU layers</span>
+                </div>
+                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="gpuLayers" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Use Flash Attention</span>
+                </div>
+                <input type="checkbox" class="toggle toggle-primary" v-model="useFlashAttn" />
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Split Mode</span>
+                </div>
+                <select v-model="splitMode" class="select select-bordered max-w-96 flex-grow">
+                    <option value="layer">Layer (Default)</option>
+                    <option value="row">Row</option>
+                </select>
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Cache Type K</span>
+                </div>
+                <select v-model="cacheTypeK" class="select select-bordered max-w-96 flex-grow">
+                    <option value="f16">f16 (Default)</option>
+                    <option value="q4_0">q4_0</option>
+                    <option value="q8_0">q8_0</option>
+                </select>
+            </label>
+
+            <label class="form-control w-full mt-3">
+                <div class="label">
+                    <span class="label-text">Cache Type V</span>
+                </div>
+                <select v-model="cacheTypeV" class="select select-bordered max-w-96 flex-grow">
+                    <option value="f16">f16 (Default)</option>
+                    <option value="q4_0">q4_0</option>
+                    <option value="q8_0">q8_0</option>
+                </select>
             </label>
 
             <label class="form-control w-full mt-3">
@@ -149,17 +215,14 @@ await getModels()
                     </option>
                     <option v-if="!models.length" disabled>No models found</option>
                 </select>
-
-                <div class="flex flex-row mt-3 md:max-w-96 space-x-2">
-                    <button @click="getModels" class="btn btn-primary flex-grow">Refresh</button>
-                    <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">
-                        Load
-                    </button>
-                    <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">
-                        Unload
-                    </button>
-                </div>
             </label>
+            <div class="flex flex-row mt-3 md:max-w-96 space-x-2">
+                <button @click="getModels" class="btn btn-primary flex-grow">Refresh</button>
+                <button @click="loadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">Load</button>
+                <button @click="unloadModel" :disabled="modelLoadPending" class="btn btn-primary flex-grow">
+                    Unload
+                </button>
+            </div>
         </div>
     </div>
 </template>

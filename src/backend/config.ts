@@ -6,14 +6,20 @@ import {logger} from './logging.js'
 
 const paths = envPaths('cybermuse-desktop', {suffix: ''})
 const configPath = path.resolve(paths.config, 'config.json')
+logger.info(`Config path: ${configPath}`)
 
 const configSchema = z.object({
     serverPort: z.number().default(31700),
     modelsPath: z.string().default(path.resolve(paths.config, 'models')),
     autoLoad: z.boolean().default(false),
     lastModel: z.string().default(''),
-    useGPU: z.boolean().default(false),
     contextSize: z.number().default(8192),
+    batchSize: z.number().default(512),
+    gpuLayers: z.number().default(0),
+    useFlashAttn: z.boolean().default(false),
+    splitMode: z.enum(['row', 'layer']).default('row'),
+    cacheTypeK: z.enum(['f16', 'q8_0', 'q4_0']).default('f16'),
+    cacheTypeV: z.enum(['f16', 'q8_0', 'q4_0']).default('f16'),
 })
 type Config = z.infer<typeof configSchema>
 

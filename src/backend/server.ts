@@ -26,13 +26,6 @@ await fixtureData()
 
 const config = getConfig()
 
-if (config.autoLoad && !env.LLAMA_SERVER_URL) {
-    const modelName = config.lastModel
-    const contextSize = config.contextSize
-    const useGPU = config.useGPU
-    await startLlamaServer(modelName, contextSize, useGPU)
-}
-
 export const server = Fastify({
     // logger: true,
     bodyLimit: 1024 * 1024 * 5, // 5MB
@@ -128,6 +121,20 @@ server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
     }
     logger.info(`Server running on port ${config.serverPort}`)
 })
+
+if (config.autoLoad && !env.LLAMA_SERVER_URL) {
+    logger.info(`Auto-loading llama server with model: ${config.lastModel}`)
+    await startLlamaServer(
+        config.lastModel,
+        config.contextSize,
+        config.batchSize,
+        config.gpuLayers,
+        config.useFlashAttn,
+        config.splitMode,
+        config.cacheTypeK,
+        config.cacheTypeV,
+    )
+}
 
 process.on('SIGINT', () => {
     server.close()

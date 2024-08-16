@@ -35,8 +35,13 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
                     modelPath: t.String(),
                     autoLoad: t.Boolean(),
                     loaded: t.Boolean(),
-                    useGPU: t.Boolean(),
                     contextSize: t.Number(),
+                    batchSize: t.Number(),
+                    gpuLayers: t.Number(),
+                    useFlashAttn: t.Boolean(),
+                    splitMode: t.Union([t.Literal('row'), t.Literal('layer')]),
+                    cacheTypeK: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
+                    cacheTypeV: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
                 }),
             },
         },
@@ -50,8 +55,13 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
                 currentModel,
                 modelPath: config.modelsPath,
                 autoLoad: config.autoLoad,
-                useGPU: config.useGPU,
                 contextSize: config.contextSize,
+                batchSize: config.batchSize,
+                gpuLayers: config.gpuLayers,
+                useFlashAttn: config.useFlashAttn,
+                splitMode: config.splitMode,
+                cacheTypeK: config.cacheTypeK,
+                cacheTypeV: config.cacheTypeV,
             }
         },
     })
@@ -66,7 +76,12 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             body: t.Object({
                 modelFile: t.String(),
                 contextSize: t.Number(),
-                useGPU: t.Boolean(),
+                batchSize: t.Number(),
+                gpuLayers: t.Number(),
+                useFlashAttn: t.Boolean(),
+                splitMode: t.Union([t.Literal('row'), t.Literal('layer')]),
+                cacheTypeK: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
+                cacheTypeV: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
             }),
             response: {
                 200: t.Object({
@@ -75,8 +90,18 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (req) => {
-            const {modelFile, contextSize, useGPU} = req.body
-            await startLlamaServer(modelFile, contextSize, useGPU)
+            const {modelFile, contextSize, batchSize, gpuLayers, useFlashAttn, splitMode, cacheTypeK, cacheTypeV} =
+                req.body
+            await startLlamaServer(
+                modelFile,
+                contextSize,
+                batchSize,
+                gpuLayers,
+                useFlashAttn,
+                splitMode,
+                cacheTypeK,
+                cacheTypeV,
+            )
             return {success: true}
         },
     })
@@ -101,8 +126,17 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
     })
 }
 
-export const startLlamaServer = async (modelName: string, contextSize: number, useGPU: boolean) => {
-    // Run llama.cpp server
+// TODO merge useGPU and gpuLayers into a single object
+export const startLlamaServer = async (
+    modelName: string,
+    contextSize: number,
+    batchSize: number = 512,
+    gpuLayers: number = 0,
+    useFlashAttn: boolean = false,
+    splitMode: 'row' | 'layer' = 'row',
+    cacheTypeK: 'f16' | 'q8_0' | 'q4_0' = 'f16',
+    cacheTypeV: 'f16' | 'q8_0' | 'q4_0' = 'f16',
+) => {
     let serverBinPath = path.resolve(import.meta.dirname, '../../llamacpp/llama-server')
     if (env.DEV) {
         serverBinPath = path.resolve(import.meta.dirname, '../../../llamacpp/llama-server')
@@ -118,19 +152,41 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
     const config = getConfig()
     const modelPath = path.resolve(config.modelsPath, modelName)
     logger.info(`Attempting to start server with model: ${modelPath}`)
-    if (!fs.existsSync(modelPath)) {
-        throw new Error('Model file not found')
+    try {
+        await fs.promises.access(modelPath, fs.constants.F_OK)
+        const stats = await fs.promises.stat(modelPath)
+        if (!stats.isFile()) {
+            throw new Error('Model file not found')
+        }
+    } catch (err) {
+        throw new Error('Model file not found or not accessible')
     }
 
     return new Promise((resolve, reject) => {
-        const args = ['-m', modelPath]
+        const args: string[] = []
+        args.push('--model', modelPath)
         args.push('--ctx-size', String(contextSize))
+        args.push('--batch-size', String(batchSize))
         args.push('--log-disable') // Prevent creating a llama.log file
         args.push('--host', '0.0.0.0') // TODO make this configurable
         args.push('--port', '8080') // TODO make this configurable
-        if (useGPU) {
-            args.push('--gpu-layers', '128')
+        if (gpuLayers) {
+            args.push('--gpu-layers', String(gpuLayers))
         }
+        if (splitMode) {
+            args.push('--split-mode', splitMode)
+        }
+        if (useFlashAttn) {
+            args.push('--flash-attn')
+        }
+        if (cacheTypeK) {
+            args.push('--cache-type-k', cacheTypeK)
+        }
+        if (cacheTypeV) {
+            args.push('--cache-type-v', cacheTypeV)
+        }
+        logger.info(`llama-server args: ${args.join(' ')}`)
+
         llamaServerProc = spawn(serverBinPath, args, {})
         llamaServerProc.stdout.on('data', (data) => {
             const output: string = data.toString()
@@ -139,9 +195,14 @@ export const startLlamaServer = async (modelName: string, contextSize: number, u
                 logger.info('Detected server startup')
                 loaded = true
                 currentModel = modelName
-                config.contextSize = contextSize
-                config.useGPU = useGPU
                 config.lastModel = modelName
+                config.contextSize = contextSize
+                config.batchSize = batchSize
+                config.gpuLayers = gpuLayers
+                config.useFlashAttn = useFlashAttn
+                config.splitMode = splitMode
+                config.cacheTypeK = cacheTypeK
+                config.cacheTypeV = cacheTypeV
                 setConfig(config)
                 resolve({success: true})
             }
