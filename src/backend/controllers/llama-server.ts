@@ -191,8 +191,8 @@ export const startLlamaServer = async (
         llamaServerProc.stdout.on('data', (data) => {
             const output: string = data.toString()
             process.stdout.write(chalk.cyan(output))
-            if (output.includes('HTTP server listening')) {
-                logger.info('Detected server startup')
+            if (output.includes('model loaded')) {
+                logger.info('Detected model loaded')
                 loaded = true
                 currentModel = modelName
                 config.lastModel = modelName
