@@ -9,6 +9,7 @@ const toast = useToast()
 const router = useRouter()
 const templateName = ref('')
 const templateContent = ref('')
+const instruction = ref('')
 
 const characters = [
     {name: 'Alice', description: 'A character named Alice.'},
@@ -40,6 +41,7 @@ const createTemplate = async () => {
         body: {
             name: templateName.value,
             content: templateContent.value,
+            instruction: instruction.value,
         },
     })
     if (error) {
@@ -75,6 +77,15 @@ const resizeTextarea = async (event: Event) => {
             </div>
             <textarea
                 v-model="templateContent"
+                @input="resizeTextarea"
+                class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+        </label>
+        <label class="form-control w-full">
+            <div class="label">
+                <span class="label-text">Instruction</span>
+            </div>
+            <textarea
+                v-model="instruction"
                 @input="resizeTextarea"
                 class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
         </label>

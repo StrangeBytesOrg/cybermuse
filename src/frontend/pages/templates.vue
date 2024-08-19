@@ -84,7 +84,7 @@ const getPreview = async () => {
         {text: 'Hello', generated: false, role: 'user', character: characters[0]},
         {text: 'Hi, how are you {{user}}?', generated: true, role: 'assistant', character: characters[1]},
         {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
-        {text: '', generated: true, role: 'assistant', character: characters[1]},
+        // {text: '', generated: true, role: 'assistant', character: characters[1]},
     ]
 
     const {data, error} = await client.POST('/parse-template', {
@@ -100,7 +100,7 @@ const getPreview = async () => {
         toast.error(`Error parsing template: ${error.message}`)
     }
     console.log(data)
-    exampleOutput.value = data?.replace(/\n/g, '<br>') || ''
+    exampleOutput.value = data?.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
 }
 
 const resizeTextarea = async (event: Event) => {
