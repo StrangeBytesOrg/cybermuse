@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import {ref, computed} from 'vue'
+import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {Template} from '@huggingface/jinja'
 import {client} from '../api-client'
 
 const toast = useToast()
@@ -10,31 +9,7 @@ const router = useRouter()
 const templateName = ref('')
 const templateContent = ref('')
 const instruction = ref('')
-
-const characters = [
-    {name: 'Alice', description: 'A character named Alice.'},
-    {name: 'Bob', description: 'A character named Bob.'},
-]
-
-const exampleOutput = computed(() => {
-    let parsed = ''
-    try {
-        const template = new Template(templateContent.value)
-        parsed = template.render({
-            characters: characters,
-            messages: [
-                {text: 'Hello', generated: false, role: 'user', character: characters[0]},
-                {text: 'Hi, how are you?', generated: true, role: 'assistant', character: characters[1]},
-                {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
-            ],
-            char: characters[0]?.name,
-            user: characters[1]?.name,
-        })
-    } catch (err) {
-        parsed = `Error parsing template\n${err}`
-    }
-    return parsed.replace(/\n/g, '<br>')
-})
+const exampleOutput = ref('')
 
 const createTemplate = async () => {
     const {error} = await client.POST('/create-template', {
@@ -51,6 +26,34 @@ const createTemplate = async () => {
         toast.success('Template created')
         router.push('/templates')
     }
+}
+
+const getPreview = async () => {
+    const characters = [
+        {name: 'Alice', description: 'A character named Alice.'},
+        {name: 'Bob', description: 'A character named Bob.'},
+    ]
+    const messages = [
+        {text: 'Hello', generated: false, role: 'user', character: characters[0]},
+        {text: 'Hi, how are you {{user}}?', generated: true, role: 'assistant', character: characters[1]},
+        {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
+        // {text: '', generated: true, role: 'assistant', character: characters[1]},
+    ]
+
+    const {data, error} = await client.POST('/parse-template', {
+        body: {
+            content: templateContent.value,
+            instruction: instruction.value,
+            characters,
+            messages,
+        },
+        parseAs: 'text',
+    })
+    if (error) {
+        toast.error(`Error parsing template: ${error.message}`)
+    }
+    console.log(data)
+    exampleOutput.value = data?.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -91,6 +94,7 @@ const resizeTextarea = async (event: Event) => {
         </label>
 
         <div class="flex flex-row space-x-2 mt-2">
+            <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
             <button @click="createTemplate" class="btn btn-primary flex-grow">Create Template</button>
         </div>
     </div>
