@@ -106,9 +106,8 @@ const getPreview = async () => {
         toast.error(`Error parsing template: ${error.message}`)
         return
     }
-    exampleChat.value = data?.chatExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
-    exampleInstruct.value =
-        data?.instructExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
+    exampleChat.value = data?.chatExample || ''
+    exampleInstruct.value = data?.instructExample || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -150,7 +149,7 @@ onMounted(() => {
                     class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
             </label>
 
-            <div class="flex flex-row w-full space-x-5">
+            <div class="flex w-full flex-col md:flex-row md:space-x-5">
                 <!-- Chat -->
                 <div class="flex flex-col w-full">
                     <label class="form-control w-full">
@@ -195,12 +194,15 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="flex flex-row space-x-5">
-            <div v-if="exampleChat" v-html="exampleChat" class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
-            <div
-                v-if="exampleInstruct"
-                v-html="exampleInstruct"
-                class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
+        <div class="flex flex-col md:flex-row md:space-x-5 mt-5">
+            <div class="w-full" v-if="exampleChat">
+                <div class="text-lg">Chat Prompt Example</div>
+                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre">{{ exampleChat }}</div>
+            </div>
+            <div class="w-full" v-if="exampleInstruct">
+                <div class="text-lg">Instruct Prompt Example</div>
+                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre">{{ exampleInstruct }}</div>
+            </div>
         </div>
     </div>
 </template>
