@@ -70,8 +70,9 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['templates'],
             body: t.Object({
                 name: t.String({minLength: 1}),
-                content: t.String({minLength: 1}),
-                instruction: t.String({minLength: 1}),
+                instructTemplate: t.String({minLength: 1}),
+                chatTemplate: t.String({minLength: 1}),
+                chatInstruction: t.String({minLength: 1}),
             }),
             response: {
                 200: t.Object({id: t.Number()}),
@@ -80,7 +81,12 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
         handler: async (req) => {
             const [newTemplate] = await db
                 .insert(PromptTemplate)
-                .values({name: req.body.name, content: req.body.content, instruction: req.body.instruction})
+                .values({
+                    name: req.body.name,
+                    instructTemplate: req.body.instructTemplate,
+                    chatTemplate: req.body.chatTemplate,
+                    chatInstruction: req.body.chatInstruction,
+                })
                 .returning({id: PromptTemplate.id})
             await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
             return {id: newTemplate.id}
@@ -99,14 +105,20 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             }),
             body: t.Object({
                 name: t.String(),
-                content: t.String({minLength: 1}),
-                instruction: t.String({minLength: 1}),
+                instructTemplate: t.String({minLength: 1}),
+                chatTemplate: t.String({minLength: 1}),
+                chatInstruction: t.String({minLength: 1}),
             }),
         },
         handler: async (req, reply) => {
             const {changes} = await db
                 .update(PromptTemplate)
-                .set({name: req.body.name, content: req.body.content, instruction: req.body.instruction})
+                .set({
+                    name: req.body.name,
+                    instructTemplate: req.body.instructTemplate,
+                    chatTemplate: req.body.chatTemplate,
+                    chatInstruction: req.body.chatInstruction,
+                })
                 .where(eq(PromptTemplate.id, Number(req.params.id)))
             if (changes === 0) {
                 return reply.status(404).send({message: 'Template not found'})
@@ -165,27 +177,41 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'ParsePromptTemplate',
             tags: ['templates'],
             body: t.Object({
-                content: t.String({minLength: 1}),
-                instruction: t.String({minLength: 1}),
+                chatTemplate: t.String({minLength: 1}),
+                instructTemplate: t.String({minLength: 1}),
+                chatInstruction: t.String({minLength: 1}),
                 messages: t.Array(t.Any()),
                 characters: t.Array(t.Any()),
+                instructMessages: t.Array(t.Any()),
             }),
             response: {
-                200: t.String(),
+                200: t.Object({
+                    chatExample: t.String(),
+                    instructExample: t.String(),
+                }),
             },
         },
         handler: async (req) => {
-            const instructionTemplate = new Template(req.body.instruction)
-            const contentTemplate = new Template(req.body.content)
-            const parsedInstruction = instructionTemplate.render({
+            const chatTemplate = new Template(req.body.chatTemplate)
+            const instructTemplate = new Template(req.body.instructTemplate)
+            const chatInstructionTemplate = new Template(req.body.chatInstruction)
+
+            const chatInstruction = chatInstructionTemplate.render({
                 characters: req.body.characters,
             })
-            logger.info('Parsed instruction:', parsedInstruction)
-            const parsedContent = contentTemplate.render({
-                instruction: parsedInstruction,
+            logger.info('Parsed chat instruction:', chatInstruction)
+
+            const chatExample = chatTemplate.render({
+                instruction: chatInstruction,
                 messages: req.body.messages,
             })
-            return parsedContent
+            const instructExample = instructTemplate.render({
+                messages: req.body.instructMessages,
+            })
+            return {
+                chatExample,
+                instructExample,
+            }
         },
     })
 }

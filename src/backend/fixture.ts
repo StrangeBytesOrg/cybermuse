@@ -2,8 +2,60 @@ import {eq} from 'drizzle-orm'
 import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePreset} from './db.js'
 import {logger} from './logging.js'
 
-// Fixture data
-import {defaultInstruction, chatMl, llama3, phi3} from './fixtures/prompt-templates.js'
+const defaultInstruction = `Roleplay in this chat with the user using the provided character description below.
+{% for character in characters %}{{character.name}}: {{character.description}}
+{% endfor %}`
+
+const chatMlInstruct = `{% for message in messages %}
+<|im_start|>{{"user" if message.role == "user" else "assistant"}}
+{{message.text}}<|im_end|>
+{% endfor %}
+<|im_start|>assistant
+`
+
+const chatMlChat = `<|im_start|>system
+{{instruction}}<|im_end|>
+{% for message in messages %}
+<|im_start|>{{"user" if message.character.type == "user" else "assistant"}}
+{{message.character.name}}: {{message.text}}<|im_end|>
+{% endfor %}
+<|im_start|>assistant
+`
+
+const llama3Instruct = `{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>
+
+{{message.text}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>
+
+`
+
+const llama3Chat = `<|start_header_id|>system<|end_header_id|>
+
+{{instruction}}<|eot_id|>{% for message in messages %}<|start_header_id|>{{message.role}}<|end_header_id|>
+
+{{message.text | trim}}<|eot_id|>{% endfor %}<|start_header_id|>assistant<|end_header_id|>
+
+`
+
+const phi3Instruct = `{% for message in messages %}<|{{message.role}}|>{{message.text}}<|end|>
+{% endfor %}<|assistant|>`
+
+const phi3Chat = `<|user|>{{instruction}}<|end|>
+{% for message in messages %}<|{{message.role}}|>{{message.character.name}}: {{message.text}}<|end|>
+{% endfor %}<|assistant|>`
+
+const gemmaInstruct = `{% for message in messages %}<start_of_turn>{{"user" if message.role == "user" else "model"}}
+{{message.text}}<end_of_turn>
+{% endfor %}
+<start_of_turn>model
+`
+
+const gemmaChat = `<start_of_turn>user
+{{instruction}}<end_of_turn>
+{% for message in messages %}<start_of_turn>{{"user" if message.role == "user" else "model"}}
+{{message.character.name}}: {{message.text}}<end_of_turn>
+{% endfor %}
+<start_of_turn>model
+`
 
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
@@ -46,9 +98,30 @@ export const fixtureData = async () => {
     const existingPromptPreset = await db.query.PromptTemplate.findFirst({where: eq(PromptTemplate.id, 1)})
     if (!existingPromptPreset) {
         logger.info('Creating default prompt templates')
-        await db.insert(PromptTemplate).values({name: 'ChatML', content: chatMl, instruction: defaultInstruction})
-        await db.insert(PromptTemplate).values({name: 'Llama3', content: llama3, instruction: defaultInstruction})
-        await db.insert(PromptTemplate).values({name: 'Phi3', content: phi3, instruction: defaultInstruction})
+        await db.insert(PromptTemplate).values({
+            name: 'ChatML',
+            instructTemplate: chatMlInstruct,
+            chatTemplate: chatMlChat,
+            chatInstruction: defaultInstruction,
+        })
+        await db.insert(PromptTemplate).values({
+            name: 'Llama3',
+            instructTemplate: llama3Instruct,
+            chatTemplate: llama3Chat,
+            chatInstruction: defaultInstruction,
+        })
+        await db.insert(PromptTemplate).values({
+            name: 'Phi3',
+            instructTemplate: phi3Instruct,
+            chatTemplate: phi3Chat,
+            chatInstruction: defaultInstruction,
+        })
+        await db.insert(PromptTemplate).values({
+            name: 'Gemma',
+            instructTemplate: gemmaInstruct,
+            chatTemplate: gemmaChat,
+            chatInstruction: defaultInstruction,
+        })
     }
 
     // Initialize a user

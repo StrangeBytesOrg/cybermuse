@@ -7,16 +7,19 @@ import {client} from '../api-client'
 const toast = useToast()
 const router = useRouter()
 const templateName = ref('')
-const templateContent = ref('')
-const instruction = ref('')
-const exampleOutput = ref('')
+const instructTemplate = ref('')
+const chatTemplate = ref('')
+const chatInstruction = ref('')
+const exampleChat = ref('')
+const exampleInstruct = ref('')
 
 const createTemplate = async () => {
     const {error} = await client.POST('/create-template', {
         body: {
             name: templateName.value,
-            content: templateContent.value,
-            instruction: instruction.value,
+            instructTemplate: instructTemplate.value,
+            chatTemplate: chatTemplate.value,
+            chatInstruction: chatInstruction.value,
         },
     })
     if (error) {
@@ -39,21 +42,24 @@ const getPreview = async () => {
         {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
         // {text: '', generated: true, role: 'assistant', character: characters[1]},
     ]
+    const instructMessages = [{text: 'What is the capital of France?', role: 'user'}]
 
     const {data, error} = await client.POST('/parse-template', {
         body: {
-            content: templateContent.value,
-            instruction: instruction.value,
+            instructTemplate: instructTemplate.value,
+            chatTemplate: chatTemplate.value,
+            chatInstruction: chatInstruction.value,
             characters,
             messages,
+            instructMessages,
         },
-        parseAs: 'text',
     })
     if (error) {
         toast.error(`Error parsing template: ${error.message}`)
     }
-    console.log(data)
-    exampleOutput.value = data?.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
+    exampleChat.value = data?.chatExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
+    exampleInstruct.value =
+        data?.instructExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -74,24 +80,42 @@ const resizeTextarea = async (event: Event) => {
                 v-model="templateName"
                 class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
         </label>
-        <label class="form-control w-full">
-            <div class="label">
-                <span class="label-text">Template String</span>
+        <div class="flex flex-row w-full space-x-5">
+            <!-- Chat -->
+            <div class="flex flex-col w-full">
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Chat Template</span>
+                    </div>
+                    <textarea
+                        v-model="chatTemplate"
+                        @input="resizeTextarea"
+                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+                </label>
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Chat Instruction</span>
+                    </div>
+                    <textarea
+                        v-model="chatInstruction"
+                        @input="resizeTextarea"
+                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+                </label>
             </div>
-            <textarea
-                v-model="templateContent"
-                @input="resizeTextarea"
-                class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-        </label>
-        <label class="form-control w-full">
-            <div class="label">
-                <span class="label-text">Instruction</span>
+
+            <!-- Instruct -->
+            <div class="flex flex-col w-full">
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Instruction Template</span>
+                    </div>
+                    <textarea
+                        v-model="instructTemplate"
+                        @input="resizeTextarea"
+                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+                </label>
             </div>
-            <textarea
-                v-model="instruction"
-                @input="resizeTextarea"
-                class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-        </label>
+        </div>
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
@@ -99,5 +123,8 @@ const resizeTextarea = async (event: Event) => {
         </div>
     </div>
 
-    <div class="bg-base-200 rounded-lg p-3 m-2" v-if="exampleOutput" v-html="exampleOutput"></div>
+    <div class="flex flex-row space-x-5">
+        <div v-if="exampleChat" v-html="exampleChat" class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
+        <div v-if="exampleInstruct" v-html="exampleInstruct" class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
+    </div>
 </template>

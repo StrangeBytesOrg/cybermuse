@@ -15,6 +15,13 @@
       "when": 1723846339027,
       "tag": "0001_daily_george_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1724395738404,
+      "tag": "0002_clumsy_magik",
+      "breakpoints": true
     }
   ]
 }

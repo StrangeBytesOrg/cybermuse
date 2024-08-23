@@ -1633,8 +1633,9 @@ export interface operations {
                         templates: {
                             id: number;
                             name: string;
-                            content: string;
-                            instruction: string;
+                            instructTemplate: string;
+                            chatTemplate: string;
+                            chatInstruction: string;
                         }[];
                         activeTemplateId: number;
                     };
@@ -1672,8 +1673,9 @@ export interface operations {
                         template: {
                             id: number;
                             name: string;
-                            content: string;
-                            instruction: string;
+                            instructTemplate: string;
+                            chatTemplate: string;
+                            chatInstruction: string;
                         };
                     };
                 };
@@ -1700,8 +1702,9 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
-                    content: string;
-                    instruction: string;
+                    instructTemplate: string;
+                    chatTemplate: string;
+                    chatInstruction: string;
                 };
             };
         };
@@ -1741,8 +1744,9 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
-                    content: string;
-                    instruction: string;
+                    instructTemplate: string;
+                    chatTemplate: string;
+                    chatInstruction: string;
                 };
             };
         };
@@ -1812,10 +1816,12 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    content: string;
-                    instruction: string;
+                    chatTemplate: string;
+                    instructTemplate: string;
+                    chatInstruction: string;
                     messages: unknown[];
                     characters: unknown[];
+                    instructMessages: unknown[];
                 };
             };
         };
@@ -1826,7 +1832,10 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": string;
+                    "application/json": {
+                        chatExample: string;
+                        instructExample: string;
+                    };
                 };
             };
             /** @description Default error response */

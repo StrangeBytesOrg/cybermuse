@@ -193,10 +193,15 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             let tokenCount = 0
             const startTime = Date.now()
             try {
+                const instructionTemplate = new Template(promptTemplate.chatInstruction || '')
+                const instruction = instructionTemplate.render({
+                    characters: formattedCharacters,
+                })
                 for (let i = formattedMessages.length - 1; i >= 0; i -= 1) {
                     const messagesSubset = formattedMessages.slice(i, formattedMessages.length - 1)
-                    const template = new Template(promptTemplate.content || '')
-                    const newPrompt = template.render({
+                    const chatTemplate = new Template(promptTemplate.chatTemplate || '')
+                    const newPrompt = chatTemplate.render({
+                        instruction,
                         messages: messagesSubset,
                         characters: formattedCharacters,
                         char: pickedCharacter?.character.name,
@@ -364,8 +369,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             try {
                 for (let i = formattedMessages.length - 1; i >= 0; i -= 1) {
                     const messagesSubset = formattedMessages.slice(i, formattedMessages.length - 1)
-                    const template = new Template(promptTemplate.content || '')
-                    const newPrompt = template.render({
+                    const chatTemplate = new Template(promptTemplate.chatTemplate || '')
+                    const newPrompt = chatTemplate.render({
                         messages: messagesSubset,
                         characters: formattedCharacters,
                     })
