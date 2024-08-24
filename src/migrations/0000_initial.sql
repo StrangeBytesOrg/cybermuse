@@ -57,7 +57,9 @@ CREATE TABLE `message` (
 CREATE TABLE `prompt_template` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`instruction` text NOT NULL
+	`instruction_template` text NOT NULL,
+	`chat_template` text NOT NULL,
+	`chat_instruction` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `user` (

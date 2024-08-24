@@ -1,1 +1,0 @@
-ALTER TABLE `prompt_template` ADD `content` text NOT NULL;
