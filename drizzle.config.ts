@@ -9,4 +9,7 @@ export default {
     },
     verbose: true,
     strict: false, // Don't ask for confirmation before running migrations
+    migrations: {
+        prefix: 'index',
+    },
 } satisfies Config

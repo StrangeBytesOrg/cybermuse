@@ -157,6 +157,91 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/lore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get all Lore */
+        get: operations["GetLore"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/lore/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get a Lore by ID */
+        get: operations["GetLoreById"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/create-lore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create a new Lore */
+        post: operations["CreateNewLore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/update-lore/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Update a Lore by ID */
+        post: operations["UpdateLore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/delete-lore/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Delete a Lore by ID */
+        post: operations["DeleteLore"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/create-message": {
         parameters: {
             query?: never;
@@ -950,6 +1035,7 @@ export interface operations {
             content: {
                 "application/json": {
                     characters: number[];
+                    lore: number[];
                 };
             };
         };
@@ -987,6 +1073,192 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    GetLore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: number;
+                        name: string;
+                        entries: {
+                            name: string;
+                            content: string;
+                        }[];
+                    }[];
+                };
+            };
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    GetLoreById: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: number;
+                        name: string;
+                        entries: {
+                            name: string;
+                            content: string;
+                        }[];
+                    };
+                };
+            };
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    CreateNewLore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    lore: {
+                        id?: number;
+                        name: string;
+                        entries: {
+                            name: string;
+                            content: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: number;
+                    };
+                };
+            };
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    UpdateLore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": {
+                    lore: {
+                        id?: number;
+                        name: string;
+                        entries: {
+                            name: string;
+                            content: string;
+                        }[];
+                    };
+                };
+            };
+        };
+        responses: {
+            /** @description Default error response */
+            default: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["err"];
+                };
+            };
+        };
+    };
+    DeleteLore: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        id: number;
+                    };
+                };
+            };
             /** @description Default error response */
             default: {
                 headers: {

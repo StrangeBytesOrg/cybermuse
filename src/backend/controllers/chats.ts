@@ -10,6 +10,7 @@ import {
     ChatCharacters,
     Character,
     Message,
+    ChatLore,
     selectChatSchema,
     selectMessageSchema,
     selectCharacterSchema,
@@ -104,6 +105,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Create a Chat',
             body: t.Object({
                 characters: t.Array(t.Number()),
+                lore: t.Array(t.Number()),
             }),
             response: {
                 200: t.Object({
@@ -154,6 +156,18 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                         })
                         .returning({id: Message.id})
                 }
+            }
+
+            // Add chat lore
+            // TODO change to a multi insert
+            const {lore} = req.body
+            for (let i = 0; i < lore.length; i += 1) {
+                const loreId = lore[i]
+                await db.insert(ChatLore).values({
+                    chatId: newChat.id,
+                    loreId,
+                })
+                logger.debug(`Adding lore: ${loreId} into chat: ${newChat.id}`)
             }
 
             return {id: newChat.id}

@@ -341,7 +341,7 @@ const toggleCtxMenu = () => {
 <template>
     <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
         <!-- Messages -->
-        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2">
+        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 max-w-[70em] ml-auto mr-auto">
             <div
                 v-for="(message, index) in messages"
                 :key="message.id"
@@ -452,7 +452,7 @@ const toggleCtxMenu = () => {
         <div class="flex-grow" />
 
         <!-- Chat Controls -->
-        <div class="flex md:px-2 md:pb-2">
+        <div class="flex md:px-2 md:pb-2 w-full max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <!-- prettier-ignore -->

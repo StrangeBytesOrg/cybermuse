@@ -37,8 +37,25 @@ export const Chat = sqliteTable('chat', {
 export const chatRelations = relations(Chat, ({many}) => ({
     messages: many(Message),
     characters: many(ChatCharacters),
+    lore: many(ChatLore),
 }))
 export const selectChatSchema = createSelectSchema(Chat)
+
+/**
+ * Lore
+ */
+type Entry = {name: string; content: string}
+const entry = t.Object({name: t.String(), content: t.String()})
+export const Lore = sqliteTable('lore', {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    name: text('name').notNull(),
+    entries: text('content', {mode: 'json'}).$type<Entry[]>().notNull(),
+})
+relations(Lore, ({many}) => ({
+    loreToChats: many(ChatLore),
+}))
+export const selectLoreSchema = createSelectSchema(Lore, {entries: t.Array(entry)})
+export const insertLoreSchema = createInsertSchema(Lore, {entries: t.Array(entry)})
 
 // Chat Characters join table
 export const ChatCharacters = sqliteTable('chat_characters', {
@@ -62,6 +79,21 @@ export const charactersToChatsRelations = relations(ChatCharacters, ({one}) => (
 }))
 export const selectChatCharactersSchema = createSelectSchema(ChatCharacters)
 
+// Chat Lore join table
+export const ChatLore = sqliteTable('chat_lore', {
+    id: integer('id').primaryKey({autoIncrement: true}),
+    chatId: integer('chat_id')
+        .references(() => Chat.id, {onDelete: 'cascade'})
+        .notNull(),
+    loreId: integer('lore_id')
+        .references(() => Lore.id, {onDelete: 'cascade'})
+        .notNull(),
+})
+relations(ChatLore, ({one}) => ({
+    chat: one(Chat, {fields: [ChatLore.chatId], references: [Chat.id]}),
+    lore: one(Lore, {fields: [ChatLore.loreId], references: [Lore.id]}),
+}))
+
 /**
  * Message
  */
@@ -81,9 +113,7 @@ export const messageRelations = relations(Message, ({one}) => ({
     chat: one(Chat, {fields: [Message.chatId], references: [Chat.id]}),
     character: one(Character, {fields: [Message.characterId], references: [Character.id]}),
 }))
-export const selectMessageSchema = createSelectSchema(Message, {
-    content: t.Array(t.String()),
-})
+export const selectMessageSchema = createSelectSchema(Message, {content: t.Array(t.String())})
 export const insertMessageSchema = createInsertSchema(Message)
 
 /**

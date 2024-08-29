@@ -46,36 +46,41 @@ const toggleMenu = () => {
             :class="{customShow: showMenu, customHide: !showMenu}">
             <ul class="menu">
                 <li>
-                    <router-link to="/characters" class="font-bold px-2" active-class="active">Characters</router-link>
+                    <router-link to="/characters" class="font-bold px-2 mb-1" active-class="active">
+                        Characters
+                    </router-link>
                 </li>
                 <li>
-                    <router-link to="/chats" class="font-bold px-2" active-class="active">Chats</router-link>
+                    <router-link to="/chats" class="font-bold px-2 mb-1" active-class="active">Chats</router-link>
                 </li>
                 <li>
-                    <router-link to="/instruct" class="font-bold px-2" active-class="active">Instruct</router-link>
+                    <router-link to="/lore" class="font-bold px-2 mb-1" active-class="active">Lore</router-link>
                 </li>
+                <!-- <li>
+                    <router-link to="/instruct" class="font-bold px-2 mb-1" active-class="active">Instruct</router-link>
+                </li> -->
                 <li>
-                    <router-link to="/backend-settings" class="font-bold px-2" active-class="active">
+                    <router-link to="/backend-settings" class="font-bold px-2 mb-1" active-class="active">
                         Models
                     </router-link>
                 </li>
                 <li>
-                    <router-link to="/download-models" class="font-bold px-2" active-class="active">
+                    <router-link to="/download-models" class="font-bold px-2 mb-1" active-class="active">
                         Download Models
                     </router-link>
                 </li>
                 <li>
-                    <router-link to="/theme-settings" class="font-bold px-2" active-class="active">
+                    <router-link to="/theme-settings" class="font-bold px-2 mb-1" active-class="active">
                         Theme Settings
                     </router-link>
                 </li>
                 <li>
-                    <router-link to="/templates" class="font-bold px-2" active-class="active">
+                    <router-link to="/templates" class="font-bold px-2 mb-1" active-class="active">
                         Prompt Templates
                     </router-link>
                 </li>
                 <li>
-                    <router-link to="/presets" class="font-bold px-2" active-class="active">
+                    <router-link to="/presets" class="font-bold px-2 mb-1" active-class="active">
                         Generation Presets
                     </router-link>
                 </li>
@@ -86,7 +91,7 @@ const toggleMenu = () => {
 
         <!-- Main -->
         <div class="flex min-h-0 ml-0 sm:ml-52 pt-14 sm:pt-0">
-            <div class="flex flex-col flex-1 pr-1 pl-1">
+            <div class="flex flex-col flex-1">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />

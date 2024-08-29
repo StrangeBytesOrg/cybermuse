@@ -12,6 +12,7 @@ import {env} from './env.js'
 // Routes
 import {characterRoutes} from './controllers/character.js'
 import {chatRoutes} from './controllers/chats.js'
+import {loreRoutes} from './controllers/lore.js'
 import {messageRoutes} from './controllers/message.js'
 import {swipeRoutes} from './controllers/swipes.js'
 import {templateRoutes} from './controllers/templates.js'
@@ -102,6 +103,7 @@ server.addHook('onRoute', (routeOptions) => {
 // Register controller routes
 await server.register(characterRoutes, {prefix: '/api'})
 await server.register(chatRoutes, {prefix: '/api'})
+await server.register(loreRoutes, {prefix: '/api'})
 await server.register(messageRoutes, {prefix: '/api'})
 await server.register(swipeRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
