@@ -15,6 +15,7 @@ import {
     selectMessageSchema,
     selectCharacterSchema,
     selectChatCharactersSchema,
+    selectLoreSchema,
 } from '../db.js'
 
 export const chatRoutes: FastifyPluginAsync = async (fastify) => {
@@ -69,6 +70,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                         messages: t.Array(selectMessageSchema),
                     }),
                     characters: t.Array(selectCharacterSchema),
+                    lore: t.Array(selectLoreSchema),
                 }),
             },
         },
@@ -78,6 +80,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                 with: {
                     messages: true,
                     characters: {with: {character: true}},
+                    lore: {with: {lore: true}},
                 },
             })
             const characters = chat?.characters.map((c) => {
@@ -88,8 +91,16 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
                 throw new Error('No characters found')
             }
 
+            const lore = chat?.lore.map((l) => {
+                return l.lore
+            })
+
+            if (!lore) {
+                throw new Error('No lore found')
+            }
+
             if (chat) {
-                return {chat, characters}
+                return {chat, characters, lore}
             } else {
                 throw new Error('Chat not found')
             }

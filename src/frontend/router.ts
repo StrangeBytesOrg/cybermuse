@@ -6,6 +6,7 @@ import Characters from './pages/characters.vue'
 import CreateCharacter from './pages/character-create.vue'
 import Chat from './pages/chat.vue'
 import Chats from './pages/chats.vue'
+import ChatEdit from './pages/chat-edit.vue'
 import Lore from './pages/lore.vue'
 import LoreEdit from './pages/lore-edit.vue'
 import LoreCreate from './pages/lore-create.vue'
@@ -51,6 +52,11 @@ export default createRouter({
             path: '/chat',
             name: 'chat',
             component: Chat,
+        },
+        {
+            path: '/edit-chat/:id',
+            name: 'edit-chat',
+            component: ChatEdit,
         },
         {
             path: '/create-chat',

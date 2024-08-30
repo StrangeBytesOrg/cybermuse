@@ -51,7 +51,7 @@ export const Lore = sqliteTable('lore', {
     name: text('name').notNull(),
     entries: text('content', {mode: 'json'}).$type<Entry[]>().notNull(),
 })
-relations(Lore, ({many}) => ({
+export const loreRelations = relations(Lore, ({many}) => ({
     loreToChats: many(ChatLore),
 }))
 export const selectLoreSchema = createSelectSchema(Lore, {entries: t.Array(entry)})
@@ -68,14 +68,8 @@ export const ChatCharacters = sqliteTable('chat_characters', {
         .notNull(),
 })
 export const charactersToChatsRelations = relations(ChatCharacters, ({one}) => ({
-    chat: one(Chat, {
-        fields: [ChatCharacters.chatId],
-        references: [Chat.id],
-    }),
-    character: one(Character, {
-        fields: [ChatCharacters.characterId],
-        references: [Character.id],
-    }),
+    chat: one(Chat, {fields: [ChatCharacters.chatId], references: [Chat.id]}),
+    character: one(Character, {fields: [ChatCharacters.characterId], references: [Character.id]}),
 }))
 export const selectChatCharactersSchema = createSelectSchema(ChatCharacters)
 
@@ -89,7 +83,7 @@ export const ChatLore = sqliteTable('chat_lore', {
         .references(() => Lore.id, {onDelete: 'cascade'})
         .notNull(),
 })
-relations(ChatLore, ({one}) => ({
+export const loreToChatsRelations = relations(ChatLore, ({one}) => ({
     chat: one(Chat, {fields: [ChatLore.chatId], references: [Chat.id]}),
     lore: one(Lore, {fields: [ChatLore.loreId], references: [Lore.id]}),
 }))

@@ -1010,6 +1010,14 @@ export interface operations {
                             firstMessage: string | null;
                             image: string | null;
                         }[];
+                        lore: {
+                            id: number;
+                            name: string;
+                            entries: {
+                                name: string;
+                                content: string;
+                            }[];
+                        }[];
                     };
                 };
             };
