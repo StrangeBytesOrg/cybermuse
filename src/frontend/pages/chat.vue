@@ -369,7 +369,7 @@ const toggleCtxMenu = () => {
                         <div
                             v-show="editModeId !== message.id"
                             v-html="formatText(message.content[message.activeIndex])"
-                            class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word]" />
+                            class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word] whitespace-pre-wrap" />
                         <textarea
                             v-show="editModeId === message.id"
                             :id="`message-input-${message.id}`"
@@ -514,5 +514,10 @@ const toggleCtxMenu = () => {
 
 .messageText q {
     color: var(--quote);
+}
+
+/* Fix wrapping for code blocks */
+code {
+    white-space: pre-wrap;
 }
 </style>
