@@ -12,15 +12,13 @@ const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 
 <template>
     <div class="p-2">
-        <label class="form-control w-full max-w-xs">
+        <label class="form-control w-full max-w-36">
             <div class="label">
                 <span class="label-text">Theme</span>
             </div>
-            <select class="select select-bordered" v-model="themeStore.theme">
+            <select class="select select-bordered" v-model="themeStore.theme" @change="saveSettings">
                 <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
             </select>
         </label>
-
-        <button class="btn btn-primary mt-4" @click="saveSettings">Save</button>
     </div>
 </template>
