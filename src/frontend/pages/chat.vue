@@ -341,7 +341,7 @@ const toggleCtxMenu = () => {
 <template>
     <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
         <!-- Messages -->
-        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 max-w-[70em] ml-auto mr-auto">
+        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <div
                 v-for="(message, index) in messages"
                 :key="message.id"
