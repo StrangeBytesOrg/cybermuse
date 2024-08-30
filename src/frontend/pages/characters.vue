@@ -21,24 +21,22 @@ const characters = reactive(data?.characters || [])
             <div v-for="character in characters" :key="character.name">
                 <router-link
                     :to="`/character?id=${character.id}`"
-                    class="card bg-base-200 mb-5 hover:outline outline-primary">
-                    <div class="card-body flex flex-row">
-                        <div class="avatar">
-                            <div class="w-36 max-h-36 rounded-xl">
-                                <img v-if="character.image" :src="character.image" :alt="character.name" />
-                                <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
-                            </div>
+                    class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
+                    <div class="avatar">
+                        <div class="w-36 max-h-36 rounded-xl">
+                            <img v-if="character.image" :src="character.image" :alt="character.name" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
+                    </div>
 
-                        <div class="inline-flex flex-col h-36">
-                            <div class="font-bold">
-                                {{ character.name }}
-                            </div>
-                            <div class="text-gray-500 overflow-hidden h-full fadeout">
-                                <p class="whitespace-pre-line">
-                                    {{ character.description }}
-                                </p>
-                            </div>
+                    <div class="inline-flex flex-col h-36 ml-3">
+                        <div class="font-bold">
+                            {{ character.name }}
+                        </div>
+                        <div class="text-gray-500 overflow-hidden h-full fadeout">
+                            <p class="whitespace-pre-line">
+                                {{ character.description }}
+                            </p>
                         </div>
                     </div>
                 </router-link>
