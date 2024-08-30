@@ -4,6 +4,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
 import FileSelect from '../components/file-select.vue'
+import BackButton from '../components/back-button.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -58,10 +59,12 @@ const deleteCharacter = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
-        <h2 class="text-xl">Character Info</h2>
-        <div class="divider mt-2"></div>
+    <div class="flex flex-row bg-base-300 p-3">
+        <BackButton />
+        <h1 class="text-xl ml-5">Character</h1>
+    </div>
 
+    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
         <input
             type="text"
             v-model="character.name"

@@ -2,8 +2,9 @@
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {client} from '../api-client'
-import FileInput from '../components/file-select.vue'
 import {useToast} from 'vue-toastification'
+import FileInput from '../components/file-select.vue'
+import BackButton from '../components/back-button.vue'
 import {decodeChunks} from '../lib/decode-png-chunks'
 
 const toast = useToast()
@@ -36,10 +37,6 @@ const createCharacter = async () => {
 
 const removeImage = () => {
     characterImage.value = ''
-}
-
-const cancelCharacter = () => {
-    router.push('/characters')
 }
 
 const imageChanged = (newVal: string) => {
@@ -88,10 +85,12 @@ const imageChanged = (newVal: string) => {
 </script>
 
 <template>
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
-        <h2 class="text-xl">Character Info</h2>
-        <div class="divider mt-0 mb-1"></div>
+    <div class="flex flex-row bg-base-300 p-3">
+        <BackButton />
+        <h1 class="text-xl ml-5">New Character</h1>
+    </div>
 
+    <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
         <input
             type="text"
             v-model="character.name"
@@ -129,7 +128,6 @@ const imageChanged = (newVal: string) => {
         <div class="divider"></div>
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
-            <button class="btn btn-error ml-5" @click="cancelCharacter">Cancel</button>
         </div>
     </div>
 </template>

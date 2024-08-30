@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
-import {RouterLink, useRouter} from 'vue-router'
+import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
+import BackButton from '../components/back-button.vue'
 
 type Entry = {name: string; content: string}
 type Lore = {name: string; entries: Entry[]}
@@ -42,11 +43,8 @@ const createLore = async () => {
 
 <template>
     <div class="flex flex-row bg-base-300 p-3">
-        <RouterLink to="/lore" class="btn btn-sm btn-neutral">
-            <!-- prettier-ignore -->
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9 15 3 9m0 0 6-6M3 9h12a6 6 0 0 1 0 12h-3" /></svg>
-        </RouterLink>
-        <div class="text-xl ml-5">Create Lorebook</div>
+        <BackButton />
+        <h1 class="text-xl ml-5">Create Lorebook</h1>
     </div>
 
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
