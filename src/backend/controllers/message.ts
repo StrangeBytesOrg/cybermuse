@@ -127,6 +127,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 where: eq(Chat.id, chatId),
                 with: {
                     characters: {with: {character: true}},
+                    lore: {with: {lore: true}},
                     messages: true,
                 },
             })
@@ -188,6 +189,13 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 return character
             })
 
+            const loreEntries: {name: string; content: string}[] = []
+            existingChat.lore.forEach(({lore}) => {
+                lore.entries.forEach((entry) => {
+                    loreEntries.push(entry)
+                })
+            })
+
             const tokenLimit = generatePreset.context
             let prompt = ''
             let tokenCount = 0
@@ -196,6 +204,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 const instructionTemplate = new Template(promptTemplate.chatInstruction || '')
                 const instruction = instructionTemplate.render({
                     characters: formattedCharacters,
+                    lore: loreEntries,
                 })
                 for (let i = formattedMessages.length - 1; i >= 0; i -= 1) {
                     const messagesSubset = formattedMessages.slice(i, formattedMessages.length - 1)

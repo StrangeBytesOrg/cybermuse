@@ -90,6 +90,7 @@ const getPreview = async () => {
         {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
         // {text: '', generated: true, role: 'assistant', character: characters[1]},
     ]
+    const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
     const instructMessages = [{text: 'What is the capital of France?', role: 'user'}]
 
     const {data, error} = await client.POST('/parse-template', {
@@ -99,6 +100,7 @@ const getPreview = async () => {
             chatInstruction: activeTemplate.value.chatInstruction,
             characters,
             messages,
+            lore,
             instructMessages,
         },
     })

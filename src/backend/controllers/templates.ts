@@ -182,6 +182,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 chatInstruction: t.String({minLength: 1}),
                 messages: t.Array(t.Any()),
                 characters: t.Array(t.Any()),
+                lore: t.Array(t.Object({name: t.String(), content: t.String()})),
                 instructMessages: t.Array(t.Any()),
             }),
             response: {
@@ -198,6 +199,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
 
             const chatInstruction = chatInstructionTemplate.render({
                 characters: req.body.characters,
+                lore: req.body.lore,
             })
             logger.info('Parsed chat instruction:', chatInstruction)
 

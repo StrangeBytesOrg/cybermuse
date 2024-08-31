@@ -2101,6 +2101,10 @@ export interface operations {
                     chatInstruction: string;
                     messages: unknown[];
                     characters: unknown[];
+                    lore: {
+                        name: string;
+                        content: string;
+                    }[];
                     instructMessages: unknown[];
                 };
             };

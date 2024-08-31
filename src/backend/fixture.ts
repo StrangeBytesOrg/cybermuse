@@ -4,7 +4,11 @@ import {logger} from './logging.js'
 
 const defaultInstruction = `Roleplay in this chat with the user using the provided character description below.
 {% for character in characters %}{{character.name}}: {{character.description}}
-{% endfor %}`
+{% endfor %}
+Use the following background information as lore.
+{% for entry in lore %}
+{{ entry.name }}: {{ entry.content }}
+ {% endfor %}`
 
 const chatMlInstruct = `{% for message in messages %}
 <|im_start|>{{"user" if message.role == "user" else "assistant"}}
