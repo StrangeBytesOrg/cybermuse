@@ -3,7 +3,6 @@ import path from 'node:path'
 import envPaths from 'env-paths'
 import {Logger} from 'tslog'
 import {createStream} from 'rotating-file-stream'
-import {env} from './env.js'
 
 const paths = envPaths('cybermuse-desktop', {suffix: ''})
 if (!fs.existsSync(paths.log)) {
@@ -11,11 +10,12 @@ if (!fs.existsSync(paths.log)) {
     fs.mkdirSync(paths.log)
 }
 
+console.log(`Logging to ${path.resolve(paths.log, 'out.log')}`)
 const logStream = createStream(path.resolve(paths.log, 'out.log'), {
     size: '5M',
 })
 export const logger = new Logger({
-    type: env.DEV ? 'pretty' : 'json',
+    type: 'pretty',
     prettyLogTemplate: '{{logLevelName}} {{fileNameWithLine}} \t',
 })
 logger.attachTransport((logObject) => {
