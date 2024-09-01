@@ -505,7 +505,6 @@ const toggleCtxMenu = () => {
 
 .messageText p {
     color: var(--msg);
-    margin-bottom: 15px;
 }
 
 .messageText em {
