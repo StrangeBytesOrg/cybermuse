@@ -199,11 +199,11 @@ onMounted(() => {
         <div class="flex flex-col md:flex-row md:space-x-5 mt-5">
             <div class="w-full" v-if="exampleChat">
                 <div class="text-lg">Chat Prompt Example</div>
-                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre">{{ exampleChat }}</div>
+                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">{{ exampleChat }}</div>
             </div>
             <div class="w-full" v-if="exampleInstruct">
                 <div class="text-lg">Instruct Prompt Example</div>
-                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre">{{ exampleInstruct }}</div>
+                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">{{ exampleInstruct }}</div>
             </div>
         </div>
     </div>

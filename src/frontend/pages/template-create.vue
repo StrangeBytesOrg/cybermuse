@@ -43,6 +43,7 @@ const getPreview = async () => {
         {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
         // {text: '', generated: true, role: 'assistant', character: characters[1]},
     ]
+    const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
     const instructMessages = [{text: 'What is the capital of France?', role: 'user'}]
 
     const {data, error} = await client.POST('/parse-template', {
@@ -52,15 +53,15 @@ const getPreview = async () => {
             chatInstruction: chatInstruction.value,
             characters,
             messages,
+            lore,
             instructMessages,
         },
     })
     if (error) {
         toast.error(`Error parsing template: ${error.message}`)
     }
-    exampleChat.value = data?.chatExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
-    exampleInstruct.value =
-        data?.instructExample.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>') || ''
+    exampleChat.value = data?.chatExample || ''
+    exampleInstruct.value = data?.instructExample || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -130,7 +131,11 @@ const resizeTextarea = async (event: Event) => {
     </div>
 
     <div class="flex flex-row space-x-5">
-        <div v-if="exampleChat" v-html="exampleChat" class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
-        <div v-if="exampleInstruct" v-html="exampleInstruct" class="flex w-full bg-base-200 rounded-lg p-3 mt-2"></div>
+        <div v-if="exampleChat" class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">
+            {{ exampleChat }}
+        </div>
+        <div v-if="exampleInstruct" class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">
+            {{ exampleInstruct }}
+        </div>
     </div>
 </template>
