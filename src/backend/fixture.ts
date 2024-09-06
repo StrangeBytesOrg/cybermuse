@@ -61,6 +61,9 @@ const gemmaChat = `<start_of_turn>user
 <start_of_turn>model
 `
 
+const commandRInstruct = `{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}|>{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}`
+const commandRChat = `<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{{instruction}}<|END_OF_TURN_TOKEN|>{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}|>{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}`
+
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
     const existingUserCharacter = await db.query.Character.findFirst({where: eq(Character.id, 1)})
@@ -124,6 +127,12 @@ export const fixtureData = async () => {
             name: 'Gemma',
             instructTemplate: gemmaInstruct,
             chatTemplate: gemmaChat,
+            chatInstruction: defaultInstruction,
+        })
+        await db.insert(PromptTemplate).values({
+            name: 'CommandR',
+            instructTemplate: commandRInstruct,
+            chatTemplate: commandRChat,
             chatInstruction: defaultInstruction,
         })
     }
