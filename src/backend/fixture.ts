@@ -61,8 +61,8 @@ const gemmaChat = `<start_of_turn>user
 <start_of_turn>model
 `
 
-const commandRInstruct = `{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}|>{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}`
-const commandRChat = `<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{{instruction}}<|END_OF_TURN_TOKEN|>{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}|>{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}`
+const commandRInstruct = `{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>`
+const commandRChat = `<|START_OF_TURN_TOKEN|><|SYSTEM_TOKEN|>{{instruction}}<|END_OF_TURN_TOKEN|>{% for message in messages %}<|START_OF_TURN_TOKEN|>{% if message.role == "system" %}<|SYSTEM_TOKEN|>{% elif message.role == "user" %}<|USER_TOKEN|>{% elif message.role == "assistant" %}<|CHATBOT_TOKEN|>{% endif %}{{message.text}}<|END_OF_TURN_TOKEN|>{% endfor %}<|START_OF_TURN_TOKEN|><|CHATBOT_TOKEN|>`
 
 export const fixtureData = async () => {
     // Initialize a character for the user if it doesn't exist
