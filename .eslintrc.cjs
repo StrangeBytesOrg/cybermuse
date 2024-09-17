@@ -13,6 +13,7 @@ module.exports = {
     rules: {
         'vue/multi-word-component-names': 'off',
         '@typescript-eslint/no-explicit-any': 'off',
+        'prefer-const': 'off',
     },
     ignorePatterns: ['node_modules', 'dist'],
 }

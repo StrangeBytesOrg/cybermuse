@@ -11,7 +11,7 @@ import {env} from '../env.js'
 
 let llamaServerProc: ChildProcessWithoutNullStreams
 let loaded = false
-let currentModel: string = ''
+export let currentModel: string = ''
 
 // Cleanup subprocess on exit
 process.on('exit', () => {
@@ -164,10 +164,10 @@ export const startLlamaServer = async (
 
     return new Promise((resolve, reject) => {
         const args: string[] = []
+        // args.push('--verbose')
         args.push('--model', modelPath)
         args.push('--ctx-size', String(contextSize))
         args.push('--batch-size', String(batchSize))
-        args.push('--log-disable') // Prevent creating a llama.log file
         args.push('--host', '0.0.0.0') // TODO make this configurable
         args.push('--port', '8080') // TODO make this configurable
         if (gpuLayers) {
@@ -186,11 +186,15 @@ export const startLlamaServer = async (
             args.push('--cache-type-v', cacheTypeV)
         }
         logger.info(`llama-server args: ${args.join(' ')}`)
-
         llamaServerProc = spawn(serverBinPath, args, {})
         llamaServerProc.stdout.on('data', (data) => {
             const output: string = data.toString()
             process.stdout.write(chalk.cyan(output))
+        })
+
+        llamaServerProc.stderr.on('data', (data) => {
+            const output: string = data.toString()
+            process.stderr.write(chalk.blue(output))
             if (output.includes('model loaded')) {
                 logger.info('Detected model loaded')
                 loaded = true
@@ -206,11 +210,6 @@ export const startLlamaServer = async (
                 setConfig(config)
                 resolve({success: true})
             }
-        })
-
-        llamaServerProc.stderr.on('data', (data) => {
-            const output: string = data.toString()
-            process.stderr.write(chalk.blue(output))
             if (output.includes('error')) {
                 reject(new Error(output))
             }
@@ -223,6 +222,7 @@ export const startLlamaServer = async (
         llamaServerProc.on('exit', (code) => {
             logger.info(`Llama Server exited with code ${code}`)
             loaded = false
+            reject(new Error('Llama Server exited'))
         })
     })
 }
