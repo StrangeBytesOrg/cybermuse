@@ -3,6 +3,7 @@ import {type FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {db, Message} from '../db.js'
+import {logger} from '../logging.js'
 
 export const swipeRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -26,7 +27,7 @@ export const swipeRoutes: FastifyPluginAsync = async (fastify) => {
                 })
             }
             message.content.push('')
-            console.log(`Active Index: ${message.content.length - 1}`)
+            logger.debug(`Message Id: ${messageId} Active Index: ${message.content.length - 1}`)
             await db
                 .update(Message)
                 .set({content: message.content, activeIndex: message.content.length - 1})
@@ -60,7 +61,7 @@ export const swipeRoutes: FastifyPluginAsync = async (fastify) => {
             if (!message.content[activeIndex]) {
                 return reply.status(404).send({error: 'Not Found', message: 'Swipe does not exist'})
             }
-            console.log(`Active Index: ${activeIndex}`)
+            logger.debug(`Message Id: ${messageId} Active Index: ${activeIndex}`)
             await db.update(Message).set({activeIndex}).where(eq(Message.id, messageId))
         },
     })
