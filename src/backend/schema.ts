@@ -133,9 +133,7 @@ export const userSettings = relations(User, ({one}) => ({
 export const PromptTemplate = sqliteTable('prompt_template', {
     id: integer('id').primaryKey(),
     name: text('name').notNull(),
-    instructTemplate: text('instruction_template').notNull(),
-    chatTemplate: text('chat_template').notNull(),
-    chatInstruction: text('chat_instruction').notNull(),
+    template: text('template').notNull(),
 })
 export const selectPromptTemplateSchema = createSelectSchema(PromptTemplate)
 

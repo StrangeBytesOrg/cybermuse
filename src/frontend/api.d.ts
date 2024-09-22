@@ -310,23 +310,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/get-response-character": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Use the loaded model to select a character to respond */
-        post: operations["GetResponseCharacter"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/new-swipe": {
         parameters: {
             query?: never;
@@ -1379,7 +1362,6 @@ export interface operations {
             content: {
                 "application/json": {
                     chatId: number;
-                    continue: boolean;
                 };
             };
         };
@@ -1400,45 +1382,6 @@ export interface operations {
                 };
                 content: {
                     "application/problem+json": components["schemas"]["err"];
-                };
-            };
-        };
-    };
-    GetResponseCharacter: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": {
-                    chatId: number;
-                };
-            };
-        };
-        responses: {
-            /** @description Default Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        characterId: number;
-                    };
-                };
-            };
-            /** @description Default Response */
-            default: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        message: string;
-                    };
                 };
             };
         };
@@ -1913,9 +1856,7 @@ export interface operations {
                         templates: {
                             id: number;
                             name: string;
-                            instructTemplate: string;
-                            chatTemplate: string;
-                            chatInstruction: string;
+                            template: string;
                         }[];
                         activeTemplateId: number;
                     };
@@ -1953,9 +1894,7 @@ export interface operations {
                         template: {
                             id: number;
                             name: string;
-                            instructTemplate: string;
-                            chatTemplate: string;
-                            chatInstruction: string;
+                            template: string;
                         };
                     };
                 };
@@ -1982,9 +1921,7 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
-                    instructTemplate: string;
-                    chatTemplate: string;
-                    chatInstruction: string;
+                    template: string;
                 };
             };
         };
@@ -2024,9 +1961,7 @@ export interface operations {
             content: {
                 "application/json": {
                     name: string;
-                    instructTemplate: string;
-                    chatTemplate: string;
-                    chatInstruction: string;
+                    template: string;
                 };
             };
         };
@@ -2096,16 +2031,12 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    chatTemplate: string;
-                    instructTemplate: string;
-                    chatInstruction: string;
-                    messages: unknown[];
+                    template: string;
                     characters: unknown[];
                     lore: {
                         name: string;
                         content: string;
                     }[];
-                    instructMessages: unknown[];
                 };
             };
         };
@@ -2117,8 +2048,7 @@ export interface operations {
                 };
                 content: {
                     "application/json": {
-                        chatExample: string;
-                        instructExample: string;
+                        example: string;
                     };
                 };
             };
@@ -2157,9 +2087,9 @@ export interface operations {
                         batchSize: number;
                         gpuLayers: number;
                         useFlashAttn: boolean;
-                        splitMode: "row" | "layer";
-                        cacheTypeK: "f16" | "q8_0" | "q4_0";
-                        cacheTypeV: "f16" | "q8_0" | "q4_0";
+                        splitMode?: "row" | "layer";
+                        cacheTypeK?: "f16" | "q8_0" | "q4_0";
+                        cacheTypeV?: "f16" | "q8_0" | "q4_0";
                     };
                 };
             };

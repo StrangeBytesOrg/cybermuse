@@ -11,17 +11,15 @@ if (error) {
 
 const templates = ref(data?.templates || [])
 const selectedTemplate = ref(data?.activeTemplateId || 0)
-const exampleChat = ref('')
-const exampleInstruct = ref('')
+const example = ref('')
 
 const activeTemplate = computed(() => {
-    const missingTemplate = {id: 0, name: '', instructTemplate: '', chatTemplate: '', chatInstruction: ''}
+    const missingTemplate = {id: 0, name: '', template: ''}
     return templates.value?.find((template) => template.id === selectedTemplate.value) || missingTemplate
 })
 
 const setActiveTemplate = async () => {
-    exampleChat.value = ''
-    exampleInstruct.value = ''
+    example.value = ''
 
     if (!selectedTemplate.value) {
         toast.error('No template selected')
@@ -48,9 +46,7 @@ const updateTemplate = async () => {
         params: {path: {id: String(activeTemplate.value.id)}},
         body: {
             name: activeTemplate.value.name,
-            instructTemplate: activeTemplate.value.instructTemplate,
-            chatTemplate: activeTemplate.value.chatTemplate,
-            chatInstruction: activeTemplate.value.chatInstruction,
+            template: activeTemplate.value.template,
         },
     })
     if (error) {
@@ -91,25 +87,20 @@ const getPreview = async () => {
         // {text: '', generated: true, role: 'assistant', character: characters[1]},
     ]
     const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
-    const instructMessages = [{text: 'What is the capital of France?', role: 'user'}]
 
     const {data, error} = await client.POST('/parse-template', {
         body: {
-            chatTemplate: activeTemplate.value.chatTemplate,
-            instructTemplate: activeTemplate.value.instructTemplate,
-            chatInstruction: activeTemplate.value.chatInstruction,
+            template: activeTemplate.value.template,
             characters,
             messages,
             lore,
-            instructMessages,
         },
     })
     if (error || !data) {
         toast.error(`Error parsing template: ${error.message}`)
         return
     }
-    exampleChat.value = data?.chatExample || ''
-    exampleInstruct.value = data?.instructExample || ''
+    example.value = data?.example || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -151,42 +142,16 @@ onMounted(() => {
                     class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
             </label>
 
-            <div class="flex w-full flex-col md:flex-row md:space-x-5">
-                <!-- Chat -->
-                <div class="flex flex-col w-full">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Chat Template</span>
-                        </div>
-                        <textarea
-                            v-model="activeTemplate.chatTemplate"
-                            @input="resizeTextarea"
-                            class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                    </label>
-
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Chat Instruction</span>
-                        </div>
-                        <textarea
-                            v-model="activeTemplate.chatInstruction"
-                            @input="resizeTextarea"
-                            class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                    </label>
-                </div>
-
-                <!-- Instruct -->
-                <div class="flex flex-col w-full">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Instruction Template</span>
-                        </div>
-                        <textarea
-                            v-model="activeTemplate.instructTemplate"
-                            @input="resizeTextarea"
-                            class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                    </label>
-                </div>
+            <div class="flex flex-col w-full">
+                <label class="form-control w-full">
+                    <div class="label">
+                        <span class="label-text">Template</span>
+                    </div>
+                    <textarea
+                        v-model="activeTemplate.template"
+                        @input="resizeTextarea"
+                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+                </label>
             </div>
 
             <div class="flex flex-row space-x-2 mt-3">
@@ -196,15 +161,8 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="flex flex-col md:flex-row md:space-x-5 mt-5">
-            <div class="w-full" v-if="exampleChat">
-                <div class="text-lg">Chat Prompt Example</div>
-                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">{{ exampleChat }}</div>
-            </div>
-            <div class="w-full" v-if="exampleInstruct">
-                <div class="text-lg">Instruct Prompt Example</div>
-                <div class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">{{ exampleInstruct }}</div>
-            </div>
+        <div class="w-full" v-if="example">
+            <div class="flex w-full bg-base-200 rounded-lg p-3 mt-3 whitespace-pre-wrap">{{ example }}</div>
         </div>
     </div>
 </template>

@@ -139,40 +139,33 @@ const createMessage = async (characterId: number, text: string = '', generated: 
     }
 }
 
-const generateMessage = async (continueExisting = false) => {
+const generateMessage = async () => {
     pendingMessage.value = true
     try {
         const {response, error} = await client.POST('/generate-message', {
             body: {
                 chatId: Number(chatId),
-                continue: continueExisting,
             },
             parseAs: 'stream',
             signal: signal.signal,
         })
         if (response.status !== 200) {
             console.log(error)
-            throw new Error('Failed to generate message')
+            toast.error(`Failed to generate message\n${error?.message}`)
+            return
         }
         const responseIterable = responseToIterable(response)
-        let bufferedResponse = ''
-        if (continueExisting) {
-            bufferedResponse = messages[messages.length - 1].content[messages[messages.length - 1].activeIndex]
-        }
+        // let bufferedResponse = ''
         for await (const chunk of responseIterable) {
             const data = JSON.parse(chunk.data)
             if (chunk.event === 'text') {
-                bufferedResponse += data.text
                 const lastMessage = messages[messages.length - 1]
                 if (lastMessage) {
-                    lastMessage.content[lastMessage.activeIndex] = bufferedResponse
+                    lastMessage.content[lastMessage.activeIndex] = data.text
                 }
                 scrollMessages('smooth')
             } else if (chunk.event === 'final') {
-                console.log('done')
-                if (data.text !== bufferedResponse) {
-                    console.error('Final text does not match buffered response')
-                }
+                console.log('Done event')
             } else if (chunk.event === 'error') {
                 console.error('Error', data.error)
                 toast.error(data.error)
@@ -185,6 +178,7 @@ const generateMessage = async (continueExisting = false) => {
         if (error instanceof DOMException && error.name === 'AbortError') return
         throw error
     } finally {
+        console.log('done pending')
         pendingMessage.value = false
     }
 }
@@ -461,7 +455,6 @@ const toggleCtxMenu = () => {
                 </svg>
                 <Transition name="fade">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
-                        <li><a @click="generateMessage(true)">Continue</a></li>
                         <li><a @click="impersonate()">Impersonate</a></li>
                     </ul>
                 </Transition>

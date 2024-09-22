@@ -8,10 +8,12 @@ import chalk from 'chalk'
 import {getConfig, setConfig} from '../config.js'
 import {logger} from '../logging.js'
 import {env} from '../env.js'
+import {chatTemplates} from '../prompt.js'
 
 let llamaServerProc: ChildProcessWithoutNullStreams
 let loaded = false
 export let currentModel: string = ''
+export let currentTemplate: string
 
 // Cleanup subprocess on exit
 process.on('exit', () => {
@@ -39,9 +41,9 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
                     batchSize: t.Number(),
                     gpuLayers: t.Number(),
                     useFlashAttn: t.Boolean(),
-                    splitMode: t.Union([t.Literal('row'), t.Literal('layer')]),
-                    cacheTypeK: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
-                    cacheTypeV: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
+                    splitMode: t.Optional(t.Union([t.Literal('row'), t.Literal('layer')])),
+                    cacheTypeK: t.Optional(t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')])),
+                    cacheTypeV: t.Optional(t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')])),
                 }),
             },
         },
@@ -133,9 +135,10 @@ export const startLlamaServer = async (
     batchSize: number = 512,
     gpuLayers: number = 0,
     useFlashAttn: boolean = false,
-    splitMode: 'row' | 'layer' = 'row',
-    cacheTypeK: 'f16' | 'q8_0' | 'q4_0' = 'f16',
-    cacheTypeV: 'f16' | 'q8_0' | 'q4_0' = 'f16',
+    splitMode?: 'row' | 'layer',
+    cacheTypeK?: 'f16' | 'q8_0' | 'q4_0',
+    cacheTypeV?: 'f16' | 'q8_0' | 'q4_0',
+    chatTemplate?: string,
 ) => {
     let serverBinPath = path.resolve(import.meta.dirname, '../../llamacpp/llama-server')
     if (env.DEV) {
@@ -185,6 +188,9 @@ export const startLlamaServer = async (
         if (cacheTypeV) {
             args.push('--cache-type-v', cacheTypeV)
         }
+        if (chatTemplate) {
+            args.push('--chat-template', chatTemplate)
+        }
         logger.info(`llama-server args: ${args.join(' ')}`)
         llamaServerProc = spawn(serverBinPath, args, {})
         llamaServerProc.stdout.on('data', (data) => {
@@ -195,21 +201,39 @@ export const startLlamaServer = async (
         llamaServerProc.stderr.on('data', (data) => {
             const output: string = data.toString()
             process.stderr.write(chalk.blue(output))
-            if (output.includes('model loaded')) {
-                logger.info('Detected model loaded')
-                loaded = true
-                currentModel = modelName
-                config.lastModel = modelName
-                config.contextSize = contextSize
-                config.batchSize = batchSize
-                config.gpuLayers = gpuLayers
-                config.useFlashAttn = useFlashAttn
-                config.splitMode = splitMode
-                config.cacheTypeK = cacheTypeK
-                config.cacheTypeV = cacheTypeV
-                setConfig(config)
-                resolve({success: true})
-            }
+            output.split('\n').forEach((line) => {
+                if (line.includes('model loaded')) {
+                    logger.info('Detected model loaded')
+                    loaded = true
+                    currentModel = modelName
+                    config.lastModel = modelName
+                    config.contextSize = contextSize
+                    config.batchSize = batchSize
+                    config.gpuLayers = gpuLayers
+                    config.useFlashAttn = useFlashAttn
+                    config.splitMode = splitMode
+                    config.cacheTypeK = cacheTypeK
+                    config.cacheTypeV = cacheTypeV
+                    setConfig(config)
+                    resolve({success: true})
+                } else if (line.includes('chat_example:')) {
+                    const example = line.split(`chat_example: '`)[1].trim()
+                    let foundTemplate = false
+                    for (const templateName in chatTemplates) {
+                        if (example === chatTemplates[templateName].example) {
+                            currentTemplate = templateName
+                            foundTemplate = true
+                            logger.info(`Detected chat example: ${templateName}`)
+                            break
+                        }
+                    }
+                    if (!foundTemplate) {
+                        currentTemplate = 'chatml'
+                        logger.error(`Unknown chat example: ${example}, falling back to chatml`)
+                        logger.info(`Chat example: ${example}`)
+                    }
+                }
+            })
             if (output.includes('error')) {
                 reject(new Error(output))
             }

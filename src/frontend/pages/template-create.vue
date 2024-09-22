@@ -8,19 +8,14 @@ import BackButton from '../components/back-button.vue'
 const toast = useToast()
 const router = useRouter()
 const templateName = ref('')
-const instructTemplate = ref('')
-const chatTemplate = ref('')
-const chatInstruction = ref('')
-const exampleChat = ref('')
-const exampleInstruct = ref('')
+const template = ref('')
+const example = ref('')
 
 const createTemplate = async () => {
     const {error} = await client.POST('/create-template', {
         body: {
             name: templateName.value,
-            instructTemplate: instructTemplate.value,
-            chatTemplate: chatTemplate.value,
-            chatInstruction: chatInstruction.value,
+            template: template.value,
         },
     })
     if (error) {
@@ -37,31 +32,19 @@ const getPreview = async () => {
         {name: 'Alice', description: 'A character named Alice.'},
         {name: 'Bob', description: 'A character named Bob.'},
     ]
-    const messages = [
-        {text: 'Hello', generated: false, role: 'user', character: characters[0]},
-        {text: 'Hi, how are you {{user}}?', generated: true, role: 'assistant', character: characters[1]},
-        {text: 'Great, thanks for asking.', generated: false, role: 'user', character: characters[0]},
-        // {text: '', generated: true, role: 'assistant', character: characters[1]},
-    ]
     const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
-    const instructMessages = [{text: 'What is the capital of France?', role: 'user'}]
 
     const {data, error} = await client.POST('/parse-template', {
         body: {
-            instructTemplate: instructTemplate.value,
-            chatTemplate: chatTemplate.value,
-            chatInstruction: chatInstruction.value,
+            template: template.value,
             characters,
-            messages,
             lore,
-            instructMessages,
         },
     })
     if (error) {
         toast.error(`Error parsing template: ${error.message}`)
     }
-    exampleChat.value = data?.chatExample || ''
-    exampleInstruct.value = data?.instructExample || ''
+    example.value = data?.example || ''
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -77,7 +60,7 @@ const resizeTextarea = async (event: Event) => {
         <h1 class="text-xl ml-5">Create Template</h1>
     </div>
 
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
+    <div class="flex flex-col bg-base-200 rounded-lg p-3 pt-0 m-2">
         <label class="form-control w-full">
             <div class="label">
                 <span class="label-text">Template Name</span>
@@ -87,41 +70,16 @@ const resizeTextarea = async (event: Event) => {
                 v-model="templateName"
                 class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
         </label>
-        <div class="flex flex-row w-full space-x-5">
-            <!-- Chat -->
-            <div class="flex flex-col w-full">
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Chat Template</span>
-                    </div>
-                    <textarea
-                        v-model="chatTemplate"
-                        @input="resizeTextarea"
-                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Chat Instruction</span>
-                    </div>
-                    <textarea
-                        v-model="chatInstruction"
-                        @input="resizeTextarea"
-                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                </label>
-            </div>
-
-            <!-- Instruct -->
-            <div class="flex flex-col w-full">
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Instruction Template</span>
-                    </div>
-                    <textarea
-                        v-model="instructTemplate"
-                        @input="resizeTextarea"
-                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                </label>
-            </div>
+        <div class="flex flex-col w-full">
+            <label class="form-control w-full">
+                <div class="label">
+                    <span class="label-text">Template</span>
+                </div>
+                <textarea
+                    v-model="template"
+                    @input="resizeTextarea"
+                    class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
+            </label>
         </div>
 
         <div class="flex flex-row space-x-2 mt-2">
@@ -130,12 +88,7 @@ const resizeTextarea = async (event: Event) => {
         </div>
     </div>
 
-    <div class="flex flex-row space-x-5">
-        <div v-if="exampleChat" class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">
-            {{ exampleChat }}
-        </div>
-        <div v-if="exampleInstruct" class="flex w-full bg-base-200 rounded-lg p-3 mt-2 whitespace-pre-wrap">
-            {{ exampleInstruct }}
-        </div>
+    <div v-if="example" class="flex w-full bg-base-200 rounded-lg p-3 m-2 whitespace-pre-wrap">
+        {{ example }}
     </div>
 </template>

@@ -70,9 +70,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             tags: ['templates'],
             body: t.Object({
                 name: t.String({minLength: 1}),
-                instructTemplate: t.String({minLength: 1}),
-                chatTemplate: t.String({minLength: 1}),
-                chatInstruction: t.String({minLength: 1}),
+                template: t.String({minLength: 1}),
             }),
             response: {
                 200: t.Object({id: t.Number()}),
@@ -83,9 +81,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 .insert(PromptTemplate)
                 .values({
                     name: req.body.name,
-                    instructTemplate: req.body.instructTemplate,
-                    chatTemplate: req.body.chatTemplate,
-                    chatInstruction: req.body.chatInstruction,
+                    template: req.body.template,
                 })
                 .returning({id: PromptTemplate.id})
             await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
@@ -105,9 +101,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             }),
             body: t.Object({
                 name: t.String(),
-                instructTemplate: t.String({minLength: 1}),
-                chatTemplate: t.String({minLength: 1}),
-                chatInstruction: t.String({minLength: 1}),
+                template: t.String({minLength: 1}),
             }),
         },
         handler: async (req, reply) => {
@@ -115,9 +109,7 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
                 .update(PromptTemplate)
                 .set({
                     name: req.body.name,
-                    instructTemplate: req.body.instructTemplate,
-                    chatTemplate: req.body.chatTemplate,
-                    chatInstruction: req.body.chatInstruction,
+                    template: req.body.template,
                 })
                 .where(eq(PromptTemplate.id, Number(req.params.id)))
             if (changes === 0) {
@@ -177,42 +169,27 @@ export const templateRoutes: FastifyPluginAsync = async (fastify) => {
             operationId: 'ParsePromptTemplate',
             tags: ['templates'],
             body: t.Object({
-                chatTemplate: t.String({minLength: 1}),
-                instructTemplate: t.String({minLength: 1}),
-                chatInstruction: t.String({minLength: 1}),
-                messages: t.Array(t.Any()),
+                template: t.String({minLength: 1}),
                 characters: t.Array(t.Any()),
                 lore: t.Array(t.Object({name: t.String(), content: t.String()})),
-                instructMessages: t.Array(t.Any()),
             }),
             response: {
                 200: t.Object({
-                    chatExample: t.String(),
-                    instructExample: t.String(),
+                    example: t.String(),
                 }),
             },
         },
         handler: async (req) => {
-            const chatTemplate = new Template(req.body.chatTemplate)
-            const instructTemplate = new Template(req.body.instructTemplate)
-            const chatInstructionTemplate = new Template(req.body.chatInstruction)
+            const template = new Template(req.body.template)
 
-            const chatInstruction = chatInstructionTemplate.render({
+            const example = template.render({
                 characters: req.body.characters,
                 lore: req.body.lore,
             })
-            logger.info('Parsed chat instruction:', chatInstruction)
+            logger.info('Parsed chat instruction:', example)
 
-            const chatExample = chatTemplate.render({
-                instruction: chatInstruction,
-                messages: req.body.messages,
-            })
-            const instructExample = instructTemplate.render({
-                messages: req.body.instructMessages,
-            })
             return {
-                chatExample,
-                instructExample,
+                example,
             }
         },
     })

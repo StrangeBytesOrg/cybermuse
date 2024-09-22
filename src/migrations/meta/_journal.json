@@ -15,6 +15,13 @@
       "when": 1724963558711,
       "tag": "0001_lame_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1726990063642,
+      "tag": "0002_rich_genesis",
+      "breakpoints": true
     }
   ]
 }
