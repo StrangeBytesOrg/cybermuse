@@ -6,7 +6,8 @@
     "description": "A batteries included AI Chat Application",
     "author": "Strange Bytes",
     "scripts": {
-        "dev": "vite",
+        "dev": "concurrently -n \"frontend,server\" -c \"blue,green\" npm:dev:frontend npm:dev:server",
+        "dev:frontend": "vite",
         "dev:server": "DEV=1 tsx watch --clear-screen=false ./src/backend/server.ts",
         "dev:browser": "vite",
         "build": "npm run build:frontend && npm run build:backend",
@@ -39,6 +40,7 @@
         "@vue/tsconfig": "^0.5.1",
         "autoprefixer": "^10.4.18",
         "chalk": "^5.3.0",
+        "concurrently": "^9.0.1",
         "daisyui": "^4.12.10",
         "drizzle-kit": "^0.22.8",
         "drizzle-orm": "^0.31.2",

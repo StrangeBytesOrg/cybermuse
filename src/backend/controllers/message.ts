@@ -243,8 +243,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                             .update(Message)
                             .set({content: lastMessage.content})
                             .where(eq(Message.id, lastMessage.id))
-                    } else {
-                        console.log('WAT', data)
+                    } else if (data.stop) {
+                        logger.debug(data)
                     }
                 }
 
