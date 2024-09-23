@@ -33,6 +33,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
             summary: 'Get status info about the server',
             response: {
                 200: t.Object({
+                    // TODO most of these could probably be auto-detected from config
                     currentModel: t.String(),
                     modelPath: t.String(),
                     autoLoad: t.Boolean(),
@@ -41,9 +42,9 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
                     batchSize: t.Number(),
                     gpuLayers: t.Number(),
                     useFlashAttn: t.Boolean(),
-                    splitMode: t.Optional(t.Union([t.Literal('row'), t.Literal('layer')])),
-                    cacheTypeK: t.Optional(t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')])),
-                    cacheTypeV: t.Optional(t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')])),
+                    splitMode: t.Union([t.Literal('row'), t.Literal('layer'), t.Literal('none')]),
+                    cacheTypeK: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
+                    cacheTypeV: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
                 }),
             },
         },
@@ -81,7 +82,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
                 batchSize: t.Number(),
                 gpuLayers: t.Number(),
                 useFlashAttn: t.Boolean(),
-                splitMode: t.Union([t.Literal('row'), t.Literal('layer')]),
+                splitMode: t.Union([t.Literal('row'), t.Literal('layer'), t.Literal('none')]),
                 cacheTypeK: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
                 cacheTypeV: t.Union([t.Literal('f16'), t.Literal('q8_0'), t.Literal('q4_0')]),
             }),
@@ -135,9 +136,9 @@ export const startLlamaServer = async (
     batchSize: number = 512,
     gpuLayers: number = 0,
     useFlashAttn: boolean = false,
-    splitMode?: 'row' | 'layer',
-    cacheTypeK?: 'f16' | 'q8_0' | 'q4_0',
-    cacheTypeV?: 'f16' | 'q8_0' | 'q4_0',
+    splitMode: 'row' | 'layer' | 'none',
+    cacheTypeK: 'f16' | 'q8_0' | 'q4_0',
+    cacheTypeV: 'f16' | 'q8_0' | 'q4_0',
     chatTemplate?: string,
 ) => {
     let serverBinPath = path.resolve(import.meta.dirname, '../../llamacpp/llama-server')

@@ -2087,9 +2087,9 @@ export interface operations {
                         batchSize: number;
                         gpuLayers: number;
                         useFlashAttn: boolean;
-                        splitMode?: "row" | "layer";
-                        cacheTypeK?: "f16" | "q8_0" | "q4_0";
-                        cacheTypeV?: "f16" | "q8_0" | "q4_0";
+                        splitMode: "row" | "layer" | "none";
+                        cacheTypeK: "f16" | "q8_0" | "q4_0";
+                        cacheTypeV: "f16" | "q8_0" | "q4_0";
                     };
                 };
             };
@@ -2119,7 +2119,7 @@ export interface operations {
                     batchSize: number;
                     gpuLayers: number;
                     useFlashAttn: boolean;
-                    splitMode: "row" | "layer";
+                    splitMode: "row" | "layer" | "none";
                     cacheTypeK: "f16" | "q8_0" | "q4_0";
                     cacheTypeV: "f16" | "q8_0" | "q4_0";
                 };

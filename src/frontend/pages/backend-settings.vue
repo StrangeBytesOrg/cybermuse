@@ -16,7 +16,7 @@ const batchSize = ref(512)
 const autoLoad = ref(false)
 const gpuLayers = ref(0)
 const useFlashAttn = ref(false)
-const splitMode = ref<'layer' | 'row'>('layer')
+const splitMode = ref<'layer' | 'row' | 'none'>('layer')
 const cacheTypeK = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
 const cacheTypeV = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
 const modelLoadPending = ref(false)
@@ -174,10 +174,16 @@ await getModels()
             <label class="form-control w-full max-w-96 mt-3">
                 <div class="label">
                     <span class="label-text">Split Mode</span>
+                    <div
+                        class="tooltip"
+                        data-tip="Layer: Split layers and KV across GPUs&#10;Row: Split only layers across GPUs&#10;None: Use one GPU only">
+                        <div class="badge badge-secondary badge-md">?</div>
+                    </div>
                 </div>
                 <select v-model="splitMode" class="select select-bordered max-w-96 flex-grow">
-                    <option value="layer">Layer (Default)</option>
+                    <option value="layer">Layer</option>
                     <option value="row">Row</option>
+                    <option value="none">None (Do not use multiple GPU's)</option>
                 </select>
             </label>
 
@@ -238,3 +244,10 @@ await getModels()
         </div>
     </div>
 </template>
+
+<style>
+/* Lets you use newlines (with &#10;) in the tooltip */
+.tooltip:before {
+    white-space: pre-line;
+}
+</style>
