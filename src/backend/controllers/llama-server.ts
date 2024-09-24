@@ -129,7 +129,7 @@ export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
     })
 }
 
-// TODO merge useGPU and gpuLayers into a single object
+// TODO add custom args as a text input so the user can use any not implemented settings
 export const startLlamaServer = async (
     modelName: string,
     contextSize: number,
@@ -172,8 +172,10 @@ export const startLlamaServer = async (
         args.push('--model', modelPath)
         args.push('--ctx-size', String(contextSize))
         args.push('--batch-size', String(batchSize))
+        // TODO u-batch size seems important
         args.push('--host', '0.0.0.0') // TODO make this configurable
         args.push('--port', '8080') // TODO make this configurable
+        args.push('--log-prefix')
         if (gpuLayers) {
             args.push('--gpu-layers', String(gpuLayers))
         }
@@ -194,15 +196,19 @@ export const startLlamaServer = async (
         }
         logger.info(`llama-server args: ${args.join(' ')}`)
         llamaServerProc = spawn(serverBinPath, args, {})
-        llamaServerProc.stdout.on('data', (data) => {
-            const output: string = data.toString()
-            process.stdout.write(chalk.cyan(output))
-        })
 
+        let stdErrBuffer = ''
         llamaServerProc.stderr.on('data', (data) => {
             const output: string = data.toString()
-            process.stderr.write(chalk.blue(output))
-            output.split('\n').forEach((line) => {
+            // process.stderr.write(chalk.blue(output))
+            stdErrBuffer += output
+            let newlineIndex: number
+            while ((newlineIndex = stdErrBuffer.indexOf('\n')) !== -1) {
+                const line = stdErrBuffer.slice(0, newlineIndex)
+                stdErrBuffer = stdErrBuffer.slice(newlineIndex + 1)
+                if (line.startsWith('E ')) {
+                    logger.error('LlamaCpp Error: ', line)
+                }
                 if (line.includes('model loaded')) {
                     logger.info('Detected model loaded')
                     loaded = true
@@ -217,9 +223,11 @@ export const startLlamaServer = async (
                     config.cacheTypeV = cacheTypeV
                     setConfig(config)
                     resolve({success: true})
-                } else if (line.includes('chat_example:')) {
+                }
+                if (line.includes('chat_example:')) {
                     const example = line.split(`chat_example: '`)[1].trim()
                     let foundTemplate = false
+                    logger.debug('Chat example:', example)
                     for (const templateName in chatTemplates) {
                         if (example === chatTemplates[templateName].example) {
                             currentTemplate = templateName
@@ -234,10 +242,12 @@ export const startLlamaServer = async (
                         logger.info(`Chat example: ${example}`)
                     }
                 }
-            })
-            if (output.includes('error')) {
-                reject(new Error(output))
             }
+        })
+
+        llamaServerProc.stdout.on('data', (data) => {
+            const output: string = data.toString()
+            process.stdout.write(chalk.cyan(output))
         })
 
         llamaServerProc.on('error', (err) => {
