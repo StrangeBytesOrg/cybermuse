@@ -3,7 +3,7 @@ import daisyui from 'daisyui'
 import themes from 'daisyui/src/theming/themes'
 
 const tailwindConfig: Config = {
-    content: ['./src/**/*'],
+    content: ['./src/frontend/**/*.{html,ts,vue}'],
     plugins: [daisyui],
     daisyui: {
         // themes: true,
