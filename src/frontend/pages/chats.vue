@@ -32,7 +32,10 @@ const formatDate = (dateString: string) => {
             <div class="avatar-group -space-x-4 rtl:space-x-reverse">
                 <div v-for="character in chat.characters" :key="character.id" class="avatar">
                     <div class="h-14">
-                        <img v-if="character.character.image" :src="character.character.image" alt="Character Image" />
+                        <img
+                            v-if="character.character.image"
+                            :src="`/avatars/${character.character.image}`"
+                            alt="Character Image" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
                 </div>

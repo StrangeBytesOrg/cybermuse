@@ -345,7 +345,7 @@ const toggleCtxMenu = () => {
                         <div class="w-16 h-16 rounded-full">
                             <img
                                 v-if="characterMap.get(message.characterId)?.image"
-                                :src="characterMap.get(message.characterId)?.image" />
+                                :src="`/avatars/${characterMap.get(message.characterId)?.image}`" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />
                         </div>
                     </div>

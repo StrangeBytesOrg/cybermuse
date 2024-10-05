@@ -70,7 +70,7 @@ const userCharacters = computed(() => {
                     :key="character.id"
                     class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
                     <div class="avatar w-20 h-20">
-                        <img v-if="character.image" :src="character.image" class="rounded-lg" />
+                        <img v-if="character.image" :src="`/avatars/${character.image}`" class="rounded-lg" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
                     </div>
                     <div class="text-lg ml-2">{{ character.name }}</div>
