@@ -29,8 +29,8 @@ const updateCharacter = async () => {
             name: character.name,
             type: character.type,
             description: character.description,
-            firstMessage: character.firstMessage,
-            image: character.image,
+            firstMessage: character.firstMessage || undefined,
+            image: character.image || undefined,
         },
     })
     if (error) {
@@ -39,10 +39,6 @@ const updateCharacter = async () => {
     } else {
         router.push('/characters')
     }
-}
-
-const removeImage = () => {
-    character.image = ''
 }
 
 const deleteCharacter = async () => {
@@ -55,6 +51,21 @@ const deleteCharacter = async () => {
     } else {
         await router.push('/characters')
     }
+}
+const uploadAvatar = async (image: string) => {
+    const {error, data} = await client.POST('/upload-avatar', {
+        body: {image},
+    })
+    if (error) {
+        console.error(error)
+        toast.error('Error uploading avatar')
+    } else {
+        character.image = data.filename
+    }
+}
+
+const removeImage = () => {
+    character.image = ''
 }
 </script>
 
@@ -89,12 +100,15 @@ const deleteCharacter = async () => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img v-if="character.image" :src="character.image" :alt="character.name + ' avatar'" />
+                    <img
+                        v-if="character.image"
+                        :src="`/avatars/${character.image}`"
+                        :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
-            <FileSelect v-model="character.image" class="ml-5 mt-auto" />
-            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Delete</button>
+            <FileSelect @changed="uploadAvatar" class="ml-5 mt-auto" />
+            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>

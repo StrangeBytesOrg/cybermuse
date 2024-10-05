@@ -24,7 +24,7 @@ const characters = reactive(data?.characters || [])
                     class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     <div class="avatar">
                         <div class="w-36 max-h-36 rounded-xl">
-                            <img v-if="character.image" :src="character.image" :alt="character.name" />
+                            <img v-if="character.image" :src="`/avatars/${character.image}`" :alt="character.name" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>

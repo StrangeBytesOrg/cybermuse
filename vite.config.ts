@@ -19,4 +19,9 @@ export default defineConfig({
         sourcemap: true,
         outDir: path.resolve(import.meta.dirname, 'dist'),
     },
+    server: {
+        proxy: {
+            '/avatars': 'http://localhost:31700',
+        },
+    },
 })

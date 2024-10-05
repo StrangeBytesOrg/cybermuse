@@ -1,9 +1,11 @@
+import fs from 'node:fs'
 import path from 'node:path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
+import envPaths from 'env-paths'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
@@ -26,6 +28,7 @@ import {fixtureData} from './fixture.js'
 await fixtureData()
 
 const config = getConfig()
+const paths = envPaths('cybermuse-desktop', {suffix: ''})
 
 export const server = Fastify({
     // logger: true,
@@ -98,6 +101,20 @@ server.addHook('onRoute', (routeOptions) => {
     }
     // @ts-expect-error - Hack because I'm pretty sure that the Fastify type is intentionally overly vague
     if (!routeOptions.schema.response.default) routeOptions.schema.response.default = defaultSchema
+})
+
+// Create the avatars directory if it doesn't exist
+const avatarsPath = path.resolve(paths.data, 'avatars')
+if (!fs.existsSync(avatarsPath)) {
+    logger.info(`Creating character image directory at ${avatarsPath}`)
+    fs.mkdirSync(avatarsPath, {recursive: true})
+}
+// Serve avatars
+await server.register(async (instance) => {
+    await instance.register(fastifyStatic, {
+        root: avatarsPath,
+        prefix: '/avatars/',
+    })
 })
 
 // Register controller routes

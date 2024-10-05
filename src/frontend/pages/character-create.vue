@@ -1,30 +1,30 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
 import FileInput from '../components/file-select.vue'
 import BackButton from '../components/back-button.vue'
-import {decodeChunks} from '../lib/decode-png-chunks'
+// import {decodeChunks} from '../lib/decode-png-chunks'
 
 const toast = useToast()
 const router = useRouter()
-const character = ref({
+const character = reactive({
     name: '',
     description: '',
     firstMessage: '',
     type: 'character' as 'character' | 'user',
+    image: '',
 })
-const characterImage = ref('')
 
 const createCharacter = async () => {
     const {error} = await client.POST('/create-character', {
         body: {
-            name: character.value.name,
-            type: character.value.type,
-            description: character.value.description,
-            firstMessage: character.value.firstMessage || undefined,
-            image: characterImage.value || undefined,
+            name: character.name,
+            type: character.type,
+            description: character.description,
+            firstMessage: character.firstMessage || undefined,
+            image: character.image || undefined,
         },
     })
     if (error) {
@@ -35,53 +35,47 @@ const createCharacter = async () => {
     }
 }
 
+const uploadAvatar = async (image: string) => {
+    if (image === '') return
+    const {error, data} = await client.POST('/upload-avatar', {
+        body: {
+            image,
+        },
+    })
+    if (error) {
+        console.error(error)
+        toast.error('Error uploading image')
+    } else {
+        character.image = data.filename
+    }
+}
+
 const removeImage = () => {
-    characterImage.value = ''
+    character.image = ''
 }
 
-const imageChanged = (newVal: string) => {
-    if (newVal === '') return
-
-    // If the image is a png, check if it has V2 card data embedded
-    if (newVal.startsWith('data:image/png;base64')) {
-        // Convert the image from a dataurl to an ArrayBuffer
-        const dataurl = newVal.split(',')[1]
-        if (!dataurl) return
-        const binary = atob(dataurl)
-        const arrayBuffer = new ArrayBuffer(binary.length)
-        const uint8Array = new Uint8Array(arrayBuffer)
-        for (let i = 0; i < binary.length; i++) {
-            uint8Array[i] = binary.charCodeAt(i)
-        }
-        const metaChunks = decodeChunks(arrayBuffer)
-        const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
-        if (!cardMeta) return
-        const card = JSON.parse(atob(cardMeta.value))
-        character.value.name = card.data.name
-        character.value.description = card.data.description
-        character.value.firstMessage = card.data.first_mes
-    }
-
-    // If the image is large, resize it
-    const img = new Image()
-    img.onload = function () {
-        const MAX_WIDTH = 1024
-        let width = img.width
-        let height = img.height
-        if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width
-            width = MAX_WIDTH
-            const canvas = document.createElement('canvas')
-            const ctx = canvas.getContext('2d')
-            canvas.width = width
-            canvas.height = height
-            ctx?.drawImage(img, 0, 0, width, height)
-            const resizedImage = canvas.toDataURL('image/webp')
-            characterImage.value = resizedImage
-        }
-    }
-    img.src = newVal
-}
+// const importCharacterPng = async (image: string) => {
+//     if (image === '') return
+//     // If the image is a png, check if it has V2 card data embedded
+//     if (image.startsWith('data:image/png;base64')) {
+//         // Convert the image from a dataurl to an ArrayBuffer
+//         const dataurl = image.split(',')[1]
+//         if (!dataurl) return
+//         const binary = atob(dataurl)
+//         const arrayBuffer = new ArrayBuffer(binary.length)
+//         const uint8Array = new Uint8Array(arrayBuffer)
+//         for (let i = 0; i < binary.length; i++) {
+//             uint8Array[i] = binary.charCodeAt(i)
+//         }
+//         const metaChunks = decodeChunks(arrayBuffer)
+//         const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
+//         if (!cardMeta) return
+//         const card = JSON.parse(atob(cardMeta.value))
+//         character.name = card.data.name
+//         character.description = card.data.description
+//         character.firstMessage = card.data.first_mes
+//     }
+// }
 </script>
 
 <template>
@@ -116,13 +110,16 @@ const imageChanged = (newVal: string) => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img v-if="characterImage" :src="characterImage" :alt="character.name + ' avatar'" />
+                    <img
+                        v-if="character.image"
+                        :src="`/avatars/${character.image}`"
+                        :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
 
-            <FileInput v-model="characterImage" @changed="imageChanged" class="ml-5 mt-auto" />
-            <button v-if="characterImage" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <FileInput @changed="uploadAvatar" class="ml-5 mt-auto" />
+            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>
