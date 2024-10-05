@@ -5,7 +5,7 @@ import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
 import FileInput from '../components/file-select.vue'
 import BackButton from '../components/back-button.vue'
-// import {decodeChunks} from '../lib/decode-png-chunks'
+import {decodeChunks} from '../lib/decode-png-chunks'
 
 const toast = useToast()
 const router = useRouter()
@@ -54,34 +54,36 @@ const removeImage = () => {
     character.image = ''
 }
 
-// const importCharacterPng = async (image: string) => {
-//     if (image === '') return
-//     // If the image is a png, check if it has V2 card data embedded
-//     if (image.startsWith('data:image/png;base64')) {
-//         // Convert the image from a dataurl to an ArrayBuffer
-//         const dataurl = image.split(',')[1]
-//         if (!dataurl) return
-//         const binary = atob(dataurl)
-//         const arrayBuffer = new ArrayBuffer(binary.length)
-//         const uint8Array = new Uint8Array(arrayBuffer)
-//         for (let i = 0; i < binary.length; i++) {
-//             uint8Array[i] = binary.charCodeAt(i)
-//         }
-//         const metaChunks = decodeChunks(arrayBuffer)
-//         const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
-//         if (!cardMeta) return
-//         const card = JSON.parse(atob(cardMeta.value))
-//         character.name = card.data.name
-//         character.description = card.data.description
-//         character.firstMessage = card.data.first_mes
-//     }
-// }
+const importCharacterPng = async (image: string) => {
+    if (image === '') return
+    // If the image is a png, check if it has V2 card data embedded
+    if (image.startsWith('data:image/png;base64')) {
+        // Convert the image from a dataurl to an ArrayBuffer
+        const dataurl = image.split(',')[1]
+        if (!dataurl) return
+        const binary = atob(dataurl)
+        const arrayBuffer = new ArrayBuffer(binary.length)
+        const uint8Array = new Uint8Array(arrayBuffer)
+        for (let i = 0; i < binary.length; i++) {
+            uint8Array[i] = binary.charCodeAt(i)
+        }
+        const metaChunks = decodeChunks(arrayBuffer)
+        const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
+        if (!cardMeta) return
+        const card = JSON.parse(atob(cardMeta.value))
+        character.name = card.data.name
+        character.description = card.data.description
+        character.firstMessage = card.data.first_mes
+        uploadAvatar(image)
+    }
+}
 </script>
 
 <template>
     <div class="flex flex-row bg-base-300 p-3">
         <BackButton />
         <h1 class="text-xl ml-5">New Character</h1>
+        <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" />
     </div>
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
