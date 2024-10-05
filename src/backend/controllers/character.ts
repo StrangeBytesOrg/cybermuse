@@ -4,12 +4,11 @@ import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
-import envPaths from 'env-paths'
 import sharp from 'sharp'
 import {db, Character, selectCharacterSchema, insertCharacterSchema} from '../db.js'
 import {logger} from '../logging.js'
+import {paths} from '../paths.js'
 
-const paths = envPaths('cybermuse-desktop', {suffix: ''})
 const avatarsPath = path.resolve(paths.data, 'avatars')
 
 export const characterRoutes: FastifyPluginAsync = async (fastify) => {

@@ -1,10 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {z} from 'zod'
-import envPaths from 'env-paths'
 import {logger} from './logging.js'
+import {paths} from './paths.js'
 
-const paths = envPaths('cybermuse-desktop', {suffix: ''})
 const configPath = path.resolve(paths.config, 'config.json')
 logger.info(`Config path: ${configPath}`)
 

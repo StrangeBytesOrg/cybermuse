@@ -1,10 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import envPaths from 'env-paths'
 import {Logger} from 'tslog'
 import {createStream} from 'rotating-file-stream'
+import {paths} from './paths.js'
 
-const paths = envPaths('cybermuse-desktop', {suffix: ''})
 if (!fs.existsSync(paths.log)) {
     console.log(`Creating log directory at ${paths.log}`)
     fs.mkdirSync(paths.log)

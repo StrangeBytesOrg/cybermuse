@@ -5,11 +5,11 @@ import cors from '@fastify/cors'
 import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
-import envPaths from 'env-paths'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
 import {env} from './env.js'
+import {paths} from './paths.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
@@ -28,7 +28,6 @@ import {fixtureData} from './fixture.js'
 await fixtureData()
 
 const config = getConfig()
-const paths = envPaths('cybermuse-desktop', {suffix: ''})
 
 export const server = Fastify({
     // logger: true,
