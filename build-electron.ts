@@ -11,6 +11,7 @@ const artifacts = await builder.build({
             output: 'out',
         },
         // asar: false,
+        asarUnpack: ['**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
         files: [
             //
             'package.json',

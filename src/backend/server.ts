@@ -130,7 +130,7 @@ await server.register(llamaServerRoutes, {prefix: '/api'})
 
 // Serve frontend
 await server.register(fastifyStatic, {
-    root: path.resolve(import.meta.dirname, '../../dist/'),
+    root: path.resolve(import.meta.dirname, '../'),
 })
 
 server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {

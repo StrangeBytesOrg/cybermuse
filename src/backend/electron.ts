@@ -1,6 +1,4 @@
-import path from 'node:path'
 import {app, shell, BrowserWindow} from 'electron'
-import './logging.js'
 import './server.js'
 import {env} from './env.js'
 
@@ -34,6 +32,7 @@ app.on('ready', () => {
         })
         win.loadURL('http://localhost:5173')
     } else {
-        win.loadFile(path.resolve(import.meta.dirname, '../index.html'))
+        // TODO show some kind of loading indicator / fallback in case the server fails or takes time to start
+        win.loadURL('http://localhost:31700')
     }
 })
