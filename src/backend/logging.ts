@@ -1,16 +1,12 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import {Logger} from 'tslog'
 import {createStream} from 'rotating-file-stream'
 import {paths} from './paths.js'
 
-if (!fs.existsSync(paths.log)) {
-    console.log(`Creating log directory at ${paths.log}`)
-    fs.mkdirSync(paths.log)
-}
+const logFile = path.resolve(paths.config, 'out.log')
+console.log(`Logging to ${logFile}`)
 
-console.log(`Logging to ${path.resolve(paths.log, 'out.log')}`)
-const logStream = createStream(path.resolve(paths.log, 'out.log'), {
+const logStream = createStream(logFile, {
     size: '5M',
 })
 export const logger = new Logger({

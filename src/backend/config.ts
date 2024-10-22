@@ -2,14 +2,14 @@ import fs from 'node:fs'
 import path from 'node:path'
 import {z} from 'zod'
 import {logger} from './logging.js'
-import {paths} from './paths.js'
+import {paths, modelsPath} from './paths.js'
 
-const configPath = path.resolve(paths.config, 'config.json')
-logger.info(`Config path: ${configPath}`)
+const configFile = path.resolve(paths.config, 'config.json')
+logger.info(`Config file: ${configFile}`)
 
 const configSchema = z.object({
     serverPort: z.number().default(31700),
-    modelsPath: z.string().default(path.resolve(paths.config, 'models')),
+    modelsPath: z.string().default(modelsPath),
     autoLoad: z.boolean().default(false),
     lastModel: z.string().default(''),
     contextSize: z.number().default(8192),
@@ -22,21 +22,9 @@ const configSchema = z.object({
 })
 type Config = z.infer<typeof configSchema>
 
-// Create the app data directory if it doesn't exist
-if (!fs.existsSync(paths.config)) {
-    logger.info(`Creating config directory at ${paths.config}`)
-    fs.mkdirSync(paths.config, {recursive: true})
-}
-// Make the models folder if it doesn't exist
-const modelPath = path.resolve(paths.config, 'models')
-if (!fs.existsSync(modelPath)) {
-    logger.info(`Creating models directory at ${modelPath}`)
-    fs.mkdirSync(modelPath)
-}
-
 export const getConfig = () => {
     try {
-        const config = JSON.parse(fs.readFileSync(configPath, 'utf-8'))
+        const config = JSON.parse(fs.readFileSync(configFile, 'utf-8'))
         const parsedConfig = configSchema.parse(config)
         return parsedConfig
     } catch {
@@ -47,5 +35,5 @@ export const getConfig = () => {
 
 export const setConfig = (config: Config) => {
     const parsedConfig = configSchema.parse(config)
-    fs.writeFileSync(configPath, JSON.stringify(parsedConfig, null, 2))
+    fs.writeFileSync(configFile, JSON.stringify(parsedConfig, null, 2))
 }

@@ -12,8 +12,9 @@ import {logger} from './logging.js'
 
 let databasePath = path.resolve(paths.config, 'app-data.db')
 if (env.DEV) {
-    databasePath = path.resolve('./dev.db')
+    databasePath = './dev.db'
 }
+logger.info(`Database file: ${databasePath}`)
 
 const dbLogger = logger.getSubLogger({
     name: 'db',
@@ -26,10 +27,9 @@ class DrizzleLogger implements Logger {
 
 const sqlite = new Database(databasePath)
 export const db = drizzle(sqlite, {schema, logger: env.VERBOSE ? new DrizzleLogger() : undefined})
-logger.info(`Database path: ${databasePath}`)
 
 if (!env.DEV) {
     migrate(db, {migrationsFolder: path.resolve(import.meta.dirname, '../migrations')})
 } else {
-    dbLogger.info('DEV mode skipping migrations')
+    dbLogger.info('Dev mode, skipping migrations')
 }

@@ -7,9 +7,7 @@ import {Template} from '@huggingface/jinja'
 import sharp from 'sharp'
 import {db, Character, selectCharacterSchema, insertCharacterSchema} from '../db.js'
 import {logger} from '../logging.js'
-import {paths} from '../paths.js'
-
-const avatarsPath = path.resolve(paths.data, 'avatars')
+import {avatarsPath} from '../paths.js'
 
 export const characterRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({

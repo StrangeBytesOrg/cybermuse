@@ -1,4 +1,3 @@
-import fs from 'node:fs'
 import path from 'node:path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
@@ -6,10 +5,9 @@ import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
+import {avatarsPath} from './paths.js'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
-// import {env} from './env.js'
-import {paths} from './paths.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
@@ -102,12 +100,6 @@ server.addHook('onRoute', (routeOptions) => {
     if (!routeOptions.schema.response.default) routeOptions.schema.response.default = defaultSchema
 })
 
-// Create the avatars directory if it doesn't exist
-const avatarsPath = path.resolve(paths.data, 'avatars')
-if (!fs.existsSync(avatarsPath)) {
-    logger.info(`Creating character image directory at ${avatarsPath}`)
-    fs.mkdirSync(avatarsPath, {recursive: true})
-}
 // Serve avatars
 await server.register(async (instance) => {
     await instance.register(fastifyStatic, {
