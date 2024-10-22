@@ -4,13 +4,12 @@ import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {logger} from '../logging.js'
 import {getLlama} from 'node-llama-cpp'
-import type {Llama, LlamaContext, LlamaModel} from 'node-llama-cpp'
+import type {LlamaContext, LlamaModel} from 'node-llama-cpp'
 import {getConfig, setConfig} from '../config.js'
 
-export let llama: Llama
+const llama = await getLlama()
 export let context: LlamaContext
 export let model: LlamaModel
-// export let sequence: LlamaContextSequence
 let loaded = false
 let currentModel: string = ''
 
@@ -120,9 +119,12 @@ export const loadModel = async (
 ) => {
     const config = getConfig()
     const modelPath = path.resolve(config.modelsPath, modelFile)
-    logger.info(`Attempting to start server with model: ${modelPath}`)
+    logger.info(`Attempting to load: ${modelPath}`)
 
-    llama = await getLlama()
+    if (model && !model.disposed) {
+        logger.info(`Disposing of previous model`)
+        await model.dispose()
+    }
     model = await llama.loadModel({
         modelPath,
         gpuLayers,
@@ -132,7 +134,6 @@ export const loadModel = async (
         batchSize,
         flashAttention: useFlashAttn,
     })
-    // sequence = context.getSequence()
     loaded = true
     currentModel = modelFile
     logger.info(`Model loaded`)
