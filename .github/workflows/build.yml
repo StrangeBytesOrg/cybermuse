@@ -63,30 +63,13 @@ jobs:
         run: npm run make
 
       # Github release files
-      - name: Upload Github Release Files (Linux)
-        if: matrix.build.platform == 'linux/amd64'
+      - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.APP_VERSION }}
           files: |
             out/*.tar.xz
             out/*.zip
-
-      # - name: Upload Github Release Files (Mac)
-      #   if: matrix.build.platform == 'darwin/amd64'
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: ${{ env.APP_VERSION }}
-      #     files: |
-      #       out/cybermuse-desktop-mac-x64.zip
-      #       out/cybermuse-desktop-mac-arm64.zip
-
-      # - name: Upload Github Release Files (Windows)
-      #   if: matrix.build.platform == 'windows/amd64'
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     tag_name: ${{ env.APP_VERSION }}
-      #     files: out/cybermuse-desktop-win-x64.zip
 
       # - name: Setup RClone
       #   uses: AnimMouse/setup-rclone@v1
