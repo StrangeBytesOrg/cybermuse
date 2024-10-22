@@ -11,14 +11,25 @@ const artifacts = await builder.build({
             output: 'out',
         },
         // asar: false,
-        asarUnpack: ['**/node_modules/sharp/**/*', '**/node_modules/@img/**/*'],
         files: [
-            //
             'package.json',
             {from: './dist', to: ''},
             {from: './src/migrations/', to: './migrations/'},
+            // Config for node-llama-cpp
+            '!node_modules/node-llama-cpp/bins/**/*',
+            'node_modules/node-llama-cpp/bins/${os}-${arch}*/**/*',
+            '!node_modules/@node-llama-cpp/*/bins/**/*',
+            'node_modules/@node-llama-cpp/${os}-${arch}*/bins/**/*',
+            '!node_modules/node-llama-cpp/llama/localBuilds/**/*',
+            'node_modules/node-llama-cpp/llama/localBuilds/${os}-${arch}*/**/*',
         ],
-        extraResources: [{from: './llamacpp/LICENSE', to: 'llamacpp/LICENSE'}],
+        asarUnpack: [
+            '**/node_modules/sharp/**/*',
+            '**/node_modules/@img/**/*',
+            'node_modules/node-llama-cpp/bins',
+            'node_modules/node-llama-cpp/llama/localBuilds',
+            'node_modules/@node-llama-cpp/*',
+        ],
         artifactName: '${name}-${os}-${arch}.${ext}',
         linux: {
             target: dev ? ['dir'] : ['tar.xz'],
@@ -27,11 +38,6 @@ const artifacts = await builder.build({
         },
         win: {
             target: ['nsis'],
-            extraResources: [
-                {from: './llamacpp/llama-server.exe', to: 'llamacpp/llama-server.exe'},
-                {from: './llamacpp/llama.dll', to: 'llamacpp/llama.dll'},
-                {from: './llamacpp/ggml.dll', to: 'llamacpp/ggml.dll'},
-            ],
             publish: null, // Prevent publishing to GitHub
         },
         mac: {
@@ -39,7 +45,6 @@ const artifacts = await builder.build({
                 {target: 'zip', arch: ['x64']},
                 {target: 'zip', arch: ['arm64']},
             ],
-            extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
             publish: null, // Prevent publishing to GitHub
         },
         nsis: {

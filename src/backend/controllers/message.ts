@@ -2,15 +2,15 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
-import {Template} from '@huggingface/jinja'
+// import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
-import {responseToIterable} from '../lib/sse.js'
+// import {responseToIterable} from '../lib/sse.js'
 import {logger} from '../logging.js'
-import {env} from '../env.js'
-import {currentTemplate} from './llama-server.js'
-import {formatPrompt, type Messages} from '../prompt.js'
-
-const llamaCppBaseUrl = env.LLAMA_SERVER_URL || 'http://localhost:8080'
+// import {env} from '../env.js'
+// import {currentTemplate} from './llama-server.js'
+// import {formatPrompt, type Messages} from '../prompt.js'
+import {LlamaChatSession} from 'node-llama-cpp'
+import {context, sequence} from './new-llama-server.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -110,6 +110,24 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (request, reply) => {
+            // const completion = new LlamaCompletion({
+            //     contextSequence: sequence,
+            // })
+            // const prompt = '<|user|>What is the capital of France?<|end|>\n<|assistant|>'
+            // const res = await completion.generateCompletion(prompt, {maxTokens: 16})
+            // console.log(res)
+            // completion.dispose()
+            // return res
+            const session = new LlamaChatSession({
+                // contextSequence: sequence,
+                contextSequence: context.getSequence(),
+                autoDisposeSequence: true,
+            })
+            const res = await session.prompt('Hello')
+            await session.dispose()
+            console.log(session.getChatHistory())
+            return res
+            /*
             const {chatId} = request.body
 
             // Setup headers for server-sent events
@@ -269,6 +287,7 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
                 reply.raw.end()
                 request.socket.destroy()
             }
+            */
         },
     })
 

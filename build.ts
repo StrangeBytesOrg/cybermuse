@@ -13,7 +13,7 @@ const buildOptions: BuildOptions = {
     bundle: true,
     outdir: outputPath,
     entryPoints: ['./src/backend/electron.ts', './src/backend/server.ts'],
-    external: ['electron', 'better-sqlite3', '@fastify/swagger-ui'],
+    external: ['electron', 'better-sqlite3', '@fastify/swagger-ui', 'node-llama-cpp'],
     target: 'esnext',
     inject: ['cjs-shim.ts'],
     sourcemap: devMode,

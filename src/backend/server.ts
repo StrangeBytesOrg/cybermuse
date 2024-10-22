@@ -21,7 +21,8 @@ import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
-import {llamaServerRoutes, startLlamaServer} from './controllers/llama-server.js'
+// import {llamaServerRoutes, startLlamaServer} from './controllers/llama-server.js'
+import {llamaServerRoutes} from './controllers/new-llama-server.js'
 
 // Fixture DB data
 import {fixtureData} from './fixture.js'
@@ -140,19 +141,19 @@ server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
     logger.info(`Server running on port ${config.serverPort}`)
 })
 
-if (config.autoLoad && !env.LLAMA_SERVER_URL) {
-    logger.info(`Auto-loading llama server with model: ${config.lastModel}`)
-    await startLlamaServer(
-        config.lastModel,
-        config.contextSize,
-        config.batchSize,
-        config.gpuLayers,
-        config.useFlashAttn,
-        config.splitMode,
-        config.cacheTypeK,
-        config.cacheTypeV,
-    )
-}
+// if (config.autoLoad && !env.LLAMA_SERVER_URL) {
+//     logger.info(`Auto-loading llama server with model: ${config.lastModel}`)
+//     await startLlamaServer(
+//         config.lastModel,
+//         config.contextSize,
+//         config.batchSize,
+//         config.gpuLayers,
+//         config.useFlashAttn,
+//         config.splitMode,
+//         config.cacheTypeK,
+//         config.cacheTypeV,
+//     )
+// }
 
 process.on('SIGINT', () => {
     server.close()

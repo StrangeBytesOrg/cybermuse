@@ -677,7 +677,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get status info about the server */
+        /** Get status info about model settings and the currently loaded model */
         get: operations["GetLlamaServerStatus"];
         put?: never;
         post?: never;
@@ -687,7 +687,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/start-server": {
+    "/load-model": {
         parameters: {
             query?: never;
             header?: never;
@@ -696,15 +696,15 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Startup the llama server */
-        post: operations["StartLlamaServer"];
+        /** Load a model */
+        post: operations["LoadModel"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/stop-server": {
+    "/unload-model": {
         parameters: {
             query?: never;
             header?: never;
@@ -713,8 +713,8 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Stop the llama server */
-        post: operations["StopLlamaServer"];
+        /** Unload the current model */
+        post: operations["UnloadModel"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2130,9 +2130,6 @@ export interface operations {
                         batchSize: number;
                         gpuLayers: number;
                         useFlashAttn: boolean;
-                        splitMode: "row" | "layer" | "none";
-                        cacheTypeK: "f16" | "q8_0" | "q4_0";
-                        cacheTypeV: "f16" | "q8_0" | "q4_0";
                     };
                 };
             };
@@ -2147,7 +2144,7 @@ export interface operations {
             };
         };
     };
-    StartLlamaServer: {
+    LoadModel: {
         parameters: {
             query?: never;
             header?: never;
@@ -2162,9 +2159,6 @@ export interface operations {
                     batchSize: number;
                     gpuLayers: number;
                     useFlashAttn: boolean;
-                    splitMode: "row" | "layer" | "none";
-                    cacheTypeK: "f16" | "q8_0" | "q4_0";
-                    cacheTypeV: "f16" | "q8_0" | "q4_0";
                 };
             };
         };
@@ -2191,7 +2185,7 @@ export interface operations {
             };
         };
     };
-    StopLlamaServer: {
+    UnloadModel: {
         parameters: {
             query?: never;
             header?: never;
@@ -2200,6 +2194,17 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
+            /** @description Default Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        success: boolean;
+                    };
+                };
+            };
             /** @description Default error response */
             default: {
                 headers: {

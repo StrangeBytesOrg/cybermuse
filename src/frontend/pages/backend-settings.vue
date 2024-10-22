@@ -16,9 +16,6 @@ const batchSize = ref(512)
 const autoLoad = ref(false)
 const gpuLayers = ref(0)
 const useFlashAttn = ref(false)
-const splitMode = ref<'layer' | 'row' | 'none'>('layer')
-const cacheTypeK = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
-const cacheTypeV = ref<'f16' | 'q8_0' | 'q4_0'>('f16')
 const modelLoadPending = ref(false)
 
 const getStatus = async () => {
@@ -36,9 +33,6 @@ const getStatus = async () => {
         batchSize.value = data.batchSize
         gpuLayers.value = data.gpuLayers
         useFlashAttn.value = data.useFlashAttn
-        splitMode.value = data.splitMode
-        cacheTypeK.value = data.cacheTypeK
-        cacheTypeV.value = data.cacheTypeV
     }
 }
 
@@ -60,16 +54,13 @@ const loadModel = async () => {
     }
 
     modelLoadPending.value = true
-    const {error} = await client.POST('/start-server', {
+    const {error} = await client.POST('/load-model', {
         body: {
             modelFile: selectModel.value,
             contextSize: contextSize.value,
             batchSize: batchSize.value,
             gpuLayers: gpuLayers.value,
             useFlashAttn: useFlashAttn.value,
-            splitMode: splitMode.value,
-            cacheTypeK: cacheTypeK.value,
-            cacheTypeV: cacheTypeV.value,
         },
     })
     if (error) {
@@ -83,7 +74,7 @@ const loadModel = async () => {
 }
 
 const unloadModel = async () => {
-    const {error} = await client.POST('/stop-server')
+    const {error} = await client.POST('/unload-model')
     if (error) {
         toast.error(`Failed to unload model\n${error.message}`)
     } else {
@@ -169,44 +160,6 @@ await getModels()
                     <span class="label-text">Use Flash Attention</span>
                 </div>
                 <input type="checkbox" class="toggle toggle-primary" v-model="useFlashAttn" />
-            </label>
-
-            <label class="form-control w-full max-w-96 mt-3">
-                <div class="label">
-                    <span class="label-text">Split Mode</span>
-                    <div
-                        class="tooltip"
-                        data-tip="Layer: Split layers and KV across GPUs&#10;Row: Split only layers across GPUs&#10;None: Use one GPU only">
-                        <div class="badge badge-secondary badge-md">?</div>
-                    </div>
-                </div>
-                <select v-model="splitMode" class="select select-bordered max-w-96 flex-grow">
-                    <option value="layer">Layer</option>
-                    <option value="row">Row</option>
-                    <option value="none">None (Do not use multiple GPU's)</option>
-                </select>
-            </label>
-
-            <label class="form-control w-full max-w-96 mt-3">
-                <div class="label">
-                    <span class="label-text">Cache Type K</span>
-                </div>
-                <select v-model="cacheTypeK" class="select select-bordered max-w-96 flex-grow">
-                    <option value="f16">f16 (Default)</option>
-                    <option value="q4_0">q4_0</option>
-                    <option value="q8_0">q8_0</option>
-                </select>
-            </label>
-
-            <label class="form-control w-full max-w-96 mt-3">
-                <div class="label">
-                    <span class="label-text">Cache Type V</span>
-                </div>
-                <select v-model="cacheTypeV" class="select select-bordered max-w-96 flex-grow">
-                    <option value="f16">f16 (Default)</option>
-                    <option value="q4_0">q4_0</option>
-                    <option value="q8_0">q8_0</option>
-                </select>
             </label>
 
             <label class="form-control w-full max-w-96 mt-3">
