@@ -21,7 +21,7 @@ import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
-import {llamaServerRoutes} from './controllers/llama-cpp.js'
+import {llamaCppRoutes} from './controllers/llama-cpp.js'
 
 // Fixture DB data
 import {fixtureData} from './fixture.js'
@@ -126,7 +126,7 @@ await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
 await server.register(generateRoutes, {prefix: '/api'})
 await server.register(templateRoutes, {prefix: '/api'})
-await server.register(llamaServerRoutes, {prefix: '/api'})
+await server.register(llamaCppRoutes, {prefix: '/api'})
 
 // Serve frontend
 await server.register(fastifyStatic, {

@@ -15,16 +15,11 @@ const maxTokens = ref(250)
 const minP = ref(0)
 const topP = ref(0)
 const topK = ref(0)
-const tfsz = ref(0)
-const typicalP = ref(0)
 const repeatPenalty = ref(0)
 const repeatLastN = ref(0)
 const penalizeNL = ref(false)
 const presencePenalty = ref(0)
 const frequencyPenalty = ref(0)
-const mirostat = ref(0)
-const mirostatTau = ref(0)
-const mirostatEta = ref(0)
 
 const createTemplate = async () => {
     const {error} = await client.POST('/create-preset', {
@@ -37,16 +32,11 @@ const createTemplate = async () => {
             topK: topK.value,
             topP: topP.value,
             minP: minP.value,
-            tfsz: tfsz.value,
-            typicalP: typicalP.value,
             repeatPenalty: repeatPenalty.value,
             repeatLastN: repeatLastN.value,
             penalizeNL: penalizeNL.value,
             presencePenalty: presencePenalty.value,
             frequencyPenalty: frequencyPenalty.value,
-            mirostat: mirostat.value,
-            mirostatTau: mirostatTau.value,
-            mirostatEta: mirostatEta.value,
         },
     })
     if (error) {
@@ -151,20 +141,6 @@ const createTemplate = async () => {
 
             <div class="flex flex-col flex-grow">
                 <label class="form-control w-full">
-                    <div class="label"><span class="label-text">tfsz</span></div>
-                    <input
-                        type="text"
-                        v-model.number="tfsz"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Typical-p</span></div>
-                    <input
-                        type="text"
-                        v-model.number="typicalP"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
                     <div class="label"><span class="label-text">Repeat-penalty</span></div>
                     <input
                         type="text"
@@ -197,28 +173,6 @@ const createTemplate = async () => {
                     <input
                         type="text"
                         v-model.number="frequencyPenalty"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Mirostat</span></div>
-                    <select v-model.number="mirostat" class="select">
-                        <option :value="0">0 (disabled)</option>
-                        <option :value="1">1 (Mirostat 1.0)</option>
-                        <option :value="2">2 (Mirostat 2.0)</option>
-                    </select>
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Mirostat-tau</span></div>
-                    <input
-                        type="text"
-                        v-model.number="mirostatTau"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Mirostat-eta</span></div>
-                    <input
-                        type="text"
-                        v-model.number="mirostatEta"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
             </div>

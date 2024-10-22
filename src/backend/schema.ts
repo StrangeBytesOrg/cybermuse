@@ -152,16 +152,11 @@ export const GeneratePreset = sqliteTable('generate_preset', {
     topK: real('top_k'),
     topP: real('top_p'),
     minP: real('min_p'),
-    tfsz: real('tfsz'),
-    typicalP: real('typical_p'),
     repeatPenalty: real('repeat_penalty'),
     repeatLastN: real('repeat_last_n'),
     penalizeNL: integer('penalize_nl', {mode: 'boolean'}),
     presencePenalty: real('presence_penalty'),
     frequencyPenalty: real('frequency_penalty'),
-    mirostat: integer('mirostat'),
-    mirostatTau: real('mirostat_tau'),
-    mirostatEta: real('mirostat_eta'),
 })
 export const selectPresetSchema = createSelectSchema(GeneratePreset)
 export const insertPresetSchema = createInsertSchema(GeneratePreset)

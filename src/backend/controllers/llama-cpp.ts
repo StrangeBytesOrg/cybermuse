@@ -14,7 +14,7 @@ export let model: LlamaModel
 let loaded = false
 let currentModel: string = ''
 
-export const llamaServerRoutes: FastifyPluginAsync = async (fastify) => {
+export const llamaCppRoutes: FastifyPluginAsync = async (fastify) => {
     const f = fastify.withTypeProvider<TypeBoxTypeProvider>()
     f.route({
         url: '/status',
@@ -122,9 +122,7 @@ export const loadModel = async (
     const modelPath = path.resolve(config.modelsPath, modelFile)
     logger.info(`Attempting to start server with model: ${modelPath}`)
 
-    llama = await getLlama({
-        // gpu: false,
-    })
+    llama = await getLlama()
     model = await llama.loadModel({
         modelPath,
         gpuLayers,

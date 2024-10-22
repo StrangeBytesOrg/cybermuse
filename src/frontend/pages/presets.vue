@@ -24,16 +24,11 @@ const activePreset = computed(() => {
         minP: 0,
         topP: 0,
         topK: 0,
-        tfsz: 0,
-        typicalP: 0,
         repeatPenalty: 0,
         repeatLastN: 0,
         penalizeNL: false,
         presencePenalty: 0,
         frequencyPenalty: 0,
-        mirostat: 0,
-        mirostatTau: 0,
-        mirostatEta: 0,
     }
     return presets.value?.find((preset) => preset.id === selectedPresetId.value) || missingPreset
 })
@@ -61,16 +56,11 @@ const updatePreset = async () => {
             topK: activePreset.value.topK,
             topP: activePreset.value.topP,
             minP: activePreset.value.minP,
-            tfsz: activePreset.value.tfsz,
-            typicalP: activePreset.value.typicalP,
             repeatPenalty: activePreset.value.repeatPenalty,
             repeatLastN: activePreset.value.repeatLastN,
             penalizeNL: activePreset.value.penalizeNL,
             presencePenalty: activePreset.value.presencePenalty,
             frequencyPenalty: activePreset.value.frequencyPenalty,
-            mirostat: activePreset.value.mirostat,
-            mirostatTau: activePreset.value.mirostatTau,
-            mirostatEta: activePreset.value.mirostatEta,
         },
     })
     if (error) {
@@ -197,20 +187,6 @@ const deletePreset = async () => {
 
                 <div class="flex flex-col flex-grow">
                     <label class="form-control w-full">
-                        <div class="label"><span class="label-text">tfsz</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.tfsz"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Typical-p</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.typicalP"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
                         <div class="label"><span class="label-text">Repeat-penalty</span></div>
                         <input
                             type="text"
@@ -243,28 +219,6 @@ const deletePreset = async () => {
                         <input
                             type="text"
                             v-model.number="activePreset.frequencyPenalty"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Mirostat</span></div>
-                        <select v-model.number="activePreset.mirostat" class="select">
-                            <option :value="0">0 (disabled)</option>
-                            <option :value="1">1 (Mirostat 1.0)</option>
-                            <option :value="2">2 (Mirostat 2.0)</option>
-                        </select>
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Mirostat-tau</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.mirostatTau"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Mirostat-eta</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.mirostatEta"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                 </div>

@@ -80,16 +80,11 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                     topK: req.body.topK,
                     topP: req.body.topP,
                     minP: req.body.minP,
-                    tfsz: req.body.tfsz,
-                    typicalP: req.body.typicalP,
                     repeatPenalty: req.body.repeatPenalty,
                     repeatLastN: req.body.repeatLastN,
                     penalizeNL: req.body.penalizeNL,
                     presencePenalty: req.body.presencePenalty,
                     frequencyPenalty: req.body.frequencyPenalty,
-                    mirostat: req.body.mirostat,
-                    mirostatTau: req.body.mirostatTau,
-                    mirostatEta: req.body.mirostatEta,
                 })
             } catch (err) {
                 console.error(err)
@@ -124,16 +119,11 @@ export const generatePresetsRoutes: FastifyPluginAsync = async (fastify) => {
                         topK: req.body.topK,
                         topP: req.body.topP,
                         minP: req.body.minP,
-                        tfsz: req.body.tfsz,
-                        typicalP: req.body.typicalP,
                         repeatPenalty: req.body.repeatPenalty,
                         repeatLastN: req.body.repeatLastN,
                         penalizeNL: req.body.penalizeNL,
                         presencePenalty: req.body.presencePenalty,
                         frequencyPenalty: req.body.frequencyPenalty,
-                        mirostat: req.body.mirostat,
-                        mirostatTau: req.body.mirostatTau,
-                        mirostatEta: req.body.mirostatEta,
                     })
                     .where(eq(GeneratePreset.id, Number(req.params.id)))
             } catch (err) {

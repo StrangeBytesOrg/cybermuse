@@ -210,12 +210,18 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             try {
                 await llamaChat.generateResponse(chatHistory, {
                     maxTokens: generatePreset.maxTokens,
-                    minP: generatePreset.minP || undefined,
-                    seed: generatePreset.seed,
                     temperature: generatePreset.temperature,
+                    seed: generatePreset.seed,
                     topK: generatePreset.topK || undefined,
                     topP: generatePreset.topP || undefined,
-                    // repeatPenalty: 0,
+                    minP: generatePreset.minP || undefined,
+                    repeatPenalty: {
+                        penalty: generatePreset.repeatPenalty || undefined,
+                        presencePenalty: generatePreset.presencePenalty || undefined,
+                        frequencyPenalty: generatePreset.frequencyPenalty || undefined,
+                        penalizeNewLine: generatePreset.penalizeNL || undefined,
+                        lastTokens: generatePreset.repeatLastN || undefined,
+                    },
                     // customStopTriggers:
                     signal: controller.signal,
                     onTextChunk: async (chunk) => {
