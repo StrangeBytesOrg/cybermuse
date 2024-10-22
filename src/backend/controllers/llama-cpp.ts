@@ -1,14 +1,11 @@
-// import fs from 'node:fs'
 import path from 'node:path'
 import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
-import {getConfig, setConfig} from '../config.js'
 import {logger} from '../logging.js'
-// import {chatTemplates} from '../prompt.js'
-
 import {getLlama} from 'node-llama-cpp'
-import type {Llama, LlamaContext, LlamaContextSequence, LlamaModel} from 'node-llama-cpp'
+import type {Llama, LlamaContext, LlamaModel} from 'node-llama-cpp'
+import {getConfig, setConfig} from '../config.js'
 
 export let llama: Llama
 export let context: LlamaContext

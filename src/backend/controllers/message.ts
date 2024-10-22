@@ -2,15 +2,13 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
-// import {Template} from '@huggingface/jinja'
+import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
-// import {responseToIterable} from '../lib/sse.js'
 import {logger} from '../logging.js'
 // import {env} from '../env.js'
 // import {currentTemplate} from './llama-server.js'
-// import {formatPrompt, type Messages} from '../prompt.js'
-import {LlamaChatSession} from 'node-llama-cpp'
-import {context, sequence} from './new-llama-server.js'
+import {LlamaChat} from 'node-llama-cpp'
+import {context} from './llama-cpp.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -110,24 +108,6 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async (request, reply) => {
-            // const completion = new LlamaCompletion({
-            //     contextSequence: sequence,
-            // })
-            // const prompt = '<|user|>What is the capital of France?<|end|>\n<|assistant|>'
-            // const res = await completion.generateCompletion(prompt, {maxTokens: 16})
-            // console.log(res)
-            // completion.dispose()
-            // return res
-            const session = new LlamaChatSession({
-                // contextSequence: sequence,
-                contextSequence: context.getSequence(),
-                autoDisposeSequence: true,
-            })
-            const res = await session.prompt('Hello')
-            await session.dispose()
-            console.log(session.getChatHistory())
-            return res
-            /*
             const {chatId} = request.body
 
             // Setup headers for server-sent events
@@ -185,109 +165,88 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
             characters.forEach((character) => {
                 characterMap.set(character.id, character)
             })
-            const responseCharacter = characterMap.get(lastMessage.characterId)
+            // const responseCharacter = characterMap.get(lastMessage.characterId)
 
             // Parse character info, lore, and chat history into a system message
-            let systemInstruction = ''
-            let prompt = ''
-            let chatHistory = ''
-            const tokenLimit = userSettings.generatePreset.context
-            const reversedMessages = chat.messages.toReversed()
-            for (let i = 1; i < reversedMessages.length; i += 1) {
-                const message = reversedMessages[i]
-                const characterName = characterMap.get(message.characterId).name
-                const messageString = `${characterName}: ${message.content}\n`
-                chatHistory = messageString + chatHistory
-                try {
-                    const systemInstructionTemplate = new Template(userSettings.promptTemplate.template)
-                    systemInstruction = systemInstructionTemplate.render({
-                        characters,
-                        lore,
-                        chatHistory,
-                    })
-                } catch (err) {
-                    throw new Error(`Could not parse system prompt: ${err}`)
-                }
-
-                const messages: Messages = [{role: 'system', content: systemInstruction}]
-                let tmpPrompt = formatPrompt(currentTemplate, messages)
-                tmpPrompt += `${responseCharacter.name}: `
-                const tokenCount = await getTokenCount(prompt)
-                if (tokenCount > tokenLimit) {
-                    logger.debug(`Token limit reached: ${tokenCount} / ${tokenLimit}`)
-                    break
-                }
-                prompt = tmpPrompt
-            }
-            logger.debug(`Prompt: ${prompt}`)
-
+            let systemPrompt = ''
             try {
-                const response = await fetch(`${llamaCppBaseUrl}/completion`, {
-                    method: 'POST',
-                    signal: controller.signal,
-                    body: JSON.stringify({
-                        prompt,
-                        stream: true,
-                        cache_prompt: true,
-                        stop: characters.map((c) => `${c.name}: `),
-                        // TODO spread in generation settings, or make an abstraction for calling llama.cpp which makes this less verbose
-                        n_predict: generatePreset.maxTokens,
-                        seed: generatePreset.seed,
-                        temperature: generatePreset.temperature,
-                        top_k: generatePreset.topK,
-                        top_p: generatePreset.topP,
-                        min_p: generatePreset.minP,
-                        tfs_z: generatePreset.tfsz,
-                        typical_p: generatePreset.typicalP,
-                        repeat_penalty: generatePreset.repeatPenalty,
-                        repeat_last_n: generatePreset.repeatLastN,
-                        penalize_nl: generatePreset.penalizeNL,
-                        presence_penalty: generatePreset.presencePenalty,
-                        frequency_penalty: generatePreset.frequencyPenalty,
-                        mirostat: generatePreset.mirostat,
-                        mirostat_tau: generatePreset.mirostatTau,
-                        mirostat_eta: generatePreset.mirostatEta,
-                    }),
+                const systemInstructionTemplate = new Template(userSettings.promptTemplate.template)
+                systemPrompt = systemInstructionTemplate.render({
+                    characters,
+                    lore,
                 })
-                const responseIterable = responseToIterable(response)
-                let bufferedResponse = ''
-                for await (const chunk of responseIterable) {
-                    const data = JSON.parse(chunk.data)
-                    if (data.content) {
-                        bufferedResponse += data.content
+            } catch (err) {
+                throw new Error(`Could not parse system prompt: ${err}`)
+            }
+            logger.debug('System Instruction', systemPrompt)
+
+            const llamaChat = new LlamaChat({
+                contextSequence: context.getSequence(),
+                autoDisposeSequence: true,
+            })
+
+            const chatHistory = llamaChat.chatWrapper.generateInitialChatHistory({systemPrompt})
+
+            // TODO implement token limit
+            chat.messages.forEach((message) => {
+                if (message.generated) {
+                    chatHistory.push({
+                        type: 'model',
+                        response: [
+                            `${characterMap.get(message.characterId).name}: ${message.content[message.activeIndex]}`,
+                        ],
+                    })
+                } else {
+                    chatHistory.push({
+                        type: 'user',
+                        text: `${characterMap.get(message.characterId).name}: ${message.content[message.activeIndex]}`,
+                    })
+                }
+            })
+
+            logger.debug('chat history', chatHistory)
+
+            let bufferedResponse = ''
+            try {
+                await llamaChat.generateResponse(chatHistory, {
+                    maxTokens: generatePreset.maxTokens,
+                    minP: generatePreset.minP || undefined,
+                    seed: generatePreset.seed,
+                    temperature: generatePreset.temperature,
+                    topK: generatePreset.topK || undefined,
+                    topP: generatePreset.topP || undefined,
+                    // repeatPenalty: 0,
+                    // customStopTriggers:
+                    signal: controller.signal,
+                    onTextChunk: async (chunk) => {
+                        bufferedResponse += chunk
                         reply.raw.write(`event:text\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
-                        lastMessage.content[lastMessage.activeIndex] = bufferedResponse
                         await db
                             .update(Message)
                             .set({content: lastMessage.content})
                             .where(eq(Message.id, lastMessage.id))
-                    } else if (data.stop) {
-                        logger.debug(data)
-                    }
-                }
+                    },
+                    stopOnAbortSignal: true,
+                })
+                await llamaChat.dispose()
 
                 bufferedResponse = bufferedResponse.trim()
-                logger.debug('Response:', bufferedResponse)
+                logger.debug('Response', bufferedResponse)
 
                 lastMessage.content[lastMessage.activeIndex] = bufferedResponse
                 await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
 
                 reply.raw.write(`event:final\ndata: ${JSON.stringify({text: bufferedResponse})}\n\n`)
             } catch (err) {
-                if (err instanceof DOMException && err.name === 'AbortError') {
-                    logger.debug('Request aborted')
-                } else {
-                    logger.error('Failed to generate response')
-                    logger.error(err)
-                    reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
-                }
+                logger.error('Failed to generate response')
+                logger.error(err)
+                reply.raw.write(`event: error\ndata: ${JSON.stringify({error: 'Failed to generate response'})}\n\n`)
             } finally {
                 // All done
                 request.socket.removeAllListeners('close')
                 reply.raw.end()
                 request.socket.destroy()
             }
-            */
         },
     })
 
@@ -443,18 +402,4 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     //         }
     //     },
     // })
-}
-
-const getTokenCount = async (prompt: string) => {
-    const response = await fetch(`${llamaCppBaseUrl}/tokenize`, {
-        method: 'POST',
-        body: JSON.stringify({
-            content: prompt,
-        }),
-    })
-    const {tokens} = await response.json()
-    if (!tokens || !Array.isArray(tokens)) {
-        throw new Error('Invalid response from tokenization')
-    }
-    return tokens.length
 }

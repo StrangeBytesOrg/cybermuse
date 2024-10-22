@@ -8,7 +8,7 @@ import fastifySwaggerUI from '@fastify/swagger-ui'
 import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
-import {env} from './env.js'
+// import {env} from './env.js'
 import {paths} from './paths.js'
 
 // Routes
@@ -21,8 +21,7 @@ import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {generateRoutes} from './controllers/generate.js'
-// import {llamaServerRoutes, startLlamaServer} from './controllers/llama-server.js'
-import {llamaServerRoutes} from './controllers/new-llama-server.js'
+import {llamaServerRoutes} from './controllers/llama-cpp.js'
 
 // Fixture DB data
 import {fixtureData} from './fixture.js'
