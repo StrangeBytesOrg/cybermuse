@@ -6,9 +6,24 @@ import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
 import {logger} from '../logging.js'
 // import {env} from '../env.js'
-// import {currentTemplate} from './llama-server.js'
 import {LlamaChat} from 'node-llama-cpp'
+import type {ChatHistoryItem} from 'node-llama-cpp'
 import {context} from './llama-cpp.js'
+
+type message = {generated: boolean; content: string[]; activeIndex: number}
+const formatMessage = (message: message): ChatHistoryItem => {
+    if (message.generated) {
+        return {
+            type: 'model',
+            response: [message.content[message.activeIndex]],
+        }
+    } else {
+        return {
+            type: 'user',
+            text: message.content[message.activeIndex],
+        }
+    }
+}
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     fastify.withTypeProvider<TypeBoxTypeProvider>().route({
@@ -187,24 +202,30 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             const chatHistory = llamaChat.chatWrapper.generateInitialChatHistory({systemPrompt})
 
-            // TODO implement token limit
-            chat.messages.forEach((message) => {
-                if (message.generated) {
-                    chatHistory.push({
-                        type: 'model',
-                        response: [
-                            `${characterMap.get(message.characterId).name}: ${message.content[message.activeIndex]}`,
-                        ],
-                    })
-                } else {
-                    chatHistory.push({
-                        type: 'user',
-                        text: `${characterMap.get(message.characterId).name}: ${message.content[message.activeIndex]}`,
-                    })
-                }
-            })
+            // Add messages to the chat history in reversed order
+            const messagesReversed = chat.messages.toReversed()
+            for (let i = 0; i < messagesReversed.length; i += 1) {
+                const message = messagesReversed[i]
+                const formattedMessage = formatMessage(message)
+                chatHistory.splice(1, 0, formattedMessage)
 
-            logger.debug('chat history', chatHistory)
+                const contextState = llamaChat.chatWrapper.generateContextState({chatHistory})
+                const tokenCount = contextState.contextText.tokenize(llamaChat.model.tokenizer).length
+                if (tokenCount + generatePreset.maxTokens > llamaChat.context.contextSize) {
+                    logger.debug(
+                        'Token limit exceeded',
+                        `${tokenCount} + ${generatePreset.maxTokens} (${tokenCount + generatePreset.maxTokens})`,
+                    )
+                    logger.debug('Removing oldest message')
+                    chatHistory.splice(1, 1)
+                    break
+                }
+            }
+
+            const contextState = llamaChat.chatWrapper.generateContextState({chatHistory})
+            const tokens = contextState.contextText.tokenize(llamaChat.model.tokenizer)
+            logger.info('prompt', contextState.contextText.toString())
+            logger.info('tokens', tokens.length)
 
             let bufferedResponse = ''
             try {
@@ -238,7 +259,6 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
                 bufferedResponse = bufferedResponse.trim()
                 logger.debug('Response', bufferedResponse)
-
                 lastMessage.content[lastMessage.activeIndex] = bufferedResponse
                 await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
 
