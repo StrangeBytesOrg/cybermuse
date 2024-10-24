@@ -146,7 +146,11 @@ server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
 //     )
 // }
 
+// SIGINT is fired on ctrl+c
 process.on('SIGINT', () => {
     server.close()
-    process.exit()
+})
+// TSX sends a SIGTERM when using watch mode
+process.on('SIGTERM', () => {
+    server.close()
 })
