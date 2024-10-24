@@ -67,7 +67,7 @@ const fullSend = async () => {
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
-        await createMessage(userCharacter.id, currentMessage.value, false)
+        await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
 
     // If there is only one character in the chat, simply use that character
@@ -89,7 +89,7 @@ const fullSend = async () => {
         return
     }
 
-    await createMessage(characterId, '', true)
+    await createMessage(characterId, '', 'model')
     await generateMessage()
 }
 
@@ -103,17 +103,17 @@ const impersonate = async () => {
         return
     }
 
-    await createMessage(userCharacter.id, '', true)
+    await createMessage(userCharacter.id, '', 'user')
     await generateMessage()
 }
 
-const createMessage = async (characterId: number, text: string = '', generated: boolean) => {
+const createMessage = async (characterId: number, text: string = '', type: 'user' | 'model' | 'system') => {
     const {data, error} = await client.POST('/create-message', {
         body: {
             chatId: Number(chatId),
             characterId: Number(characterId),
             text,
-            generated,
+            type,
         },
     })
 
@@ -127,7 +127,7 @@ const createMessage = async (characterId: number, text: string = '', generated: 
             id: data.messageId,
             chatId: Number(chatId),
             characterId,
-            generated,
+            type,
             activeIndex: 0,
             content: [text],
         })
@@ -402,7 +402,7 @@ const toggleCtxMenu = () => {
                 </div>
 
                 <!-- Swipe Controls -->
-                <div v-if="message.generated" class="flex flex-row justify-between px-1 pb-1">
+                <div v-if="message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
                     <!-- Swipe Left -->
                     <div class="flex w-16">
                         <button

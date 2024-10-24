@@ -1023,7 +1023,7 @@ export interface operations {
                                 id: number;
                                 chatId: number;
                                 characterId: number;
-                                generated: boolean;
+                                type: "user" | "model" | "system";
                                 activeIndex: number;
                                 content: string[];
                             }[];
@@ -1317,7 +1317,7 @@ export interface operations {
                     chatId: number;
                     characterId: number;
                     text: string;
-                    generated: boolean;
+                    type: "user" | "model" | "system";
                 };
             };
         };

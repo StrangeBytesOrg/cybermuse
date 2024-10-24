@@ -3,15 +3,16 @@ import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
 import {logger} from '../logging.js'
-import {getLlama} from 'node-llama-cpp'
-import type {LlamaContext, LlamaModel} from 'node-llama-cpp'
+import {getLlama, LlamaChat, JinjaTemplateChatWrapper} from 'node-llama-cpp'
+import type {LlamaModel, ChatHistoryItem} from 'node-llama-cpp'
 import {getConfig, setConfig} from '../config.js'
 
 const llama = await getLlama()
-export let context: LlamaContext
-export let model: LlamaModel
+let model: LlamaModel
 let loaded = false
 let currentModel: string = ''
+
+export let llamaChat: LlamaChat
 
 export const llamaCppRoutes: FastifyPluginAsync = async (fastify) => {
     const f = fastify.withTypeProvider<TypeBoxTypeProvider>()
@@ -129,12 +130,36 @@ export const loadModel = async (
         modelPath,
         gpuLayers,
     })
-    context = await model.createContext({
+    const context = await model.createContext({
         contextSize,
         batchSize,
         flashAttention: useFlashAttn,
     })
+    // TODO fallback to chatML if no template
+    const template = model.fileInfo.metadata.tokenizer.chat_template || ''
+    llamaChat = new LlamaChat({
+        contextSequence: context.getSequence(),
+        chatWrapper: new JinjaTemplateChatWrapper({
+            template,
+        }),
+        autoDisposeSequence: true,
+    })
     loaded = true
     currentModel = modelFile
     logger.info(`Model loaded`)
+}
+
+type Message = {type: 'user' | 'model' | 'system'; content: string}
+export const formatMessage = (message: Message): ChatHistoryItem => {
+    if (message.type === 'model') {
+        return {
+            type: 'model',
+            response: [message.content],
+        }
+    } else {
+        return {
+            type: 'user',
+            text: message.content,
+        }
+    }
 }

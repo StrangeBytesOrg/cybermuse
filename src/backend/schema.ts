@@ -99,7 +99,7 @@ export const Message = sqliteTable('message', {
     characterId: integer('character_id')
         .references(() => Character.id, {onDelete: 'set null'})
         .notNull(),
-    generated: integer('generated', {mode: 'boolean'}).notNull(),
+    type: text('type', {enum: ['user', 'model', 'system']}).notNull(),
     activeIndex: integer('active_index').notNull(),
     content: text('content', {mode: 'json'}).$type<string[]>().notNull(),
 })
