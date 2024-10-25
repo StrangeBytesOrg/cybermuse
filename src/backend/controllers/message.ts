@@ -5,8 +5,7 @@ import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {db, Message, Chat, User} from '../db.js'
 import {logger} from '../logging.js'
-// import {env} from '../env.js'
-import {llamaChat, formatMessage} from './llama-cpp.js'
+import {llamaChat, formatMessage} from '../llama-cpp.js'
 
 export const messageRoutes: FastifyPluginAsync = async (fastify) => {
     const f = fastify.withTypeProvider<TypeBoxTypeProvider>()
@@ -205,8 +204,8 @@ export const messageRoutes: FastifyPluginAsync = async (fastify) => {
 
             const contextState = llamaChat.chatWrapper.generateContextState({chatHistory})
             const tokens = contextState.contextText.tokenize(llamaChat.model.tokenizer)
-            logger.info('prompt', contextState.contextText.toString())
-            logger.info('tokens', tokens.length)
+            logger.debug('prompt', contextState.contextText.toString())
+            logger.debug('tokens', tokens.length)
 
             let bufferedResponse = ''
             try {

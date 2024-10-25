@@ -8,6 +8,7 @@ import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {avatarsPath} from './paths.js'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
+import {loadModel} from './llama-cpp.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
@@ -130,19 +131,17 @@ server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
     logger.info(`Server running on port ${config.serverPort}`)
 })
 
-// if (config.autoLoad && !env.LLAMA_SERVER_URL) {
-//     logger.info(`Auto-loading llama server with model: ${config.lastModel}`)
-//     await startLlamaServer(
-//         config.lastModel,
-//         config.contextSize,
-//         config.batchSize,
-//         config.gpuLayers,
-//         config.useFlashAttn,
-//         config.splitMode,
-//         config.cacheTypeK,
-//         config.cacheTypeV,
-//     )
-// }
+if (config.autoLoad) {
+    logger.info('auto loading')
+    await loadModel(
+        config.modelsPath,
+        config.lastModel,
+        config.contextSize,
+        config.batchSize,
+        config.gpuLayers,
+        config.useFlashAttn,
+    )
+}
 
 // SIGINT is fired on ctrl+c
 process.on('SIGINT', () => {

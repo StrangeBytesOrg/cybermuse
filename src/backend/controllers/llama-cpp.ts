@@ -1,18 +1,8 @@
-import path from 'node:path'
 import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
 import type {FastifyPluginAsync} from 'fastify'
 import {Type as t} from '@sinclair/typebox'
-import {logger} from '../logging.js'
-import {getLlama, LlamaChat, JinjaTemplateChatWrapper} from 'node-llama-cpp'
-import type {LlamaModel, ChatHistoryItem} from 'node-llama-cpp'
 import {getConfig, setConfig} from '../config.js'
-
-const llama = await getLlama()
-let model: LlamaModel
-let loaded = false
-let currentModel: string = ''
-
-export let llamaChat: LlamaChat
+import {loaded, currentModel, loadModel, unloadModel} from '../llama-cpp.js'
 
 export const llamaCppRoutes: FastifyPluginAsync = async (fastify) => {
     const f = fastify.withTypeProvider<TypeBoxTypeProvider>()
@@ -74,9 +64,10 @@ export const llamaCppRoutes: FastifyPluginAsync = async (fastify) => {
         },
         handler: async (req) => {
             const {modelFile, contextSize, batchSize, gpuLayers, useFlashAttn} = req.body
-            await loadModel(modelFile, contextSize, batchSize, gpuLayers, useFlashAttn)
-            // Update the config
             const config = getConfig()
+            await loadModel(config.modelsPath, modelFile, contextSize, batchSize, gpuLayers, useFlashAttn)
+
+            // Update the config
             config.lastModel = modelFile
             config.contextSize = contextSize
             config.batchSize = batchSize
@@ -101,65 +92,8 @@ export const llamaCppRoutes: FastifyPluginAsync = async (fastify) => {
             },
         },
         handler: async () => {
-            if (loaded) {
-                loaded = false
-                currentModel = ''
-                model.dispose()
-            }
+            await unloadModel()
             return {success: true}
         },
     })
-}
-
-export const loadModel = async (
-    modelFile: string,
-    contextSize: number,
-    batchSize: number,
-    gpuLayers: number,
-    useFlashAttn: boolean,
-) => {
-    const config = getConfig()
-    const modelPath = path.resolve(config.modelsPath, modelFile)
-    logger.info(`Attempting to load: ${modelPath}`)
-
-    if (model && !model.disposed) {
-        logger.info(`Disposing of previous model`)
-        await model.dispose()
-    }
-    model = await llama.loadModel({
-        modelPath,
-        gpuLayers,
-    })
-    const context = await model.createContext({
-        contextSize,
-        batchSize,
-        flashAttention: useFlashAttn,
-    })
-    // TODO fallback to chatML if no template
-    const template = model.fileInfo.metadata.tokenizer.chat_template || ''
-    llamaChat = new LlamaChat({
-        contextSequence: context.getSequence(),
-        chatWrapper: new JinjaTemplateChatWrapper({
-            template,
-        }),
-        autoDisposeSequence: true,
-    })
-    loaded = true
-    currentModel = modelFile
-    logger.info(`Model loaded`)
-}
-
-type Message = {type: 'user' | 'model' | 'system'; content: string}
-export const formatMessage = (message: Message): ChatHistoryItem => {
-    if (message.type === 'model') {
-        return {
-            type: 'model',
-            response: [message.content],
-        }
-    } else {
-        return {
-            type: 'user',
-            text: message.content,
-        }
-    }
 }
