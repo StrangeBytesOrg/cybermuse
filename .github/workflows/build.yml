@@ -62,6 +62,10 @@ jobs:
       - name: Build Electron
         run: npm run make
 
+      - name: Zip installer on Windows
+        if: matrix.build.platform == 'windows/amd64'
+        run: Compress-Archive -Path out/cybermuse-desktop-win-x64.exe -DestinationPath out/cybermuse-desktop-win-x64.zip
+
       # Github release files
       - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2
