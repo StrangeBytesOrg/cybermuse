@@ -1,6 +1,7 @@
 import path from 'node:path'
 import Fastify from 'fastify'
 import cors from '@fastify/cors'
+import {fastifyTRPCPlugin, FastifyTRPCPluginOptions} from '@trpc/server/adapters/fastify'
 import fastifyStatic from '@fastify/static'
 import fastifySwagger from '@fastify/swagger'
 import fastifySwaggerUI from '@fastify/swagger-ui'
@@ -9,6 +10,8 @@ import {avatarsPath} from './paths.js'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
 import {loadModel} from './llama-cpp.js'
+import {appRouter, type AppRouter} from './router.js'
+import {createContext} from './trpc.js'
 
 // Routes
 import {characterRoutes} from './controllers/character.js'
@@ -16,7 +19,7 @@ import {chatRoutes} from './controllers/chats.js'
 import {loreRoutes} from './controllers/lore.js'
 import {messageRoutes} from './controllers/message.js'
 import {swipeRoutes} from './controllers/swipes.js'
-import {templateRoutes} from './controllers/templates.js'
+// import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
 import {llamaCppRoutes} from './controllers/llama-cpp.js'
@@ -38,6 +41,13 @@ server.setErrorHandler((error, request, reply) => {
     // logger.error(error)
     reply.status(500).send(error)
 })
+server.register(fastifyTRPCPlugin, {
+    prefix: '/trpc',
+    trpcOptions: {
+        router: appRouter,
+        createContext,
+    } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
+})
 
 await server.register(fastifySwagger, {
     openapi: {
@@ -58,18 +68,6 @@ await server.register(fastifySwagger, {
 await server.register(fastifySwaggerUI, {
     routePrefix: '/docs',
 })
-
-// Set media type for error responses
-// server.setErrorHandler((error, request, reply) => {
-//     reply.headers({'Content-Type': 'application/problem+json'})
-//     if (error.validation) {
-//         reply.status(400).send({
-//             statusCode: 400,
-//             error: 'Bad Request',
-//             message: error.message,
-//         })
-//     }
-// })
 
 // Create error schema
 server.addSchema({
@@ -116,7 +114,7 @@ await server.register(messageRoutes, {prefix: '/api'})
 await server.register(swipeRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
-await server.register(templateRoutes, {prefix: '/api'})
+// await server.register(templateRoutes, {prefix: '/api'})
 await server.register(llamaCppRoutes, {prefix: '/api'})
 
 // Serve frontend

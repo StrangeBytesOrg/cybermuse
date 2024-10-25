@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
+import {client} from '../trpc'
 import BackButton from '../components/back-button.vue'
 
 const toast = useToast()
@@ -12,19 +12,12 @@ const template = ref('')
 const example = ref('')
 
 const createTemplate = async () => {
-    const {error} = await client.POST('/create-template', {
-        body: {
-            name: templateName.value,
-            template: template.value,
-        },
+    await client.templates.create.mutate({
+        name: templateName.value,
+        template: template.value,
     })
-    if (error) {
-        toast.error(`Error creating template\n${error.message}`)
-        console.error(error)
-    } else {
-        toast.success('Template created')
-        router.push('/templates')
-    }
+    toast.success('Template created')
+    router.push(`/templates`)
 }
 
 const getPreview = async () => {
@@ -34,17 +27,11 @@ const getPreview = async () => {
     ]
     const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
 
-    const {data, error} = await client.POST('/parse-template', {
-        body: {
-            template: template.value,
-            characters,
-            lore,
-        },
+    example.value = await client.templates.parseTemplate.query({
+        template: template.value,
+        characters,
+        lore,
     })
-    if (error) {
-        toast.error(`Error parsing template: ${error.message}`)
-    }
-    example.value = data?.example || ''
 }
 
 const resizeTextarea = async (event: Event) => {

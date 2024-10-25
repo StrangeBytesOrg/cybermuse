@@ -1,196 +1,117 @@
-import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
-import type {FastifyPluginAsync} from 'fastify'
-import {Type as t} from '@sinclair/typebox'
 import {eq} from 'drizzle-orm'
+import {TRPCError} from '@trpc/server'
+import {z} from 'zod'
 import {Template} from '@huggingface/jinja'
-import {db, User, PromptTemplate, selectPromptTemplateSchema} from '../db.js'
+import {t} from '../trpc.js'
+import {db, PromptTemplate, User} from '../db.js'
 import {logger} from '../logging.js'
 
-export const templateRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/templates',
-        method: 'GET',
-        schema: {
-            summary: 'Get all prompt templates',
-            operationId: 'GetAllPromptTemplates',
-            tags: ['templates'],
-            response: {
-                200: t.Object({
-                    templates: t.Array(selectPromptTemplateSchema),
-                    activeTemplateId: t.Number(),
-                }),
-            },
-        },
-        handler: async () => {
-            const templates = await db.query.PromptTemplate.findMany()
-            const user = await db.query.User.findFirst({
-                with: {promptTemplate: true},
-            })
-            if (!templates) {
-                throw new Error('No templates found')
-            }
-            if (!user || !user.promptTemplate) {
-                throw new Error('No user found or no active template set')
-            }
-            return {templates, activeTemplateId: user.promptTemplate.id}
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/template/:id',
-        method: 'GET',
-        schema: {
-            summary: 'Get a prompt template',
-            operationId: 'GetPromptTemplateById',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String(),
+export const templatesRoutes = t.router({
+    getAll: t.procedure.query(async () => {
+        const templates = await db.query.PromptTemplate.findMany()
+        const user = await db.query.User.findFirst({
+            with: {promptTemplate: true},
+        })
+        if (!templates) {
+            throw new Error('No templates found')
+        }
+        if (!user || !user.promptTemplate) {
+            throw new Error('No user found or no active template set')
+        }
+        return {templates, activeTemplateId: user.promptTemplate.id}
+    }),
+    create: t.procedure
+        .input(
+            z.object({
+                name: z.string(),
+                template: z.string(),
             }),
-            response: {
-                200: t.Object({template: selectPromptTemplateSchema}),
-            },
-        },
-        handler: async (req) => {
-            const template = await db.query.PromptTemplate.findFirst({
-                where: eq(PromptTemplate.id, Number(req.params.id)),
-            })
-            if (!template) {
-                throw new Error('Template not found')
-            }
-            return {template}
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/create-template',
-        method: 'POST',
-        schema: {
-            summary: 'Create a prompt template',
-            operationId: 'CreatePromptTemplate',
-            tags: ['templates'],
-            body: t.Object({
-                name: t.String({minLength: 1}),
-                template: t.String({minLength: 1}),
-            }),
-            response: {
-                200: t.Object({id: t.Number()}),
-            },
-        },
-        handler: async (req) => {
+        )
+        .mutation(async ({input}) => {
             const [newTemplate] = await db
                 .insert(PromptTemplate)
                 .values({
-                    name: req.body.name,
-                    template: req.body.template,
+                    name: input.name,
+                    template: input.template,
                 })
                 .returning({id: PromptTemplate.id})
             await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
-            return {id: newTemplate.id}
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/update-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Update a prompt template',
-            operationId: 'UpdatePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String({pattern: '^[0-9]+$'}),
+        }),
+    update: t.procedure
+        .input(
+            z.object({
+                id: z.number(),
+                name: z.string(),
+                template: z.string(),
             }),
-            body: t.Object({
-                name: t.String(),
-                template: t.String({minLength: 1}),
-            }),
-        },
-        handler: async (req, reply) => {
+        )
+        .mutation(async ({input}) => {
             const {changes} = await db
                 .update(PromptTemplate)
                 .set({
-                    name: req.body.name,
-                    template: req.body.template,
+                    name: input.name,
+                    template: input.template,
                 })
-                .where(eq(PromptTemplate.id, Number(req.params.id)))
+                .where(eq(PromptTemplate.id, Number(input.id)))
             if (changes === 0) {
-                return reply.status(404).send({message: 'Template not found'})
+                throw new TRPCError({
+                    code: 'UNPROCESSABLE_CONTENT',
+                    message: 'No changes made',
+                })
             }
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/delete-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Delete a prompt template',
-            operationId: 'DeletePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String({pattern: '^[0-9]+$'}),
+        }),
+    delete: t.procedure
+        .input(
+            z.object({
+                id: z.number(),
             }),
-        },
-        handler: async (req, reply) => {
-            if (req.params.id === '1') {
-                return reply.status(400).send({message: 'Cannot delete the default template'})
+        )
+        .mutation(async ({input}) => {
+            if (input.id === 1) {
+                throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: 'Cannot delete the default template',
+                })
             }
             await db.update(User).set({promptTemplate: 1}).where(eq(User.id, 1))
-            await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(req.params.id)))
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/set-active-template/:id',
-        method: 'POST',
-        schema: {
-            summary: 'Set active prompt template',
-            operationId: 'SetActivePromptTemplate',
-            tags: ['templates'],
-            params: t.Object({
-                id: t.String({pattern: '^[0-9]+$'}),
+            await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(input.id)))
+        }),
+    setActiveId: t.procedure
+        .input(
+            z.object({
+                id: z.number(),
             }),
-        },
-        handler: async (req, reply) => {
+        )
+        .mutation(async ({input}) => {
             const {changes} = await db
                 .update(User)
-                .set({promptTemplate: Number(req.params.id)})
+                .set({promptTemplate: Number(input.id)})
                 .where(eq(User.id, 1))
             if (changes === 0) {
                 // TODO handle other reasons for this to fail
-                return reply.status(404).send({message: 'User not found'})
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'User not found',
+                })
             }
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/parse-template',
-        method: 'POST',
-        schema: {
-            summary: 'Parse a prompt template',
-            operationId: 'ParsePromptTemplate',
-            tags: ['templates'],
-            body: t.Object({
-                template: t.String({minLength: 1}),
-                characters: t.Array(t.Any()),
-                lore: t.Array(t.Object({name: t.String(), content: t.String()})),
+        }),
+    parseTemplate: t.procedure
+        .input(
+            z.object({
+                template: z.string(),
+                characters: z.array(z.any()),
+                lore: z.array(z.any()),
             }),
-            response: {
-                200: t.Object({
-                    example: t.String(),
-                }),
-            },
-        },
-        handler: async (req) => {
-            const template = new Template(req.body.template)
+        )
+        .query(async ({input}) => {
+            const template = new Template(input.template)
 
             const example = template.render({
-                characters: req.body.characters,
-                lore: req.body.lore,
+                characters: input.characters,
+                lore: input.lore,
             })
             logger.info('Parsed chat instruction:', example)
 
-            return {
-                example,
-            }
-        },
-    })
-}
+            return example
+        }),
+})
