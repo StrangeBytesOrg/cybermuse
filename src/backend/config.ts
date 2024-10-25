@@ -16,9 +16,6 @@ const configSchema = z.object({
     batchSize: z.number().default(512),
     gpuLayers: z.number().default(0),
     useFlashAttn: z.boolean().default(false),
-    splitMode: z.enum(['row', 'layer', 'none']).default('row'),
-    cacheTypeK: z.enum(['f16', 'q8_0', 'q4_0']).default('f16'),
-    cacheTypeV: z.enum(['f16', 'q8_0', 'q4_0']).default('f16'),
 })
 type Config = z.infer<typeof configSchema>
 

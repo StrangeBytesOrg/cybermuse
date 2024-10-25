@@ -11,7 +11,6 @@ export const env = createEnv({
             .string()
             .transform((v) => v !== 'false' && v !== '0')
             .optional(),
-        LLAMA_SERVER_URL: z.string().url().optional(),
     },
     runtimeEnv: process.env,
 })
