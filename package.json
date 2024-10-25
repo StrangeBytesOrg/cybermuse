@@ -9,7 +9,7 @@
         "dev": "concurrently -n \"frontend,server\" -c \"blue,green\" npm:dev:frontend npm:dev:server",
         "dev:frontend": "vite",
         "dev:server": "DEV=1 tsx watch --clear-screen=false ./src/backend/server.ts",
-        "build": "npm run build:frontend && npm run build:backend",
+        "build": "npm run build:frontend && npm run build:backend && cp -r ./src/migrations ./dist/",
         "build:frontend": "vite build",
         "build:backend": "node --import tsx build.ts",
         "build:backend-tsc": "tsc --p ./src/backend",

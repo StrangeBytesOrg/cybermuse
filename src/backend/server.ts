@@ -18,7 +18,6 @@ import {swipeRoutes} from './controllers/swipes.js'
 import {templateRoutes} from './controllers/templates.js'
 import {generatePresetsRoutes} from './controllers/generate-presets.js'
 import {modelRoutes} from './controllers/models.js'
-import {generateRoutes} from './controllers/generate.js'
 import {llamaCppRoutes} from './controllers/llama-cpp.js'
 
 // Fixture DB data
@@ -116,7 +115,6 @@ await server.register(messageRoutes, {prefix: '/api'})
 await server.register(swipeRoutes, {prefix: '/api'})
 await server.register(modelRoutes, {prefix: '/api'})
 await server.register(generatePresetsRoutes, {prefix: '/api'})
-await server.register(generateRoutes, {prefix: '/api'})
 await server.register(templateRoutes, {prefix: '/api'})
 await server.register(llamaCppRoutes, {prefix: '/api'})
 
