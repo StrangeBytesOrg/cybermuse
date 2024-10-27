@@ -1,13 +1,10 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
-import {client} from '../api-client'
+import {client} from '../trpc'
 
-const {data, error} = await client.GET('/characters')
-if (error) {
-    console.error(error)
-}
-const characters = reactive(data?.characters || [])
+const res = await client.characters.getAll.query()
+const characters = reactive(res)
 </script>
 
 <template>

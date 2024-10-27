@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import {client} from '../api-client'
+import {client} from '../trpc'
 import {useToast} from 'vue-toastification'
 import FileInput from '../components/file-select.vue'
 import BackButton from '../components/back-button.vue'
@@ -18,36 +18,15 @@ const character = reactive({
 })
 
 const createCharacter = async () => {
-    const {error} = await client.POST('/create-character', {
-        body: {
-            name: character.name,
-            type: character.type,
-            description: character.description,
-            firstMessage: character.firstMessage || undefined,
-            image: character.image || undefined,
-        },
-    })
-    if (error) {
-        console.error(error)
-        toast.error('Error creating character')
-    } else {
-        await router.push('/characters')
-    }
+    await client.characters.create.mutate(character)
+    toast.success('Character created')
+    await router.push('/characters')
 }
 
 const uploadAvatar = async (image: string) => {
     if (image === '') return
-    const {error, data} = await client.POST('/upload-avatar', {
-        body: {
-            image,
-        },
-    })
-    if (error) {
-        console.error(error)
-        toast.error('Error uploading image')
-    } else {
-        character.image = data.filename
-    }
+    character.image = await client.characters.uploadAvatar.mutate(image)
+    toast.success('Avatar uploaded')
 }
 
 const removeImage = () => {

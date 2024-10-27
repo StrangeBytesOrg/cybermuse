@@ -1,6 +1,7 @@
 import {sqliteTable, text, integer, real} from 'drizzle-orm/sqlite-core'
 import {sql, relations} from 'drizzle-orm'
 import {createSelectSchema, createInsertSchema} from 'drizzle-typebox'
+import {createInsertSchema as zodCreateInsertSchema} from 'drizzle-zod'
 import {Type as t} from '@sinclair/typebox'
 
 /**
@@ -18,7 +19,8 @@ export const characterRelations = relations(Character, ({many}) => ({
     charactersToChats: many(ChatCharacters),
 }))
 export const selectCharacterSchema = createSelectSchema(Character)
-export const insertCharacterSchema = createInsertSchema(Character)
+// export const insertCharacterSchema = createInsertSchema(Character)
+export const insertCharacterSchema = zodCreateInsertSchema(Character)
 
 /**
  * Chat
