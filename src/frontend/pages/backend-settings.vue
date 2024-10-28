@@ -19,32 +19,20 @@ const useFlashAttn = ref(false)
 const modelLoadPending = ref(false)
 
 const getStatus = async () => {
-    const {data, error} = await client.GET('/status')
-    if (error) {
-        console.error(error)
-        toast.error('Error getting server status')
-    } else {
-        modelLoaded.value = data.loaded
-        currentModel.value = data.currentModel
-        modelPath.value = data.modelPath
-        contextSize.value = data.contextSize
-        autoLoad.value = data.autoLoad
-        selectModel.value = data.currentModel
-        batchSize.value = data.batchSize
-        gpuLayers.value = data.gpuLayers
-        useFlashAttn.value = data.useFlashAttn
-    }
+    const data = await client.llamaCpp.status.query()
+    modelLoaded.value = data.loaded
+    currentModel.value = data.currentModel
+    modelPath.value = data.modelPath
+    contextSize.value = data.contextSize
+    autoLoad.value = data.autoLoad
+    selectModel.value = data.currentModel
+    batchSize.value = data.batchSize
+    gpuLayers.value = data.gpuLayers
+    useFlashAttn.value = data.useFlashAttn
 }
 
 const getModels = async () => {
-    models.value = []
-    const {data, error} = await client.GET('/models')
-    if (error) {
-        // TODO properly handle error
-        toast.error('Failed to get models')
-    } else {
-        models.value = data.models
-    }
+    models.value = await client.models.getAll.query()
 }
 
 const loadModel = async () => {
@@ -53,63 +41,38 @@ const loadModel = async () => {
         return
     }
 
-    modelLoadPending.value = true
-    const {error} = await client.POST('/load-model', {
-        body: {
+    try {
+        modelLoadPending.value = true
+        await client.llamaCpp.loadModel.query({
             modelFile: selectModel.value,
             contextSize: contextSize.value,
             batchSize: batchSize.value,
             gpuLayers: gpuLayers.value,
             useFlashAttn: useFlashAttn.value,
-        },
-    })
-    if (error) {
-        toast.error(`Failed to load model\n${error.message}`)
-        console.error(error)
-    } else {
+        })
         toast.success('Model loaded')
         currentModel.value = selectModel.value
+    } finally {
+        modelLoadPending.value = false
     }
-    modelLoadPending.value = false
 }
 
 const unloadModel = async () => {
-    const {error} = await client.POST('/unload-model')
-    if (error) {
-        toast.error(`Failed to unload model\n${error.message}`)
-    } else {
-        toast.success('Model unloaded')
-        currentModel.value = ''
-        selectModel.value = ''
-    }
+    await client.llamaCpp.unloadModel.query()
+    toast.success('Model unloaded')
+    currentModel.value = ''
+    selectModel.value = ''
 }
 
 const setModelDir = async () => {
-    const {error} = await client.POST('/set-model-path', {
-        body: {
-            modelPath: modelPath.value,
-        },
-    })
-    if (error) {
-        console.error(error)
-        toast.error(error.message)
-    } else {
-        toast.success('Model path updated')
-        await getModels()
-    }
+    await client.models.setModelPath.mutate(modelPath.value)
+    toast.success('Model path updated')
+    await getModels()
 }
 
 const setAutoLoad = async () => {
-    const {error} = await client.POST('/set-autoload', {
-        body: {
-            autoLoad: autoLoad.value,
-        },
-    })
-    if (error) {
-        toast.error(`Failed to update autoload\n${error.message}`)
-    } else {
-        toast.success('Autoload updated')
-    }
+    await client.models.setAutoLoad.mutate(autoLoad.value)
+    toast.success('Autoload updated')
 }
 
 await getStatus()

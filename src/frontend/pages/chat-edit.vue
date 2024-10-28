@@ -1,35 +1,20 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
 import BackButton from '../components/back-button.vue'
 import {client} from '../api-client'
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
 const chatId = Number(route.params.id)
-const {data} = await client.GET('/chat/{id}', {
-    params: {path: {id: String(chatId)}},
-})
+const data = await client.chats.getById.query(chatId)
 
 const updateChat = async () => {
-    // const {data, error} = await client.POST('/update-chat/${id}', {
-    //     params: path: {id: String(chatId)},
-    // })
     console.log('TODO')
 }
 
 const deleteChat = async () => {
-    const {error} = await client.POST('/delete-chat/{id}', {
-        params: {path: {id: String(chatId)}},
-    })
-
-    if (error) {
-        console.error(error)
-        toast.error('Failed to delete chat')
-    } else {
-        router.push('/chats')
-    }
+    await client.chats.delete.mutate(chatId)
+    router.push('/chats')
 }
 </script>
 

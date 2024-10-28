@@ -10,16 +10,7 @@ const router = useRouter()
 const toast = useToast()
 const loreId = Number(route.params.id)
 
-const {data, error} = await client.GET('/lore/{id}', {
-    params: {path: {id: String(loreId)}},
-})
-if (error) {
-    console.error(error)
-    toast.error(`Error fetching lore: ${error.message}`)
-}
-type Entry = {name: string; content: string}
-type Lore = {name: string; entries: Entry[]}
-const lore: Lore = reactive(data || {name: '', entries: []})
+const lore = reactive(await client.lore.getById.query(loreId))
 
 const addEntry = () => {
     lore.entries.push({name: '', content: ''})
@@ -33,32 +24,12 @@ const updateLore = async () => {
     // Remove any entries that have empty content
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
-    const {error} = await client.POST('/update-lore/{id}', {
-        params: {path: {id: String(loreId)}},
-        body: {
-            lore: {
-                name: lore.name,
-                entries: lore.entries,
-            },
-        },
-    })
-    if (error) {
-        console.error(error)
-        toast.error(`Error updating lore: ${error.message}`)
-        return
-    }
+    await client.lore.update.mutate(lore)
     toast.success('Lore updated')
 }
 
 const deleteLore = async () => {
-    const {error} = await client.POST('/delete-lore/{id}', {
-        params: {path: {id: String(loreId)}},
-    })
-    if (error) {
-        console.error(error)
-        toast.error(`Error deleting lore: ${error.message}`)
-        return
-    }
+    await client.lore.delete.mutate(loreId)
     toast.success('Lore deleted')
     router.push('/lore')
 }

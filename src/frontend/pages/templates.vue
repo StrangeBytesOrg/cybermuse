@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, computed, onMounted} from 'vue'
 import {useToast} from 'vue-toastification'
-import {client} from '../trpc'
+import {client} from '../api-client'
 
 const toast = useToast()
 const res = await client.templates.getAll.query()

@@ -3,26 +3,12 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import {fastifyTRPCPlugin, FastifyTRPCPluginOptions} from '@trpc/server/adapters/fastify'
 import fastifyStatic from '@fastify/static'
-// import fastifySwagger from '@fastify/swagger'
-// import fastifySwaggerUI from '@fastify/swagger-ui'
-import {TypeBoxValidatorCompiler} from '@fastify/type-provider-typebox'
 import {avatarsPath} from './paths.js'
 import {logger} from './logging.js'
 import {getConfig} from './config.js'
 import {loadModel} from './llama-cpp.js'
 import {appRouter, type AppRouter} from './router.js'
 import {createContext} from './trpc.js'
-
-// Routes
-// import {characterRoutes} from './controllers/character.js'
-import {chatRoutes} from './controllers/chats.js'
-import {loreRoutes} from './controllers/lore.js'
-import {messageRoutes} from './controllers/message.js'
-import {swipeRoutes} from './controllers/swipes.js'
-// import {templateRoutes} from './controllers/templates.js'
-import {generatePresetsRoutes} from './controllers/generate-presets.js'
-import {modelRoutes} from './controllers/models.js'
-import {llamaCppRoutes} from './controllers/llama-cpp.js'
 
 // Fixture DB data
 import {fixtureData} from './fixture.js'
@@ -34,38 +20,12 @@ export const server = Fastify({
     bodyLimit: 1024 * 1024 * 100, // 100MB
 })
 server.register(cors)
-server.setValidatorCompiler(TypeBoxValidatorCompiler)
+
+// TODO send trpc error for too large of file
 // server.setErrorHandler((error, request, reply) => {
 //     console.error(error)
 //     // logger.error(error)
 //     reply.status(500).send(error)
-// })
-server.register(fastifyTRPCPlugin, {
-    prefix: '/trpc',
-    trpcOptions: {
-        router: appRouter,
-        createContext,
-    } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
-})
-
-// await server.register(fastifySwagger, {
-//     openapi: {
-//         openapi: '3.1.0',
-//         info: {
-//             title: 'Chat App builtin server API',
-//             version: '0.1.0',
-//         },
-//         servers: [{url: '/api'}],
-//     },
-//     refResolver: {
-//         buildLocalReference(json, baseUrl, fragment, i) {
-//             return String(json.$id) || `def-${i}`
-//         },
-//     },
-// })
-
-// await server.register(fastifySwaggerUI, {
-//     routePrefix: '/docs',
 // })
 
 // Serve avatars
@@ -76,16 +36,13 @@ await server.register(async (instance) => {
     })
 })
 
-// Register controller routes
-// await server.register(characterRoutes, {prefix: '/api'})
-await server.register(chatRoutes, {prefix: '/api'})
-await server.register(loreRoutes, {prefix: '/api'})
-await server.register(messageRoutes, {prefix: '/api'})
-await server.register(swipeRoutes, {prefix: '/api'})
-await server.register(modelRoutes, {prefix: '/api'})
-await server.register(generatePresetsRoutes, {prefix: '/api'})
-// await server.register(templateRoutes, {prefix: '/api'})
-await server.register(llamaCppRoutes, {prefix: '/api'})
+server.register(fastifyTRPCPlugin, {
+    prefix: '/trpc',
+    trpcOptions: {
+        router: appRouter,
+        createContext,
+    } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
+})
 
 // Serve frontend
 await server.register(fastifyStatic, {

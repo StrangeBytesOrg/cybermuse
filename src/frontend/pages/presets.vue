@@ -5,13 +5,9 @@ import {client} from '../api-client'
 
 const toast = useToast()
 
-const {data, error} = await client.GET('/presets')
-if (error) {
-    toast.error('Error getting presets')
-}
-
-const presets = ref(data?.presets || [])
-const selectedPresetId = ref(data?.activePresetId || 0)
+const res = await client.generatePresets.getAll.query()
+const presets = ref(res.presets)
+const selectedPresetId = ref(res.activePresetId)
 
 const activePreset = computed(() => {
     const missingPreset = {
@@ -34,56 +30,38 @@ const activePreset = computed(() => {
 })
 
 const setActivePreset = async () => {
-    const {error} = await client.POST('/set-active-preset/{id}', {
-        params: {path: {id: String(selectedPresetId.value)}},
-    })
-    if (error) {
-        toast.error('Error setting active preset')
-    } else {
-        toast.success('Active preset set')
-    }
+    await client.generatePresets.setActive.mutate(selectedPresetId.value)
+    toast.success('Active preset set')
 }
 
 const updatePreset = async () => {
-    const {error} = await client.POST('/update-preset/{id}', {
-        params: {path: {id: String(selectedPresetId.value)}},
-        body: {
-            name: activePreset.value.name,
-            context: activePreset.value.context,
-            maxTokens: activePreset.value.maxTokens,
-            seed: activePreset.value.seed,
-            temperature: activePreset.value.temperature,
-            topK: activePreset.value.topK,
-            topP: activePreset.value.topP,
-            minP: activePreset.value.minP,
-            repeatPenalty: activePreset.value.repeatPenalty,
-            repeatLastN: activePreset.value.repeatLastN,
-            penalizeNL: activePreset.value.penalizeNL,
-            presencePenalty: activePreset.value.presencePenalty,
-            frequencyPenalty: activePreset.value.frequencyPenalty,
-        },
+    await client.generatePresets.update.mutate({
+        id: selectedPresetId.value,
+        name: activePreset.value.name,
+        context: activePreset.value.context,
+        maxTokens: activePreset.value.maxTokens,
+        seed: activePreset.value.seed,
+        temperature: activePreset.value.temperature,
+        topK: activePreset.value.topK,
+        topP: activePreset.value.topP,
+        minP: activePreset.value.minP,
+        repeatPenalty: activePreset.value.repeatPenalty,
+        repeatLastN: activePreset.value.repeatLastN,
+        penalizeNL: activePreset.value.penalizeNL,
+        presencePenalty: activePreset.value.presencePenalty,
+        frequencyPenalty: activePreset.value.frequencyPenalty,
     })
-    if (error) {
-        toast.error('Error updating preset')
-    } else {
-        toast.success('Preset updated')
-    }
+    toast.success('Preset updated')
 }
 
 const deletePreset = async () => {
-    const {error} = await client.POST('/delete-preset/{id}', {
-        params: {path: {id: String(selectedPresetId.value)}},
-    })
-    if (error) {
-        toast.error(`Error deleting preset\n${error.message}`)
-    } else {
-        toast.success('Preset deleted')
-        presets.value.splice(
-            presets.value.findIndex((preset) => preset.id === selectedPresetId.value),
-            1,
-        )
-        selectedPresetId.value = 1
-    }
+    await client.generatePresets.delete.mutate(selectedPresetId.value)
+    toast.success('Preset deleted')
+    presets.value.splice(
+        presets.value.findIndex((preset) => preset.id === selectedPresetId.value),
+        1,
+    )
+    selectedPresetId.value = 1
 }
 </script>
 

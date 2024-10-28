@@ -1,15 +1,9 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
-import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
 
-const toast = useToast()
-const {data, error} = await client.GET('/lore')
-if (error) {
-    toast.error(`Error fetching lore: ${error.message}`)
-}
-const loreBooks = reactive(data || [])
+const loreBooks = reactive(await client.lore.getAll.query())
 </script>
 
 <template>

@@ -22,30 +22,24 @@ const presencePenalty = ref(0)
 const frequencyPenalty = ref(0)
 
 const createTemplate = async () => {
-    const {error} = await client.POST('/create-preset', {
-        body: {
-            name: presetName.value,
-            context: context.value,
-            maxTokens: maxTokens.value,
-            seed: seed.value,
-            temperature: temperature.value,
-            topK: topK.value,
-            topP: topP.value,
-            minP: minP.value,
-            repeatPenalty: repeatPenalty.value,
-            repeatLastN: repeatLastN.value,
-            penalizeNL: penalizeNL.value,
-            presencePenalty: presencePenalty.value,
-            frequencyPenalty: frequencyPenalty.value,
-        },
+    // TODO convert preset into a single reactive so this can all be one object
+    await client.generatePresets.create.mutate({
+        name: presetName.value,
+        context: context.value,
+        maxTokens: maxTokens.value,
+        seed: seed.value,
+        temperature: temperature.value,
+        topK: topK.value,
+        topP: topP.value,
+        minP: minP.value,
+        repeatPenalty: repeatPenalty.value,
+        repeatLastN: repeatLastN.value,
+        penalizeNL: penalizeNL.value,
+        presencePenalty: presencePenalty.value,
+        frequencyPenalty: frequencyPenalty.value,
     })
-    if (error) {
-        console.error(error)
-        toast.error(`Error creating preset\n${error.message}`)
-    } else {
-        toast.success('Template created')
-        router.push('/presets')
-    }
+    toast.success('Created new preset')
+    router.push('/presets')
 }
 </script>
 

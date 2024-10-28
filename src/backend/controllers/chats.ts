@@ -1,131 +1,67 @@
-import type {TypeBoxTypeProvider} from '@fastify/type-provider-typebox'
-import type {FastifyPluginAsync} from 'fastify'
-import {Type as t} from '@sinclair/typebox'
+import {z} from 'zod'
 import {eq, inArray} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
+import {TRPCError} from '@trpc/server'
+import {t} from '../trpc.js'
 import {logger} from '../logging.js'
-import {
-    db,
-    Chat,
-    ChatCharacters,
-    Character,
-    Message,
-    ChatLore,
-    selectChatSchema,
-    selectMessageSchema,
-    selectCharacterSchema,
-    selectChatCharactersSchema,
-    selectLoreSchema,
-} from '../db.js'
+import {db, Chat, ChatCharacters, Character, Message, ChatLore} from '../db.js'
 
-export const chatRoutes: FastifyPluginAsync = async (fastify) => {
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/chats',
-        method: 'GET',
-        schema: {
-            operationId: 'GetAllChats',
-            tags: ['chats'],
-            summary: 'Get all Chats',
-            response: {
-                200: t.Object({
-                    chats: t.Array(
-                        t.Object({
-                            ...selectChatSchema.properties,
-                            characters: t.Array(
-                                t.Object({
-                                    ...selectChatCharactersSchema.properties,
-                                    character: selectCharacterSchema,
-                                }),
-                            ),
-                        }),
-                    ),
-                }),
+export const chatRouter = t.router({
+    getAll: t.procedure.query(async () => {
+        const chats = await db.query.Chat.findMany({
+            with: {characters: {with: {character: true}}},
+        })
+        return chats
+    }),
+    getById: t.procedure.input(z.number()).query(async ({input: id}) => {
+        const chat = await db.query.Chat.findFirst({
+            where: eq(Chat.id, Number(id)),
+            with: {
+                messages: true,
+                characters: {with: {character: true}},
+                lore: {with: {lore: true}},
             },
-        },
-        handler: async () => {
-            const chats = await db.query.Chat.findMany({
-                with: {characters: {with: {character: true}}},
-            })
-            if (!chats) {
-                throw new Error('No chats found')
-            }
-            return {chats}
-        },
-    })
+        })
+        const characters = chat?.characters.map((c) => {
+            return c.character
+        })
 
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/chat/:id',
-        method: 'GET',
-        schema: {
-            operationId: 'GetChatById',
-            tags: ['chats'],
-            summary: 'Get a Chat by ID',
-            params: t.Object({
-                id: t.String(),
+        if (!characters) {
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'No characters found',
+            })
+        }
+
+        const lore = chat?.lore.map((l) => {
+            return l.lore
+        })
+
+        if (!lore) {
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'No lore found',
+            })
+        }
+
+        if (chat) {
+            return {chat, characters, lore}
+        } else {
+            throw new TRPCError({
+                code: 'NOT_FOUND',
+                message: 'Chat not found',
+            })
+        }
+    }),
+    create: t.procedure
+        .input(
+            z.object({
+                characters: z.array(z.number()),
+                lore: z.array(z.number()),
             }),
-            response: {
-                200: t.Object({
-                    chat: t.Object({
-                        ...selectChatSchema.properties,
-                        messages: t.Array(selectMessageSchema),
-                    }),
-                    characters: t.Array(selectCharacterSchema),
-                    lore: t.Array(selectLoreSchema),
-                }),
-            },
-        },
-        handler: async (req) => {
-            const chat = await db.query.Chat.findFirst({
-                where: eq(Chat.id, Number(req.params.id)),
-                with: {
-                    messages: true,
-                    characters: {with: {character: true}},
-                    lore: {with: {lore: true}},
-                },
-            })
-            const characters = chat?.characters.map((c) => {
-                return c.character
-            })
-
-            if (!characters) {
-                throw new Error('No characters found')
-            }
-
-            const lore = chat?.lore.map((l) => {
-                return l.lore
-            })
-
-            if (!lore) {
-                throw new Error('No lore found')
-            }
-
-            if (chat) {
-                return {chat, characters, lore}
-            } else {
-                throw new Error('Chat not found')
-            }
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/create-chat',
-        method: 'POST',
-        schema: {
-            operationId: 'CreateChat',
-            tags: ['chats'],
-            summary: 'Create a Chat',
-            body: t.Object({
-                characters: t.Array(t.Number()),
-                lore: t.Array(t.Number()),
-            }),
-            response: {
-                200: t.Object({
-                    id: t.Number(),
-                }),
-            },
-        },
-        handler: async (req) => {
-            const {characters} = req.body
+        )
+        .mutation(async ({input}) => {
+            const {characters} = input
             if (characters.length === 0) {
                 throw new Error('At least one character is required')
             }
@@ -171,7 +107,7 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
 
             // Add chat lore
             // TODO change to a multi insert
-            const {lore} = req.body
+            const {lore} = input
             for (let i = 0; i < lore.length; i += 1) {
                 const loreId = lore[i]
                 await db.insert(ChatLore).values({
@@ -182,20 +118,8 @@ export const chatRoutes: FastifyPluginAsync = async (fastify) => {
             }
 
             return {id: newChat.id}
-        },
-    })
-
-    fastify.withTypeProvider<TypeBoxTypeProvider>().route({
-        url: '/delete-chat/:id',
-        method: 'POST',
-        schema: {
-            operationId: 'DeleteChat',
-            tags: ['chats'],
-            summary: 'Delete a Chat',
-            params: t.Object({id: t.String()}),
-        },
-        handler: async (req) => {
-            await db.delete(Chat).where(eq(Chat.id, Number(req.params.id)))
-        },
-    })
-}
+        }),
+    delete: t.procedure.input(z.number()).mutation(async ({input: id}) => {
+        await db.delete(Chat).where(eq(Chat.id, Number(id)))
+    }),
+})

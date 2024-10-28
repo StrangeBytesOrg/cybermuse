@@ -1,8 +1,7 @@
 import {sqliteTable, text, integer, real} from 'drizzle-orm/sqlite-core'
 import {sql, relations} from 'drizzle-orm'
-import {createSelectSchema, createInsertSchema} from 'drizzle-typebox'
-import {createInsertSchema as zodCreateInsertSchema} from 'drizzle-zod'
-import {Type as t} from '@sinclair/typebox'
+import {createInsertSchema} from 'drizzle-zod'
+import {z} from 'zod'
 
 /**
  * Character
@@ -18,9 +17,7 @@ export const Character = sqliteTable('character', {
 export const characterRelations = relations(Character, ({many}) => ({
     charactersToChats: many(ChatCharacters),
 }))
-export const selectCharacterSchema = createSelectSchema(Character)
-// export const insertCharacterSchema = createInsertSchema(Character)
-export const insertCharacterSchema = zodCreateInsertSchema(Character)
+export const insertCharacterSchema = createInsertSchema(Character)
 
 /**
  * Chat
@@ -41,13 +38,13 @@ export const chatRelations = relations(Chat, ({many}) => ({
     characters: many(ChatCharacters),
     lore: many(ChatLore),
 }))
-export const selectChatSchema = createSelectSchema(Chat)
 
 /**
  * Lore
  */
 type Entry = {name: string; content: string}
-const entry = t.Object({name: t.String(), content: t.String()})
+// const entry = t.Object({name: t.String(), content: t.String()})
+const entry = z.object({name: z.string(), content: z.string()})
 export const Lore = sqliteTable('lore', {
     id: integer('id').primaryKey({autoIncrement: true}),
     name: text('name').notNull(),
@@ -56,8 +53,7 @@ export const Lore = sqliteTable('lore', {
 export const loreRelations = relations(Lore, ({many}) => ({
     loreToChats: many(ChatLore),
 }))
-export const selectLoreSchema = createSelectSchema(Lore, {entries: t.Array(entry)})
-export const insertLoreSchema = createInsertSchema(Lore, {entries: t.Array(entry)})
+export const insertLoreSchema = createInsertSchema(Lore, {entries: z.array(entry)})
 
 // Chat Characters join table
 export const ChatCharacters = sqliteTable('chat_characters', {
@@ -73,7 +69,6 @@ export const charactersToChatsRelations = relations(ChatCharacters, ({one}) => (
     chat: one(Chat, {fields: [ChatCharacters.chatId], references: [Chat.id]}),
     character: one(Character, {fields: [ChatCharacters.characterId], references: [Character.id]}),
 }))
-export const selectChatCharactersSchema = createSelectSchema(ChatCharacters)
 
 // Chat Lore join table
 export const ChatLore = sqliteTable('chat_lore', {
@@ -109,7 +104,6 @@ export const messageRelations = relations(Message, ({one}) => ({
     chat: one(Chat, {fields: [Message.chatId], references: [Chat.id]}),
     character: one(Character, {fields: [Message.characterId], references: [Character.id]}),
 }))
-export const selectMessageSchema = createSelectSchema(Message, {content: t.Array(t.String())})
 export const insertMessageSchema = createInsertSchema(Message)
 
 /**
@@ -137,7 +131,7 @@ export const PromptTemplate = sqliteTable('prompt_template', {
     name: text('name').notNull(),
     template: text('template').notNull(),
 })
-export const selectPromptTemplateSchema = createSelectSchema(PromptTemplate)
+export const insertPromptTemplateSchema = createInsertSchema(PromptTemplate)
 
 /**
  * Generate Preset
@@ -160,5 +154,4 @@ export const GeneratePreset = sqliteTable('generate_preset', {
     presencePenalty: real('presence_penalty'),
     frequencyPenalty: real('frequency_penalty'),
 })
-export const selectPresetSchema = createSelectSchema(GeneratePreset)
 export const insertPresetSchema = createInsertSchema(GeneratePreset)

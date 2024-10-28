@@ -22,21 +22,8 @@ const createLore = async () => {
     // Remove any entries that have empty content
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
-    const {data, error} = await client.POST('/create-lore', {
-        body: {
-            lore: {
-                name: lore.name,
-                entries: lore.entries,
-            },
-        },
-    })
-    if (error) {
-        console.error(error)
-        toast.error(`Error creating lore: ${error.message}`)
-        return
-    }
+    await client.lore.create.mutate(lore)
     toast.success('Lore created')
-    console.log(`New Lore Id: ${data.id}`)
     router.push('/lore')
 }
 </script>

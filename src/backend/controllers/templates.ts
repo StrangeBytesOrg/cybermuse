@@ -3,7 +3,7 @@ import {TRPCError} from '@trpc/server'
 import {z} from 'zod'
 import {Template} from '@huggingface/jinja'
 import {t} from '../trpc.js'
-import {db, PromptTemplate, User} from '../db.js'
+import {db, PromptTemplate, User, insertPromptTemplateSchema} from '../db.js'
 import {logger} from '../logging.js'
 
 export const templatesRoutes = t.router({
@@ -20,46 +20,31 @@ export const templatesRoutes = t.router({
         }
         return {templates, activeTemplateId: user.promptTemplate.id}
     }),
-    create: t.procedure
-        .input(
-            z.object({
-                name: z.string(),
-                template: z.string(),
-            }),
-        )
-        .mutation(async ({input}) => {
-            const [newTemplate] = await db
-                .insert(PromptTemplate)
-                .values({
-                    name: input.name,
-                    template: input.template,
-                })
-                .returning({id: PromptTemplate.id})
-            await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
-        }),
-    update: t.procedure
-        .input(
-            z.object({
-                id: z.number(),
-                name: z.string(),
-                template: z.string(),
-            }),
-        )
-        .mutation(async ({input}) => {
-            const {changes} = await db
-                .update(PromptTemplate)
-                .set({
-                    name: input.name,
-                    template: input.template,
-                })
-                .where(eq(PromptTemplate.id, Number(input.id)))
-            if (changes === 0) {
-                throw new TRPCError({
-                    code: 'UNPROCESSABLE_CONTENT',
-                    message: 'No changes made',
-                })
-            }
-        }),
+    create: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
+        const [newTemplate] = await db
+            .insert(PromptTemplate)
+            .values({
+                name: input.name,
+                template: input.template,
+            })
+            .returning({id: PromptTemplate.id})
+        await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
+    }),
+    update: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
+        const {changes} = await db
+            .update(PromptTemplate)
+            .set({
+                name: input.name,
+                template: input.template,
+            })
+            .where(eq(PromptTemplate.id, Number(input.id)))
+        if (changes === 0) {
+            throw new TRPCError({
+                code: 'UNPROCESSABLE_CONTENT',
+                message: 'No changes made',
+            })
+        }
+    }),
     delete: t.procedure
         .input(
             z.object({

@@ -3,14 +3,14 @@ import {reactive, ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
+import {client, streamingClient} from '../api-client'
 import {responseToIterable} from '../lib/fetch-backend'
 import {useConnectionStore} from '../store'
 
 const route = useRoute()
 const toast = useToast()
 const connectionStore = useConnectionStore()
-const chatId = route.query.id
+const chatId = Number(route.query.id)
 const currentMessage = ref('')
 const pendingMessage = ref(false)
 const editModeId = ref(0)
@@ -21,32 +21,74 @@ const showCtxMenu = ref(false)
 let signal = new AbortController()
 
 // Check if generation server is actually running
-const checkServer = async () => {
-    const {data, error} = await client.GET('/status')
-    if (error) {
-        console.error(error)
-        toast.error('Error getting server status')
-    }
-    if (data && data.loaded) {
-        connectionStore.connected = true
-    }
+// const checkServer = async () => {
+//     const {data, error} = await client.GET('/status')
+//     if (error) {
+//         console.error(error)
+//         toast.error('Error getting server status')
+//     }
+//     if (data && data.loaded) {
+//         connectionStore.connected = true
+//     }
+// }
+// await checkServer()
+connectionStore.connected = true
+
+const getWat = async () => {
+    // try {
+    //     const iterable = await streamingClient.messages.generate.query()
+    //     for await (const message of iterable) {
+    //         console.log(message)
+    //     }
+    // } catch (err) {
+    //     console.error(err)
+    //     toast.error(err.message)
+    // }
+    // try {
+    //     await wat.messages.create.mutate({
+    //         chatId: 69,
+    //         characterId: 1,
+    //         text: 'Hello, world!',
+    //         type: 'user',
+    //     })
+    // } catch (err) {
+    //     console.error(err)
+    //     toast.error(err.message)
+    // }
+    // Error narrowing
+    // wat.messages.wat
+    //     .query()
+    //     .then((res) => {
+    //         console.log(res)
+    //     })
+    //     .catch((err) => {
+    //         if (isTRPCClientError(err)) {
+    //             console.log('trpc error')
+    //             console.error(err.message)
+    //         } else {
+    //             console.log('other error')
+    //             console.error(err)
+    //         }
+    //         // toast.error(err.message)
+    //     })
 }
-await checkServer()
 
-const {data, error} = await client.GET('/chat/{id}', {
-    params: {path: {id: String(chatId)}},
-})
+// const {data, error} = await client.GET('/chat/{id}', {
+//     params: {path: {id: String(chatId)}},
+// })
 
-if (error) {
-    console.error(error)
-    toast.error('Failed to load chat')
-}
+// if (error) {
+//     console.error(error)
+//     toast.error('Failed to load chat')
+// }
 
-const messages = reactive(data?.chat.messages ?? [])
+const data = await client.chats.getById.query(chatId)
+
+const messages = reactive(data.chat.messages)
 type Message = (typeof messages)[0]
-const characterMap = new Map((data?.characters ?? []).map((character) => [character.id, character]))
-const userCharacter = data?.characters.find((character) => character.type === 'user')
-const nonUserCharacters = data?.characters.filter((character) => character.type === 'character')
+const characterMap = new Map(data.characters.map((character) => [character.id, character]))
+const userCharacter = data.characters.find((character) => character.type === 'user')
+const nonUserCharacters = data.characters.filter((character) => character.type === 'character')
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -108,23 +150,21 @@ const impersonate = async () => {
 }
 
 const createMessage = async (characterId: number, text: string = '', type: 'user' | 'model' | 'system') => {
-    const {data, error} = await client.POST('/create-message', {
-        body: {
-            chatId: Number(chatId),
-            characterId: Number(characterId),
-            text,
-            type,
-        },
+    const {messageId} = await client.messages.create.mutate({
+        chatId: Number(chatId),
+        characterId: Number(characterId),
+        text,
+        type,
     })
 
-    if (error) {
-        toast.error(error.message || 'Failed sending message')
-        return
-    }
+    // if (error) {
+    //     toast.error(error.message || 'Failed sending message')
+    //     return
+    // }
 
-    if (data && data.messageId) {
+    if (messageId) {
         messages.push({
-            id: data.messageId,
+            id: messageId,
             chatId: Number(chatId),
             characterId,
             type,
@@ -225,28 +265,15 @@ const cancelEdit = () => {
 }
 
 const updateMessage = async (message: Message) => {
-    const {error} = await client.POST('/update-message/{id}', {
-        params: {path: {id: String(message.id)}},
-        body: {
-            text: message.content[message.activeIndex] || '',
-        },
+    await client.messages.update.mutate({
+        id: message.id,
+        text: message.content[message.activeIndex] || '',
     })
-    if (error) {
-        toast.error(error.message || 'Failed updating message')
-    } else {
-        editModeId.value = 0
-    }
+    editModeId.value = 0
 }
 
 const deleteMessage = async (messageId: number) => {
-    const {error} = await client.POST('/delete-message/{id}', {
-        params: {path: {id: String(messageId)}},
-    })
-
-    if (error) {
-        toast.error(error.message || 'Failed deleting message')
-        return
-    }
+    await client.messages.delete.mutate(messageId)
 
     messages.splice(
         messages.findIndex((message) => message.id === messageId),

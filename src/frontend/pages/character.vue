@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {client} from '../trpc'
+import {client} from '../api-client'
 import FileSelect from '../components/file-select.vue'
 import BackButton from '../components/back-button.vue'
 

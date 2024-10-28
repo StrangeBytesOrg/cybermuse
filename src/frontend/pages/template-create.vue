@@ -2,7 +2,7 @@
 import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../trpc'
+import {client} from '../api-client'
 import BackButton from '../components/back-button.vue'
 
 const toast = useToast()

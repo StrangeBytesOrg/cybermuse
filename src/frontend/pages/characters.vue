@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
-import {client} from '../trpc'
+import {client} from '../api-client'
 
 const res = await client.characters.getAll.query()
 const characters = reactive(res)

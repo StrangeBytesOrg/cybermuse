@@ -2,8 +2,7 @@
 import {ref} from 'vue'
 import {client} from '../api-client'
 
-const {data} = await client.GET('/chats')
-const chats = ref(data?.chats || [])
+const chats = ref(await client.chats.getAll.query())
 
 const formatDate = (dateString: string) => {
     return new Date(dateString + ' UTC').toLocaleDateString(undefined, {

@@ -2,33 +2,22 @@
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import {client} from '../api-client'
-import {useToast} from 'vue-toastification'
 
 const router = useRouter()
-const toast = useToast()
 const selectedCharacters = ref<number[]>([])
 const selectedLore = ref<number[]>([])
 
-const {data: characterData} = await client.GET('/characters')
-const characters = characterData?.characters || []
-const {data: loreData} = await client.GET('/lore')
+const characters = await client.characters.getAll.query()
+const loreData = await client.lore.getAll.query()
 
 const userCharacter = ref(1)
 
 const createChat = async () => {
-    const {data, error} = await client.POST('/create-chat', {
-        body: {
-            characters: [...selectedCharacters.value, userCharacter.value],
-            lore: selectedLore.value,
-        },
+    await client.chats.create.mutate({
+        characters: [...selectedCharacters.value, userCharacter.value],
+        lore: selectedLore.value,
     })
-    if (error) {
-        toast.error(`Failed creating chat\n${error.message}`)
-        return
-    }
-    if (data && data.id) {
-        router.push(`/chat?id=${data.id}`)
-    }
+    router.push('/chats')
 }
 
 const setSelected = (event: Event) => {
