@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useConnectionStore} from '../store'
-import {client} from '../api-client'
-import {responseToIterable} from '../lib/fetch-backend'
+import {client, streamingClient} from '../api-client'
 import {useToast} from 'vue-toastification'
 
 const connectionStore = useConnectionStore()
@@ -14,51 +13,14 @@ const toast = useToast()
 let controller: AbortController
 
 // Check if generation server is actually running
-const checkServer = async () => {
-    const {data, error} = await client.GET('/status')
-    if (error) {
-        toast.error('Error getting server status')
-    }
-    if (data && data.loaded) {
-        connectionStore.connected = true
-    }
-}
-await checkServer()
+const {loaded} = await client.llamaCpp.status.query()
+connectionStore.connected = loaded
 
 const getGeneration = async () => {
+    controller = new AbortController()
     pendingMessage.value = true
     generatedResponse.value = ''
-    controller = new AbortController()
-
-    try {
-        const {response} = await client.POST('/generate-stream', {
-            body: {
-                prompt: currentInput.value,
-                // instruction: systemPrompt.value || undefined,
-            },
-            signal: controller.signal,
-            parseAs: 'stream',
-        })
-        const responseIterable = responseToIterable(response)
-        for await (const chunk of responseIterable) {
-            const data = JSON.parse(chunk.data)
-            if (chunk.event === 'text') {
-                generatedResponse.value += data.text
-            } else if (chunk.event === 'final') {
-                generatedResponse.value = data.text
-            } else if (chunk.event === 'error') {
-                console.error('Error', data)
-                toast.error(`Error generating message: ${data.error}`)
-            } else {
-                console.error('Unknown event', chunk)
-            }
-        }
-    } catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') return
-        throw error
-    } finally {
-        pendingMessage.value = false
-    }
+    console.log('NOT IMPLEMENTED')
 }
 
 const stop = async () => {

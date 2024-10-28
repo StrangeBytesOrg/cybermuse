@@ -3,7 +3,6 @@ import {ref} from 'vue'
 import {listFiles} from '@huggingface/hub'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
-import {responseToIterable} from '../lib/fetch-backend'
 
 type HfFile = {
     name: string
@@ -48,33 +47,33 @@ const getModelInfo = async (repo: string) => {
 
 const downloadModel = async () => {
     downloadPending.value = true
-    try {
-        const {response} = await client.POST('/download-model', {
-            body: {
-                repoId: selectedRepo.value,
-                path: selectedQuant.value,
-            },
-            parseAs: 'stream',
-        })
-        const iterable = responseToIterable(response)
-        for await (const chunk of iterable) {
-            const data = JSON.parse(chunk.data)
-            console.log(data, chunk.event)
-            if (chunk.event === 'progress') {
-                downloadProgress.value = data.progress.toFixed(2)
-            } else if (chunk.event === 'final') {
-                toast.success('Model downloaded')
-                downloadProgress.value = 0
-                downloadPending.value = false
-            } else if (chunk.event === 'error') {
-                toast.error(data.error)
-                downloadPending.value = false
-            }
-        }
-    } catch (err) {
-        toast.error('Failed to download model')
-        downloadPending.value = false
-    }
+    // try {
+    //     const {response} = await client.POST('/download-model', {
+    //         body: {
+    //             repoId: selectedRepo.value,
+    //             path: selectedQuant.value,
+    //         },
+    //         parseAs: 'stream',
+    //     })
+    //     const iterable = responseToIterable(response)
+    //     for await (const chunk of iterable) {
+    //         const data = JSON.parse(chunk.data)
+    //         console.log(data, chunk.event)
+    //         if (chunk.event === 'progress') {
+    //             downloadProgress.value = data.progress.toFixed(2)
+    //         } else if (chunk.event === 'final') {
+    //             toast.success('Model downloaded')
+    //             downloadProgress.value = 0
+    //             downloadPending.value = false
+    //         } else if (chunk.event === 'error') {
+    //             toast.error(data.error)
+    //             downloadPending.value = false
+    //         }
+    //     }
+    // } catch (err) {
+    //     toast.error('Failed to download model')
+    //     downloadPending.value = false
+    // }
 }
 
 // const searchModels = async () => {
