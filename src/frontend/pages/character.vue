@@ -84,7 +84,20 @@ const removeImage = () => {
         <div class="divider"></div>
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="updateCharacter()">Update</button>
-            <button class="btn btn-error ml-5" @click="deleteCharacter()">Delete</button>
+            <button class="btn btn-error ml-5" onclick="delete_confirm.showModal()">Delete</button>
         </div>
     </div>
+
+    <dialog id="delete_confirm" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">Are you sure you want to delete this character?</h3>
+            <p class="pt-4">This will also remove all existing chats</p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn">Cancel</button>
+                </form>
+                <button class="btn btn-error" @click="deleteCharacter()">Delete</button>
+            </div>
+        </div>
+    </dialog>
 </template>
