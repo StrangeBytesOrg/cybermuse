@@ -4,7 +4,6 @@ import {useRoute} from 'vue-router'
 import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
 import {client, streamingClient} from '../api-client'
-import {responseToIterable} from '../lib/fetch-backend'
 import {useConnectionStore} from '../store'
 
 const route = useRoute()
@@ -18,69 +17,11 @@ const editedText = ref('')
 const messagesElement = ref<HTMLElement>()
 let lastScrollTime = Date.now()
 const showCtxMenu = ref(false)
-let signal = new AbortController()
+let abortController = new AbortController()
 
 // Check if generation server is actually running
-// const checkServer = async () => {
-//     const {data, error} = await client.GET('/status')
-//     if (error) {
-//         console.error(error)
-//         toast.error('Error getting server status')
-//     }
-//     if (data && data.loaded) {
-//         connectionStore.connected = true
-//     }
-// }
-// await checkServer()
-connectionStore.connected = true
-
-const getWat = async () => {
-    // try {
-    //     const iterable = await streamingClient.messages.generate.query()
-    //     for await (const message of iterable) {
-    //         console.log(message)
-    //     }
-    // } catch (err) {
-    //     console.error(err)
-    //     toast.error(err.message)
-    // }
-    // try {
-    //     await wat.messages.create.mutate({
-    //         chatId: 69,
-    //         characterId: 1,
-    //         text: 'Hello, world!',
-    //         type: 'user',
-    //     })
-    // } catch (err) {
-    //     console.error(err)
-    //     toast.error(err.message)
-    // }
-    // Error narrowing
-    // wat.messages.wat
-    //     .query()
-    //     .then((res) => {
-    //         console.log(res)
-    //     })
-    //     .catch((err) => {
-    //         if (isTRPCClientError(err)) {
-    //             console.log('trpc error')
-    //             console.error(err.message)
-    //         } else {
-    //             console.log('other error')
-    //             console.error(err)
-    //         }
-    //         // toast.error(err.message)
-    //     })
-}
-
-// const {data, error} = await client.GET('/chat/{id}', {
-//     params: {path: {id: String(chatId)}},
-// })
-
-// if (error) {
-//     console.error(error)
-//     toast.error('Failed to load chat')
-// }
+const {loaded} = await client.llamaCpp.status.query()
+connectionStore.connected = loaded
 
 const data = await client.chats.getById.query(chatId)
 
@@ -157,11 +98,6 @@ const createMessage = async (characterId: number, text: string = '', type: 'user
         type,
     })
 
-    // if (error) {
-    //     toast.error(error.message || 'Failed sending message')
-    //     return
-    // }
-
     if (messageId) {
         messages.push({
             id: messageId,
@@ -181,41 +117,19 @@ const createMessage = async (characterId: number, text: string = '', type: 'user
 
 const generateMessage = async () => {
     pendingMessage.value = true
+
     try {
-        const {response, error} = await client.POST('/generate-message', {
-            body: {
-                chatId: Number(chatId),
-            },
-            parseAs: 'stream',
-            signal: signal.signal,
-        })
-        if (response.status !== 200) {
-            console.log(error)
-            toast.error(`Failed to generate message\n${error?.message}`)
-            return
-        }
-        const responseIterable = responseToIterable(response)
-        // let bufferedResponse = ''
-        for await (const chunk of responseIterable) {
-            const data = JSON.parse(chunk.data)
-            if (chunk.event === 'text') {
-                const lastMessage = messages[messages.length - 1]
-                if (lastMessage) {
-                    lastMessage.content[lastMessage.activeIndex] = data.text
-                }
-                scrollMessages('smooth')
-            } else if (chunk.event === 'final') {
-                console.log('Done event')
-            } else if (chunk.event === 'error') {
-                console.error('Error', data.error)
-                toast.error(data.error)
-            } else {
-                console.error('Unknown event', chunk)
+        const iterable = await streamingClient.messages.generate.mutate(chatId, {signal: abortController.signal})
+        for await (const text of iterable) {
+            const lastMessage = messages[messages.length - 1]
+            if (lastMessage) {
+                lastMessage.content[lastMessage.activeIndex] = text
             }
+            scrollMessages('smooth')
         }
     } catch (error) {
         // Ignore abort errors
-        if (error instanceof DOMException && error.name === 'AbortError') return
+        if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
         throw error
     } finally {
         console.log('done pending')
@@ -224,21 +138,14 @@ const generateMessage = async () => {
 }
 
 const stopGeneration = () => {
-    signal.abort()
+    abortController.abort()
     pendingMessage.value = false
-    signal = new AbortController()
+    abortController = new AbortController()
 }
 
 const getCharacter = async () => {
-    const {data, error} = await client.POST('/get-response-character', {
-        body: {
-            chatId: Number(chatId),
-        },
-    })
-    if (error) {
-        toast.error(error.message || 'Failed getting character')
-    }
-    return data?.characterId
+    console.log('NOT IMPLEMENTED')
+    return 1
 }
 
 const editMessage = async (messageId: number) => {
@@ -282,47 +189,27 @@ const deleteMessage = async (messageId: number) => {
 }
 
 const newSwipe = async (message: Message) => {
-    const {error} = await client.POST('/new-swipe', {
-        body: {messageId: message.id},
-    })
-    if (error) {
-        toast.error(error.message || 'Failed generating alt')
-    } else {
-        if (message) {
-            message.content.push('')
-            message.activeIndex = message.content.length - 1
-        }
-    }
+    await client.swipes.newSwipe.mutate(message.id)
+    message.content.push('')
+    message.activeIndex = message.content.length - 1
 
     await generateMessage()
 }
 
 const swipeLeft = async (message: Message) => {
-    const {error} = await client.POST('/set-swipe-index', {
-        body: {
-            messageId: message.id,
-            activeIndex: message.activeIndex - 1,
-        },
+    await client.swipes.setSwipeIndex.mutate({
+        messageId: message.id,
+        activeIndex: message.activeIndex - 1,
     })
-    if (error) {
-        toast.error(error.message || 'Failed swiping left')
-    } else {
-        message.activeIndex -= 1
-    }
+    message.activeIndex -= 1
 }
 
 const swipeRight = async (message: Message) => {
-    const {error} = await client.POST('/set-swipe-index', {
-        body: {
-            messageId: message.id,
-            activeIndex: message.activeIndex + 1,
-        },
+    await client.swipes.setSwipeIndex.mutate({
+        messageId: message.id,
+        activeIndex: message.activeIndex + 1,
     })
-    if (error) {
-        toast.error(error.message || 'Failed swiping right')
-    } else {
-        message.activeIndex += 1
-    }
+    message.activeIndex += 1
 }
 
 const quoteWrap = (text: string) => {

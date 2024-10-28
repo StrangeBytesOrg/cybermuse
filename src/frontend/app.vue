@@ -42,7 +42,7 @@ const toggleMenu = () => {
 
         <!-- Sidebar -->
         <div
-            class="fixed left-0 top-14 sm:top-0 h-full w-52 bg-base-200 z-20 wat"
+            class="fixed left-0 top-14 sm:top-0 h-full w-52 bg-base-200 z-20"
             :class="{customShow: showMenu, customHide: !showMenu}">
             <ul class="menu">
                 <li>
