@@ -17,7 +17,6 @@ import CreateTemplate from './pages/template-create.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
-import DownloadModels from './pages/download-models.vue'
 import ThemeSettings from './pages/theme-settings.vue'
 
 export default createRouter({
@@ -107,11 +106,6 @@ export default createRouter({
             path: '/backend-settings',
             name: 'backend-settings',
             component: BackendSettings,
-        },
-        {
-            path: '/download-models',
-            name: 'download-models',
-            component: DownloadModels,
         },
         {
             path: '/instruct',

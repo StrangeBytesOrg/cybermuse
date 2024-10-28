@@ -30,6 +30,26 @@ export const modelsRouter = t.router({
             })
         }
     }),
+    setModelPath: t.procedure.input(z.string()).mutation(async ({input: modelPath}) => {
+        const config = getConfig()
+        logger.info(`Setting Model Folder: ${modelPath}`)
+        // Check if the directory exists
+        if (!fs.existsSync(modelPath)) {
+            logger.error('Directory does not exist')
+            throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Directory does not exist',
+            })
+        }
+        config.modelsPath = modelPath
+        setConfig(config)
+    }),
+    setAutoLoad: t.procedure.input(z.boolean()).mutation(async ({input: autoLoad}) => {
+        logger.info(`Setting Auto Load: ${autoLoad}`)
+        const config = getConfig()
+        config.autoLoad = autoLoad
+        setConfig(config)
+    }),
     // TODO implement
     downloadModel: t.procedure
         .input(
@@ -80,24 +100,4 @@ export const modelsRouter = t.router({
             // reply.raw.end()
             // request.socket.destroy()
         }),
-    setModelPath: t.procedure.input(z.string()).mutation(async ({input: modelPath}) => {
-        const config = getConfig()
-        logger.info(`Setting Model Folder: ${modelPath}`)
-        // Check if the directory exists
-        if (!fs.existsSync(modelPath)) {
-            logger.error('Directory does not exist')
-            throw new TRPCError({
-                code: 'BAD_REQUEST',
-                message: 'Directory does not exist',
-            })
-        }
-        config.modelsPath = modelPath
-        setConfig(config)
-    }),
-    setAutoLoad: t.procedure.input(z.boolean()).mutation(async ({input: autoLoad}) => {
-        logger.info(`Setting Auto Load: ${autoLoad}`)
-        const config = getConfig()
-        config.autoLoad = autoLoad
-        setConfig(config)
-    }),
 })
