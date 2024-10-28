@@ -22,6 +22,7 @@ export default defineConfig({
     server: {
         proxy: {
             '/avatars': 'http://localhost:31700',
+            '/trpc': 'http://localhost:31700',
         },
     },
 })

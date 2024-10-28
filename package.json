@@ -7,7 +7,7 @@
     "author": "Strange Bytes",
     "scripts": {
         "dev": "concurrently -n \"frontend,server\" -c \"blue,green\" npm:dev:frontend npm:dev:server",
-        "dev:frontend": "vite",
+        "dev:frontend": "vite --host",
         "dev:server": "DEV=1 tsx watch --clear-screen=false ./src/backend/server.ts",
         "build": "npm run build:frontend && npm run build:backend && cp -r ./src/migrations ./dist/",
         "build:frontend": "vite build",

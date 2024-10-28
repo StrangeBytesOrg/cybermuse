@@ -5,7 +5,7 @@
         "strict": true,
         "composite": true,
         "baseUrl": ".",
-        "noUncheckedIndexedAccess": true, // Recommended by OpenAPI ts
+        "noUncheckedIndexedAccess": true,
         "types": ["vite/client"]
     }
 }

@@ -4,7 +4,7 @@ import type {AppRouter} from '../backend/router'
 export const client = createTRPCClient<AppRouter>({
     links: [
         httpBatchLink({
-            url: 'http://localhost:31700/trpc',
+            url: '/trpc',
         }),
     ],
 })
@@ -12,7 +12,7 @@ export const client = createTRPCClient<AppRouter>({
 export const streamingClient = createTRPCClient<AppRouter>({
     links: [
         unstable_httpBatchStreamLink({
-            url: 'http://localhost:31700/trpc',
+            url: '/trpc',
         }),
     ],
 })
