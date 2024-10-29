@@ -14,7 +14,7 @@ const characterId = Number(route.query.id)
 let res
 try {
     res = await client.characters.getById.query(characterId)
-} catch (error) {
+} catch {
     router.push('/characters')
     throw new Error('Character not found')
 }
