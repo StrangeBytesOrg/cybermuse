@@ -28,7 +28,7 @@ logger.info(`Database file: ${databasePath}`)
 export const db = drizzle({
     schema,
     logger: env.VERBOSE ? new DrizzleLogger() : undefined,
-    connection: {url: 'file:dev.db'},
+    connection: {url: `file:${databasePath}`},
 })
 
 if (env.DEV) {
