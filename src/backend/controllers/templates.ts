@@ -31,17 +31,17 @@ export const templatesRoutes = t.router({
         await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
     }),
     update: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
-        const {changes} = await db
+        const {rowsAffected} = await db
             .update(PromptTemplate)
             .set({
                 name: input.name,
                 template: input.template,
             })
             .where(eq(PromptTemplate.id, Number(input.id)))
-        if (changes === 0) {
+        if (rowsAffected === 0) {
             throw new TRPCError({
-                code: 'UNPROCESSABLE_CONTENT',
-                message: 'No changes made',
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'No updates ocurred',
             })
         }
     }),
@@ -68,15 +68,14 @@ export const templatesRoutes = t.router({
             }),
         )
         .mutation(async ({input}) => {
-            const {changes} = await db
+            const {rowsAffected} = await db
                 .update(User)
                 .set({promptTemplate: Number(input.id)})
                 .where(eq(User.id, 1))
-            if (changes === 0) {
-                // TODO handle other reasons for this to fail
+            if (rowsAffected === 0) {
                 throw new TRPCError({
-                    code: 'NOT_FOUND',
-                    message: 'User not found',
+                    code: 'INTERNAL_SERVER_ERROR',
+                    message: 'No updates ocurred',
                 })
             }
         }),

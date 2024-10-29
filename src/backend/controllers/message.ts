@@ -171,8 +171,6 @@ export const messageRouter = t.router({
                             lastTokens: generatePreset.repeatLastN || undefined,
                         },
                         // customStopTriggers:
-                        // TODO bring back abort signal
-                        // signal: controller.signal,
                         signal,
                         onTextChunk: async (chunk) => {
                             await db

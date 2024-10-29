@@ -17,11 +17,6 @@ const activeTemplate = computed(() => {
 const setActiveTemplate = async () => {
     example.value = ''
 
-    if (!selectedTemplate.value) {
-        toast.error('No template selected')
-        return
-    }
-
     await client.templates.setActiveId.mutate({id: selectedTemplate.value})
     document.querySelectorAll('textarea').forEach((textarea) => {
         textarea.style.height = 'auto'
