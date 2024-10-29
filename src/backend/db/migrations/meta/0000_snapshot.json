@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e7c9bd1e-ca7e-4299-b5e0-ff09ace54a86",
+  "id": "bd973c5c-2ac3-4642-938c-7010aaa631a6",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -35,8 +35,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "firstMessage": {
-          "name": "firstMessage",
+        "first_message": {
+          "name": "first_message",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -66,16 +66,16 @@
           "notNull": true,
           "autoincrement": true
         },
-        "created": {
-          "name": "created",
+        "created_at": {
+          "name": "created_at",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
           "default": "(CURRENT_TIMESTAMP)"
         },
-        "updated": {
-          "name": "updated",
+        "updated_at": {
+          "name": "updated_at",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -330,8 +330,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "content": {
-          "name": "content",
+        "entries": {
+          "name": "entries",
           "type": "text",
           "primaryKey": false,
           "notNull": true,

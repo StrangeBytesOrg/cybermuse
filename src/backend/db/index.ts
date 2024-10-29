@@ -29,6 +29,7 @@ export const db = drizzle({
     schema,
     logger: env.VERBOSE ? new DrizzleLogger() : undefined,
     connection: {url: `file:${databasePath}`},
+    casing: 'snake_case',
 })
 
 if (env.DEV) {

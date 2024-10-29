@@ -3,14 +3,14 @@ CREATE TABLE `character` (
 	`name` text NOT NULL,
 	`type` text NOT NULL,
 	`description` text NOT NULL,
-	`firstMessage` text,
+	`first_message` text,
 	`image` text
 );
 --> statement-breakpoint
 CREATE TABLE `chat` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`created` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `chat_characters` (
@@ -49,7 +49,7 @@ CREATE TABLE `generate_preset` (
 CREATE TABLE `lore` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`name` text NOT NULL,
-	`content` text NOT NULL
+	`entries` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `message` (

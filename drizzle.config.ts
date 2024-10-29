@@ -8,4 +8,5 @@ export default defineConfig({
         url: 'file:dev.db',
     },
     verbose: true,
+    casing: 'snake_case',
 })
