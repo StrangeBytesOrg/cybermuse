@@ -1,7 +1,7 @@
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {t} from '../trpc.js'
-import {db, GeneratePreset, insertPresetSchema, User} from '../db.js'
+import {db, GeneratePreset, insertPresetSchema, User} from '../db/index.js'
 import {TRPCError} from '@trpc/server'
 
 export const generatePresetsRouter = t.router({

@@ -3,7 +3,7 @@ import {TRPCError} from '@trpc/server'
 import {z} from 'zod'
 import {Template} from '@huggingface/jinja'
 import {t} from '../trpc.js'
-import {db, PromptTemplate, User, insertPromptTemplateSchema} from '../db.js'
+import {db, PromptTemplate, User, insertPromptTemplateSchema} from '../db/index.js'
 import {logger} from '../logging.js'
 
 export const templatesRoutes = t.router({

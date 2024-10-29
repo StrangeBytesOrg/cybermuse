@@ -1,7 +1,7 @@
 import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {t} from '../trpc.js'
-import {db, Message} from '../db.js'
+import {db, Message} from '../db/index.js'
 import {logger} from '../logging.js'
 import {TRPCError} from '@trpc/server'
 

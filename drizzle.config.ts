@@ -1,15 +1,11 @@
-import type {Config} from 'drizzle-kit'
+import {defineConfig} from 'drizzle-kit'
 
-export default {
+export default defineConfig({
     dialect: 'sqlite',
-    schema: './src/backend/schema.ts',
-    out: './src/migrations/',
+    schema: './src/backend/db/schema.ts',
+    out: './src/backend/db/migrations',
     dbCredentials: {
-        url: './dev.db',
+        url: 'file:dev.db',
     },
     verbose: true,
-    strict: false, // Don't ask for confirmation before running migrations
-    migrations: {
-        prefix: 'index',
-    },
-} satisfies Config
+})

@@ -14,8 +14,6 @@ const artifacts = await builder.build({
         files: [
             'package.json',
             {from: './dist', to: ''},
-            {from: './src/migrations/', to: './migrations/'},
-            // Config for node-llama-cpp
             '!node_modules/node-llama-cpp/bins/**/*',
             'node_modules/node-llama-cpp/bins/${os}-${arch}*/**/*',
             '!node_modules/@node-llama-cpp/*/bins/**/*',
@@ -33,7 +31,6 @@ const artifacts = await builder.build({
         artifactName: '${name}-${os}-${arch}.${ext}',
         linux: {
             target: dev ? ['dir'] : ['tar.xz'],
-            extraResources: [{from: './llamacpp/llama-server', to: 'llamacpp/llama-server'}],
             compression: 'store', // Seems like "normal" actually does max and "store" does normal
         },
         win: {

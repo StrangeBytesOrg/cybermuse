@@ -3,7 +3,7 @@ import {eq} from 'drizzle-orm'
 import {Template} from '@huggingface/jinja'
 import {TRPCError} from '@trpc/server'
 import {t} from '../trpc.js'
-import {db, Message, Chat, User} from '../db.js'
+import {db, Message, Chat, User} from '../db/index.js'
 import {logger} from '../logging.js'
 import {llamaChat, formatMessage} from '../llama-cpp.js'
 

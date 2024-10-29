@@ -9,9 +9,9 @@ import {getConfig} from './config.js'
 import {loadModel} from './llama-cpp.js'
 import {appRouter, type AppRouter} from './router.js'
 import {createContext} from './trpc.js'
+import {fixtureData} from './db/fixture.js'
 
-// Fixture DB data
-import {fixtureData} from './fixture.js'
+// Apply fixture data
 await fixtureData()
 
 const config = getConfig()

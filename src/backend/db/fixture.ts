@@ -1,6 +1,6 @@
 import {eq} from 'drizzle-orm'
-import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePreset} from './db.js'
-import {logger} from './logging.js'
+import {db, User, Character, Chat, ChatCharacters, PromptTemplate, GeneratePreset} from './index.js'
+import {logger} from '../logging.js'
 
 // TODO output characters and lore as a single string for easier use
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.

@@ -4,7 +4,7 @@ import {Template} from '@huggingface/jinja'
 import {TRPCError} from '@trpc/server'
 import {t} from '../trpc.js'
 import {logger} from '../logging.js'
-import {db, Chat, ChatCharacters, Character, Message, ChatLore} from '../db.js'
+import {db, Chat, ChatCharacters, Character, Message, ChatLore} from '../db/index.js'
 
 export const chatRouter = t.router({
     getAll: t.procedure.query(async () => {

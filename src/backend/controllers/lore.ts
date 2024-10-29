@@ -2,7 +2,7 @@ import {z} from 'zod'
 import {eq} from 'drizzle-orm'
 import {t} from '../trpc.js'
 import {logger} from '../logging.js'
-import {db, Lore, insertLoreSchema} from '../db.js'
+import {db, Lore, insertLoreSchema} from '../db/index.js'
 import {TRPCError} from '@trpc/server'
 
 export const loreRouter = t.router({
