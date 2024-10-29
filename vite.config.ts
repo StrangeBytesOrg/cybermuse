@@ -17,7 +17,7 @@ export default defineConfig({
     plugins: [vue()],
     build: {
         sourcemap: true,
-        outDir: path.resolve(import.meta.dirname, 'dist'),
+        outDir: path.resolve(import.meta.dirname, 'dist', 'frontend'),
     },
     server: {
         proxy: {

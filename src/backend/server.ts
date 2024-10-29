@@ -46,7 +46,7 @@ server.register(fastifyTRPCPlugin, {
 
 // Serve frontend
 await server.register(fastifyStatic, {
-    root: path.resolve(import.meta.dirname, '../'),
+    root: path.resolve(import.meta.dirname, '../', 'frontend'),
 })
 
 server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
