@@ -21,6 +21,14 @@ CREATE TABLE `chat_characters` (
 	FOREIGN KEY (`character_id`) REFERENCES `character`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE TABLE `chat_lore` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`chat_id` integer NOT NULL,
+	`lore_id` integer NOT NULL,
+	FOREIGN KEY (`chat_id`) REFERENCES `chat`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`lore_id`) REFERENCES `lore`(`id`) ON UPDATE no action ON DELETE cascade
+);
+--> statement-breakpoint
 CREATE TABLE `generate_preset` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
@@ -31,23 +39,24 @@ CREATE TABLE `generate_preset` (
 	`top_k` real,
 	`top_p` real,
 	`min_p` real,
-	`tfsz` real,
-	`typical_p` real,
 	`repeat_penalty` real,
 	`repeat_last_n` real,
 	`penalize_nl` integer,
 	`presence_penalty` real,
-	`frequency_penalty` real,
-	`mirostat` integer,
-	`mirostat_tau` real,
-	`mirostat_eta` real
+	`frequency_penalty` real
+);
+--> statement-breakpoint
+CREATE TABLE `lore` (
+	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`name` text NOT NULL,
+	`content` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `message` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`chat_id` integer NOT NULL,
 	`character_id` integer NOT NULL,
-	`generated` integer NOT NULL,
+	`type` text NOT NULL,
 	`active_index` integer NOT NULL,
 	`content` text NOT NULL,
 	FOREIGN KEY (`chat_id`) REFERENCES `chat`(`id`) ON UPDATE no action ON DELETE cascade,
@@ -57,9 +66,7 @@ CREATE TABLE `message` (
 CREATE TABLE `prompt_template` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`name` text NOT NULL,
-	`instruction_template` text NOT NULL,
-	`chat_template` text NOT NULL,
-	`chat_instruction` text NOT NULL
+	`template` text NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE `user` (
