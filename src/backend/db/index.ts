@@ -35,5 +35,6 @@ if (env.DEV) {
     dbLogger.info('Dev mode, skipping migrations')
 } else {
     dbLogger.info('Running migrations')
-    migrate(db, {migrationsFolder: path.resolve(import.meta.dirname, './migrations')})
+    await migrate(db, {migrationsFolder: path.resolve(import.meta.dirname, './migrations')})
+    dbLogger.info('Migrations complete')
 }
