@@ -22,36 +22,15 @@ export const chatRouter = t.router({
                 lore: {with: {lore: true}},
             },
         })
-        const characters = chat?.characters.map((c) => {
-            return c.character
-        })
 
-        if (!characters) {
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'No characters found',
-            })
-        }
-
-        const lore = chat?.lore.map((l) => {
-            return l.lore
-        })
-
-        if (!lore) {
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'No lore found',
-            })
-        }
-
-        if (chat) {
-            return {chat, characters, lore}
-        } else {
+        if (!chat) {
             throw new TRPCError({
                 code: 'NOT_FOUND',
                 message: 'Chat not found',
             })
         }
+
+        return chat
     }),
     create: t.procedure
         .input(

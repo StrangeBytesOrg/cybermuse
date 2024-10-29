@@ -25,11 +25,23 @@ connectionStore.connected = loaded
 
 const data = await client.chats.getById.query(chatId)
 
-const messages = reactive(data.chat.messages)
 type Message = (typeof messages)[0]
-const characterMap = new Map(data.characters.map((character) => [character.id, character]))
-const userCharacter = data.characters.find((character) => character.type === 'user')
-const nonUserCharacters = data.characters.filter((character) => character.type === 'character')
+const messages = reactive(data.messages)
+const characters = data.characters.map((c) => c.character)
+const characterMap = new Map(characters.map((character) => [character.id, character]))
+let userCharacter = characters.find((character) => character.type === 'user')
+const nonUserCharacters = characters.filter((character) => character.type === 'character')
+
+if (!userCharacter) {
+    userCharacter = {
+        id: 0,
+        name: 'User',
+        type: 'user',
+        image: null,
+        firstMessage: null,
+        description: 'missing',
+    }
+}
 
 const checkSend = (event: KeyboardEvent) => {
     if (event.key === 'Enter' && !event.shiftKey) {
@@ -276,7 +288,7 @@ const toggleCtxMenu = () => {
                             class="loading loading-dots loading-sm mt-2"></span>
                         <div
                             v-show="editModeId !== message.id"
-                            v-html="formatText(message.content[message.activeIndex])"
+                            v-html="formatText(message.content[message.activeIndex] || '')"
                             class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word] whitespace-pre-wrap" />
                         <textarea
                             v-show="editModeId === message.id"
