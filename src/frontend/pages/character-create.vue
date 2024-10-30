@@ -3,8 +3,8 @@ import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
-import FileInput from '../components/file-select.vue'
-import BackButton from '../components/back-button.vue'
+import FileInput from '@/components/file-select.vue'
+import TopBar from '@/components/top-bar.vue'
 import {decodeChunks} from '../lib/decode-png-chunks'
 
 const toast = useToast()
@@ -59,11 +59,9 @@ const importCharacterPng = async (image: string) => {
 </script>
 
 <template>
-    <div class="flex flex-row bg-base-300 p-3">
-        <BackButton />
-        <h1 class="text-xl ml-5">New Character</h1>
+    <TopBar title="New Character" back>
         <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" />
-    </div>
+    </TopBar>
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
         <input

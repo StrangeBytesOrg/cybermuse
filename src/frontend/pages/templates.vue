@@ -2,6 +2,7 @@
 import {ref, computed, onMounted} from 'vue'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
+import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const res = await client.templates.getAll.query()
@@ -72,6 +73,8 @@ onMounted(() => {
 </script>
 
 <template>
+    <TopBar title="Prompt Templates" />
+
     <div class="py-3 px-2">
         <div class="flex flex-row">
             <div class="flex flex-col">

@@ -2,8 +2,8 @@
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {client} from '../api-client'
-import FileSelect from '../components/file-select.vue'
-import BackButton from '../components/back-button.vue'
+import FileSelect from '@/components/file-select.vue'
+import TopBar from '@/components/top-bar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -40,10 +40,7 @@ const removeImage = () => {
 </script>
 
 <template>
-    <div class="flex flex-row bg-base-300 p-3">
-        <BackButton />
-        <h1 class="text-xl ml-5">Character</h1>
-    </div>
+    <TopBar title="Character" back />
 
     <div v-if="character" class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
         <input

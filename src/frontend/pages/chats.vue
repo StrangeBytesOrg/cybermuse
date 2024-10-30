@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {client} from '../api-client'
+import TopBar from '@/components/top-bar.vue'
 
 const chats = ref(await client.chats.getAll.query())
 type Chat = (typeof chats.value)[0]
@@ -28,10 +29,9 @@ const formatTitle = (chat: Chat) => {
 </script>
 
 <template>
-    <div class="flex flex-row p-3 bg-base-300">
-        <h1 class="text-xl">Chats</h1>
+    <TopBar title="Chats">
         <RouterLink to="/create-chat" class="btn btn-sm btn-primary ml-auto">New Chat +</RouterLink>
-    </div>
+    </TopBar>
 
     <div class="flex flex-col m-2">
         <router-link

@@ -2,6 +2,7 @@
 import {ref, computed} from 'vue'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
+import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 
@@ -66,6 +67,8 @@ const deletePreset = async () => {
 </script>
 
 <template>
+    <TopBar title="Generation Presets" />
+
     <div class="py-3 px-2">
         <div class="flex flex-row">
             <div class="flex flex-col">

@@ -2,6 +2,7 @@
 import {ref} from 'vue'
 import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
+import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 
@@ -80,10 +81,12 @@ await getModels()
 </script>
 
 <template>
+    <TopBar title="Models" />
+
     <div class="p-3">
         <div class="flex flex-col">
             <div class="flex flex-row max-w-96">
-                <label class="form-control w-full mt-3">
+                <label class="form-control w-full">
                     <div class="label">
                         <span class="label-text">Model Folder</span>
                     </div>

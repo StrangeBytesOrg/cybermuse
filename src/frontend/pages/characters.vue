@@ -2,16 +2,16 @@
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
 import {client} from '../api-client'
+import TopBar from '../components/top-bar.vue'
 
 const res = await client.characters.getAll.query()
 const characters = reactive(res)
 </script>
 
 <template>
-    <div class="flex flex-row p-3 bg-base-300">
-        <h1 class="text-xl">Characters</h1>
+    <TopBar title="Characters">
         <RouterLink to="/create-character" class="btn btn-sm btn-primary ml-auto">Create Character +</RouterLink>
-    </div>
+    </TopBar>
 
     <div class="flex flex-col m-2">
         <template v-if="characters.length">

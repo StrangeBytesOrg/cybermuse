@@ -3,7 +3,7 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
-import BackButton from '../components/back-button.vue'
+import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const router = useRouter()
@@ -42,10 +42,7 @@ const resizeTextarea = async (event: Event) => {
 </script>
 
 <template>
-    <div class="flex flex-row bg-base-300 p-3">
-        <BackButton />
-        <h1 class="text-xl ml-5">Create Template</h1>
-    </div>
+    <TopBar title="Create Template" back />
 
     <div class="flex flex-col bg-base-200 rounded-lg p-3 pt-0 m-2">
         <label class="form-control w-full">

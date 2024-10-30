@@ -2,15 +2,15 @@
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
 import {client} from '../api-client'
+import TopBar from '@/components/top-bar.vue'
 
 const loreBooks = reactive(await client.lore.getAll.query())
 </script>
 
 <template>
-    <div class="flex flex-row p-3 bg-base-300">
-        <h1 class="text-xl">Lore Books</h1>
+    <TopBar title="Lore Books">
         <RouterLink to="/create-lore" class="btn btn-sm btn-primary ml-auto">New Lorebook +</RouterLink>
-    </div>
+    </TopBar>
 
     <div class="flex flex-row m-2">
         <div class="bg-base-200 rounded-lg w-full max-w-96 p-3">

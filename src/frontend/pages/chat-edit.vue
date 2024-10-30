@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import BackButton from '../components/back-button.vue'
+import TopBar from '@/components/top-bar.vue'
 import {client} from '../api-client'
 
 const route = useRoute()
@@ -26,10 +26,7 @@ const deleteChat = async () => {
 </script>
 
 <template>
-    <div class="flex flex-row bg-base-300 p-3">
-        <BackButton />
-        <h1 class="text-xl ml-5">Edit Chat</h1>
-    </div>
+    <TopBar title="Edit Chat" back />
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
         <label class="form-control w-full max-w-64">

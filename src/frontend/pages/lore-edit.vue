@@ -3,7 +3,7 @@ import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {client} from '../api-client'
-import BackButton from '../components/back-button.vue'
+import TopBar from '@/components/top-bar.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -36,10 +36,7 @@ const deleteLore = async () => {
 </script>
 
 <template>
-    <div class="flex flex-row bg-base-300 p-3">
-        <BackButton />
-        <h1 class="text-xl ml-5">Lore</h1>
-    </div>
+    <TopBar title="Edit Lorebook" back />
 
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
         <input type="text" v-model="lore.name" class="input input-bordered" placeholder="Lore Name" />

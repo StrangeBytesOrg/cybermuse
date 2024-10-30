@@ -46,12 +46,12 @@ const toggleMenu = () => {
             :class="{customShow: showMenu, customHide: !showMenu}">
             <ul class="menu">
                 <li>
+                    <router-link to="/chats" class="font-bold px-2 mb-1" active-class="active">Chats</router-link>
+                </li>
+                <li>
                     <router-link to="/characters" class="font-bold px-2 mb-1" active-class="active">
                         Characters
                     </router-link>
-                </li>
-                <li>
-                    <router-link to="/chats" class="font-bold px-2 mb-1" active-class="active">Chats</router-link>
                 </li>
                 <li>
                     <router-link to="/lore" class="font-bold px-2 mb-1" active-class="active">Lore</router-link>
