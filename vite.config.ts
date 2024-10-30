@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import tailwind from 'tailwindcss'
 import autoprefixer from 'autoprefixer'
 import tailwindConfig from './tailwind.config'
+import {fileURLToPath} from 'node:url'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,6 +24,11 @@ export default defineConfig({
         proxy: {
             '/avatars': 'http://localhost:31700',
             '/trpc': 'http://localhost:31700',
+        },
+    },
+    resolve: {
+        alias: {
+            '@': fileURLToPath(new URL('./src/frontend', import.meta.url)),
         },
     },
 })

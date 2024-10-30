@@ -4,8 +4,11 @@
     "compilerOptions": {
         "strict": true,
         "composite": true,
-        "baseUrl": ".",
         "noUncheckedIndexedAccess": true,
-        "types": ["vite/client"]
+        "types": ["vite/client"],
+        "baseUrl": ".", // Resolves relative to this file
+        "paths": {
+            "@/*": ["./*"]
+        }
     }
 }
