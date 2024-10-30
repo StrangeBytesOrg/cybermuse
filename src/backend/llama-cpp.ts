@@ -1,9 +1,12 @@
 import path from 'node:path'
-import {getLlama, LlamaChat, JinjaTemplateChatWrapper} from 'node-llama-cpp'
+import {getLlama, LlamaChat, JinjaTemplateChatWrapper, LlamaLogLevel} from 'node-llama-cpp'
 import type {LlamaModel, ChatHistoryItem} from 'node-llama-cpp'
 import {logger} from './logging.js'
+import {env} from './env.js'
 
-const llama = await getLlama()
+const llama = await getLlama({
+    logLevel: env.VERBOSE ? LlamaLogLevel.debug : LlamaLogLevel.warn,
+})
 let model: LlamaModel
 
 export let loaded = false
