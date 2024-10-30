@@ -98,7 +98,7 @@ const impersonate = async () => {
         return
     }
 
-    await createMessage(userCharacter.id, '', 'user')
+    await createMessage(userCharacter.id, '', 'model')
     await generateMessage()
 }
 
