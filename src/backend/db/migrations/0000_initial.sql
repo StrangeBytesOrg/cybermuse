@@ -9,6 +9,7 @@ CREATE TABLE `character` (
 --> statement-breakpoint
 CREATE TABLE `chat` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`name` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
@@ -60,7 +61,7 @@ CREATE TABLE `message` (
 	`active_index` integer NOT NULL,
 	`content` text NOT NULL,
 	FOREIGN KEY (`chat_id`) REFERENCES `chat`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`character_id`) REFERENCES `character`(`id`) ON UPDATE no action ON DELETE set null
+	FOREIGN KEY (`character_id`) REFERENCES `character`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `prompt_template` (

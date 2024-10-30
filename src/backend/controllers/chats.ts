@@ -98,6 +98,19 @@ export const chatRouter = t.router({
 
             return {id: newChat.id}
         }),
+    update: t.procedure
+        .input(
+            z.object({
+                id: z.number(),
+                name: z.nullable(z.string()),
+            }),
+        )
+        .mutation(async ({input}) => {
+            await db
+                .update(Chat)
+                .set({name: input.name || null})
+                .where(eq(Chat.id, input.id))
+        }),
     delete: t.procedure.input(z.number()).mutation(async ({input: id}) => {
         await db.delete(Chat).where(eq(Chat.id, Number(id)))
     }),

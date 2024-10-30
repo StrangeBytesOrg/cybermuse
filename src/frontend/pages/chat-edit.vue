@@ -1,15 +1,22 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
+import {useToast} from 'vue-toastification'
 import BackButton from '../components/back-button.vue'
 import {client} from '../api-client'
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 const chatId = Number(route.params.id)
-const data = await client.chats.getById.query(chatId)
+const chat = await client.chats.getById.query(chatId)
 
 const updateChat = async () => {
-    console.log('TODO')
+    await client.chats.update.mutate({
+        id: chatId,
+        name: chat.name,
+    })
+    toast.success('Updated')
+    router.push('/chats')
 }
 
 const deleteChat = async () => {
@@ -25,23 +32,32 @@ const deleteChat = async () => {
     </div>
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
+        <label class="form-control w-full max-w-64">
+            <input
+                type="text"
+                v-model="chat.name"
+                placeholder="Chat name (optional)"
+                class="input input-bordered focus:outline-none focus:border-primary" />
+        </label>
+
         <!-- Characters -->
-        <div>
-            Characters:
-            <div v-for="character in data?.characters" :key="character.id">
+        <div class="mt-3">
+            <div class="text-lg">Characters</div>
+            <div v-for="{character} in chat.characters" :key="character.id">
                 {{ character.name }}
             </div>
         </div>
 
         <!-- Lore -->
         <div class="mt-3">
-            Lore:
-            <div v-for="lore in data?.lore" :key="lore.id">
+            <div class="text-lg">Lore</div>
+            <div v-for="{lore} in chat.lore" :key="lore.id">
                 {{ lore.name }}
             </div>
         </div>
 
-        <div class="mt-3">
+        <div class="divider mb-3"></div>
+        <div>
             <button @click.prevent="updateChat" class="btn btn-primary">Update</button>
             <button @click.prevent="deleteChat" class="btn btn-error ml-3">
                 Delete

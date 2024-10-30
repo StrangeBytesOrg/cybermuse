@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "bd973c5c-2ac3-4642-938c-7010aaa631a6",
+  "id": "4069d17d-0665-423d-89e2-ec6c9bea0b56",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "character": {
@@ -65,6 +65,13 @@
           "primaryKey": true,
           "notNull": true,
           "autoincrement": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
@@ -415,7 +422,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

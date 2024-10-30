@@ -24,6 +24,7 @@ export const insertCharacterSchema = createInsertSchema(Character)
  */
 export const Chat = sqliteTable('chat', {
     id: integer().primaryKey({autoIncrement: true}),
+    name: text(),
     createdAt: text()
         .default(sql`(CURRENT_TIMESTAMP)`)
         .notNull(),

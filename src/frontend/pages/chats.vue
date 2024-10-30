@@ -3,6 +3,7 @@ import {ref} from 'vue'
 import {client} from '../api-client'
 
 const chats = ref(await client.chats.getAll.query())
+type Chat = (typeof chats.value)[0]
 
 // Filter out chats with no characters
 chats.value = chats.value.filter((chat) => chat.characters.length > 1)
@@ -17,16 +18,9 @@ const formatDate = (dateString: string) => {
     })
 }
 
-type Character = {
-    id: number
-    character: {
-        name: string
-        type: 'character' | 'user'
-    }
-}
-
-const formatTitle = (characters: Character[]) => {
-    return characters
+const formatTitle = (chat: Chat) => {
+    if (chat.name) return chat.name
+    return chat.characters
         .filter(({character}) => character.type === 'character')
         .map(({character}) => character.name)
         .join(' ')
@@ -46,7 +40,7 @@ const formatTitle = (characters: Character[]) => {
             :key="chat.id"
             class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">
             <div class="text-lg font-bold">
-                {{ formatTitle(chat.characters) }}
+                {{ formatTitle(chat) }}
             </div>
             <div class="text-sm">{{ formatDate(chat.createdAt) }}</div>
             <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
