@@ -91,7 +91,7 @@ const removeImage = () => {
     <dialog id="delete_confirm" class="modal">
         <div class="modal-box">
             <h3 class="text-lg font-bold">Are you sure you want to delete this character?</h3>
-            <p class="pt-4">This will also remove all existing chats</p>
+            <p class="pt-4">This will also remove all character messages from existing chats</p>
             <div class="modal-action">
                 <form method="dialog">
                     <button class="btn">Cancel</button>

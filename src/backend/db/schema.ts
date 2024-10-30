@@ -93,7 +93,7 @@ export const Message = sqliteTable('message', {
         .references(() => Chat.id, {onDelete: 'cascade'})
         .notNull(),
     characterId: integer()
-        .references(() => Character.id, {onDelete: 'set null'})
+        .references(() => Character.id, {onDelete: 'cascade'})
         .notNull(),
     type: text({enum: ['user', 'model', 'system']}).notNull(),
     activeIndex: integer().notNull(),

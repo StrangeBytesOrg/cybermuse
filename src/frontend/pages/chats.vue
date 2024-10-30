@@ -4,6 +4,9 @@ import {client} from '../api-client'
 
 const chats = ref(await client.chats.getAll.query())
 
+// Filter out chats with no characters
+chats.value = chats.value.filter((chat) => chat.characters.length > 1)
+
 const formatDate = (dateString: string) => {
     return new Date(dateString + ' UTC').toLocaleDateString(undefined, {
         year: 'numeric',
