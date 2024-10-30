@@ -13,11 +13,11 @@ const loreData = await client.lore.getAll.query()
 const userCharacter = ref(1)
 
 const createChat = async () => {
-    await client.chats.create.mutate({
+    const {id: newChatId} = await client.chats.create.mutate({
         characters: [...selectedCharacters.value, userCharacter.value],
         lore: selectedLore.value,
     })
-    router.push('/chats')
+    router.push(`/chat?id=${newChatId}`)
 }
 
 const setSelected = (event: Event) => {
