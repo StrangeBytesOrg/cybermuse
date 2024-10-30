@@ -41,8 +41,11 @@ export const chatRouter = t.router({
         )
         .mutation(async ({input}) => {
             const {characters} = input
-            if (characters.length === 0) {
-                throw new Error('At least one character is required')
+            if (characters.length === 1) {
+                throw new TRPCError({
+                    code: 'BAD_REQUEST',
+                    message: 'Chat must have at least one character',
+                })
             }
 
             const [newChat] = await db.insert(Chat).values({}).returning({id: Chat.id})
