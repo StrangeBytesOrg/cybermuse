@@ -128,10 +128,10 @@ export const messageRouter = t.router({
         const messagesReversed = chat.messages.toReversed()
         for (let i = 0; i < messagesReversed.length; i += 1) {
             const message = messagesReversed[i]
+            let prefix = `${characterMap.get(message.characterId).name}: `
             const formattedMessage = formatMessage({
                 type: message.type,
-                // TODO add character name prefix to messages
-                content: message.content[message.activeIndex],
+                content: prefix + message.content[message.activeIndex],
             })
             chatHistory.splice(1, 0, formattedMessage)
 
