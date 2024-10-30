@@ -88,28 +88,23 @@ const userCharacters = computed(() => {
         </select>
 
         <!-- Lore -->
-        <div class="w-full">
+        <div v-if="loreData.length" class="w-full">
             <h2 class="text-xl font-bold mt-5">Lore</h2>
             <div class="divider mt-0 mb-1"></div>
             <div class="flex flex-col">
-                <template v-if="loreData?.length">
-                    <div
-                        v-for="lore in loreData"
-                        :key="lore.id"
-                        class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
-                        <div class="text-lg ml-2">{{ lore.name }}</div>
-                        <label class="absolute w-full h-full cursor-pointer">
-                            <input
-                                type="checkbox"
-                                :value="lore.id"
-                                @change="setSelectedLore"
-                                class="checkbox absolute top-2 right-4" />
-                        </label>
-                    </div>
-                </template>
-                <template v-else>
-                    <div class="font-bold text-lg pt-3 pb-5">No Lore</div>
-                </template>
+                <div
+                    v-for="lore in loreData"
+                    :key="lore.id"
+                    class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
+                    <div class="text-lg ml-2">{{ lore.name }}</div>
+                    <label class="absolute w-full h-full cursor-pointer">
+                        <input
+                            type="checkbox"
+                            :value="lore.id"
+                            @change="setSelectedLore"
+                            class="checkbox absolute top-2 right-4" />
+                    </label>
+                </div>
             </div>
         </div>
 
