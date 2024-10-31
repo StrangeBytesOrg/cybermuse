@@ -43,23 +43,14 @@ export const messageRouter = t.router({
             }
         }),
     generate: t.procedure.input(z.number()).mutation(async function* ({input: chatId, signal}) {
-        // const controller = new AbortController()
-        if (signal) {
-            signal.onabort = () => {
-                logger.debug('abort signal')
-                // controller.abort()
-            }
-        }
-
         const chat = await db.query.Chat.findFirst({
             where: eq(Chat.id, chatId),
             with: {
                 characters: {with: {character: true}},
                 lore: {with: {lore: true}},
-                messages: true,
+                messages: {with: {character: true}},
             },
         })
-
         if (!chat) {
             throw new TRPCError({
                 code: 'NOT_FOUND',
@@ -71,13 +62,13 @@ export const messageRouter = t.router({
             where: eq(User.id, 1),
             with: {promptTemplate: true, generatePreset: true},
         })
-
         if (!userSettings) {
             throw new TRPCError({
                 code: 'INTERNAL_SERVER_ERROR',
                 message: 'Could not get user settings',
             })
         }
+
         const {generatePreset} = userSettings
         if (!generatePreset) {
             throw new TRPCError({
@@ -99,11 +90,6 @@ export const messageRouter = t.router({
                 user: userCharacter.name,
             })
         })
-        const characterMap = new Map()
-        characters.forEach((character) => {
-            characterMap.set(character.id, character)
-        })
-        // const responseCharacter = characterMap.get(lastMessage.characterId)
 
         // Parse character info, lore, and chat history into a system message
         let systemPrompt = ''
@@ -128,7 +114,7 @@ export const messageRouter = t.router({
         const messagesReversed = chat.messages.toReversed()
         for (let i = 0; i < messagesReversed.length; i += 1) {
             const message = messagesReversed[i]
-            let prefix = `${characterMap.get(message.characterId).name}: `
+            const prefix = `${message.character.name}: `
             const formattedMessage = formatMessage({
                 type: message.type,
                 content: prefix + message.content[message.activeIndex],
