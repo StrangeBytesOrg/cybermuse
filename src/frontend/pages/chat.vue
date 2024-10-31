@@ -90,7 +90,7 @@ const createMessage = async (characterId: number, text: string = '', type: 'user
     const {messageId} = await client.messages.create.mutate({
         chatId: Number(chatId),
         characterId: Number(characterId),
-        text,
+        content: [text],
         type,
     })
 

@@ -97,14 +97,16 @@ export const Message = sqliteTable('message', {
         .references(() => Character.id, {onDelete: 'cascade'})
         .notNull(),
     type: text({enum: ['user', 'model', 'system']}).notNull(),
-    activeIndex: integer().notNull(),
+    activeIndex: integer().default(0).notNull(),
     content: text({mode: 'json'}).$type<string[]>().notNull(),
 })
 export const messageRelations = relations(Message, ({one}) => ({
     chat: one(Chat, {fields: [Message.chatId], references: [Chat.id]}),
     character: one(Character, {fields: [Message.characterId], references: [Character.id]}),
 }))
-export const insertMessageSchema = createInsertSchema(Message)
+export const insertMessageSchema = createInsertSchema(Message, {
+    content: z.array(z.string()),
+})
 
 /**
  * User
