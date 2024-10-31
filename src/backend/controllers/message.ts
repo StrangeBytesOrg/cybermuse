@@ -110,28 +110,15 @@ export const messageRouter = t.router({
 
         const chatHistory = llamaChat.chatWrapper.generateInitialChatHistory({systemPrompt})
 
-        // Add messages to the chat history in reversed order
-        const messagesReversed = chat.messages.toReversed()
-        for (let i = 0; i < messagesReversed.length; i += 1) {
-            const message = messagesReversed[i]
+        // Add messages to the chat history
+        for (let i = 0; i < chat.messages.length; i += 1) {
+            const message = chat.messages[i]
             const prefix = `${message.character.name}: `
             const formattedMessage = formatMessage({
                 type: message.type,
                 content: prefix + message.content[message.activeIndex],
             })
-            chatHistory.splice(1, 0, formattedMessage)
-
-            const contextState = llamaChat.chatWrapper.generateContextState({chatHistory})
-            const tokenCount = contextState.contextText.tokenize(llamaChat.model.tokenizer).length
-            if (tokenCount + generatePreset.maxTokens > llamaChat.context.contextSize) {
-                logger.debug(
-                    'Token limit exceeded',
-                    `${tokenCount} + ${generatePreset.maxTokens} (${tokenCount + generatePreset.maxTokens})`,
-                )
-                logger.debug('Removing oldest message')
-                chatHistory.splice(1, 1)
-                break
-            }
+            chatHistory.push(formattedMessage)
         }
 
         const contextState = llamaChat.chatWrapper.generateContextState({chatHistory})
@@ -171,7 +158,6 @@ export const messageRouter = t.router({
                 },
             })
 
-            // TODO update DB during generation
             let bufferedResponse = ''
             const reader = chunkStream.getReader()
             while (true) {
@@ -185,7 +171,6 @@ export const messageRouter = t.router({
             logger.debug('Response', bufferedResponse)
             lastMessage.content[lastMessage.activeIndex] = bufferedResponse
             await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
-            // TODO does this catch actually do anything useful now?
         } catch (err) {
             logger.error('Failed to generate response')
             logger.error(err)
