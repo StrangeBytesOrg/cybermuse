@@ -43,6 +43,7 @@ export const loadModel = async (
         contextSequence: context.getSequence(),
         chatWrapper: new JinjaTemplateChatWrapper({
             template,
+            joinAdjacentMessagesOfTheSameType: false,
         }),
         autoDisposeSequence: true,
     })

@@ -43,14 +43,9 @@ if (!userCharacter) {
     }
 }
 
-const checkSend = (event: KeyboardEvent) => {
-    if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault()
-        fullSend()
-    }
-}
+const fullSend = async (event: KeyboardEvent | MouseEvent) => {
+    event.preventDefault()
 
-const fullSend = async () => {
     if (pendingMessage.value) {
         toast.error('Message already in progress')
         return
@@ -65,26 +60,15 @@ const fullSend = async () => {
         await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
 
-    // If there is only one character in the chat, simply use that character
-    let characterId
-    if (nonUserCharacters.length === 1) {
-        characterId = nonUserCharacters[0].id
-    } else {
-        try {
-            characterId = await getCharacter()
-            console.log(`Picked character ${characterId}`)
-        } catch (err) {
-            console.error(`Failed getting response character: ${err}`)
-            toast.error('Failed getting response character')
-            return
-        }
+    // TODO implement picking a character from the group
+    if (!nonUserCharacters[0]) {
+        throw new Error('No non-user characters in the chat')
     }
+    const characterId = nonUserCharacters[0].id
 
-    if (!characterId) {
-        return
-    }
-
+    // Create a new empty message for the response
     await createMessage(characterId, '', 'model')
+
     await generateMessage()
 }
 
@@ -129,14 +113,17 @@ const createMessage = async (characterId: number, text: string = '', type: 'user
 
 const generateMessage = async () => {
     pendingMessage.value = true
+    const lastMessage = messages[messages.length - 1]
+
+    if (!lastMessage) {
+        // Realistically this probably can't happen but it keeps TS happy
+        throw new Error('No messages to generate into')
+    }
 
     try {
         const iterable = await streamingClient.messages.generate.mutate(chatId, {signal: abortController.signal})
         for await (const text of iterable) {
-            const lastMessage = messages[messages.length - 1]
-            if (lastMessage) {
-                lastMessage.content[lastMessage.activeIndex] = text
-            }
+            lastMessage.content[lastMessage.activeIndex] = text
             scrollMessages('smooth')
         }
     } catch (error) {
@@ -153,11 +140,6 @@ const stopGeneration = () => {
     abortController.abort()
     pendingMessage.value = false
     abortController = new AbortController()
-}
-
-const getCharacter = async () => {
-    console.log('NOT IMPLEMENTED')
-    return 1
 }
 
 const editMessage = async (messageId: number) => {
@@ -390,12 +372,12 @@ const toggleCtxMenu = () => {
                 ref="inputElement"
                 id="message-input"
                 v-model="currentMessage"
-                @keydown="checkSend"
+                @keydown.exact.enter="fullSend"
                 class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
 
             <!-- :disabled="pendingMessage || connectionStore.connected === false" -->
             <button
-                @click="fullSend()"
+                @click="fullSend"
                 :disabled="!connectionStore.connected"
                 v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
