@@ -8,6 +8,7 @@ import {generatePresetsRouter} from './controllers/generate-presets.js'
 import {swipeRouter} from './controllers/swipes.js'
 import {modelsRouter} from './controllers/models.js'
 import {llamaCppRouter} from './controllers/llama-cpp.js'
+import {generateRouter} from './controllers/generate.js'
 
 export const appRouter = t.router({
     characters: characterRouter,
@@ -17,6 +18,7 @@ export const appRouter = t.router({
     templates: templatesRoutes,
     generatePresets: generatePresetsRouter,
     swipes: swipeRouter,
+    generate: generateRouter,
     models: modelsRouter,
     llamaCpp: llamaCppRouter,
 })

@@ -121,7 +121,7 @@ const generateMessage = async () => {
     }
 
     try {
-        const iterable = await streamingClient.messages.generate.mutate(chatId, {signal: abortController.signal})
+        const iterable = await streamingClient.generate.generate.mutate(chatId, {signal: abortController.signal})
         for await (const text of iterable) {
             lastMessage.content[lastMessage.activeIndex] = text
             scrollMessages('smooth')
