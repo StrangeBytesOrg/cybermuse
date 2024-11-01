@@ -44,11 +44,14 @@ export const characterRouter = t.router({
         const {name, type, description, firstMessage, image} = input
         await db.update(Character).set({name, type, description, firstMessage, image}).where(eq(Character.id, input.id))
     }),
-    delete: t.procedure.input(z.number()).mutation(async ({input}) => {
-        if (input === 1) {
-            throw new Error('Not allowed to delete the user character.')
+    delete: t.procedure.input(z.number()).mutation(async ({input: characterId}) => {
+        if (characterId === 1) {
+            throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Not allowed to delete the user character.',
+            })
         }
-        await db.delete(Character).where(eq(Character.id, input))
+        await db.delete(Character).where(eq(Character.id, characterId))
     }),
     uploadAvatar: t.procedure.input(z.string()).mutation(async ({input}) => {
         const filename = `${Date.now()}.webp`

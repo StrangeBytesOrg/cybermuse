@@ -38,7 +38,10 @@ export const messageRouter = t.router({
                 where: eq(Message.id, input.id),
             })
             if (!message) {
-                throw new Error('Message not found')
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: 'Message not found',
+                })
             }
             const content = message.content
             content[message.activeIndex] = input.text

@@ -13,9 +13,9 @@ export const chatRouter = t.router({
         })
         return chats
     }),
-    getById: t.procedure.input(z.number()).query(async ({input: id}) => {
+    getById: t.procedure.input(z.number()).query(async ({input: chatId}) => {
         const chat = await db.query.Chat.findFirst({
-            where: eq(Chat.id, Number(id)),
+            where: eq(Chat.id, chatId),
             with: {
                 messages: true,
                 characters: {with: {character: true}},
@@ -114,7 +114,7 @@ export const chatRouter = t.router({
                 .set({name: input.name || null})
                 .where(eq(Chat.id, input.id))
         }),
-    delete: t.procedure.input(z.number()).mutation(async ({input: id}) => {
-        await db.delete(Chat).where(eq(Chat.id, Number(id)))
+    delete: t.procedure.input(z.number()).mutation(async ({input: chatId}) => {
+        await db.delete(Chat).where(eq(Chat.id, chatId))
     }),
 })

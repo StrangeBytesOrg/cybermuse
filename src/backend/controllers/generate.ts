@@ -18,10 +18,7 @@ export const generateRouter = t.router({
             },
         })
         if (!chat) {
-            throw new TRPCError({
-                code: 'NOT_FOUND',
-                message: 'Chat not found',
-            })
+            throw new TRPCError({code: 'NOT_FOUND', message: 'Chat not found'})
         }
 
         const userSettings = await db.query.User.findFirst({
@@ -29,19 +26,9 @@ export const generateRouter = t.router({
             with: {promptTemplate: true, generatePreset: true},
         })
         if (!userSettings) {
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'Could not get user settings',
-            })
+            throw new TRPCError({code: 'INTERNAL_SERVER_ERROR', message: 'Could not get user settings'})
         }
-
-        const {generatePreset} = userSettings
-        if (!generatePreset) {
-            throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'Could not get generation settings',
-            })
-        }
+        const {generatePreset, promptTemplate} = userSettings
 
         const lastMessage = chat.messages[chat.messages.length - 1]
         const characters = chat.characters.map((c) => c.character)
@@ -60,7 +47,7 @@ export const generateRouter = t.router({
         // Parse character info, lore, and chat history into a system message
         let systemPrompt = ''
         try {
-            const systemInstructionTemplate = new Template(userSettings.promptTemplate.template)
+            const systemInstructionTemplate = new Template(promptTemplate.template)
             systemPrompt = systemInstructionTemplate.render({
                 characters,
                 lore,

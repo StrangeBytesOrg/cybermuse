@@ -18,7 +18,7 @@ const activeTemplate = computed(() => {
 const setActiveTemplate = async () => {
     example.value = ''
 
-    await client.templates.setActiveId.mutate({id: selectedTemplate.value})
+    await client.templates.setActiveId.mutate(selectedTemplate.value)
     document.querySelectorAll('textarea').forEach((textarea) => {
         textarea.style.height = 'auto'
         textarea.style.height = `${textarea.scrollHeight + 4}px`
@@ -35,7 +35,7 @@ const updateTemplate = async () => {
 }
 
 const deleteTemplate = async () => {
-    await client.templates.delete.mutate({id: activeTemplate.value.id})
+    await client.templates.delete.mutate(activeTemplate.value.id)
     toast.success('Template deleted')
     templates.value.splice(
         templates.value?.findIndex((template) => template.id === activeTemplate.value.id),

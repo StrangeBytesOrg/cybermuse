@@ -10,11 +10,11 @@ export const generatePresetsRouter = t.router({
         const user = await db.query.User.findFirst({
             with: {generatePreset: true},
         })
-        if (!presets) {
-            throw new Error('No presets found')
-        }
         if (!user || !user.generatePreset) {
-            throw new Error('No user found')
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Could not get active generate preset',
+            })
         }
 
         return {presets, activePresetId: user.generatePreset.id}
@@ -84,17 +84,17 @@ export const generatePresetsRouter = t.router({
             })
         }
     }),
-    delete: t.procedure.input(z.number()).mutation(async ({input}) => {
-        if (input === 1) {
+    delete: t.procedure.input(z.number()).mutation(async ({input: presetId}) => {
+        if (presetId === 1) {
             throw new TRPCError({
                 code: 'BAD_REQUEST',
                 message: 'Cannot delete the default preset',
             })
         }
         await db.update(User).set({generatePreset: 1}).where(eq(User.id, 1))
-        await db.delete(GeneratePreset).where(eq(GeneratePreset.id, input))
+        await db.delete(GeneratePreset).where(eq(GeneratePreset.id, presetId))
     }),
-    setActive: t.procedure.input(z.number()).mutation(async ({input: id}) => {
-        await db.update(User).set({generatePreset: id}).where(eq(User.id, 1))
+    setActive: t.procedure.input(z.number()).mutation(async ({input: presetId}) => {
+        await db.update(User).set({generatePreset: presetId}).where(eq(User.id, 1))
     }),
 })

@@ -12,11 +12,11 @@ export const templatesRoutes = t.router({
         const user = await db.query.User.findFirst({
             with: {promptTemplate: true},
         })
-        if (!templates) {
-            throw new Error('No templates found')
-        }
         if (!user || !user.promptTemplate) {
-            throw new Error('No user found or no active template set')
+            throw new TRPCError({
+                code: 'INTERNAL_SERVER_ERROR',
+                message: 'Could not get active prompt template',
+            })
         }
         return {templates, activeTemplateId: user.promptTemplate.id}
     }),
@@ -29,52 +29,28 @@ export const templatesRoutes = t.router({
         await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
     }),
     update: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
-        const {name, template} = input
-        const {rowsAffected} = await db
-            .update(PromptTemplate)
-            .set({name,template})
-            .where(eq(PromptTemplate.id, Number(input.id)))
-        if (rowsAffected === 0) {
+        const {id, name, template} = input
+        if (!id) {
             throw new TRPCError({
-                code: 'INTERNAL_SERVER_ERROR',
-                message: 'No updates ocurred',
+                code: 'BAD_REQUEST',
+                message: 'Missing template ID',
             })
         }
+        await db.update(PromptTemplate).set({name, template}).where(eq(PromptTemplate.id, id))
     }),
-    delete: t.procedure
-        .input(
-            z.object({
-                id: z.number(),
-            }),
-        )
-        .mutation(async ({input}) => {
-            if (input.id === 1) {
-                throw new TRPCError({
-                    code: 'BAD_REQUEST',
-                    message: 'Cannot delete the default template',
-                })
-            }
-            await db.update(User).set({promptTemplate: 1}).where(eq(User.id, 1))
-            await db.delete(PromptTemplate).where(eq(PromptTemplate.id, Number(input.id)))
-        }),
-    setActiveId: t.procedure
-        .input(
-            z.object({
-                id: z.number(),
-            }),
-        )
-        .mutation(async ({input}) => {
-            const {rowsAffected} = await db
-                .update(User)
-                .set({promptTemplate: Number(input.id)})
-                .where(eq(User.id, 1))
-            if (rowsAffected === 0) {
-                throw new TRPCError({
-                    code: 'INTERNAL_SERVER_ERROR',
-                    message: 'No updates ocurred',
-                })
-            }
-        }),
+    delete: t.procedure.input(z.number()).mutation(async ({input: templateId}) => {
+        if (templateId === 1) {
+            throw new TRPCError({
+                code: 'BAD_REQUEST',
+                message: 'Cannot delete the default template',
+            })
+        }
+        await db.update(User).set({promptTemplate: 1}).where(eq(User.id, 1))
+        await db.delete(PromptTemplate).where(eq(PromptTemplate.id, templateId))
+    }),
+    setActiveId: t.procedure.input(z.number()).mutation(async ({input: templateId}) => {
+        await db.update(User).set({promptTemplate: templateId}).where(eq(User.id, 1))
+    }),
     parseTemplate: t.procedure
         .input(
             z.object({
