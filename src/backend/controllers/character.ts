@@ -31,13 +31,8 @@ export const characterRouter = t.router({
         return character
     }),
     create: t.procedure.input(insertCharacterSchema).mutation(async ({input}) => {
-        await db.insert(Character).values({
-            name: input.name,
-            type: input.type,
-            description: input.description,
-            firstMessage: input.firstMessage,
-            image: input.image || null,
-        })
+        const {name, type, description, firstMessage, image} = input
+        await db.insert(Character).values({name, type, description, firstMessage, image})
     }),
     update: t.procedure.input(insertCharacterSchema).mutation(async ({input}) => {
         if (!input.id) {
@@ -46,16 +41,8 @@ export const characterRouter = t.router({
                 message: 'ID is required',
             })
         }
-        await db
-            .update(Character)
-            .set({
-                name: input.name,
-                type: input.type,
-                description: input.description,
-                firstMessage: input.firstMessage,
-                image: input.image || null,
-            })
-            .where(eq(Character.id, input.id))
+        const {name, type, description, firstMessage, image} = input
+        await db.update(Character).set({name, type, description, firstMessage, image}).where(eq(Character.id, input.id))
     }),
     delete: t.procedure.input(z.number()).mutation(async ({input}) => {
         if (input === 1) {

@@ -21,22 +21,18 @@ export const templatesRoutes = t.router({
         return {templates, activeTemplateId: user.promptTemplate.id}
     }),
     create: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
+        const {name, template} = input
         const [newTemplate] = await db
             .insert(PromptTemplate)
-            .values({
-                name: input.name,
-                template: input.template,
-            })
+            .values({name, template})
             .returning({id: PromptTemplate.id})
         await db.update(User).set({promptTemplate: newTemplate.id}).where(eq(User.id, 1))
     }),
     update: t.procedure.input(insertPromptTemplateSchema).mutation(async ({input}) => {
+        const {name, template} = input
         const {rowsAffected} = await db
             .update(PromptTemplate)
-            .set({
-                name: input.name,
-                template: input.template,
-            })
+            .set({name,template})
             .where(eq(PromptTemplate.id, Number(input.id)))
         if (rowsAffected === 0) {
             throw new TRPCError({
