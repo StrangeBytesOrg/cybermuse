@@ -4,7 +4,7 @@ import type {LlamaModel, ChatHistoryItem} from 'node-llama-cpp'
 import {logger} from './logging.js'
 import {env} from './env.js'
 
-const llama = await getLlama({
+export const llama = await getLlama({
     logLevel: env.VERBOSE ? LlamaLogLevel.debug : LlamaLogLevel.warn,
 })
 let model: LlamaModel
