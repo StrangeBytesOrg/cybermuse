@@ -18,6 +18,7 @@ export const characterRelations = relations(Character, ({many}) => ({
     charactersToChats: many(ChatCharacters),
 }))
 export const insertCharacterSchema = createInsertSchema(Character, {
+    name: z.string().min(1),
     description: z.string().min(1),
     firstMessage: z.string().transform((v) => (v === '' ? null : v)),
     image: z.string().transform((v) => (v === '' ? null : v)),

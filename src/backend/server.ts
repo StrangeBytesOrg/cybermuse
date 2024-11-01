@@ -10,6 +10,8 @@ import {loadModel} from './llama-cpp.js'
 import {appRouter, type AppRouter} from './router.js'
 import {createContext} from './trpc.js'
 import {fixtureData} from './db/fixture.js'
+import {ZodError} from 'zod'
+import {fromError} from 'zod-validation-error'
 
 // Apply fixture data
 await fixtureData()
@@ -23,9 +25,7 @@ server.register(cors)
 
 // TODO send trpc error for too large of file
 // server.setErrorHandler((error, request, reply) => {
-//     console.error(error)
-//     // logger.error(error)
-//     reply.status(500).send(error)
+//     logger.error(error)
 // })
 
 // Serve avatars
@@ -41,6 +41,12 @@ server.register(fastifyTRPCPlugin, {
     trpcOptions: {
         router: appRouter,
         createContext,
+        onError({error}) {
+            if (error.cause instanceof ZodError) {
+                const formattedError = fromError(error.cause, {issueSeparator: '\n', prefix: '', prefixSeparator: ''})
+                error.message = formattedError.message
+            }
+        },
     } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
 })
 

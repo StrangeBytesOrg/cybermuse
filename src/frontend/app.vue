@@ -13,7 +13,7 @@ const showMenu = ref(false)
 const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
 onErrorCaptured((error) => {
-    toast.error(`Error: ${error.message}`)
+    toast.error(error.message)
     console.error(error)
     return false
 })
