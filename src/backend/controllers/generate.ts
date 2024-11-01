@@ -111,13 +111,7 @@ export const generateRouter = t.router({
                         },
                         // customStopTriggers:
                         signal,
-                        onTextChunk: async (chunk) => {
-                            await db
-                                .update(Message)
-                                .set({content: lastMessage.content})
-                                .where(eq(Message.id, lastMessage.id))
-                            controller.enqueue(chunk)
-                        },
+                        onTextChunk: (chunk) => controller.enqueue(chunk),
                         stopOnAbortSignal: true,
                     })
                     controller.close()
@@ -130,12 +124,13 @@ export const generateRouter = t.router({
                 const {done, value} = await reader.read()
                 if (done) break
                 bufferedResponse += value
+                lastMessage.content[lastMessage.activeIndex] = bufferedResponse
+                await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
                 yield bufferedResponse
             }
 
-            bufferedResponse = bufferedResponse.trim()
             logger.debug('Response', bufferedResponse)
-            lastMessage.content[lastMessage.activeIndex] = bufferedResponse
+            lastMessage.content[lastMessage.activeIndex] = bufferedResponse.trim()
             await db.update(Message).set({content: lastMessage.content}).where(eq(Message.id, lastMessage.id))
         } catch (err) {
             logger.error('Failed to generate response')
