@@ -1,4 +1,11 @@
-import {createTRPCClient, httpBatchLink, unstable_httpBatchStreamLink, TRPCClientError} from '@trpc/client'
+import {
+    createTRPCClient,
+    splitLink,
+    httpBatchLink,
+    unstable_httpBatchStreamLink,
+    unstable_httpSubscriptionLink,
+    TRPCClientError,
+} from '@trpc/client'
 import type {AppRouter} from '../backend/router'
 
 export const client = createTRPCClient<AppRouter>({
@@ -11,8 +18,14 @@ export const client = createTRPCClient<AppRouter>({
 
 export const streamingClient = createTRPCClient<AppRouter>({
     links: [
-        unstable_httpBatchStreamLink({
-            url: '/trpc',
+        splitLink({
+            condition: (op) => op.type === 'subscription',
+            true: unstable_httpSubscriptionLink({
+                url: '/trpc',
+            }),
+            false: unstable_httpBatchStreamLink({
+                url: '/trpc',
+            }),
         }),
     ],
 })

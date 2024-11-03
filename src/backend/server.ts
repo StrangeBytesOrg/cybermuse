@@ -81,4 +81,5 @@ process.on('SIGINT', () => {
 // TSX sends a SIGTERM when using watch mode
 process.on('SIGTERM', () => {
     server.close()
+    process.exit()
 })

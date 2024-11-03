@@ -30,7 +30,37 @@ const messages = reactive(data.messages)
 const characters = data.characters.map((c) => c.character)
 const characterMap = new Map(characters.map((character) => [character.id, character]))
 let userCharacter = characters.find((character) => character.type === 'user')
-const nonUserCharacters = characters.filter((character) => character.type === 'character')
+// const nonUserCharacters = characters.filter((character) => character.type === 'character')
+
+streamingClient.generate.chat.subscribe(chatId, {
+    onData({data}) {
+        // console.log(data)
+        switch (data.event) {
+            case 'start':
+                pendingMessage.value = true
+                break
+            case 'textChunk':
+                const lastMessage = messages[messages.length - 1]
+                if (lastMessage) {
+                    lastMessage.content[lastMessage.activeIndex] = data.text
+                }
+                scrollMessages('smooth')
+                break
+            case 'done':
+                pendingMessage.value = false
+                break
+            case 'newMessage':
+                const newMessage = data.message
+                console.log(newMessage)
+                messages.push(newMessage)
+                scrollMessages('smooth')
+                break
+        }
+    },
+    onError(error) {
+        console.error(error)
+    },
+})
 
 if (!userCharacter) {
     userCharacter = {
@@ -61,16 +91,21 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     }
 
     // TODO implement picking a character from the group
-    if (!nonUserCharacters[0]) {
-        throw new Error('No non-user characters in the chat')
-    }
-    const characterId = nonUserCharacters[0].id
+    // if (!nonUserCharacters[0]) {
+    //     throw new Error('No non-user characters in the chat')
+    // }
+    // const characterId = nonUserCharacters[0].id
 
     // Create a new empty message for the response
-    await createMessage(characterId, '', 'model')
+    // await createMessage(characterId, '', 'model')
 
     await generateMessage()
 }
+
+// const pickCharacter = async () => {
+//     const res = await client.generate.pickCharacter.mutate(chatId)
+//     console.log(res)
+// }
 
 const impersonate = async () => {
     if (pendingMessage.value) {
@@ -112,33 +147,11 @@ const createMessage = async (characterId: number, text: string = '', type: 'user
 }
 
 const generateMessage = async () => {
-    pendingMessage.value = true
-    const lastMessage = messages[messages.length - 1]
-
-    if (!lastMessage) {
-        // Realistically this probably can't happen but it keeps TS happy
-        throw new Error('No messages to generate into')
-    }
-
-    try {
-        const iterable = await streamingClient.generate.generate.mutate(chatId, {signal: abortController.signal})
-        for await (const text of iterable) {
-            lastMessage.content[lastMessage.activeIndex] = text
-            scrollMessages('smooth')
-        }
-    } catch (error) {
-        // Ignore abort errors
-        if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
-        throw error
-    } finally {
-        console.log('done pending')
-        pendingMessage.value = false
-    }
+    await streamingClient.generate.generate.query(chatId, {signal: abortController.signal})
 }
 
 const stopGeneration = () => {
     abortController.abort()
-    pendingMessage.value = false
     abortController = new AbortController()
 }
 
@@ -241,6 +254,7 @@ const toggleCtxMenu = () => {
 </script>
 
 <template>
+    <!-- <button class="btn btn-primary" @click="pickCharacter">Pick Character</button> -->
     <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
         <!-- Messages -->
         <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
