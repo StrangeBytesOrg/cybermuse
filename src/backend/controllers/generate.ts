@@ -130,7 +130,7 @@ export const generateRouter = t.router({
         }
     }),
     pickCharacter: t.procedure.input(z.number()).mutation(async ({input: chatId}) => {
-        logger.info('picking character', chatId)
+        logger.info('picking character', `chat id: ${chatId}`)
 
         const chat = await db.query.Chat.findFirst({
             where: eq(Chat.id, chatId),
@@ -153,7 +153,6 @@ export const generateRouter = t.router({
         }
         const {generatePreset, promptTemplate} = userSettings
 
-        // const lastMessage = chat.messages[chat.messages.length - 1]
         const characters = chat.characters.map((c) => c.character)
         const lore = chat.lore.map((l) => l.lore)
         const userCharacter = characters.find((c) => c.type === 'user') || {name: 'User'}
@@ -218,6 +217,11 @@ export const generateRouter = t.router({
             grammar,
         })
         logger.debug('picked character name', response)
-        return response
+
+        const character = characters.find((c) => c.name === response)
+        if (!character) {
+            throw new TRPCError({code: 'INTERNAL_SERVER_ERROR', message: 'Could not find character'})
+        }
+        return character.id
     }),
 })

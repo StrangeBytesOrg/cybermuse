@@ -60,11 +60,15 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
         await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
 
-    // TODO implement picking a character from the group
-    if (!nonUserCharacters[0]) {
-        throw new Error('No non-user characters in the chat')
+    let characterId
+    if (nonUserCharacters.length > 1) {
+        characterId = await client.generate.pickCharacter.mutate(chatId)
+    } else if (nonUserCharacters[0]) {
+        characterId = nonUserCharacters[0].id
+    } else {
+        toast.error('Missing characters')
+        return
     }
-    const characterId = nonUserCharacters[0].id
 
     // Create a new empty message for the response
     await createMessage(characterId, '', 'model')
