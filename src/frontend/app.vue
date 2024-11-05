@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import {ref, onErrorCaptured} from 'vue'
 import {RouterLink, RouterView} from 'vue-router'
+import {useToast} from 'vue-toastification'
 import {useThemeStore} from './store/'
 import './styles/global.css'
 import './styles/tailwind.css'
 import 'vue-toastification/dist/index.css'
-import {useToast} from 'vue-toastification'
 
 const themeStore = useThemeStore()
 const toast = useToast()

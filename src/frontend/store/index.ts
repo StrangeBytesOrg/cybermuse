@@ -1,2 +1,2 @@
-export {useConnectionStore} from './connection'
+export {useModelStore} from './model'
 export {useThemeStore} from './theme'

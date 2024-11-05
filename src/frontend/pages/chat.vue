@@ -4,11 +4,11 @@ import {useRoute} from 'vue-router'
 import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
 import {client, streamingClient} from '../api-client'
-import {useConnectionStore} from '../store'
+import {useModelStore} from '../store'
 
 const route = useRoute()
 const toast = useToast()
-const connectionStore = useConnectionStore()
+const modelStore = useModelStore()
 const chatId = Number(route.query.id)
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -19,9 +19,9 @@ let lastScrollTime = Date.now()
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
-// Check if generation server is actually running
-const {loaded} = await client.llamaCpp.status.query()
-connectionStore.connected = loaded
+// Check if a model is loaded on page load
+await modelStore.getLoaded()
+console.log('loaded: ', modelStore.loaded)
 
 const data = await client.chats.getById.query(chatId)
 
@@ -50,7 +50,7 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
         toast.error('Message already in progress')
         return
     }
-    if (!connectionStore.connected) {
+    if (!modelStore.loaded) {
         toast.error('Generation server not running or not connected')
         return
     }
@@ -81,7 +81,7 @@ const impersonate = async () => {
         toast.error('Message already in progress')
         return
     }
-    if (!connectionStore.connected) {
+    if (!modelStore.loaded) {
         toast.error('Generation server not running or not connected')
         return
     }
@@ -344,7 +344,7 @@ const toggleCtxMenu = () => {
                         <button
                             @click="newSwipe(message)"
                             v-show="index === messages.length - 1"
-                            :disabled="pendingMessage || connectionStore.connected === false"
+                            :disabled="pendingMessage || modelStore.loaded === false"
                             class="btn btn-sm btn-neutral">
                             <!-- prettier-ignore -->
                             <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" /></svg>
@@ -379,10 +379,9 @@ const toggleCtxMenu = () => {
                 @keydown.exact.enter="fullSend"
                 class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
 
-            <!-- :disabled="pendingMessage || connectionStore.connected === false" -->
             <button
                 @click="fullSend"
-                :disabled="!connectionStore.connected"
+                :disabled="!modelStore.loaded"
                 v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 {{ pendingMessage ? '' : 'Send' }}

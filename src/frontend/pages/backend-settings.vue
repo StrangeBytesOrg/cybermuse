@@ -1,10 +1,12 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
 import TopBar from '@/components/top-bar.vue'
+import {client} from '../api-client'
+import {useModelStore} from '../store'
 
 const toast = useToast()
+const modelStore = useModelStore()
 
 type models = {name: string; size: number}[]
 const models = ref<models>([])
@@ -53,6 +55,7 @@ const loadModel = async () => {
         })
         toast.success('Model loaded')
         currentModel.value = selectModel.value
+        modelStore.loaded = true
     } finally {
         modelLoadPending.value = false
     }

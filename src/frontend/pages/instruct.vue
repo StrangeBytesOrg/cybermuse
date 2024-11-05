@@ -1,20 +1,16 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useConnectionStore} from '../store'
+import {useModelStore} from '../store'
 import {client, streamingClient} from '../api-client'
 import {useToast} from 'vue-toastification'
 
-const connectionStore = useConnectionStore()
+const modelStore = useModelStore()
 const pendingMessage = ref(false)
 const currentInput = ref('')
 // const systemPrompt = ref('')
 const generatedResponse = ref('')
 const toast = useToast()
 let controller: AbortController
-
-// Check if generation server is actually running
-const {loaded} = await client.llamaCpp.status.query()
-connectionStore.connected = loaded
 
 const getGeneration = async () => {
     controller = new AbortController()
@@ -48,7 +44,7 @@ const stop = async () => {
                 <div class="flex flex-row justify-between mt-3">
                     <button
                         @click="getGeneration"
-                        :disabled="pendingMessage || connectionStore.connected === false"
+                        :disabled="pendingMessage || modelStore.loaded === false"
                         class="btn btn-primary w-[48%]">
                         {{ pendingMessage ? '' : 'Generate' }}
                         <span class="loading loading-spinner loading-md" :class="{hidden: !pendingMessage}" />
