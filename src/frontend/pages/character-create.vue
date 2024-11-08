@@ -20,7 +20,7 @@ const character = reactive({
 })
 
 const createCharacter = async () => {
-    character._id = character.name.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    character._id = Math.random().toString(36).slice(2)
     await characterCollection.put(character)
     toast.success('Character created')
     await router.push('/characters')
@@ -28,7 +28,7 @@ const createCharacter = async () => {
 
 const uploadAvatar = async (image: string) => {
     if (image === '') return
-    character.image = await client.characters.uploadAvatar.mutate(image)
+    character.image = await client.avatars.uploadAvatar.mutate(image)
     toast.success('Avatar uploaded')
 }
 

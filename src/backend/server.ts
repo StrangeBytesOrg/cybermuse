@@ -9,12 +9,8 @@ import {getConfig} from './config.js'
 import {loadModel} from './llama-cpp.js'
 import {appRouter, type AppRouter} from './router.js'
 import {createContext} from './trpc.js'
-import {fixtureData} from './db/fixture.js'
 import {ZodError} from 'zod'
 import {fromError} from 'zod-validation-error'
-
-// Apply fixture data
-await fixtureData()
 
 const config = getConfig()
 

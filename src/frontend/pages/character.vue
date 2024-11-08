@@ -32,7 +32,7 @@ const deleteCharacter = async () => {
 }
 
 const uploadAvatar = async (image: string) => {
-    character.image = await client.characters.uploadAvatar.mutate(image)
+    character.image = await client.avatars.uploadAvatar.mutate(image)
 }
 
 const removeImage = () => {

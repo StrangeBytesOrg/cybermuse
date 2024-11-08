@@ -5,6 +5,9 @@ import Toast, {POSITION} from 'vue-toastification'
 import App from './app.vue'
 import router from './router'
 
+// Fixture DB data
+import '@/db/fixture'
+
 const documentHeight = () => {
     const doc = document.documentElement
     doc.style.setProperty('--doc-height', `${window.innerHeight}px`)

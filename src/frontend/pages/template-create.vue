@@ -1,21 +1,22 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
+import {Template} from '@huggingface/jinja'
+import {templateCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const router = useRouter()
-const templateName = ref('')
-const template = ref('')
 const example = ref('')
+const template = reactive({
+    _id: Math.random().toString(36).slice(2),
+    name: '',
+    template: '',
+})
 
 const createTemplate = async () => {
-    await client.templates.create.mutate({
-        name: templateName.value,
-        template: template.value,
-    })
+    await templateCollection.put(template)
     toast.success('Template created')
     router.push(`/templates`)
 }
@@ -27,11 +28,12 @@ const getPreview = async () => {
     ]
     const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
 
-    example.value = await client.templates.parseTemplate.query({
-        template: template.value,
-        characters,
-        lore,
-    })
+    if (!template.template) {
+        throw new Error('Template not found')
+    }
+
+    const jinjaTemplate = new Template(template.template)
+    example.value = jinjaTemplate.render({characters, lore})
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -51,7 +53,7 @@ const resizeTextarea = async (event: Event) => {
             </div>
             <input
                 type="text"
-                v-model="templateName"
+                v-model="template.name"
                 class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
         </label>
         <div class="flex flex-col w-full">
@@ -60,7 +62,7 @@ const resizeTextarea = async (event: Event) => {
                     <span class="label-text">Template</span>
                 </div>
                 <textarea
-                    v-model="template"
+                    v-model="template.template"
                     @input="resizeTextarea"
                     class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
             </label>

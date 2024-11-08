@@ -1,43 +1,31 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
+import {generationPresetCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const router = useRouter()
-const presetName = ref('')
-const context = ref(2048)
-const seed = ref(-1)
-const temperature = ref(0)
-const maxTokens = ref(250)
-const minP = ref(0)
-const topP = ref(0)
-const topK = ref(0)
-const repeatPenalty = ref(0)
-const repeatLastN = ref(0)
-const penalizeNL = ref(false)
-const presencePenalty = ref(0)
-const frequencyPenalty = ref(0)
+const preset = reactive({
+    _id: Math.random().toString(36).slice(2),
+    name: '',
+    context: 2048,
+    seed: -1,
+    temperature: 0,
+    maxTokens: 250,
+    minP: 0,
+    topP: 0,
+    topK: 0,
+    repeatPenalty: 0,
+    repeatLastN: 0,
+    penalizeNL: false,
+    presencePenalty: 0,
+    frequencyPenalty: 0,
+})
 
 const createTemplate = async () => {
-    // TODO convert preset into a single reactive so this can all be one object
-    await client.generatePresets.create.mutate({
-        name: presetName.value,
-        context: context.value,
-        maxTokens: maxTokens.value,
-        seed: seed.value,
-        temperature: temperature.value,
-        topK: topK.value,
-        topP: topP.value,
-        minP: minP.value,
-        repeatPenalty: repeatPenalty.value,
-        repeatLastN: repeatLastN.value,
-        penalizeNL: penalizeNL.value,
-        presencePenalty: presencePenalty.value,
-        frequencyPenalty: frequencyPenalty.value,
-    })
+    await generationPresetCollection.put(preset)
     toast.success('Created new preset')
     router.push('/presets')
 }
@@ -55,7 +43,7 @@ const createTemplate = async () => {
                     </div>
                     <input
                         type="text"
-                        v-model="presetName"
+                        v-model="preset.name"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
 
@@ -66,7 +54,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="context" />
+                        v-model="preset.context" />
                 </label>
 
                 <label class="form-control w-full">
@@ -76,7 +64,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="maxTokens" />
+                        v-model="preset.maxTokens" />
                 </label>
 
                 <label class="form-control w-full">
@@ -86,7 +74,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="seed" />
+                        v-model="preset.seed" />
                 </label>
 
                 <label class="form-control w-full">
@@ -95,7 +83,7 @@ const createTemplate = async () => {
                     </div>
                     <input
                         type="number"
-                        v-model="temperature"
+                        v-model="preset.temperature"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
 
@@ -106,7 +94,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="minP" />
+                        v-model="preset.minP" />
                 </label>
 
                 <label class="form-control w-full">
@@ -116,7 +104,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="topP" />
+                        v-model="preset.topP" />
                 </label>
 
                 <label class="form-control w-full">
@@ -126,7 +114,7 @@ const createTemplate = async () => {
                     <input
                         type="number"
                         class="input input-bordered focus:outline-none focus:border-primary"
-                        v-model="topK" />
+                        v-model="preset.topK" />
                 </label>
             </div>
 
@@ -135,19 +123,19 @@ const createTemplate = async () => {
                     <div class="label"><span class="label-text">Repeat-penalty</span></div>
                     <input
                         type="text"
-                        v-model.number="repeatPenalty"
+                        v-model.number="preset.repeatPenalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Repeat-last-n</span></div>
                     <input
                         type="text"
-                        v-model.number="repeatLastN"
+                        v-model.number="preset.repeatLastN"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Penalize-nl</span></div>
-                    <select v-model.number="penalizeNL" class="select select-bordered">
+                    <select v-model.number="preset.penalizeNL" class="select select-bordered">
                         <option :value="true">true</option>
                         <option :value="false">false</option>
                     </select>
@@ -156,14 +144,14 @@ const createTemplate = async () => {
                     <div class="label"><span class="label-text">Presence-penalty</span></div>
                     <input
                         type="text"
-                        v-model.number="presencePenalty"
+                        v-model.number="preset.presencePenalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Frequency-penalty</span></div>
                     <input
                         type="text"
-                        v-model.number="frequencyPenalty"
+                        v-model.number="preset.frequencyPenalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
             </div>

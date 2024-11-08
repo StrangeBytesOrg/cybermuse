@@ -50,3 +50,36 @@ const chatSchema = baseSchema.extend({
     ),
 })
 export const chatCollection = new Collection(db, 'chat', chatSchema)
+
+/** Template */
+const templateSchema = baseSchema.extend({
+    name: z.string(),
+    template: z.string(),
+})
+export const templateCollection = new Collection(db, 'template', templateSchema)
+
+/** Generation Preset */
+const generationPresetSchema = baseSchema.extend({
+    name: z.string(),
+    context: z.number(),
+    maxTokens: z.number(),
+    temperature: z.number(),
+    seed: z.number(),
+    topK: z.number().optional(),
+    topP: z.number().optional(),
+    minP: z.number().optional(),
+    repeatPenalty: z.number().optional(),
+    repeatLastN: z.number().optional(),
+    penalizeNL: z.boolean().optional(),
+    presencePenalty: z.number().optional(),
+    frequencyPenalty: z.number().optional(),
+})
+export const generationPresetCollection = new Collection(db, 'generationPreset', generationPresetSchema)
+
+/** User */
+const userSchema = baseSchema.extend({
+    name: z.string(),
+    generatePreset: z.string(),
+    promptTemplate: z.string(),
+})
+export const userCollection = new Collection(db, 'user', userSchema)
