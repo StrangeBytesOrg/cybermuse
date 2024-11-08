@@ -1,18 +1,18 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
-import {chatCollection} from '@/db'
-import {client} from '../api-client'
+import {reactive} from 'vue'
+import {chatCollection, characterCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
-// const chats = ref(await client.chats.getAll.query())
-const chats = ref(await chatCollection.find({}))
-type Chat = (typeof chats.value)[0]
+const chats = reactive(await chatCollection.find())
+const characters = reactive(await characterCollection.find())
+const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
+type Chat = (typeof chats)[0]
 
 // Filter out chats with no characters
-// chats.value = chats.value.filter((chat) => chat.characters.length > 1)
+// chats = chats.filter((chat) => chat.characters.length > 1)
 
 const formatDate = (dateString: string) => {
-    return new Date(dateString + ' UTC').toLocaleDateString(undefined, {
+    return new Date(dateString).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
@@ -23,10 +23,7 @@ const formatDate = (dateString: string) => {
 
 const formatTitle = (chat: Chat) => {
     if (chat.name) return chat.name
-    return chat.characters
-        .filter(({character}) => character.type === 'character')
-        .map(({character}) => character.name)
-        .join(' ')
+    return chat.characters.map((character) => characterMap[character]?.name || 'Unknown').join(' ')
 }
 </script>
 
@@ -44,17 +41,17 @@ const formatTitle = (chat: Chat) => {
             <div class="text-lg font-bold">
                 {{ formatTitle(chat) }}
             </div>
-            <div class="text-sm">{{ formatDate(chat.createdAt) }}</div>
+            <div class="text-sm">{{ formatDate(chat.createDate) }}</div>
             <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
-                <!-- <div v-for="character in chat.characters" :key="character.id" class="avatar">
+                <div v-for="character in chat.characters" :key="character" class="avatar">
                     <div class="h-14">
                         <img
-                            v-if="character.character.image"
-                            :src="`/avatars/${character.character.image}`"
+                            v-if="characterMap[character]?.image"
+                            :src="`/avatars/${characterMap[character]?.image}`"
                             alt="Character Image" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
-                </div> -->
+                </div>
             </div>
             <RouterLink :to="`/edit-chat/${chat._id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
                 <!-- prettier-ignore -->

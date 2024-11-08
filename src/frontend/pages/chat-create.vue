@@ -20,6 +20,7 @@ const createChat = async () => {
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value,
         lore: selectedLore.value,
+        createDate: new Date().toISOString(),
         messages: [],
     })
     router.push(`/chat?id=${id}`)
