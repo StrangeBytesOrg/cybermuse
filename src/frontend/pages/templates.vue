@@ -7,7 +7,7 @@ import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 let templates = reactive(await templateCollection.find())
-const user = reactive(await userCollection.findById('default-user'))
+let user = reactive(await userCollection.findById('default-user'))
 const example = ref('')
 
 const selectedTemplate = ref(user.promptTemplate)
@@ -22,14 +22,12 @@ const setActiveTemplate = async () => {
     await templateCollection.findById(selectedTemplate.value)
 
     user.promptTemplate = selectedTemplate.value
-    const {_rev} = await userCollection.put(user)
-    user._rev = _rev
+    await userCollection.update(user)
 }
 
 const updateTemplate = async () => {
     if (activeTemplate.value) {
-        const {_rev} = await templateCollection.put(activeTemplate.value)
-        activeTemplate.value._rev = _rev
+        await templateCollection.update(activeTemplate.value)
     }
 
     toast.success('Template updated')
@@ -45,8 +43,7 @@ const deleteTemplate = async () => {
         // Set the default template as active
         user.promptTemplate = 'default-template'
         selectedTemplate.value = 'default-template'
-        const {_rev} = await userCollection.put(user)
-        user._rev = _rev
+        await userCollection.update(user)
         toast.success('Template deleted')
     }
 }

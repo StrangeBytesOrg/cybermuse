@@ -91,8 +91,7 @@ const createMessage = async (characterId: string, text: string = '', type: 'user
         content: [text],
         activeIndex: 0,
     })
-    const {_rev} = await chatCollection.put(chat)
-    chat._rev = _rev
+    await chatCollection.update(chat)
 
     currentMessage.value = ''
     await nextTick()
@@ -155,15 +154,13 @@ const cancelEdit = () => {
 }
 
 const updateMessage = async () => {
-    const {_rev} = await chatCollection.put(chat)
-    chat._rev = _rev
+    await chatCollection.update(chat)
     editModeId.value = -1
 }
 
 const deleteMessage = async (messageIndex: number) => {
     chat.messages.splice(messageIndex, 1)
-    const {_rev} = await chatCollection.put(chat)
-    chat._rev = _rev
+    await chatCollection.update(chat)
     editModeId.value = -1
 }
 
@@ -171,8 +168,7 @@ const newSwipe = async (message: Message) => {
     message.content.push('')
     message.activeIndex = message.content.length - 1
 
-    const {_rev} = await chatCollection.put(chat)
-    chat._rev = _rev
+    await chatCollection.update(chat)
 
     await generateMessage()
 }
@@ -180,15 +176,13 @@ const newSwipe = async (message: Message) => {
 const swipeLeft = async (message: Message) => {
     if (message.activeIndex > 0) {
         message.activeIndex -= 1
-        const {_rev} = await chatCollection.put(chat)
-        chat._rev = _rev
+        await chatCollection.update(chat)
     }
 }
 
 const swipeRight = async (message: Message) => {
     message.activeIndex += 1
-    const {_rev} = await chatCollection.put(chat)
-    chat._rev = _rev
+    await chatCollection.update(chat)
 }
 
 const quoteWrap = (text: string) => {

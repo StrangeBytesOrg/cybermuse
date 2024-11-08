@@ -14,7 +14,7 @@ const lore = await loreCollection.find()
 const userCharacter = ref()
 
 const createChat = async () => {
-    const newChat = await chatCollection.put({
+    const {id} = await chatCollection.put({
         _id: Math.random().toString(36).slice(2), // TODO implement a more general document ID generation method
         name: 'Test Chat',
         userCharacter: userCharacter.value,
@@ -22,7 +22,7 @@ const createChat = async () => {
         lore: selectedLore.value,
         messages: [],
     })
-    router.push(`/chat?id=${newChat._id}`)
+    router.push(`/chat?id=${id}`)
 }
 
 const setSelected = (event: Event) => {

@@ -29,8 +29,7 @@ const updateLore = async () => {
     // Remove any entries that have empty content
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
-    const {_rev} = await loreCollection.put(lore)
-    lore._rev = _rev
+    await loreCollection.update(lore)
     toast.success('Lore updated')
 }
 
