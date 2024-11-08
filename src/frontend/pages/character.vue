@@ -2,31 +2,32 @@
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {client} from '../api-client'
+import {characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
 
 const route = useRoute()
 const router = useRouter()
-const characterId = Number(route.query.id)
+const characterId = route.query.id
 
-// TODO this is pretty ugly, but should be tackled by a bigger refactor implementing something
-// like a useQuery hook
-let res
-try {
-    res = await client.characters.getById.query(characterId)
-} catch {
+if (!characterId || Array.isArray(characterId)) {
     router.push('/characters')
     throw new Error('Character not found')
 }
-const character = reactive(res)
+
+const character = reactive(await characterCollection.findById(characterId))
+if (!character) {
+    router.push('/characters')
+    throw new Error('Character not found')
+}
 
 const updateCharacter = async () => {
-    await client.characters.update.mutate(character)
+    await characterCollection.put(character)
     router.push('/characters')
 }
 
 const deleteCharacter = async () => {
-    await client.characters.delete.mutate(characterId)
+    await characterCollection.removeById(characterId)
     router.push('/characters')
 }
 

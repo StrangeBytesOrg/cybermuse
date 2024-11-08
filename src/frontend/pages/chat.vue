@@ -3,16 +3,17 @@ import {reactive, ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
+import {characterCollection, chatCollection} from '@/db'
 import {client, streamingClient} from '../api-client'
 import {useModelStore} from '../store'
 
 const route = useRoute()
 const toast = useToast()
 const modelStore = useModelStore()
-const chatId = Number(route.query.id)
+const chatId = route.query.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
-const editModeId = ref(0)
+const editModeId = ref(-1)
 const editedText = ref('')
 const messagesElement = ref<HTMLElement>()
 let lastScrollTime = Date.now()
@@ -23,25 +24,17 @@ let abortController = new AbortController()
 await modelStore.getLoaded()
 console.log('loaded: ', modelStore.loaded)
 
-const data = await client.chats.getById.query(chatId)
-
-type Message = (typeof messages)[0]
-const messages = reactive(data.messages)
-const characters = data.characters.map((c) => c.character)
-const characterMap = new Map(characters.map((character) => [character.id, character]))
-let userCharacter = characters.find((character) => character.type === 'user')
-const nonUserCharacters = characters.filter((character) => character.type === 'character')
-
-if (!userCharacter) {
-    userCharacter = {
-        id: 0,
-        name: 'User',
-        type: 'user',
-        image: null,
-        firstMessage: null,
-        description: 'missing',
-    }
+if (!chatId || Array.isArray(chatId)) {
+    // router.push('/chats')
+    throw new Error('Invalid chat ID')
 }
+
+const chat = reactive(await chatCollection.findById(chatId))
+const characters = await characterCollection.find()
+const messages = reactive(chat.messages)
+const userCharacter = chat.userCharacter
+const characterMap = new Map(characters.map((c) => [c._id, c]))
+type Message = (typeof messages)[0]
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
@@ -57,14 +50,15 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
-        await createMessage(userCharacter.id, currentMessage.value, 'user')
+        await createMessage(userCharacter, currentMessage.value, 'user')
     }
 
     let characterId
-    if (nonUserCharacters.length > 1) {
-        characterId = await client.generate.pickCharacter.mutate(chatId)
-    } else if (nonUserCharacters[0]) {
-        characterId = nonUserCharacters[0].id
+    if (chat.characters.length > 1) {
+        // characterId = await client.generate.pickCharacter.mutate(chatId)
+        throw new Error('Multi-character chat not implemented')
+    } else if (chat.characters[0]) {
+        characterId = chat.characters[0]
     } else {
         toast.error('Missing characters')
         return
@@ -86,33 +80,23 @@ const impersonate = async () => {
         return
     }
 
-    await createMessage(userCharacter.id, '', 'model')
+    await createMessage(userCharacter, '', 'model')
     await generateMessage()
 }
 
-const createMessage = async (characterId: number, text: string = '', type: 'user' | 'model' | 'system') => {
-    const {messageId} = await client.messages.create.mutate({
-        chatId: Number(chatId),
-        characterId: Number(characterId),
-        content: [text],
+const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
+    chat.messages.push({
+        characterId,
         type,
+        content: [text],
+        activeIndex: 0,
     })
+    const {_rev} = await chatCollection.put(chat)
+    chat._rev = _rev
 
-    if (messageId) {
-        messages.push({
-            id: messageId,
-            chatId: Number(chatId),
-            characterId,
-            type,
-            activeIndex: 0,
-            content: [text],
-        })
-        currentMessage.value = ''
-        await nextTick()
-        scrollMessages('smooth')
-    } else {
-        toast.error('Server did not return a message ID')
-    }
+    currentMessage.value = ''
+    await nextTick()
+    scrollMessages('smooth')
 }
 
 const generateMessage = async () => {
@@ -125,11 +109,12 @@ const generateMessage = async () => {
     }
 
     try {
-        const iterable = await streamingClient.generate.generate.mutate(chatId, {signal: abortController.signal})
-        for await (const text of iterable) {
-            lastMessage.content[lastMessage.activeIndex] = text
-            scrollMessages('smooth')
-        }
+        // const iterable = await streamingClient.generate.generate.mutate(chatId, {signal: abortController.signal})
+        // for await (const text of iterable) {
+        //     lastMessage.content[lastMessage.activeIndex] = text
+        //     scrollMessages('smooth')
+        // }
+        console.log('IMPLEMENT')
     } catch (error) {
         // Ignore abort errors
         if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
@@ -146,68 +131,64 @@ const stopGeneration = () => {
     abortController = new AbortController()
 }
 
-const editMessage = async (messageId: number) => {
-    if (editModeId.value === messageId) {
+const editMessage = async (messageIndex: number) => {
+    if (editModeId.value === messageIndex) {
         cancelEdit()
     } else {
-        editModeId.value = messageId
-        const message = messages.find((message) => message.id === messageId)
+        editModeId.value = messageIndex
+        const message = messages[messageIndex]
         editedText.value = message?.content[message.activeIndex] || ''
         // Focus the input
         await nextTick()
-        const inputElement = document.getElementById(`message-input-${messageId}`) as HTMLTextAreaElement
+        const inputElement = document.getElementById(`message-input-${messageIndex}`) as HTMLTextAreaElement
         inputElement.focus()
     }
 }
 
 const cancelEdit = () => {
     // Reset the text to the original value
-    const message = messages.find((message) => message.id === editModeId.value)
+    const message = messages[editModeId.value]
     if (message) {
         message.content[message.activeIndex] = editedText.value
     }
-    editModeId.value = 0
+    editModeId.value = -1
 }
 
-const updateMessage = async (message: Message) => {
-    await client.messages.update.mutate({
-        id: message.id,
-        text: message.content[message.activeIndex] || '',
-    })
-    editModeId.value = 0
+const updateMessage = async () => {
+    const {_rev} = await chatCollection.put(chat)
+    chat._rev = _rev
+    editModeId.value = -1
 }
 
-const deleteMessage = async (messageId: number) => {
-    await client.messages.delete.mutate(messageId)
-
-    messages.splice(
-        messages.findIndex((message) => message.id === messageId),
-        1,
-    )
+const deleteMessage = async (messageIndex: number) => {
+    chat.messages.splice(messageIndex, 1)
+    const {_rev} = await chatCollection.put(chat)
+    chat._rev = _rev
+    editModeId.value = -1
 }
 
 const newSwipe = async (message: Message) => {
-    await client.swipes.newSwipe.mutate(message.id)
     message.content.push('')
     message.activeIndex = message.content.length - 1
+
+    const {_rev} = await chatCollection.put(chat)
+    chat._rev = _rev
 
     await generateMessage()
 }
 
 const swipeLeft = async (message: Message) => {
-    await client.swipes.setSwipeIndex.mutate({
-        messageId: message.id,
-        activeIndex: message.activeIndex - 1,
-    })
-    message.activeIndex -= 1
+    if (message.activeIndex > 0) {
+        message.activeIndex -= 1
+        const {_rev} = await chatCollection.put(chat)
+        chat._rev = _rev
+    }
 }
 
 const swipeRight = async (message: Message) => {
-    await client.swipes.setSwipeIndex.mutate({
-        messageId: message.id,
-        activeIndex: message.activeIndex + 1,
-    })
     message.activeIndex += 1
+    const {_rev} = await chatCollection.put(chat)
+    chat._rev = _rev
 }
 
 const quoteWrap = (text: string) => {
@@ -250,7 +231,7 @@ const toggleCtxMenu = () => {
         <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <div
                 v-for="(message, index) in messages"
-                :key="message.id"
+                :key="index"
                 class="flex flex-col relative mb-2 bg-base-200 rounded-xl">
                 <div class="flex flex-row pb-2 pt-3">
                     <div class="avatar ml-2">
@@ -273,16 +254,16 @@ const toggleCtxMenu = () => {
                             "
                             class="loading loading-dots loading-sm mt-2"></span>
                         <div
-                            v-show="editModeId !== message.id"
+                            v-show="editModeId !== index"
                             v-html="formatText(message.content[message.activeIndex] || '')"
                             class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word] whitespace-pre-wrap" />
                         <textarea
-                            v-show="editModeId === message.id"
-                            :id="`message-input-${message.id}`"
+                            v-show="editModeId === index"
+                            :id="`message-input-${index}`"
                             v-model="message.content[message.activeIndex]"
                             @input="resizeTextarea"
                             @focus="resizeTextarea"
-                            @keydown.ctrl.enter="updateMessage(message)"
+                            @keydown.ctrl.enter="updateMessage()"
                             @keydown.esc="cancelEdit"
                             data-1p-ignore
                             class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]" />
@@ -293,28 +274,28 @@ const toggleCtxMenu = () => {
                 <div class="absolute top-1 right-1">
                     <!-- Delete -->
                     <button
-                        v-if="editModeId === message.id"
+                        v-if="editModeId === index"
                         class="btn btn-square btn-sm btn-error ml-2"
-                        @click="deleteMessage(message.id)">
+                        @click="deleteMessage(index)">
                         <!-- prettier-ignore -->
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
                     </button>
                     <button
-                        v-if="editModeId === message.id"
-                        @click="updateMessage(message)"
+                        v-if="editModeId === index"
+                        @click="updateMessage()"
                         class="btn btn-square btn-sm btn-accent ml-2 align-top">
                         <!-- prettier-ignore -->
                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>
                     </button>
                     <!-- Edit -->
-                    <button class="btn btn-square btn-sm btn-neutral ml-2" @click="editMessage(message.id)">
+                    <button class="btn btn-square btn-sm btn-neutral ml-2" @click="editMessage(index)">
                         <!-- prettier-ignore -->
                         <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
                     </button>
                 </div>
 
                 <!-- Swipe Controls -->
-                <div v-if="message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
+                <div v-if="message.type === 'model' || 1" class="flex flex-row justify-between px-1 pb-1">
                     <!-- Swipe Left -->
                     <div class="flex w-16">
                         <button

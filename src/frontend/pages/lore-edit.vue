@@ -2,15 +2,20 @@
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
 import TopBar from '@/components/top-bar.vue'
+import {loreCollection} from '@/db'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const loreId = Number(route.params.id)
+const loreId = route.params.id
 
-const lore = reactive(await client.lore.getById.query(loreId))
+if (!loreId || Array.isArray(loreId)) {
+    router.push('/lore')
+    throw new Error('No lore ID provided')
+}
+
+const lore = reactive(await loreCollection.findById(loreId))
 
 const addEntry = () => {
     lore.entries.push({name: '', content: ''})
@@ -24,12 +29,13 @@ const updateLore = async () => {
     // Remove any entries that have empty content
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
-    await client.lore.update.mutate(lore)
+    const {_rev} = await loreCollection.put(lore)
+    lore._rev = _rev
     toast.success('Lore updated')
 }
 
 const deleteLore = async () => {
-    await client.lore.delete.mutate(loreId)
+    await loreCollection.removeById(loreId)
     toast.success('Lore deleted')
     router.push('/lore')
 }

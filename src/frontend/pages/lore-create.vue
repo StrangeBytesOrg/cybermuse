@@ -2,7 +2,7 @@
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '../api-client'
+import {loreCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 type Entry = {name: string; content: string}
@@ -22,7 +22,11 @@ const createLore = async () => {
     // Remove any entries that have empty content
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
-    await client.lore.create.mutate(lore)
+    await loreCollection.put({
+        _id: lore.name,
+        name: lore.name,
+        entries: lore.entries,
+    })
     toast.success('Lore created')
     router.push('/lore')
 }

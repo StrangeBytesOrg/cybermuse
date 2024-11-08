@@ -1,41 +1,45 @@
 <script lang="ts" setup>
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
-import {client} from '../api-client'
+import {chatCollection, characterCollection, loreCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const router = useRouter()
-const selectedCharacters = ref<number[]>([])
-const selectedLore = ref<number[]>([])
+const selectedCharacters = ref<string[]>([])
+const selectedLore = ref<string[]>([])
 
-const characters = await client.characters.getAll.query()
-const loreData = await client.lore.getAll.query()
+const characters = await characterCollection.find()
+const lore = await loreCollection.find()
 
-const userCharacter = ref(1)
+const userCharacter = ref()
 
 const createChat = async () => {
-    const {id: newChatId} = await client.chats.create.mutate({
-        characters: [...selectedCharacters.value, userCharacter.value],
+    const newChat = await chatCollection.put({
+        _id: Math.random().toString(36).slice(2), // TODO implement a more general document ID generation method
+        name: 'Test Chat',
+        userCharacter: userCharacter.value,
+        characters: selectedCharacters.value,
         lore: selectedLore.value,
+        messages: [],
     })
-    router.push(`/chat?id=${newChatId}`)
+    router.push(`/chat?id=${newChat._id}`)
 }
 
 const setSelected = (event: Event) => {
     const target = event.target as HTMLInputElement
     if (target.checked) {
-        selectedCharacters.value.push(Number(target.value))
+        selectedCharacters.value.push(target.value)
     } else {
-        selectedCharacters.value = selectedCharacters.value.filter((id) => id !== Number(target.value))
+        selectedCharacters.value = selectedCharacters.value.filter((id) => id !== target.value)
     }
 }
 
 const setSelectedLore = (event: Event) => {
     const target = event.target as HTMLInputElement
     if (target.checked) {
-        selectedLore.value.push(Number(target.value))
+        selectedLore.value.push(target.value)
     } else {
-        selectedLore.value = selectedLore.value.filter((id) => id !== Number(target.value))
+        selectedLore.value = selectedLore.value.filter((id) => id !== target.value)
     }
 }
 
@@ -59,7 +63,7 @@ const userCharacters = computed(() => {
             <template v-if="notUserCharacters.length">
                 <div
                     v-for="character in notUserCharacters"
-                    :key="character.id"
+                    :key="character._id"
                     class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
                     <div class="avatar w-20 h-20">
                         <img v-if="character.image" :src="`/avatars/${character.image}`" class="rounded-lg" />
@@ -69,8 +73,8 @@ const userCharacters = computed(() => {
                     <label class="absolute w-full h-full cursor-pointer">
                         <input
                             type="checkbox"
-                            :value="character.id"
-                            :checked="selectedCharacters.includes(character.id)"
+                            :value="character._id"
+                            :checked="selectedCharacters.includes(character._id)"
                             @change="setSelected"
                             class="checkbox absolute top-2 right-4" />
                     </label>
@@ -85,25 +89,25 @@ const userCharacters = computed(() => {
         <h2 class="text-xl font-bold">User Character</h2>
         <div class="divider mt-0 mb-1"></div>
         <select v-model="userCharacter" class="select bg-base-200">
-            <option v-for="character in userCharacters" :key="character.id" :value="character.id">
+            <option v-for="character in userCharacters" :key="character._id" :value="character._id">
                 {{ character.name }}
             </option>
         </select>
 
         <!-- Lore -->
-        <div v-if="loreData.length" class="w-full">
+        <div v-if="lore.length" class="w-full">
             <h2 class="text-xl font-bold mt-5">Lore</h2>
             <div class="divider mt-0 mb-1"></div>
             <div class="flex flex-col">
                 <div
-                    v-for="lore in loreData"
-                    :key="lore.id"
+                    v-for="loreBook in lore"
+                    :key="loreBook._id"
                     class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
-                    <div class="text-lg ml-2">{{ lore.name }}</div>
+                    <div class="text-lg ml-2">{{ loreBook.name }}</div>
                     <label class="absolute w-full h-full cursor-pointer">
                         <input
                             type="checkbox"
-                            :value="lore.id"
+                            :value="loreBook._id"
                             @change="setSelectedLore"
                             class="checkbox absolute top-2 right-4" />
                     </label>

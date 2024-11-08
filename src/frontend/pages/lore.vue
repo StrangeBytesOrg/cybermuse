@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
-import {client} from '../api-client'
 import TopBar from '@/components/top-bar.vue'
+import {loreCollection} from '@/db'
 
-const loreBooks = reactive(await client.lore.getAll.query())
+const loreBooks = reactive(await loreCollection.find())
 </script>
 
 <template>
@@ -17,8 +17,8 @@ const loreBooks = reactive(await client.lore.getAll.query())
             <template v-if="loreBooks.length">
                 <RouterLink
                     v-for="book in loreBooks"
-                    :key="book.id"
-                    :to="`/lore/${book.id}`"
+                    :key="book._id"
+                    :to="`/lore/${book._id}`"
                     class="block bg-base-100 min-h-32 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     {{ book.name }}
                     <div>Entries: {{ book.entries.length }}</div>

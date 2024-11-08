@@ -1,8 +1,9 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import {client} from '../api-client'
 import {useToast} from 'vue-toastification'
+import {client} from '@/api-client'
+import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
 import {decodeChunks} from '../lib/decode-png-chunks'
@@ -10,6 +11,7 @@ import {decodeChunks} from '../lib/decode-png-chunks'
 const toast = useToast()
 const router = useRouter()
 const character = reactive({
+    _id: '',
     name: '',
     description: '',
     firstMessage: '',
@@ -18,7 +20,8 @@ const character = reactive({
 })
 
 const createCharacter = async () => {
-    await client.characters.create.mutate(character)
+    character._id = character.name.toLowerCase().replace(/[^a-z0-9]/g, '-')
+    await characterCollection.put(character)
     toast.success('Character created')
     await router.push('/characters')
 }

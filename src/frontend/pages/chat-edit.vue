@@ -2,25 +2,32 @@
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import TopBar from '@/components/top-bar.vue'
-import {client} from '../api-client'
+import {chatCollection, characterCollection} from '@/db'
 
 const route = useRoute()
 const router = useRouter()
 const toast = useToast()
-const chatId = Number(route.params.id)
-const chat = await client.chats.getById.query(chatId)
+const chatId = route.params.id
+if (!chatId || Array.isArray(chatId)) {
+    router.push('/chats')
+    throw new Error('Invalid chat ID')
+}
+
+const chat = await chatCollection.findById(chatId)
+const characters = await characterCollection.find()
+if (!chat) {
+    router.push('/chats')
+    throw new Error('Chat not found')
+}
 
 const updateChat = async () => {
-    await client.chats.update.mutate({
-        id: chatId,
-        name: chat.name,
-    })
+    await chatCollection.put(chat)
     toast.success('Updated')
     router.push('/chats')
 }
 
 const deleteChat = async () => {
-    await client.chats.delete.mutate(chatId)
+    await chatCollection.removeById(chatId)
     router.push('/chats')
 }
 </script>
@@ -40,16 +47,19 @@ const deleteChat = async () => {
         <!-- Characters -->
         <div class="mt-3">
             <div class="text-lg">Characters</div>
-            <div v-for="{character} in chat.characters" :key="character.id">
-                {{ character.name }}
+            <div v-for="character in chat.characters" :key="character">
+                {{ characters.find((c) => c._id === character)?.name }}
             </div>
+
+            <div class="text-lg">User</div>
+            {{ characters.find((c) => c._id === chat.userCharacter)?.name }}
         </div>
 
         <!-- Lore -->
         <div class="mt-3">
             <div class="text-lg">Lore</div>
-            <div v-for="{lore} in chat.lore" :key="lore.id">
-                {{ lore.name }}
+            <div v-for="lore in chat.lore" :key="lore">
+                {{ lore }}
             </div>
         </div>
 
