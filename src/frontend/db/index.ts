@@ -4,7 +4,9 @@ import find from 'pouchdb-find'
 import {z} from 'zod'
 
 const dbName = 'devdb'
-const db = new PouchDB(dbName)
+const db = new PouchDB(dbName, {
+    auto_compaction: true,
+})
 PouchDB.plugin(find)
 
 const baseSchema = z.object({
