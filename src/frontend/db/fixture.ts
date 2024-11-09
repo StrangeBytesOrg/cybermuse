@@ -4,8 +4,9 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 {% for character in characters %}{{character.name}}: {{character.description}}
 {% endfor %}
 {% if lore.length %}Use the following background information as lore.
-{% for entry in lore %}
-{{ entry.name }}: {{ entry.content }}
+{% for book in lore %}
+{{ book.name }}
+{% for entry in book.entries %}{{ entry.name}}: {{entry.content}}{% endfor %}
 {% endfor %}{% endif %}`
 
 const users = await userCollection.find()

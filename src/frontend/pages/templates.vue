@@ -53,7 +53,12 @@ const getPreview = async () => {
         {name: 'Alice', description: 'A character named Alice.'},
         {name: 'Bob', description: 'A character named Bob.'},
     ]
-    const lore = [{name: 'Example', content: 'This would be the text for a lore entry.'}]
+    const lore = [
+        {
+            name: 'Example Lorebook',
+            entries: [{name: 'example', content: 'This would be the text for a lore entry.'}],
+        },
+    ]
 
     if (!activeTemplate.value) {
         throw new Error('Template not found')
