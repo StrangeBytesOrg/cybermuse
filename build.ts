@@ -21,7 +21,6 @@ const buildOptions: BuildOptions = {
 const build = async () => {
     await fs.rm(outputPath, {recursive: true, force: true})
     await esbuild.build(buildOptions)
-    await fs.cp('./src/backend/db/migrations/', './dist/backend/migrations', {recursive: true})
     console.log('Built backend')
 }
 
