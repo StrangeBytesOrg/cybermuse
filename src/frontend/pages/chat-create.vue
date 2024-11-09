@@ -7,16 +7,16 @@ import TopBar from '@/components/top-bar.vue'
 const router = useRouter()
 const selectedCharacters = ref<string[]>([])
 const selectedLore = ref<string[]>([])
+const userCharacter = ref()
+const chatName = ref('')
 
 const characters = await characterCollection.find()
 const lore = await loreCollection.find()
 
-const userCharacter = ref()
-
 const createChat = async () => {
     const {id} = await chatCollection.put({
         _id: Math.random().toString(36).slice(2), // TODO implement a more general document ID generation method
-        name: 'Test Chat',
+        name: chatName.value,
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value,
         lore: selectedLore.value,
@@ -115,6 +115,16 @@ const userCharacters = computed(() => {
                 </div>
             </div>
         </div>
+
+        <!-- Chat Name -->
+        <label class="form-control w-full">
+            <div class="label"><span class="label-text font-bold">Chat Name</span></div>
+            <input
+                type="text"
+                placeholder="(optional)"
+                v-model="chatName"
+                class="input input-bordered focus:outline-none focus:border-primary" />
+        </label>
 
         <div class="flex flex-row mt-5">
             <button class="btn btn-primary" @click="createChat">Create Chat</button>
