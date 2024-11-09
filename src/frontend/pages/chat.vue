@@ -3,9 +3,10 @@ import {reactive, ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {marked} from 'marked'
 import {useToast} from 'vue-toastification'
-import {characterCollection, chatCollection} from '@/db'
-import {client, streamingClient} from '../api-client'
+import {characterCollection, chatCollection, loreCollection, templateCollection, userCollection} from '@/db'
+import {streamingClient} from '../api-client'
 import {useModelStore} from '../store'
+import {Template} from '@huggingface/jinja'
 
 const route = useRoute()
 const toast = useToast()
@@ -31,6 +32,7 @@ if (!chatId || Array.isArray(chatId)) {
 
 const chat = reactive(await chatCollection.findById(chatId))
 const characters = await characterCollection.find()
+const lore = await loreCollection.find()
 const messages = reactive(chat.messages)
 const userCharacter = chat.userCharacter
 const characterMap = new Map(characters.map((c) => [c._id, c]))
@@ -108,12 +110,29 @@ const generateMessage = async () => {
     }
 
     try {
-        // const iterable = await streamingClient.generate.generate.mutate(chatId, {signal: abortController.signal})
-        // for await (const text of iterable) {
-        //     lastMessage.content[lastMessage.activeIndex] = text
-        //     scrollMessages('smooth')
-        // }
-        console.log('IMPLEMENT')
+        const {promptTemplate} = await userCollection.findById('default-user')
+        const template = await templateCollection.findById(promptTemplate)
+        const jTemplate = new Template(template.template)
+        const systemPrompt = jTemplate.render({
+            characters,
+            lore,
+        })
+        console.log(`systemPrompt: ${systemPrompt}`)
+        const messages = chat.messages.map((message) => {
+            return {type: message.type, content: message.content[message.activeIndex] || ''}
+        })
+        const generationSettings = {
+            maxTokens: 32,
+            temperature: 1,
+            seed: Math.random() * 100000,
+        }
+        const iterable = await streamingClient.generate.generate.mutate({systemPrompt, messages, generationSettings})
+        for await (const text of iterable) {
+            lastMessage.content[lastMessage.activeIndex] = text
+            scrollMessages('smooth')
+            console.log('text: ', text)
+        }
+        await chatCollection.update(chat)
     } catch (error) {
         // Ignore abort errors
         if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
