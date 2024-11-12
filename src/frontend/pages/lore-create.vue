@@ -23,7 +23,6 @@ const createLore = async () => {
     lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
 
     await loreCollection.put({
-        _id: lore.name,
         name: lore.name,
         entries: lore.entries,
     })

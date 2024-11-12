@@ -10,7 +10,6 @@ const toast = useToast()
 const router = useRouter()
 const example = ref('')
 const template = reactive({
-    _id: Math.random().toString(36).slice(2),
     name: '',
     template: '',
 })

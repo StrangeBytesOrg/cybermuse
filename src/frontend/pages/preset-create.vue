@@ -8,7 +8,6 @@ import TopBar from '@/components/top-bar.vue'
 const toast = useToast()
 const router = useRouter()
 const preset = reactive({
-    _id: Math.random().toString(36).slice(2),
     name: '',
     context: 2048,
     seed: -1,

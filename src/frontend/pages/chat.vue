@@ -119,7 +119,8 @@ const generateMessage = async () => {
         })
         console.log(`systemPrompt: ${systemPrompt}`)
         const messages = chat.messages.map((message) => {
-            return {type: message.type, content: message.content[message.activeIndex] || ''}
+            const prefix = `${characterMap.get(message.characterId)?.name || 'Missing Character'}: `
+            return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
         })
         const generationSettings = {
             maxTokens: 32,
@@ -139,6 +140,7 @@ const generateMessage = async () => {
         throw error
     } finally {
         console.log('done pending')
+        scrollMessages('smooth')
         pendingMessage.value = false
     }
 }
@@ -308,7 +310,7 @@ const toggleCtxMenu = () => {
                 </div>
 
                 <!-- Swipe Controls -->
-                <div v-if="message.type === 'model' || 1" class="flex flex-row justify-between px-1 pb-1">
+                <div v-if="message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
                     <!-- Swipe Left -->
                     <div class="flex w-16">
                         <button

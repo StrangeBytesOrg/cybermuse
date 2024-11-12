@@ -6,6 +6,7 @@ import {z} from 'zod'
 const dbName = 'devdb'
 const db = new PouchDB(dbName, {
     auto_compaction: true,
+    revs_limit: 10,
 })
 PouchDB.plugin(find)
 
@@ -16,6 +17,7 @@ const baseSchema = z.object({
 
 /** Character */
 const characterSchema = baseSchema.extend({
+    _id: z.string().default(() => `character-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
     type: z.union([z.literal('user'), z.literal('character')]),
     description: z.string(),
@@ -26,6 +28,7 @@ export const characterCollection = new Collection(db, 'character', characterSche
 
 /** Lore */
 const loreSchema = baseSchema.extend({
+    _id: z.string().default(() => `lore-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
     entries: z.array(
         z.object({
@@ -38,6 +41,7 @@ export const loreCollection = new Collection(db, 'lore', loreSchema)
 
 /** Chat */
 const chatSchema = baseSchema.extend({
+    _id: z.string().default(() => `chat-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
     userCharacter: z.string(),
     characters: z.array(z.string()),
@@ -56,6 +60,7 @@ export const chatCollection = new Collection(db, 'chat', chatSchema)
 
 /** Template */
 const templateSchema = baseSchema.extend({
+    _id: z.string().default(() => `template-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
     template: z.string(),
 })
@@ -63,6 +68,7 @@ export const templateCollection = new Collection(db, 'template', templateSchema)
 
 /** Generation Preset */
 const generationPresetSchema = baseSchema.extend({
+    _id: z.string().default(() => `generationPreset-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
     context: z.number(),
     maxTokens: z.number(),

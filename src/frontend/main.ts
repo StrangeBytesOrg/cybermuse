@@ -6,7 +6,8 @@ import App from './app.vue'
 import router from './router'
 
 // Fixture DB data
-import '@/db/fixture'
+import {fixtureData} from '@/db/fixture'
+fixtureData().then(() => console.log('Fixture data loaded'))
 
 const documentHeight = () => {
     const doc = document.documentElement

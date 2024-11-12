@@ -3,8 +3,9 @@ import {reactive} from 'vue'
 import {chatCollection, characterCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
-const chats = reactive(await chatCollection.find())
+const chats = reactive(await chatCollection.find({limit: 100}))
 const characters = reactive(await characterCollection.find())
+
 const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
 type Chat = (typeof chats)[0]
 

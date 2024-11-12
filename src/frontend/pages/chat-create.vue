@@ -15,7 +15,6 @@ const lore = await loreCollection.find()
 
 const createChat = async () => {
     const {id} = await chatCollection.put({
-        _id: Math.random().toString(36).slice(2), // TODO implement a more general document ID generation method
         name: chatName.value,
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value,

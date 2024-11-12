@@ -11,7 +11,6 @@ import {decodeChunks} from '../lib/decode-png-chunks'
 const toast = useToast()
 const router = useRouter()
 const character = reactive({
-    _id: '',
     name: '',
     description: '',
     firstMessage: '',
@@ -20,7 +19,6 @@ const character = reactive({
 })
 
 const createCharacter = async () => {
-    character._id = Math.random().toString(36).slice(2)
     await characterCollection.put(character)
     toast.success('Character created')
     await router.push('/characters')

@@ -6,7 +6,7 @@ import TopBar from '@/components/top-bar.vue'
 
 const searchName = ref('')
 const characterType = ref<'user' | 'character' | 'both'>('both')
-const characters = reactive(await characterCollection.find())
+const characters = reactive(await characterCollection.find({limit: 110}))
 
 // Computed property to filter characters based on search input and character type
 const filteredCharacters = computed(() => {
