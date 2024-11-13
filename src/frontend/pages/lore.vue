@@ -18,7 +18,7 @@ const loreBooks = reactive(await loreCollection.find())
                 <RouterLink
                     v-for="book in loreBooks"
                     :key="book._id"
-                    :to="`/lore/${book._id}`"
+                    :to="{name: 'edit-lore', params: {id: book._id}}"
                     class="block bg-base-100 min-h-32 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     {{ book.name }}
                     <div>Entries: {{ book.entries.length }}</div>

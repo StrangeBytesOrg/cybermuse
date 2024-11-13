@@ -1,4 +1,4 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 
 import Index from './pages/index.vue'
 import Character from './pages/character.vue'
@@ -20,7 +20,7 @@ import BackendSettings from './pages/backend-settings.vue'
 import ThemeSettings from './pages/theme-settings.vue'
 
 export default createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes: [
         {
             path: '/',
@@ -33,7 +33,7 @@ export default createRouter({
             component: Characters,
         },
         {
-            path: '/character',
+            path: '/character/:id',
             name: 'character',
             component: Character,
         },
@@ -48,7 +48,7 @@ export default createRouter({
             component: Chats,
         },
         {
-            path: '/chat',
+            path: '/chat/:id',
             name: 'chat',
             component: Chat,
         },

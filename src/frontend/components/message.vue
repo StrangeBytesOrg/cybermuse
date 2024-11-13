@@ -1,15 +1,11 @@
 <script lang="ts" setup>
-import {ref, nextTick} from 'vue'
+import {ref, nextTick, useTemplateRef} from 'vue'
 import {marked} from 'marked'
+import type {Message} from '@/db'
 
-type Message = {
+type Props = {
     index: number
-    message: {
-        content: string[]
-        activeIndex: number
-        characterId: string
-        type: 'user' | 'model' | 'system'
-    }
+    message: Message
     characterMap: Record<
         string,
         {
@@ -20,10 +16,17 @@ type Message = {
     loading: boolean
     regenAvailable: boolean
 }
-const props = defineProps<Message>()
+const props = defineProps<Props>()
 const editMode = ref(false)
 const editedText = ref('')
-const emit = defineEmits(['update', 'delete', 'newSwipe', 'swipeLeft', 'swipeRight'])
+const textarea = useTemplateRef<HTMLTextAreaElement>('message-input')
+const emit = defineEmits<{
+    (event: 'update', index: number, text: string): void
+    (event: 'delete', index: number): void
+    (event: 'newSwipe', index: number): void
+    (event: 'swipeLeft', index: number): void
+    (event: 'swipeRight', index: number): void
+}>()
 
 const update = () => {
     emit('update', props.index, editedText.value)
@@ -36,12 +39,10 @@ const newSwipe = () => emit('newSwipe', props.index)
 const deleteMe = async () => emit('delete', props.index)
 
 const enterEdit = async () => {
-    editedText.value = props.message.content[props.message.activeIndex] || ''
     editMode.value = !editMode.value
-    // Focus the input
+    editedText.value = props.message.content[props.message.activeIndex] || ''
     await nextTick()
-    const inputElement = document.getElementById(`message-input-${props.index}`) as HTMLTextAreaElement
-    inputElement.focus()
+    textarea.value?.focus()
 }
 
 const formatText = (text: string) => {
@@ -81,7 +82,7 @@ const resizeTextarea = async (event: Event) => {
                     class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word] whitespace-pre-wrap" />
                 <textarea
                     v-show="editMode"
-                    :id="`message-input-${index}`"
+                    ref="message-input"
                     v-model="editedText"
                     @input="resizeTextarea"
                     @focus="resizeTextarea"

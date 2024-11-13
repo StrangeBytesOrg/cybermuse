@@ -7,7 +7,6 @@ import router from './router'
 
 // Fixture DB data
 import {fixtureData} from '@/db/fixture'
-fixtureData().then(() => console.log('Fixture data loaded'))
 
 const documentHeight = () => {
     const doc = document.documentElement
@@ -22,4 +21,8 @@ app.use(createPinia())
 app.use(router)
 app.use(Toast, {position: POSITION.BOTTOM_RIGHT})
 
-app.mount('#app')
+// TODO this is a bit hacky, but it works for now
+fixtureData().then(() => {
+    console.log('Fixture data loaded')
+    app.mount('#app')
+})

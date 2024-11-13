@@ -1,16 +1,12 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {chatCollection, characterCollection} from '@/db'
+import type {Chat} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const chats = reactive(await chatCollection.find({limit: 100}))
 const characters = reactive(await characterCollection.find())
-
 const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
-type Chat = (typeof chats)[0]
-
-// Filter out chats with no characters
-// chats = chats.filter((chat) => chat.characters.length > 1)
 
 const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -35,7 +31,7 @@ const formatTitle = (chat: Chat) => {
 
     <div class="flex flex-col m-2">
         <router-link
-            :to="`/chat?id=${chat._id}`"
+            :to="{name: 'chat', params: {id: chat._id}}"
             v-for="chat in chats"
             :key="chat._id"
             class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">

@@ -45,7 +45,7 @@ const filteredCharacters = computed(() => {
         <template v-if="filteredCharacters.length">
             <div v-for="character in filteredCharacters" :key="character.name">
                 <router-link
-                    :to="`/character?id=${character._id}`"
+                    :to="{name: 'character', params: {id: character._id}}"
                     class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     <div class="avatar">
                         <div class="w-36 max-h-36 rounded-xl">

@@ -11,7 +11,7 @@ import Message from '@/components/message.vue'
 const route = useRoute()
 const toast = useToast()
 const modelStore = useModelStore()
-const chatId = route.query.id
+const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
 const messagesElement = ref<HTMLElement>()
@@ -219,7 +219,6 @@ const toggleCtxMenu = () => {
                 :index="index"
                 :message="message"
                 :characterMap="characterMap"
-                :chatId="chatId"
                 :loading="false"
                 :regenAvailable="index === chat.messages.length - 1"
                 @update="updateMessage"

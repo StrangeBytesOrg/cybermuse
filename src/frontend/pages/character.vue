@@ -8,7 +8,7 @@ import TopBar from '@/components/top-bar.vue'
 
 const route = useRoute()
 const router = useRouter()
-const characterId = route.query.id
+const characterId = route.params.id
 
 if (!characterId || Array.isArray(characterId)) {
     router.push('/characters')

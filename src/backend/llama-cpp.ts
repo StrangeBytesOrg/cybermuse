@@ -62,15 +62,23 @@ export const unloadModel = async () => {
 
 type Message = {type: 'user' | 'model' | 'system'; content: string}
 export const formatMessage = (message: Message): ChatHistoryItem => {
-    if (message.type === 'model') {
-        return {
-            type: 'model',
-            response: [message.content],
-        }
-    } else {
-        return {
-            type: 'user',
-            text: message.content,
-        }
+    switch (message.type) {
+        case 'model':
+            return {
+                type: 'model',
+                response: [message.content],
+            }
+        case 'user':
+            return {
+                type: 'user',
+                text: message.content,
+            }
+        case 'system':
+            return {
+                type: 'system',
+                text: message.content,
+            }
+        default:
+            throw new Error(`Unknown message type: ${message.type}`)
     }
 }

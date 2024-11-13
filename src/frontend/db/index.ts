@@ -56,6 +56,8 @@ const chatSchema = baseSchema.extend({
     ),
 })
 export const chatCollection = new Collection(db, 'chat', chatSchema)
+export type Chat = z.infer<typeof chatSchema>
+export type Message = z.infer<typeof chatSchema>['messages'][0]
 
 /** Template */
 const templateSchema = baseSchema.extend({
