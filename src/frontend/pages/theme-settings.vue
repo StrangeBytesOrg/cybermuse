@@ -5,7 +5,7 @@ import TopBar from '@/components/top-bar.vue'
 const themeStore = useThemeStore()
 
 const saveSettings = async () => {
-    themeStore.update()
+    themeStore.save()
 }
 
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
