@@ -5,8 +5,7 @@ import {z} from 'zod'
 
 const dbName = 'devdb'
 const db = new PouchDB(dbName, {
-    auto_compaction: true,
-    revs_limit: 10,
+    revs_limit: 10, // TODO verify if auto-compaction is necessary with revs_limit
 })
 PouchDB.plugin(find)
 
