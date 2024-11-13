@@ -1,15 +1,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useModelStore} from '../store'
-import {client, streamingClient} from '../api-client'
-import {useToast} from 'vue-toastification'
+import {useModelStore} from '@/store'
 
 const modelStore = useModelStore()
 const pendingMessage = ref(false)
 const currentInput = ref('')
-// const systemPrompt = ref('')
 const generatedResponse = ref('')
-const toast = useToast()
 let controller: AbortController
 
 const getGeneration = async () => {

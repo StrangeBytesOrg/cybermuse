@@ -2,8 +2,8 @@
 import {ref} from 'vue'
 import {useToast} from 'vue-toastification'
 import TopBar from '@/components/top-bar.vue'
-import {client} from '../api-client'
-import {useModelStore} from '../store'
+import {client} from '@/api-client'
+import {useModelStore} from '@/store'
 
 const toast = useToast()
 const modelStore = useModelStore()

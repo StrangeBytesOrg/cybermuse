@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {useThemeStore} from '../store'
+import {useThemeStore} from '@/store'
 import TopBar from '@/components/top-bar.vue'
 
 const themeStore = useThemeStore()

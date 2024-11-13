@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {client} from '../api-client'
+import {client} from '@/api-client'
 import {characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'

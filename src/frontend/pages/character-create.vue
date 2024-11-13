@@ -6,7 +6,7 @@ import {client} from '@/api-client'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
-import {decodeChunks} from '../lib/decode-png-chunks'
+import {decodeChunks} from '@/lib/decode-png-chunks'
 
 const toast = useToast()
 const router = useRouter()
