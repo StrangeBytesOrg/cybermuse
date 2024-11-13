@@ -2,6 +2,7 @@
 import {ref, nextTick, useTemplateRef} from 'vue'
 import {marked} from 'marked'
 import type {Message} from '@/db'
+import {useChatStore} from '@/store'
 
 type Props = {
     index: number
@@ -21,22 +22,18 @@ const editMode = ref(false)
 const editedText = ref('')
 const textarea = useTemplateRef<HTMLTextAreaElement>('message-input')
 const emit = defineEmits<{
-    (event: 'update', index: number, text: string): void
-    (event: 'delete', index: number): void
     (event: 'newSwipe', index: number): void
-    (event: 'swipeLeft', index: number): void
-    (event: 'swipeRight', index: number): void
 }>()
+const chatStore = useChatStore()
 
+const newSwipe = () => emit('newSwipe', props.index)
 const update = () => {
-    emit('update', props.index, editedText.value)
+    chatStore.updateMessage(props.index, editedText.value)
     editMode.value = false
 }
-
-const swipeLeft = () => emit('swipeLeft', props.index)
-const swipeRight = () => emit('swipeRight', props.index)
-const newSwipe = () => emit('newSwipe', props.index)
-const deleteMe = async () => emit('delete', props.index)
+const deleteMe = async () => chatStore.deleteMessage(props.index)
+const swipeLeft = async () => chatStore.swipeLeft(props.index)
+const swipeRight = async () => chatStore.swipeRight(props.index)
 
 const enterEdit = async () => {
     editMode.value = !editMode.value

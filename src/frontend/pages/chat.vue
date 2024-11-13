@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import {reactive, ref, nextTick, onMounted} from 'vue'
+import {ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {chatCollection, characterCollection, loreCollection, templateCollection, userCollection} from '@/db'
+import {characterCollection, loreCollection, templateCollection, userCollection} from '@/db'
 import {streamingClient} from '@/api-client'
-import {useModelStore} from '@/store'
+import {useChatStore, useModelStore} from '@/store'
 import {Template} from '@huggingface/jinja'
 import Message from '@/components/message.vue'
 
 const route = useRoute()
 const toast = useToast()
+const chatStore = useChatStore()
 const modelStore = useModelStore()
 const chatId = route.params.id
 const currentMessage = ref('')
@@ -28,7 +29,8 @@ if (!chatId || Array.isArray(chatId)) {
     throw new Error('Invalid chat ID')
 }
 
-const chat = reactive(await chatCollection.findById(chatId))
+await chatStore.getChat(chatId)
+const chat = chatStore.chat
 const characters = await characterCollection.find()
 const lore = await loreCollection.find()
 const userCharacter = chat.userCharacter
@@ -89,7 +91,7 @@ const createMessage = async (characterId: string, text: string = '', type: 'user
         content: [text],
         activeIndex: 0,
     })
-    await chatCollection.update(chat)
+    await chatStore.save()
 
     currentMessage.value = ''
     await nextTick()
@@ -129,7 +131,7 @@ const generateMessage = async () => {
             lastMessage.content[lastMessage.activeIndex] = text
             scrollMessages('smooth')
         }
-        await chatCollection.update(chat)
+        await chatStore.save()
     } catch (error) {
         // Ignore abort errors
         if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
@@ -147,35 +149,6 @@ const stopGeneration = () => {
     abortController = new AbortController()
 }
 
-const updateMessage = async (messageIndex: number, content: string) => {
-    const message = chat.messages[messageIndex]
-    if (message) {
-        message.content[message.activeIndex] = content
-        await chatCollection.update(chat)
-    }
-}
-
-const deleteMessage = async (messageIndex: number) => {
-    chat.messages.splice(messageIndex, 1)
-    await chatCollection.update(chat)
-}
-
-const swipeLeft = async (messageIndex: number) => {
-    const message = chat.messages[messageIndex]
-    if (message && message.activeIndex > 0) {
-        message.activeIndex -= 1
-        await chatCollection.update(chat)
-    }
-}
-
-const swipeRight = async (messageIndex: number) => {
-    const message = chat.messages[messageIndex]
-    if (message && message.activeIndex < message.content.length - 1) {
-        message.activeIndex += 1
-        await chatCollection.update(chat)
-    }
-}
-
 const newSwipe = async (messageIndex: number) => {
     const message = chat.messages[messageIndex]
     if (pendingMessage.value) {
@@ -185,7 +158,7 @@ const newSwipe = async (messageIndex: number) => {
     if (message) {
         message.content.push('')
         message.activeIndex = message.content.length - 1
-        await chatCollection.update(chat)
+        await chatStore.save()
         await generateMessage()
     }
 }
@@ -221,11 +194,7 @@ const toggleCtxMenu = () => {
                 :characterMap="characterMap"
                 :loading="false"
                 :regenAvailable="index === chat.messages.length - 1"
-                @update="updateMessage"
-                @delete="deleteMessage"
-                @new-swipe="newSwipe"
-                @swipe-left="swipeLeft"
-                @swipe-right="swipeRight" />
+                @new-swipe="newSwipe" />
         </div>
 
         <!-- expanding spacer -->
