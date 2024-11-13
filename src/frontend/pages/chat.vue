@@ -193,7 +193,7 @@ const toggleCtxMenu = () => {
                 :message="message"
                 :characterMap="characterMap"
                 :loading="false"
-                :regenAvailable="index === chat.messages.length - 1"
+                :showSwipes="index === chat.messages.length - 1 && message.type === 'model'"
                 @new-swipe="newSwipe" />
         </div>
 
