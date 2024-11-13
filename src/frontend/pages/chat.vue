@@ -122,13 +122,17 @@ const generateMessage = async () => {
             temperature: 1,
             seed: Math.random() * 100000,
         }
-        const iterable = await streamingClient.generate.generate.mutate({
-            systemPrompt,
-            messages: formattedMessages,
-            generationSettings,
-        })
+        const iterable = await streamingClient.generate.generate.mutate(
+            {
+                systemPrompt,
+                messages: formattedMessages,
+                generationSettings,
+            },
+            {signal: abortController.signal},
+        )
         for await (const text of iterable) {
             lastMessage.content[lastMessage.activeIndex] = text
+            await chatStore.save()
             scrollMessages('smooth')
         }
         await chatStore.save()
