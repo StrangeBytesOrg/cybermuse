@@ -50,9 +50,13 @@ const enterEdit = async () => {
     textarea.value?.focus()
 }
 
+const quoteWrap = (text: string) => {
+    return text.replace(/"([^"]*)"/g, '<q>$1</q>')
+}
+
 const formatText = (text: string) => {
-    const regex = /"([^"]*)"/g
-    return marked(text.replace(regex, '<q>$1</q>'))
+    const withQuotes = quoteWrap(text)
+    return marked(withQuotes, {breaks: true})
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -84,7 +88,7 @@ const resizeTextarea = async (event: Event) => {
                 <div
                     v-show="!editMode"
                     v-html="formatText(message.content[message.activeIndex] || '')"
-                    class="messageText mx-[-1px] mt-2 px-[1px] [word-break:break-word] whitespace-pre-wrap" />
+                    class="messageText mx-[-1px] px-[1px] [word-break:break-word]" />
                 <textarea
                     v-show="editMode"
                     ref="message-input"
@@ -145,19 +149,32 @@ const resizeTextarea = async (event: Event) => {
 
 <style>
 .messageText p {
+    @apply mt-2;
     color: var(--msg);
 }
-
-.messageText em {
-    @apply text-base-content/80;
-}
-
 .messageText q {
     color: var(--quote);
 }
-
-/* Fix wrapping for code blocks */
-code {
-    white-space: pre-wrap;
+.messageText em {
+    @apply text-base-content/80;
+}
+.messageText ol {
+    @apply pl-4 list-decimal;
+}
+.messageText h1 {
+    @apply text-xl font-bold;
+}
+.messageText h2 {
+    @apply text-lg font-bold;
+}
+.messageText pre {
+    @apply bg-base-300;
+}
+.messageText code {
+    @apply bg-base-300 whitespace-pre-wrap;
+}
+.messageText blockquote {
+    @apply bg-base-300 px-2;
+    border-left: 4px solid var(--quote);
 }
 </style>
