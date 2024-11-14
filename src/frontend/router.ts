@@ -18,6 +18,7 @@ import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import BackendSettings from './pages/backend-settings.vue'
 import ThemeSettings from './pages/theme-settings.vue'
+import ErrorPage from './pages/error.vue'
 
 export default createRouter({
     history: createWebHistory(),
@@ -116,6 +117,11 @@ export default createRouter({
             path: '/theme-settings',
             name: 'settings',
             component: ThemeSettings,
+        },
+        {
+            path: '/:pathMatch(.*)*',
+            name: 'not-found',
+            component: ErrorPage,
         },
     ],
 })
