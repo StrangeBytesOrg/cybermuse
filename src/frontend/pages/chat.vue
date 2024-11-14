@@ -8,6 +8,7 @@ import {useChatStore, useModelStore} from '@/store'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import Message from '@/components/message.vue'
+import router from '@/router'
 
 const route = useRoute()
 const toast = useToast()
@@ -26,7 +27,7 @@ await modelStore.getLoaded()
 console.log('loaded: ', modelStore.loaded)
 
 if (!chatId || Array.isArray(chatId)) {
-    // router.push('/chats')
+    router.push({name: 'chats'})
     throw new Error('Invalid chat ID')
 }
 
@@ -212,7 +213,7 @@ const toggleCtxMenu = () => {
                 <Bars4Icon class="size-10" />
                 <Transition name="fade">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
-                        <li><a @click="impersonate()">Impersonate</a></li>
+                        <li><a @click="impersonate">Impersonate</a></li>
                     </ul>
                 </Transition>
             </button>

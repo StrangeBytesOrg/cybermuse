@@ -9,26 +9,26 @@ const router = useRouter()
 const toast = useToast()
 const chatId = route.params.id
 if (!chatId || Array.isArray(chatId)) {
-    router.push('/chats')
+    router.push({name: 'chats'})
     throw new Error('Invalid chat ID')
 }
 
 const chat = await chatCollection.findById(chatId)
 const characters = await characterCollection.find()
 if (!chat) {
-    router.push('/chats')
+    router.push({name: 'chats'})
     throw new Error('Chat not found')
 }
 
 const updateChat = async () => {
     await chatCollection.put(chat)
     toast.success('Updated')
-    router.push('/chats')
+    router.push({name: 'chats'})
 }
 
 const deleteChat = async () => {
     await chatCollection.removeById(chatId)
-    router.push('/chats')
+    router.push({name: 'chats'})
 }
 </script>
 

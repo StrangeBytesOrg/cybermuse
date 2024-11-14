@@ -27,7 +27,7 @@ const createLore = async () => {
         entries: lore.entries,
     })
     toast.success('Lore created')
-    router.push('/lore')
+    router.push({name: 'lore'})
 }
 </script>
 

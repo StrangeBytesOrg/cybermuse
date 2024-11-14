@@ -26,7 +26,7 @@ const preset = reactive({
 const createTemplate = async () => {
     await generationPresetCollection.put(preset)
     toast.success('Created new preset')
-    router.push('/presets')
+    router.push({name: 'presets'})
 }
 </script>
 

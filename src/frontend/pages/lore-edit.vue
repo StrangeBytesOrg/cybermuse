@@ -12,7 +12,7 @@ const toast = useToast()
 const loreId = route.params.id
 
 if (!loreId || Array.isArray(loreId)) {
-    router.push('/lore')
+    router.push({name: 'lore'})
     throw new Error('No lore ID provided')
 }
 
@@ -37,7 +37,7 @@ const updateLore = async () => {
 const deleteLore = async () => {
     await loreCollection.removeById(loreId)
     toast.success('Lore deleted')
-    router.push('/lore')
+    router.push({name: 'lore'})
 }
 </script>
 

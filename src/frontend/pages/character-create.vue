@@ -21,7 +21,7 @@ const character = reactive({
 const createCharacter = async () => {
     await characterCollection.put(character)
     toast.success('Character created')
-    await router.push('/characters')
+    await router.push({name: 'characters'})
 }
 
 const uploadAvatar = async (image: string) => {
@@ -105,6 +105,7 @@ const importCharacterPng = async (image: string) => {
         <div class="divider"></div>
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
+            <button class="btn btn-error ml-2" @click="router.back">Cancel</button>
         </div>
     </div>
 </template>

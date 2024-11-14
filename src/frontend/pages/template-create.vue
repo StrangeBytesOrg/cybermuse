@@ -17,7 +17,7 @@ const template = reactive({
 const createTemplate = async () => {
     await templateCollection.put(template)
     toast.success('Template created')
-    router.push(`/templates`)
+    router.push({name: 'templates'})
 }
 
 const getPreview = async () => {

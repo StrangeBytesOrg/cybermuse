@@ -11,24 +11,24 @@ const router = useRouter()
 const characterId = route.params.id
 
 if (!characterId || Array.isArray(characterId)) {
-    router.push('/characters')
+    router.push({name: 'characters'})
     throw new Error('Character not found')
 }
 
 const character = reactive(await characterCollection.findById(characterId))
 if (!character) {
-    router.push('/characters')
+    router.push({name: 'characters'})
     throw new Error('Character not found')
 }
 
 const updateCharacter = async () => {
     await characterCollection.put(character)
-    router.push('/characters')
+    router.push({name: 'characters'})
 }
 
 const deleteCharacter = async () => {
     await characterCollection.removeById(characterId)
-    router.push('/characters')
+    router.push({name: 'characters'})
 }
 
 const uploadAvatar = async (image: string) => {
