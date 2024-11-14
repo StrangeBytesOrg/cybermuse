@@ -9,17 +9,17 @@ const toast = useToast()
 
 const presets = reactive(await generationPresetCollection.find())
 const user = reactive(await userCollection.findById('default-user'))
-const selectedPresetId = ref(user.generatePreset)
+const selectedPresetId = ref(user.generatePresetId)
 
 const activePreset = computed(() => {
-    return presets.find((preset) => preset._id === user.generatePreset)
+    return presets.find((preset) => preset._id === user.generatePresetId)
 })
 
 const setActivePreset = async () => {
     // Check if the preset exists
     await generationPresetCollection.findById(selectedPresetId.value)
 
-    user.generatePreset = selectedPresetId.value
+    user.generatePresetId = selectedPresetId.value
     await userCollection.update(user)
 
     toast.success('Active preset set')
@@ -39,7 +39,7 @@ const deletePreset = async () => {
 
     await generationPresetCollection.removeById(selectedPresetId.value)
     // Set the default preset as active
-    user.generatePreset = 'default-generation-preset'
+    user.generatePresetId = 'default-generation-preset'
     selectedPresetId.value = 'default-generation-preset'
     await userCollection.update(user)
 }

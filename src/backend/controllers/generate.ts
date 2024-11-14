@@ -17,7 +17,7 @@ export const generateRouter = t.router({
                 generationSettings: z.object({
                     maxTokens: z.number(),
                     temperature: z.number(),
-                    seed: z.number(),
+                    seed: z.number().optional(),
                     topK: z.number().optional(),
                     topP: z.number().optional(),
                     minP: z.number().optional(),
@@ -34,6 +34,7 @@ export const generateRouter = t.router({
         )
         .mutation(async function* ({input, signal}) {
             const {systemPrompt, messages, generationSettings} = input
+            logger.debug('generationSettings', generationSettings)
             const chatHistory = llamaChat.chatWrapper.generateInitialChatHistory({systemPrompt})
             messages.forEach((message) => {
                 const formattedMessage = formatMessage(message)

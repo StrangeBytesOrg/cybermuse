@@ -1,9 +1,4 @@
-import {
-    characterCollection,
-    templateCollection,
-    generationPresetCollection,
-    userCollection,
-} from './index'
+import {characterCollection, templateCollection, generationPresetCollection, userCollection} from './index'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {% for character in characters %}{{character.name}}: {{character.description}}
@@ -21,8 +16,8 @@ export const fixtureData = async () => {
         await userCollection.put({
             _id: 'default-user',
             name: 'Default',
-            generatePreset: 'default-generation-preset',
-            promptTemplate: 'default-template',
+            generatePresetId: 'default-generation-preset',
+            promptTemplateId: 'default-template',
         })
     }
 

@@ -4,7 +4,7 @@ import find from 'pouchdb-find'
 import {z} from 'zod'
 
 const dbName = 'devdb'
-const db = new PouchDB(dbName, {
+export const db = new PouchDB(dbName, {
     revs_limit: 10, // TODO verify if auto-compaction is necessary with revs_limit
 })
 PouchDB.plugin(find)
@@ -74,7 +74,7 @@ const generationPresetSchema = baseSchema.extend({
     context: z.number(),
     maxTokens: z.number(),
     temperature: z.number(),
-    seed: z.number(),
+    seed: z.number().optional(),
     topK: z.number().optional(),
     topP: z.number().optional(),
     minP: z.number().optional(),
@@ -89,7 +89,7 @@ export const generationPresetCollection = new Collection(db, 'generationPreset',
 /** User */
 const userSchema = baseSchema.extend({
     name: z.string(),
-    generatePreset: z.string(),
-    promptTemplate: z.string(),
+    generatePresetId: z.string(),
+    promptTemplateId: z.string(),
 })
 export const userCollection = new Collection(db, 'user', userSchema)

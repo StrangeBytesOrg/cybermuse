@@ -2,7 +2,7 @@
 import {ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {characterCollection, loreCollection, templateCollection, userCollection} from '@/db'
+import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
 import {streamingClient} from '@/api-client'
 import {useChatStore, useModelStore} from '@/store'
 import {Template} from '@huggingface/jinja'
@@ -110,8 +110,9 @@ const generateMessage = async () => {
     }
 
     try {
-        const {promptTemplate} = await userCollection.findById('default-user')
-        const template = await templateCollection.findById(promptTemplate)
+        const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
+        const generatePreset = await generationPresetCollection.findById(generatePresetId)
+        const template = await templateCollection.findById(promptTemplateId)
         const jTemplate = new Template(template.template)
         const systemPrompt = jTemplate.render({characters, lore})
         console.log(`systemPrompt: ${systemPrompt}`)
@@ -119,21 +120,16 @@ const generateMessage = async () => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
         })
-        const generationSettings = {
-            maxTokens: 32,
-            temperature: 1,
-            seed: Math.random() * 100000,
-        }
         const iterable = await streamingClient.generate.generate.mutate(
             {
                 systemPrompt,
                 messages: formattedMessages,
-                generationSettings,
+                generationSettings: generatePreset,
             },
             {signal: abortController.signal},
         )
         for await (const text of iterable) {
-            lastMessage.content[lastMessage.activeIndex] = text
+            lastMessage.content[lastMessage.activeIndex] = text.trim()
             await chatStore.save()
             scrollMessages('smooth')
         }
