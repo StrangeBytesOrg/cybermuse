@@ -6,6 +6,7 @@ import {useThemeStore} from './store/'
 import './styles/global.css'
 import './styles/tailwind.css'
 import 'vue-toastification/dist/index.css'
+import {Bars4Icon} from '@heroicons/vue/24/outline'
 
 const themeStore = useThemeStore()
 const toast = useToast()
@@ -27,10 +28,7 @@ const toggleMenu = () => {
     <div :data-theme="themeStore.theme" class="min-h-[100vh]">
         <div class="bg-base-200 h-14 sm:hidden fixed top-0 w-full z-30">
             <button @click="toggleMenu" class="btn btn-sm btn-square w-10 h-10 ml-3 mt-2">
-                <!-- prettier-ignore -->
-                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
-                </svg>
+                <Bars4Icon class="size-10" />
             </button>
         </div>
 

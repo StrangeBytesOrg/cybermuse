@@ -6,6 +6,7 @@ import {characterCollection, loreCollection, templateCollection, userCollection}
 import {streamingClient} from '@/api-client'
 import {useChatStore, useModelStore} from '@/store'
 import {Template} from '@huggingface/jinja'
+import {Bars4Icon} from '@heroicons/vue/24/outline'
 import Message from '@/components/message.vue'
 
 const route = useRoute()
@@ -208,10 +209,7 @@ const toggleCtxMenu = () => {
         <div class="flex md:px-2 md:pb-2 w-full max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
-                <!-- prettier-ignore -->
-                <svg class="w-10 h-10" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5" />
-                </svg>
+                <Bars4Icon class="size-10" />
                 <Transition name="fade">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
                         <li><a @click="impersonate()">Impersonate</a></li>
@@ -252,22 +250,5 @@ const toggleCtxMenu = () => {
 .fade-enter-from,
 .fade-leave-to {
     opacity: 0;
-}
-
-.messageText p {
-    color: var(--msg);
-}
-
-.messageText em {
-    @apply text-base-content/80;
-}
-
-.messageText q {
-    color: var(--quote);
-}
-
-/* Fix wrapping for code blocks */
-code {
-    white-space: pre-wrap;
 }
 </style>
