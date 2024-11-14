@@ -3,6 +3,7 @@ import {ref, reactive, computed} from 'vue'
 import {useToast} from 'vue-toastification'
 import {generationPresetCollection, userCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
+import NumberInput from '@/components/number-input.vue'
 
 const toast = useToast()
 
@@ -77,28 +78,25 @@ const deletePreset = async () => {
                         <div class="label">
                             <span class="label-text">Max Response Tokens</span>
                         </div>
-                        <input
-                            type="number"
-                            class="input input-bordered focus:outline-none focus:border-primary"
-                            v-model="activePreset.maxTokens" />
+                        <NumberInput
+                            v-model="activePreset.maxTokens"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
 
                     <label class="form-control w-full">
                         <div class="label">
                             <span class="label-text">Max Context</span>
                         </div>
-                        <input
-                            type="number"
-                            class="input input-bordered focus:outline-none focus:border-primary"
-                            v-model="activePreset.context" />
+                        <NumberInput
+                            v-model="activePreset.context"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
 
                     <label class="form-control w-full">
                         <div class="label">
                             <span class="label-text">Temperature</span>
                         </div>
-                        <input
-                            type="number"
+                        <NumberInput
                             v-model="activePreset.temperature"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
@@ -107,8 +105,7 @@ const deletePreset = async () => {
                         <div class="label">
                             <span class="label-text">Seed</span>
                         </div>
-                        <input
-                            type="number"
+                        <NumberInput
                             v-model="activePreset.seed"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
@@ -117,67 +114,60 @@ const deletePreset = async () => {
                         <div class="label">
                             <span class="label-text">Min P</span>
                         </div>
-                        <input
-                            type="number"
-                            class="input input-bordered focus:outline-none focus:border-primary"
-                            v-model="activePreset.minP" />
+                        <NumberInput
+                            v-model="activePreset.minP"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
 
                     <label class="form-control w-full">
                         <div class="label">
                             <span class="label-text">Top P</span>
                         </div>
-                        <input
-                            type="number"
-                            class="input input-bordered focus:outline-none focus:border-primary"
-                            v-model="activePreset.topP" />
+                        <NumberInput
+                            v-model="activePreset.topP"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
 
                     <label class="form-control w-full">
                         <div class="label">
                             <span class="label-text">Top K</span>
                         </div>
-                        <input
-                            type="number"
-                            class="input input-bordered focus:outline-none focus:border-primary"
-                            v-model="activePreset.topK" />
+                        <NumberInput
+                            v-model="activePreset.topK"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                 </div>
 
                 <div class="flex flex-col flex-grow">
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Repeat-penalty</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.repeatPenalty"
+                        <NumberInput
+                            v-model="activePreset.repeatPenalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Repeat-last-n</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.repeatLastN"
+                        <NumberInput
+                            v-model="activePreset.repeatLastN"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Penalize-nl</span></div>
-                        <select v-model.number="activePreset.penalizeNL" class="select select-bordered">
+                        <select v-model="activePreset.penalizeNL" class="select select-bordered">
                             <option :value="true">true</option>
                             <option :value="false">false</option>
                         </select>
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Presence-penalty</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.presencePenalty"
+                        <NumberInput
+                            v-model="activePreset.presencePenalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Frequency-penalty</span></div>
-                        <input
-                            type="text"
-                            v-model.number="activePreset.frequencyPenalty"
+                        <NumberInput
+                            v-model="activePreset.frequencyPenalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                 </div>
