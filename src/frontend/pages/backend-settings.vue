@@ -5,6 +5,7 @@ import {ArrowPathIcon, CheckCircleIcon} from '@heroicons/vue/24/outline'
 import TopBar from '@/components/top-bar.vue'
 import {client} from '@/api-client'
 import {useModelStore} from '@/store'
+import NumberInput from '@/components/number-input.vue'
 
 const toast = useToast()
 const modelStore = useModelStore()
@@ -106,21 +107,21 @@ await getModels()
                 <div class="label">
                     <span class="label-text">Context size</span>
                 </div>
-                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="contextSize" />
+                <NumberInput class="input input-bordered w-full md:max-w-96" v-model="contextSize" />
             </label>
 
             <label class="form-control w-full max-w-96 mt-3">
                 <div class="label">
                     <span class="label-text">Batch size</span>
                 </div>
-                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="batchSize" />
+                <NumberInput class="input input-bordered w-full md:max-w-96" v-model="batchSize" />
             </label>
 
             <label class="form-control w-full max-w-96 mt-3">
                 <div class="label">
                     <span class="label-text">GPU layers</span>
                 </div>
-                <input type="number" class="input input-bordered w-full md:max-w-96" v-model="gpuLayers" />
+                <NumberInput class="input input-bordered w-full md:max-w-96" v-model="gpuLayers" />
             </label>
 
             <label class="form-control w-full max-w-96 mt-3">
