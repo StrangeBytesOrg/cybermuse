@@ -10,9 +10,8 @@ const toast = useToast()
 const router = useRouter()
 const preset = reactive({
     name: '',
-    context: 2048,
     maxTokens: 250,
-    temperature: 0,
+    temperature: 1,
     seed: undefined,
     minP: undefined,
     topP: undefined,
@@ -54,15 +53,6 @@ const createTemplate = async () => {
 
                 <label class="form-control w-full">
                     <div class="label">
-                        <span class="label-text">Context Length</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.context"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-
-                <label class="form-control w-full">
-                    <div class="label">
                         <span class="label-text">Max Tokens</span>
                     </div>
                     <NumberInput
@@ -73,6 +63,9 @@ const createTemplate = async () => {
                 <label class="form-control w-full">
                     <div class="label">
                         <span class="label-text">Seed</span>
+                        <div class="tooltip" data-tip="Leave empty for random">
+                            <div class="badge badge-secondary badge-md">?</div>
+                        </div>
                     </div>
                     <NumberInput
                         v-model="preset.seed"

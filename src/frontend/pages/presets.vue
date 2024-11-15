@@ -85,15 +85,6 @@ const deletePreset = async () => {
 
                     <label class="form-control w-full">
                         <div class="label">
-                            <span class="label-text">Max Context</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.context"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-
-                    <label class="form-control w-full">
-                        <div class="label">
                             <span class="label-text">Temperature</span>
                         </div>
                         <NumberInput
@@ -104,6 +95,9 @@ const deletePreset = async () => {
                     <label class="form-control w-full">
                         <div class="label">
                             <span class="label-text">Seed</span>
+                            <div class="tooltip" data-tip="Leave empty for random">
+                                <div class="badge badge-secondary badge-md">?</div>
+                            </div>
                         </div>
                         <NumberInput
                             v-model="activePreset.seed"

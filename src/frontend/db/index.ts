@@ -70,12 +70,11 @@ export const templateCollection = new Collection(db, 'template', templateSchema)
 /** Generation Preset */
 const generationPresetSchema = baseSchema.extend({
     _id: z.string().default(() => `generationPreset-${Math.random().toString(36).slice(2)}`),
-    name: z.string(),
-    context: z.number(),
-    maxTokens: z.number(),
-    temperature: z.number(),
-    seed: z.number().optional(),
-    topK: z.number().optional(),
+    name: z.string().min(1),
+    maxTokens: z.number().positive().int(),
+    temperature: z.number().nonnegative(),
+    seed: z.number().nonnegative().int().optional(),
+    topK: z.number().int().optional(),
     topP: z.number().optional(),
     minP: z.number().optional(),
     repeatPenalty: z.object({

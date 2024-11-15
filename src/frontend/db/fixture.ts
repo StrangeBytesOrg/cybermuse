@@ -54,10 +54,8 @@ export const fixtureData = async () => {
         await generationPresetCollection.put({
             _id: 'default-generation-preset',
             name: 'Default',
-            context: 1024,
             maxTokens: 64,
-            temperature: 0.5,
-            seed: -1,
+            temperature: 1,
             repeatPenalty: {},
         })
     }

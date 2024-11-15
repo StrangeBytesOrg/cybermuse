@@ -106,6 +106,9 @@ await getModels()
             <label class="form-control w-full max-w-96 mt-3">
                 <div class="label">
                     <span class="label-text">Context size</span>
+                    <div class="tooltip" data-tip="Controls the maximum prompt size.">
+                        <div class="badge badge-secondary badge-md">?</div>
+                    </div>
                 </div>
                 <NumberInput class="input input-bordered w-full md:max-w-96" v-model="contextSize" />
             </label>
