@@ -48,6 +48,7 @@ const chatSchema = baseSchema.extend({
     createDate: z.string().datetime(),
     messages: z.array(
         z.object({
+            id: z.string(),
             characterId: z.string(),
             type: z.union([z.literal('user'), z.literal('model'), z.literal('system')]),
             content: z.array(z.string()),

@@ -80,6 +80,7 @@ const impersonate = async () => {
 
 const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
     chat.messages.push({
+        id: Math.random().toString(36).slice(2),
         characterId,
         type,
         content: [text],
@@ -168,7 +169,7 @@ const toggleCtxMenu = () => {
             class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <Message
                 v-for="(message, index) in chat.messages.slice().reverse()"
-                v-bind:key="chat.messages.length - 1 - index"
+                v-bind:key="message.id"
                 :index="chat.messages.length - 1 - index"
                 :message="message"
                 :characterMap="characterMap"
