@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import {defineEmits} from 'vue'
-
 defineProps<{modelValue: number | undefined}>()
 const emit = defineEmits(['update:modelValue'])
 const handleUpdate = (event: Event) => {
     const target = event.target as HTMLInputElement
-    emit('update:modelValue', parseFloat(target.value) || undefined)
+    if (target.value === '') return emit('update:modelValue', undefined)
+    emit('update:modelValue', parseFloat(target.value))
 }
 </script>
 
