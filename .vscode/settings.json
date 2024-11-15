@@ -1,20 +1,3 @@
 {
-    "cSpell.words": [
-        "cybermuse",
-        "strangebytes",
-        "daisyui",
-        "detokenize",
-        "dotenv",
-        "huggingface",
-        "llamacpp",
-        "mirostat",
-        "openapi",
-        "pinia",
-        "roleplay",
-        "snarkdown",
-        "tailwindcss",
-        "toastification",
-        "typebox"
-    ],
     "typescript.tsdk": "node_modules/typescript/lib"
 }
