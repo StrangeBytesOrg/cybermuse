@@ -1,17 +1,15 @@
 <script lang="ts" setup>
 import {ref, nextTick, onMounted} from 'vue'
 import {useRoute} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {Template} from '@huggingface/jinja'
+import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
 import {streamingClient} from '@/api-client'
 import {useChatStore, useModelStore} from '@/store'
-import {Template} from '@huggingface/jinja'
-import {Bars4Icon} from '@heroicons/vue/24/outline'
 import Message from '@/components/message.vue'
 import router from '@/router'
 
 const route = useRoute()
-const toast = useToast()
 const chatStore = useChatStore()
 const modelStore = useModelStore()
 const chatId = route.params.id
@@ -42,12 +40,10 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
     if (pendingMessage.value) {
-        toast.error('Message already in progress')
-        return
+        throw new Error('Message already in progress')
     }
     if (!modelStore.loaded) {
-        toast.error('Generation server not running or not connected')
-        return
+        throw new Error('Generation server not running or not connected')
     }
 
     // Only create a new user message if there is text
@@ -62,8 +58,7 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     } else if (chat.characters[0]) {
         characterId = chat.characters[0]
     } else {
-        toast.error('Missing characters')
-        return
+        throw new Error('Missing characters')
     }
 
     // Create a new empty message for the response
@@ -74,12 +69,10 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 
 const impersonate = async () => {
     if (pendingMessage.value) {
-        toast.error('Message already in progress')
-        return
+        throw new Error('Message already in progress')
     }
     if (!modelStore.loaded) {
-        toast.error('Generation server not running or not connected')
-        return
+        throw new Error('Generation server not running or not connected')
     }
 
     await createMessage(userCharacter, '', 'model')
@@ -115,7 +108,6 @@ const generateMessage = async () => {
         const template = await templateCollection.findById(promptTemplateId)
         const jTemplate = new Template(template.template)
         const systemPrompt = jTemplate.render({characters, lore})
-        console.log(`systemPrompt: ${systemPrompt}`)
         const formattedMessages = chat.messages.map((message) => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
@@ -153,11 +145,10 @@ const stopGeneration = () => {
 }
 
 const newSwipe = async (messageIndex: number) => {
-    const message = chat.messages[messageIndex]
     if (pendingMessage.value) {
-        toast.error('Message already in progress')
-        return
+        throw new Error('Message already in progress')
     }
+    const message = chat.messages[messageIndex]
     if (message) {
         message.content.push('')
         message.activeIndex = message.content.length - 1
@@ -208,7 +199,12 @@ const toggleCtxMenu = () => {
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <Bars4Icon class="size-10" />
-                <Transition name="fade">
+                <Transition
+                    name="fade"
+                    leave-to-class="opacity-0"
+                    enter-from-class="opacity-0"
+                    enter-active-class="transition duration-300"
+                    leave-active-class="transition duration-300">
                     <ul class="menu absolute bottom-16 bg-base-300 w-40 rounded-box" v-show="showCtxMenu">
                         <li><a @click="impersonate">Impersonate</a></li>
                     </ul>
@@ -239,14 +235,3 @@ const toggleCtxMenu = () => {
         </div>
     </main>
 </template>
-
-<style>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.2s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-    opacity: 0;
-}
-</style>

@@ -41,8 +41,7 @@ const getModels = async () => {
 
 const loadModel = async () => {
     if (!selectModel.value) {
-        toast.error('No model selected')
-        return
+        throw new Error('No model selected')
     }
 
     try {
