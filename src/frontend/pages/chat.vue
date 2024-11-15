@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, nextTick, onMounted} from 'vue'
+import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
@@ -16,7 +16,6 @@ const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
 const messagesElement = ref<HTMLElement>()
-let lastScrollTime = Date.now()
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
@@ -89,8 +88,6 @@ const createMessage = async (characterId: string, text: string = '', type: 'user
     await chatStore.save()
 
     currentMessage.value = ''
-    await nextTick()
-    scrollMessages('smooth')
 }
 
 const generateMessage = async () => {
@@ -124,7 +121,6 @@ const generateMessage = async () => {
         for await (const text of iterable) {
             lastMessage.content[lastMessage.activeIndex] = text.trim()
             await chatStore.save()
-            scrollMessages('smooth')
         }
         await chatStore.save()
     } catch (error) {
@@ -133,7 +129,6 @@ const generateMessage = async () => {
         throw error
     } finally {
         console.log('done pending')
-        scrollMessages('smooth')
         pendingMessage.value = false
     }
 }
@@ -157,20 +152,6 @@ const newSwipe = async (messageIndex: number) => {
     }
 }
 
-const scrollMessages = (behavior: 'auto' | 'instant' | 'smooth' = 'auto') => {
-    if (Date.now() - lastScrollTime < 100 && behavior === 'smooth') return
-    lastScrollTime = Date.now()
-
-    messagesElement.value?.scroll({
-        top: messagesElement.value?.scrollHeight,
-        behavior,
-    })
-}
-
-onMounted(() => {
-    scrollMessages('instant')
-})
-
 const toggleCtxMenu = () => {
     showCtxMenu.value = !showCtxMenu.value
 }
@@ -178,21 +159,23 @@ const toggleCtxMenu = () => {
 
 <template>
     <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
+        <!-- expanding spacer -->
+        <div class="flex-grow" />
+
         <!-- Messages -->
-        <div ref="messagesElement" class="flex-grow overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
+        <div
+            ref="messagesElement"
+            class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <Message
-                v-for="(message, index) in chat.messages"
-                v-bind:key="index"
-                :index="index"
+                v-for="(message, index) in chat.messages.slice().reverse()"
+                v-bind:key="chat.messages.length - 1 - index"
+                :index="chat.messages.length - 1 - index"
                 :message="message"
                 :characterMap="characterMap"
                 :loading="false"
-                :showSwipes="index === chat.messages.length - 1 && message.type === 'model'"
+                :showSwipes="index === 0 && message.type === 'model'"
                 @new-swipe="newSwipe" />
         </div>
-
-        <!-- expanding spacer -->
-        <div class="flex-grow" />
 
         <!-- Chat Controls -->
         <div class="flex md:px-2 md:pb-2 w-full max-w-[70em] ml-auto mr-auto">
