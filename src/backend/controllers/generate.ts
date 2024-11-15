@@ -21,14 +21,13 @@ export const generateRouter = t.router({
                     topK: z.number().optional(),
                     topP: z.number().optional(),
                     minP: z.number().optional(),
-                    // TODO add all the other generation settings
-                    // repeatPenalty: {
-                    //     penalty: generatePreset.repeatPenalty || undefined,
-                    //     presencePenalty: generatePreset.presencePenalty || undefined,
-                    //     frequencyPenalty: generatePreset.frequencyPenalty || undefined,
-                    //     penalizeNewLine: generatePreset.penalizeNL || undefined,
-                    //     lastTokens: generatePreset.repeatLastN || undefined,
-                    // },
+                    repeatPenalty: z.object({
+                        penalty: z.number().optional(),
+                        frequencyPenalty: z.number().optional(),
+                        presencePenalty: z.number().optional(),
+                        penalizeNewLine: z.boolean().optional(),
+                        lastTokens: z.number().optional(),
+                    }),
                 }),
             }),
         )

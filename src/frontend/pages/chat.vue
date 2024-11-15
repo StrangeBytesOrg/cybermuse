@@ -120,6 +120,7 @@ const generateMessage = async () => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
         })
+
         const iterable = await streamingClient.generate.generate.mutate(
             {
                 systemPrompt,

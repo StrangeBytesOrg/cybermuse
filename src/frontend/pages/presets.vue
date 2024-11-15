@@ -142,33 +142,33 @@ const deletePreset = async () => {
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Repeat-penalty</span></div>
                         <NumberInput
-                            v-model="activePreset.repeatPenalty"
+                            v-model="activePreset.repeatPenalty.penalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Repeat-last-n</span></div>
-                        <NumberInput
-                            v-model="activePreset.repeatLastN"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Penalize-nl</span></div>
-                        <select v-model="activePreset.penalizeNL" class="select select-bordered">
-                            <option :value="true">true</option>
-                            <option :value="false">false</option>
-                        </select>
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Presence-penalty</span></div>
                         <NumberInput
-                            v-model="activePreset.presencePenalty"
+                            v-model="activePreset.repeatPenalty.presencePenalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
                     </label>
                     <label class="form-control w-full">
                         <div class="label"><span class="label-text">Frequency-penalty</span></div>
                         <NumberInput
-                            v-model="activePreset.frequencyPenalty"
+                            v-model="activePreset.repeatPenalty.frequencyPenalty"
                             class="input input-bordered focus:outline-none focus:border-primary" />
+                    </label>
+                    <label class="form-control w-full">
+                        <div class="label"><span class="label-text">Last Tokens</span></div>
+                        <NumberInput
+                            v-model="activePreset.repeatPenalty.lastTokens"
+                            class="input input-bordered focus:outline-none focus:border-primary" />
+                    </label>
+                    <label class="form-control w-full">
+                        <div class="label"><span class="label-text">Penalize-nl</span></div>
+                        <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                            <option :value="true">true</option>
+                            <option :value="false">false</option>
+                        </select>
                     </label>
                 </div>
             </div>

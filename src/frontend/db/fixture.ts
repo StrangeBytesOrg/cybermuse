@@ -58,6 +58,7 @@ export const fixtureData = async () => {
             maxTokens: 64,
             temperature: 0.5,
             seed: -1,
+            repeatPenalty: {},
         })
     }
 }

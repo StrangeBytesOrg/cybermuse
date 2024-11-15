@@ -78,11 +78,13 @@ const generationPresetSchema = baseSchema.extend({
     topK: z.number().optional(),
     topP: z.number().optional(),
     minP: z.number().optional(),
-    repeatPenalty: z.number().optional(),
-    repeatLastN: z.number().optional(),
-    penalizeNL: z.boolean().optional(),
-    presencePenalty: z.number().optional(),
-    frequencyPenalty: z.number().optional(),
+    repeatPenalty: z.object({
+        penalty: z.number().optional(),
+        presencePenalty: z.number().optional(),
+        frequencyPenalty: z.number().optional(),
+        lastTokens: z.number().optional(),
+        penalizeNewLine: z.boolean().optional(),
+    }),
 })
 export const generationPresetCollection = new Collection(db, 'generationPreset', generationPresetSchema)
 

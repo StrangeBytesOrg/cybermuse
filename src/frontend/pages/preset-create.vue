@@ -2,7 +2,7 @@
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {generationPresetCollection} from '@/db'
+import {generationPresetCollection, userCollection} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 import NumberInput from '@/components/number-input.vue'
 
@@ -17,15 +17,20 @@ const preset = reactive({
     minP: undefined,
     topP: undefined,
     topK: undefined,
-    repeatPenalty: undefined,
-    repeatLastN: undefined,
-    penalizeNL: false,
-    presencePenalty: undefined,
-    frequencyPenalty: undefined,
+    repeatPenalty: {
+        penalty: undefined,
+        presencePenalty: undefined,
+        frequencyPenalty: undefined,
+        lastTokens: undefined,
+        penalizeNewLine: undefined,
+    },
 })
 
 const createTemplate = async () => {
-    await generationPresetCollection.put(preset)
+    const {id} = await generationPresetCollection.put(preset)
+    const user = await userCollection.findById('default-user')
+    user.generatePresetId = id
+    await userCollection.update(user)
     toast.success('Created new preset')
     router.push({name: 'presets'})
 }
@@ -115,33 +120,33 @@ const createTemplate = async () => {
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Repeat-penalty</span></div>
                     <NumberInput
-                        v-model="preset.repeatPenalty"
+                        v-model="preset.repeatPenalty.penalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Repeat-last-n</span></div>
-                    <NumberInput
-                        v-model="preset.repeatLastN"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Penalize-nl</span></div>
-                    <select v-model="preset.penalizeNL" class="select select-bordered">
-                        <option :value="true">true</option>
-                        <option :value="false">false</option>
-                    </select>
                 </label>
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Presence-penalty</span></div>
                     <NumberInput
-                        v-model="preset.presencePenalty"
+                        v-model="preset.repeatPenalty.presencePenalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
                 </label>
                 <label class="form-control w-full">
                     <div class="label"><span class="label-text">Frequency-penalty</span></div>
                     <NumberInput
-                        v-model="preset.frequencyPenalty"
+                        v-model="preset.repeatPenalty.frequencyPenalty"
                         class="input input-bordered focus:outline-none focus:border-primary" />
+                </label>
+                <label class="form-control w-full">
+                    <div class="label"><span class="label-text">Last Tokens</span></div>
+                    <NumberInput
+                        v-model="preset.repeatPenalty.lastTokens"
+                        class="input input-bordered focus:outline-none focus:border-primary" />
+                </label>
+                <label class="form-control w-full">
+                    <div class="label"><span class="label-text">Penalize-nl</span></div>
+                    <select v-model="preset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                        <option :value="true">true</option>
+                        <option :value="false">false</option>
+                    </select>
                 </label>
             </div>
         </div>
