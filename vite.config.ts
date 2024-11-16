@@ -9,7 +9,7 @@ import {fileURLToPath} from 'node:url'
 // https://vitejs.dev/config/
 export default defineConfig({
     root: path.resolve('./src/frontend/'),
-    base: './',
+    base: '/',
     css: {
         postcss: {
             plugins: [tailwind(tailwindConfig), autoprefixer],

@@ -24,15 +24,8 @@ server.register(cors)
 //     logger.error(error)
 // })
 
-// Serve avatars
-await server.register(async (instance) => {
-    await instance.register(fastifyStatic, {
-        root: avatarsPath,
-        prefix: '/avatars/',
-    })
-})
-
-server.register(fastifyTRPCPlugin, {
+// Register API endpoints
+await server.register(fastifyTRPCPlugin, {
     prefix: '/trpc',
     trpcOptions: {
         router: appRouter,
@@ -46,9 +39,20 @@ server.register(fastifyTRPCPlugin, {
     } satisfies FastifyTRPCPluginOptions<AppRouter>['trpcOptions'],
 })
 
-// Serve frontend
+// Serve frontend. Use a fallback to index.html for SPA routing
 await server.register(fastifyStatic, {
     root: path.resolve(import.meta.dirname, '../', 'frontend'),
+    prefix: '/',
+})
+server.setNotFoundHandler((request, reply) => reply.sendFile('/index.html'))
+
+// Serve avatars
+await server.register(fastifyStatic, {
+    root: avatarsPath,
+    prefix: '/avatars/',
+    list: true,
+    index: false,
+    decorateReply: false,
 })
 
 server.listen({port: config.serverPort, host: '0.0.0.0'}, (error) => {
