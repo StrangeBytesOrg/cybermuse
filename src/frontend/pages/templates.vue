@@ -10,7 +10,7 @@ let templates = reactive(await templateCollection.find())
 let user = reactive(await userCollection.findById('default-user'))
 const example = ref('')
 
-const selectedTemplate = ref(user.promptTemplate)
+const selectedTemplate = ref(user.promptTemplateId)
 const activeTemplate = computed(() => {
     return templates.find((t) => t._id === selectedTemplate.value)
 })
@@ -21,7 +21,7 @@ const setActiveTemplate = async () => {
     // Check if the template exists
     await templateCollection.findById(selectedTemplate.value)
 
-    user.promptTemplate = selectedTemplate.value
+    user.promptTemplateId = selectedTemplate.value
     await userCollection.update(user)
 }
 
@@ -41,7 +41,7 @@ const deleteTemplate = async () => {
     if (activeTemplate.value) {
         await templateCollection.removeById(activeTemplate.value._id)
         // Set the default template as active
-        user.promptTemplate = 'default-template'
+        user.promptTemplateId = 'default-template'
         selectedTemplate.value = 'default-template'
         await userCollection.update(user)
         toast.success('Template deleted')
