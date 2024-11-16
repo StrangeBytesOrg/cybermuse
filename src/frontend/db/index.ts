@@ -17,7 +17,7 @@ const baseSchema = z.object({
 /** Character */
 const characterSchema = baseSchema.extend({
     _id: z.string().default(() => `character-${Math.random().toString(36).slice(2)}`),
-    name: z.string(),
+    name: z.string().min(1),
     type: z.union([z.literal('user'), z.literal('character')]),
     description: z.string(),
     firstMessage: z.string().optional(),
