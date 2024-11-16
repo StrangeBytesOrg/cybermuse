@@ -4,7 +4,7 @@ import {useRoute} from 'vue-router'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
-import {streamingClient} from '@/api-client'
+import {streamingClient, client} from '@/api-client'
 import {useChatStore, useModelStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
@@ -30,10 +30,19 @@ if (!chatId || Array.isArray(chatId)) {
 
 await chatStore.getChat(chatId)
 const chat = chatStore.chat
-const characters = await characterCollection.find()
-const lore = await loreCollection.find()
-const userCharacter = chat.userCharacter
+const characters = await characterCollection.find({
+    selector: {
+        _id: {$in: chat.characters},
+    },
+})
+const userCharacter = await characterCollection.findById(chat.userCharacter)
+const lore = await loreCollection.find({
+    selector: {
+        _id: {$in: chat.lore},
+    },
+})
 const characterMap = Object.fromEntries(characters.map((c) => [c._id, c]))
+characterMap[chat.userCharacter] = userCharacter
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
@@ -47,13 +56,12 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
-        await createMessage(userCharacter, currentMessage.value, 'user')
+        await createMessage(userCharacter._id, currentMessage.value, 'user')
     }
 
     let characterId
     if (chat.characters.length > 1) {
-        // characterId = await client.generate.pickCharacter.mutate(chatId)
-        throw new Error('Multi-character chat not implemented')
+        characterId = await pickCharacter()
     } else if (chat.characters[0]) {
         characterId = chat.characters[0]
     } else {
@@ -74,7 +82,7 @@ const impersonate = async () => {
         throw new Error('Generation server not running or not connected')
     }
 
-    await createMessage(userCharacter, '', 'model')
+    await createMessage(userCharacter._id, '', 'model')
     await generateMessage()
 }
 
@@ -134,10 +142,39 @@ const generateMessage = async () => {
     }
 }
 
-const stopGeneration = () => {
-    abortController.abort()
-    pendingMessage.value = false
-    abortController = new AbortController()
+const pickCharacter = async () => {
+    const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
+    const generatePreset = await generationPresetCollection.findById(generatePresetId)
+    const template = await templateCollection.findById(promptTemplateId)
+    const jTemplate = new Template(template.template)
+    // Render each character description
+    characters.forEach((c) => {
+        const characterTemplate = new Template(c.description)
+        c.description = characterTemplate.render({char: c.name})
+    })
+    const systemPrompt = jTemplate.render({characters, lore})
+    const formattedMessages = chat.messages.map((message) => {
+        const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
+        return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
+    })
+    formattedMessages.push({type: 'model', content: ''})
+
+    // Call generate, passing a grammar to be used for character picking
+    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
+
+    const res = await client.generate.generateNonStreaming.mutate({
+        systemPrompt,
+        messages: formattedMessages,
+        gbnfString,
+        generationSettings: generatePreset,
+    })
+
+    const characterName = res.response
+    const character = characters.find((c) => c.name === characterName)
+    if (!character) {
+        throw new Error('Character not found')
+    }
+    return character._id
 }
 
 const newSwipe = async (messageIndex: number) => {
@@ -151,6 +188,12 @@ const newSwipe = async (messageIndex: number) => {
         await chatStore.save()
         await generateMessage()
     }
+}
+
+const stopGeneration = () => {
+    abortController.abort()
+    pendingMessage.value = false
+    abortController = new AbortController()
 }
 
 const toggleCtxMenu = () => {
