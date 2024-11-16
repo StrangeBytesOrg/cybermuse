@@ -1,7 +1,9 @@
 <script lang="ts" setup>
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
+import {Template} from '@huggingface/jinja'
 import {chatCollection, characterCollection, loreCollection} from '@/db'
+import type {Message} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const router = useRouter()
@@ -14,14 +16,33 @@ const characters = await characterCollection.find()
 const lore = await loreCollection.find()
 
 const createChat = async () => {
+    // If characters have a first message, add it to the chat
+    const messages: Message[] = []
+    selectedCharacters.value.forEach(async (characterId) => {
+        const character = characters.find((c) => c._id === characterId)
+        if (character?.firstMessage) {
+            // Parse firstMessage template
+            const jinjaTemplate = new Template(character.firstMessage)
+            const content = jinjaTemplate.render({char: character.name})
+            messages.push({
+                id: Math.random().toString(36).slice(2),
+                type: 'model',
+                content: [content],
+                activeIndex: 0,
+                characterId: character._id,
+            })
+        }
+    })
+
     const {id} = await chatCollection.put({
         name: chatName.value,
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value,
         lore: selectedLore.value,
         createDate: new Date().toISOString(),
-        messages: [],
+        messages,
     })
+
     router.push({name: 'chat', params: {id}})
 }
 
