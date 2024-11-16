@@ -44,6 +44,64 @@ const lore = await loreCollection.find({
 const characterMap = Object.fromEntries(characters.map((c) => [c._id, c]))
 characterMap[chat.userCharacter] = userCharacter
 
+// Common setup function for generation
+const setupGeneration = async () => {
+    const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
+    const generatePreset = await generationPresetCollection.findById(generatePresetId)
+    const template = await templateCollection.findById(promptTemplateId)
+    const jinjaTemplate = new Template(template.template)
+
+    // Render each character description
+    characters.forEach((c) => {
+        const characterTemplate = new Template(c.description)
+        c.description = characterTemplate.render({char: c.name})
+    })
+
+    const systemPrompt = jinjaTemplate.render({characters, lore})
+    const formattedMessages = chat.messages.map((message) => {
+        const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
+        return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
+    })
+
+    return {systemPrompt, formattedMessages, generatePreset}
+}
+
+const pickCharacter = async () => {
+    // If there are no characters, throw an error
+    if (chat.characters.length === 0) {
+        throw new Error('Missing characters')
+    }
+
+    // If there's only one character, use that one
+    if (chat.characters.length === 1 && chat.characters[0]) {
+        return chat.characters[0]
+    }
+
+    // For multiple characters, use GBNF to select one
+    pendingMessage.value = true
+    const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
+
+    // Add empty message for response
+    formattedMessages.push({type: 'model', content: ''})
+
+    // Call generate, passing a grammar to be used for character picking
+    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
+
+    const res = await client.generate.generateNonStreaming.mutate({
+        systemPrompt,
+        messages: formattedMessages,
+        gbnfString,
+        generationSettings: generatePreset,
+    })
+
+    const characterName = res.response
+    const character = characters.find((c) => c.name === characterName)
+    if (!character) {
+        throw new Error('Character not found')
+    }
+    return character._id
+}
+
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
@@ -59,16 +117,8 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
         await createMessage(userCharacter._id, currentMessage.value, 'user')
     }
 
-    let characterId
-    if (chat.characters.length > 1) {
-        characterId = await pickCharacter()
-    } else if (chat.characters[0]) {
-        characterId = chat.characters[0]
-    } else {
-        throw new Error('Missing characters')
-    }
-
     // Create a new empty message for the response
+    const characterId = await pickCharacter()
     await createMessage(characterId, '', 'model')
 
     await generateMessage()
@@ -109,15 +159,7 @@ const generateMessage = async () => {
     }
 
     try {
-        const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
-        const generatePreset = await generationPresetCollection.findById(generatePresetId)
-        const template = await templateCollection.findById(promptTemplateId)
-        const jTemplate = new Template(template.template)
-        const systemPrompt = jTemplate.render({characters, lore})
-        const formattedMessages = chat.messages.map((message) => {
-            const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
-            return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
-        })
+        const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
 
         const iterable = await streamingClient.generate.generate.mutate(
             {
@@ -140,41 +182,6 @@ const generateMessage = async () => {
         console.log('done pending')
         pendingMessage.value = false
     }
-}
-
-const pickCharacter = async () => {
-    const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
-    const generatePreset = await generationPresetCollection.findById(generatePresetId)
-    const template = await templateCollection.findById(promptTemplateId)
-    const jTemplate = new Template(template.template)
-    // Render each character description
-    characters.forEach((c) => {
-        const characterTemplate = new Template(c.description)
-        c.description = characterTemplate.render({char: c.name})
-    })
-    const systemPrompt = jTemplate.render({characters, lore})
-    const formattedMessages = chat.messages.map((message) => {
-        const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
-        return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
-    })
-    formattedMessages.push({type: 'model', content: ''})
-
-    // Call generate, passing a grammar to be used for character picking
-    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
-
-    const res = await client.generate.generateNonStreaming.mutate({
-        systemPrompt,
-        messages: formattedMessages,
-        gbnfString,
-        generationSettings: generatePreset,
-    })
-
-    const characterName = res.response
-    const character = characters.find((c) => c.name === characterName)
-    if (!character) {
-        throw new Error('Character not found')
-    }
-    return character._id
 }
 
 const newSwipe = async (messageIndex: number) => {
