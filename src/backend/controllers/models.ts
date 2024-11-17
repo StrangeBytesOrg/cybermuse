@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import {z} from 'zod'
-// import {fileExists} from '@huggingface/hub'
+import {createModelDownloader} from 'node-llama-cpp'
 import {TRPCError} from '@trpc/server'
 import {t} from '../trpc.js'
 import {getConfig, setConfig} from '../config.js'
@@ -54,50 +54,45 @@ export const modelsRouter = t.router({
     downloadModel: t.procedure
         .input(
             z.object({
-                repoId: z.string(),
-                path: z.string(),
+                repo: z.string(),
+                filename: z.string(),
             }),
         )
-        .mutation(async ({}) => {
-            console.log('NEED TO IMPLEMENT')
-            // // TODO handle canceling
-            // const exists = await fileExists({repo: request.body.repoId, path: request.body.path})
-            // if (!exists) {
-            //     return reply.status(404).send({message: 'Model not found'})
-            // }
-            // const config = getConfig()
-            // const response = await fetch(
-            //     `https://huggingface.co/${request.body.repoId}/resolve/main/${request.body.path}`,
-            // )
-            // if (response.body === null || !response.ok) {
-            //     logger.error('Failed to download model')
-            //     return reply.status(500).send({message: 'Failed to download model'})
-            // }
-            // const reader = response.body.getReader()
-            // const contentLength = Number(response.headers.get('content-length'))
-            // logger.info(`Downloading ${request.body.path}, Size: ${(contentLength / 1024 / 1024).toFixed(2)} MB`)
-            // const finalPath = path.resolve(config.modelsPath, request.body.path)
-            // logger.info(`Model will be downloaded to: ${finalPath}`)
-            // const fileStream = fs.createWriteStream(finalPath)
-            // // Setup headers for server-sent events
-            // reply.raw.setHeader('Content-Type', 'text/event-stream')
-            // reply.raw.setHeader('Cache-Control', 'no-store')
-            // reply.raw.setHeader('Connection', 'keep-alive')
-            // reply.raw.setHeader('Access-Control-Allow-Origin', '*')
-            // let receivedLength = 0
-            // while (true) {
-            //     const {done, value} = await reader.read()
-            //     if (done) break
-            //     fileStream.write(value)
-            //     receivedLength += value.length
-            //     const progress = (receivedLength / contentLength) * 100
-            //     logger.info(`Progress: ${progress.toFixed(2)}%`)
-            //     reply.raw.write(`event:progress\ndata: ${JSON.stringify({progress})}\n\n`)
-            // }
-            // fileStream.end()
-            // logger.info('Model downloaded')
-            // reply.raw.write(`event:final\ndata: {"progress": 100}\n\n`)
-            // reply.raw.end()
-            // request.socket.destroy()
+        .mutation(async function* ({input, signal}) {
+            const {repo, filename} = input
+
+            logger.info('Downloading model', `${repo}/${filename}`)
+            signal?.addEventListener('abort', () => {
+                logger.info('Download aborted')
+                // TODO implement abort
+            })
+
+            const chunkStream = new ReadableStream({
+                async start(controller) {
+                    const downloader = await createModelDownloader({
+                        modelUri: `hf:${repo}/${filename}`,
+                        dirPath: getConfig().modelsPath,
+                        onProgress: (progress) => {
+                            const percentage = Math.floor((progress.downloadedSize / progress.totalSize) * 100)
+                            logger.debug(`Progress: ${percentage}%`)
+                            controller.enqueue({progress: percentage})
+                        },
+                    })
+                    await downloader.download()
+                    logger.info('Model downloaded')
+                    controller.close()
+                },
+            })
+
+            let lastEmit = ''
+            const reader = chunkStream.getReader()
+            while (true) {
+                const {done, value} = await reader.read()
+                if (done) break
+                if (value.progress !== lastEmit) {
+                    lastEmit = value.progress
+                    yield value
+                }
+            }
         }),
 })
