@@ -17,9 +17,9 @@ const baseSchema = z.object({
 /** Character */
 const characterSchema = baseSchema.extend({
     _id: z.string().default(() => `character-${Math.random().toString(36).slice(2)}`),
-    name: z.string().min(1),
+    name: z.string().min(1, {message: 'Character name cannot be empty'}),
     type: z.union([z.literal('user'), z.literal('character')]),
-    description: z.string(),
+    description: z.string().min(1, {message: 'Character description cannot be empty'}),
     firstMessage: z.string().optional(),
     image: z.string().optional(),
 })
@@ -28,10 +28,10 @@ export const characterCollection = new Collection(db, 'character', characterSche
 /** Lore */
 const loreSchema = baseSchema.extend({
     _id: z.string().default(() => `lore-${Math.random().toString(36).slice(2)}`),
-    name: z.string(),
+    name: z.string().min(1, {message: 'Lorebook name cannot be empty'}),
     entries: z.array(
         z.object({
-            name: z.string(),
+            name: z.string().min(1, {message: 'Entry name cannot be empty'}),
             content: z.string(),
         }),
     ),
@@ -42,8 +42,8 @@ export const loreCollection = new Collection(db, 'lore', loreSchema)
 const chatSchema = baseSchema.extend({
     _id: z.string().default(() => `chat-${Math.random().toString(36).slice(2)}`),
     name: z.string(),
-    userCharacter: z.string(),
-    characters: z.array(z.string()),
+    userCharacter: z.string({message: 'A user character is required'}),
+    characters: z.array(z.string()).min(1, {message: 'At least one character is required'}),
     lore: z.array(z.string()),
     createDate: z.string().datetime(),
     messages: z.array(
@@ -63,16 +63,16 @@ export type Message = z.infer<typeof chatSchema>['messages'][0]
 /** Template */
 const templateSchema = baseSchema.extend({
     _id: z.string().default(() => `template-${Math.random().toString(36).slice(2)}`),
-    name: z.string(),
-    template: z.string(),
+    name: z.string().min(1, {message: 'Template name cannot be empty'}),
+    template: z.string().min(1, {message: 'Template content cannot be empty'}),
 })
 export const templateCollection = new Collection(db, 'template', templateSchema)
 
 /** Generation Preset */
 const generationPresetSchema = baseSchema.extend({
     _id: z.string().default(() => `generationPreset-${Math.random().toString(36).slice(2)}`),
-    name: z.string().min(1),
-    maxTokens: z.number().positive().int(),
+    name: z.string().min(1, {message: 'Generation Preset name cannot be empty'}),
+    maxTokens: z.number({message: 'Max Tokens is required'}).positive().int(),
     temperature: z.number().nonnegative(),
     seed: z.number().nonnegative().int().optional(),
     topK: z.number().int().optional(),

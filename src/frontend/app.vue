@@ -2,7 +2,9 @@
 import {ref, onErrorCaptured} from 'vue'
 import {RouterLink, RouterView} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {useThemeStore} from './store/'
+import {ZodError} from 'zod'
+import {fromError} from 'zod-validation-error'
+import {useThemeStore} from './store'
 import './styles/global.css'
 import './styles/tailwind.css'
 import 'vue-toastification/dist/index.css'
@@ -14,7 +16,12 @@ const showMenu = ref(false)
 const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
 onErrorCaptured((error) => {
-    toast.error(error.message)
+    if (error instanceof ZodError) {
+        const validationError = fromError(error, {issueSeparator: `\n`, prefix: '', prefixSeparator: ''})
+        toast.error(validationError.message)
+    } else {
+        toast.error(error.message)
+    }
     console.error(error)
     return false
 })
