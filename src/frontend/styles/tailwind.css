@@ -1,3 +1,41 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@plugin "daisyui" {
+    themes:
+        dark --default,
+        dracula,
+        aqua,
+        winter,
+        pastel;
+}
+
+@plugin "daisyui/theme" {
+    name: 'dark';
+    --msg: #ffffff;
+    --quote: oklch(0.79 0.17 70);
+}
+@plugin "daisyui/theme" {
+    name: 'forest';
+    --radius-field: 0.5rem;
+    --msg: #ffffff;
+    --quote: var(--color-primary);
+}
+@plugin "daisyui/theme" {
+    name: 'dracula';
+    --quote: oklch(var(--p));
+}
+@plugin "daisyui/theme" {
+    name: 'aqua';
+    --quote: oklch(0.79 0.17 70.66);
+}
+@plugin "daisyui/theme" {
+    name: 'winter';
+    --msg: #000000;
+    --quote: oklch(0.79 0.17 70.66);
+}
+@plugin "daisyui/theme" {
+    name: 'pastel';
+    --radius-field: 0.5rem;
+    --msg: #000000;
+    --quote: oklch(0.6 0.3 310);
+}

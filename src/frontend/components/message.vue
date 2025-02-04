@@ -148,6 +148,7 @@ const resizeTextarea = async (event: Event) => {
 </template>
 
 <style>
+@reference "../styles/tailwind.css";
 .messageText p {
     @apply mt-2;
     color: var(--msg);
