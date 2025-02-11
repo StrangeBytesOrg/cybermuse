@@ -7,8 +7,6 @@ on:
       - ci
 
 env:
-  # Necessary for most environments as build failure can occur due to OOM issues
-  NODE_OPTIONS: "--max-old-space-size=4096"
   APP_VERSION: "v0.${{ github.run_number }}"
   VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 
@@ -48,23 +46,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          node-version: '20.14.0'
+          go-version: '1.23.5'
 
-      - name: Install Node Dependencies
-        run: npm ci
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Build Frontend and Backend
-        run: npm run build
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Build Electron
-        run: npm run make
+      - name: Install JS Dependencies
+        run: bun install --frozen-lockfile
 
-      - name: Zip installer on Windows
-        if: matrix.build.platform == 'windows/amd64'
-        run: Compress-Archive -Path out/cybermuse-desktop-win-x64.exe -DestinationPath out/cybermuse-desktop-win-x64.zip
+      - name: Build App
+        run: wails build -skipbindings -platform=${{ matrix.build.platform }} -nsis=${{ matrix.build.platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
+
+      # - name: Zip installer on Windows
+      #   if: matrix.build.platform == 'windows/amd64'
+      #   run: Compress-Archive -Path out/cybermuse-desktop-win-x64.exe -DestinationPath out/cybermuse-desktop-win-x64.zip
 
       # Github release files
       - name: Upload Github Release Files
