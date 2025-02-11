@@ -3,4 +3,4 @@ dist
 build/bin/
 archive
 rclone.conf
-src/wailsjs
+wailsjs/

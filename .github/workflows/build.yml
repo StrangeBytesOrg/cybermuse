@@ -46,20 +46,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.5'
-
       # Covers both libgtk for Linux build and nsis for Windows installer build
       - name: Install System Dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
 
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23.5'
+
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Setup bun
+      - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
@@ -69,15 +69,18 @@ jobs:
 
       - name: Compress Linux Binary
         if: matrix.build.platform == 'linux/amd64'
-        run: tar -cJf build/bin/cybermuse-desktop-linux-x64.tar.xz build/bin/cybermuse-desktop
+        run: cd build/bin && tar -cJf cybermuse-desktop-linux-x64.tar.xz cybermuse-desktop
 
       - name: Compress Windows Binary/Installer
         if: matrix.build.platform == 'windows/amd64'
-        run: zip -r build/bin/cybermuse-desktop-windows-x64.zip build/bin/cybermuse-desktop.exe
+        run: |
+          cd build/bin
+          zip -r cybermuse-desktop-windows-x64.zip cybermuse-desktop.exe
+          zip -r cybermuse-desktop-windows-installer.zip cybermuse-desktop-amd64-installer.exe
 
       - name: Compress Mac Binary
         if: matrix.build.platform == 'darwin/amd64'
-        run: zip -r build/bin/cybermuse-desktop-mac-x64.zip build/bin/cybermuse-desktop.app
+        run: cd build/bin && zip -r cybermuse-desktop-mac-x64.zip cybermuse-desktop.app
 
       # Github release files
       - name: Upload Github Release Files
