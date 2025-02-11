@@ -73,7 +73,7 @@ jobs:
 
       - name: Compress Windows Binary/Installer
         if: matrix.build.platform == 'windows/amd64'
-        run: Compress-Archive -Path build/bin/cybermuse-desktop.exe -DestinationPath build/bin/cybermuse-desktop-windows-x64.zip
+        run: zip -r build/bin/cybermuse-desktop-windows-x64.zip build/bin/cybermuse-desktop.exe
 
       - name: Compress Mac Binary
         if: matrix.build.platform == 'darwin/amd64'
@@ -85,8 +85,8 @@ jobs:
         with:
           tag_name: ${{ env.APP_VERSION }}
           files: |
-            out/*.tar.xz
-            out/*.zip
+            build/bin/*.tar.xz
+            build/bin/*.zip
 
       # - name: Setup RClone
       #   uses: AnimMouse/setup-rclone@v1
