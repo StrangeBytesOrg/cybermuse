@@ -97,36 +97,22 @@ onMounted(() => {
             <router-link to="/create-template" class="btn btn-primary mt-auto ml-3">Create Template</router-link>
         </div>
 
-        <div v-if="activeTemplate" class="flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">
-            <label class="form-control w-full">
-                <div class="label">
-                    <span class="label-text">Template Name</span>
-                </div>
-                <input
-                    type="text"
-                    v-model="activeTemplate.name"
-                    class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
-            </label>
+        <fieldset v-if="activeTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">
+            <label class="label text-sm">Template Name</label>
+            <input v-model="activeTemplate.name" type="text" class="input input-bordered focus:outline-none" />
 
-            <div class="flex flex-col w-full">
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Template</span>
-                    </div>
-                    <textarea
-                        v-model="activeTemplate.template"
-                        @input="resizeTextarea"
-                        class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-                </label>
-            </div>
+            <label class="label text-sm mt-3">Template</label>
+            <textarea
+                v-model="activeTemplate.template"
+                @input="resizeTextarea"
+                class="textarea textarea-bordered leading-normal p-2 focus:outline-none" />
 
             <div class="flex flex-row space-x-2 mt-3">
                 <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
                 <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
-                <button @click="deleteTemplate()" class="btn btn-error flex-grow">Delete</button>
+                <button @click="deleteTemplate" class="btn btn-error flex-grow">Delete</button>
             </div>
-        </div>
-        <div v-else>Template not found</div>
+        </fieldset>
 
         <div class="w-full" v-if="example">
             <div class="flex w-full bg-base-200 rounded-lg p-3 mt-3 whitespace-pre-wrap">{{ example }}</div>

@@ -39,111 +39,61 @@ const createTemplate = async () => {
     <TopBar title="Create Preset" back />
 
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
-        <div class="flex flex-row justify-between">
-            <div class="flex flex-col flex-grow mr-8">
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Preset Name</span>
-                    </div>
-                    <input
-                        type="text"
-                        v-model="preset.name"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+        <div class="flex flex-row">
+            <fieldset class="fieldset">
+                <legend class="fieldset-legend">Basic Settings</legend>
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Max Tokens</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.maxTokens"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+                <label class="fieldset-label text-sm">Preset Name</label>
+                <input v-model="preset.name" type="text" class="input focus:outline-none" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Seed</span>
-                        <div class="tooltip" data-tip="Leave empty for random">
-                            <div class="badge badge-secondary badge-md">?</div>
-                        </div>
-                    </div>
-                    <NumberInput
-                        v-model="preset.seed"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+                <label class="fieldset-label text-sm">Max Response Tokens</label>
+                <NumberInput v-model="preset.maxTokens" class="input input-bordered focus:outline-none" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Temperature</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.temperature"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+                <label class="fieldset-label text-sm">Temperature</label>
+                <NumberInput v-model="preset.temperature" class="input input-bordered focus:outline-none" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Min P</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.minP"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+                <label class="fieldset-label text-sm">Seed</label>
+                <NumberInput v-model="preset.seed" class="input input-bordered focus:outline-none" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Top P</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.topP"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
+                <label class="fieldset-label text-sm">Min P</label>
+                <NumberInput v-model="preset.minP" class="input input-bordered focus:outline-none" />
 
-                <label class="form-control w-full">
-                    <div class="label">
-                        <span class="label-text">Top K</span>
-                    </div>
-                    <NumberInput
-                        v-model="preset.topK"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-            </div>
+                <label class="fieldset-label text-sm">Top P</label>
+                <NumberInput v-model="preset.topP" class="input input-bordered focus:outline-none" />
 
-            <div class="flex flex-col flex-grow">
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Repeat-penalty</span></div>
-                    <NumberInput
-                        v-model="preset.repeatPenalty.penalty"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Presence-penalty</span></div>
-                    <NumberInput
-                        v-model="preset.repeatPenalty.presencePenalty"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Frequency-penalty</span></div>
-                    <NumberInput
-                        v-model="preset.repeatPenalty.frequencyPenalty"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Last Tokens</span></div>
-                    <NumberInput
-                        v-model="preset.repeatPenalty.lastTokens"
-                        class="input input-bordered focus:outline-none focus:border-primary" />
-                </label>
-                <label class="form-control w-full">
-                    <div class="label"><span class="label-text">Penalize-nl</span></div>
-                    <select v-model="preset.repeatPenalty.penalizeNewLine" class="select select-bordered">
-                        <option :value="true">true</option>
-                        <option :value="false">false</option>
-                    </select>
-                </label>
-            </div>
+                <label class="fieldset-label text-sm">Top K</label>
+                <NumberInput v-model="preset.topK" class="input input-bordered focus:outline-none" />
+            </fieldset>
+
+            <fieldset class="fieldset ml-5">
+                <legend class="fieldset-legend">Penalties</legend>
+
+                <label class="fieldset-label text-sm">Repeat-penalty</label>
+                <NumberInput v-model="preset.repeatPenalty.penalty" class="input input-bordered focus:outline-none" />
+
+                <label class="fieldset-label text-sm">Presence-penalty</label>
+                <NumberInput
+                    v-model="preset.repeatPenalty.presencePenalty"
+                    class="input input-bordered focus:outline-none" />
+
+                <label class="fieldset-label text-sm">Frequency-penalty</label>
+                <NumberInput
+                    v-model="preset.repeatPenalty.frequencyPenalty"
+                    class="input input-bordered focus:outline-none" />
+
+                <label class="fieldset-label text-sm">Last Tokens</label>
+                <NumberInput
+                    v-model="preset.repeatPenalty.lastTokens"
+                    class="input input-bordered focus:outline-none" />
+
+                <label class="fieldset-label text-sm">Penalize-nl</label>
+                <select v-model="preset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                    <option :value="true">true</option>
+                    <option :value="false">false</option>
+                </select>
+            </fieldset>
         </div>
 
-        <button @click="createTemplate" class="btn btn-primary mt-2">Create Preset</button>
+        <button @click="createTemplate" class="btn btn-primary max-w-32 mt-2">Create Preset</button>
     </div>
 </template>
