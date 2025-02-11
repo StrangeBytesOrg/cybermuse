@@ -35,12 +35,12 @@ jobs:
           - name: build-linux
             os: ubuntu-latest
             platform: linux/amd64
+          - name: build-windows
+            os: ubuntu-latest
+            platform: windows/amd64
           - name: build-mac
             os: macos-latest
             platform: darwin/amd64
-          - name: build-windows
-            os: windows-latest
-            platform: windows/amd64
     runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
@@ -51,6 +51,11 @@ jobs:
         with:
           go-version: '1.23.5'
 
+      # Covers both libgtk for Linux build and nsis for Windows installer build
+      - name: Install System Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+
       - name: Install Wails
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
@@ -58,9 +63,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-
-      - name: Install JS Dependencies
-        run: bun install --frozen-lockfile
 
       - name: Build App
         run: wails build -skipbindings -platform=${{ matrix.build.platform }} -nsis=${{ matrix.build.platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
