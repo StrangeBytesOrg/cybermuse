@@ -33,10 +33,10 @@ jobs:
       matrix:
         build:
           - name: build-linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             platform: linux/amd64
           - name: build-windows
-            os: ubuntu-latest
+            os: ubuntu-22.04
             platform: windows/amd64
           - name: build-mac
             os: macos-latest
