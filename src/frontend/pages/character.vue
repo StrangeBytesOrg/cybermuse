@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {client} from '@/api-client'
 import {characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
@@ -32,7 +31,8 @@ const deleteCharacter = async () => {
 }
 
 const uploadAvatar = async (image: string) => {
-    character.image = await client.avatars.uploadAvatar.mutate(image)
+    // TODO re-implement
+    // character.image = await client.avatars.uploadAvatar.mutate(image)
 }
 
 const removeImage = () => {

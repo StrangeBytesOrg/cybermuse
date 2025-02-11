@@ -4,10 +4,6 @@
 
 ## Features
 
-### Manage and run models locally
-
-Cybermuse uses llama.cpp under the hood, and includes a model manager to directly download compatible models from Huggingface.
-
 ### Create and Import characters
 
 You can create new characters or use the popular Tavern V2 png format to import any of thousands of existing character cards.
@@ -18,16 +14,22 @@ Group chats utilize the LLM itself to pick which character should respond next i
 
 ### Template based prompt formatting
 
-Jinja is used for templating giving you complete control over how the prompt is formatted. Templates for the most popular models are included out of the box.
+Jinja is used for templating giving you complete control over how the prompt is formatted.
 
 ## Building Locally
 
-Building locally requires NodeJS
+Building locally requires Go and Bun
 
-Build the frontend, backend, and electron app:
+Building the frontend for browser use:
 
 ```bash
-npm install
-npm run build
-npm run make
+bun install
+bun run build
+bun run preview
+```
+
+Building the full application:
+
+```bash
+wails build
 ```

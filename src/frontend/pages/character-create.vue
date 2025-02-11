@@ -2,7 +2,6 @@
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '@/api-client'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
@@ -26,7 +25,8 @@ const createCharacter = async () => {
 
 const uploadAvatar = async (image: string) => {
     if (image === '') return
-    character.image = await client.avatars.uploadAvatar.mutate(image)
+    // TODO re-implement
+    // character.image = await client.avatars.uploadAvatar.mutate(image)
     toast.success('Avatar uploaded')
 }
 

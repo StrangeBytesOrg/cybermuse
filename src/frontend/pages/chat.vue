@@ -1,17 +1,19 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRoute} from 'vue-router'
+import {useToast} from 'vue-toastification'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
-import {streamingClient, client} from '@/api-client'
-import {useChatStore, useModelStore} from '@/store'
+import {useChatStore, useConnectionStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
+import {responseToIterable} from '../lib/sse'
 
 const route = useRoute()
+const toast = useToast()
 const chatStore = useChatStore()
-const modelStore = useModelStore()
+const connectionStore = useConnectionStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -19,9 +21,14 @@ const messagesElement = ref<HTMLElement>()
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
-// Check if a model is loaded on page load
-await modelStore.getLoaded()
-console.log('loaded: ', modelStore.loaded)
+// Check if API connection is good
+const checkFetch = await fetch(connectionStore.connectionUrl + '/health')
+const checkRes = await checkFetch.json()
+console.log(checkRes)
+if (checkRes.status !== 'ok') {
+    toast.error('Not connected to a generation API')
+}
+connectionStore.connected = true
 
 if (!chatId || Array.isArray(chatId)) {
     router.push({name: 'chats'})
@@ -77,29 +84,32 @@ const pickCharacter = async () => {
         return chat.characters[0]
     }
 
+    // TODO implement
+    throw new Error('Multiple characters not implemented')
+
     // For multiple characters, use GBNF to select one
-    pendingMessage.value = true
-    const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
+    // pendingMessage.value = true
+    // const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
 
-    // Add empty message for response
-    formattedMessages.push({type: 'model', content: ''})
+    // // Add empty message for response
+    // formattedMessages.push({type: 'model', content: ''})
 
-    // Call generate, passing a grammar to be used for character picking
-    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
+    // // Call generate, passing a grammar to be used for character picking
+    // const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
 
-    const res = await client.generate.generateNonStreaming.mutate({
-        systemPrompt,
-        messages: formattedMessages,
-        gbnfString,
-        generationSettings: generatePreset,
-    })
+    // const res = await client.generate.generateNonStreaming.mutate({
+    //     systemPrompt,
+    //     messages: formattedMessages,
+    //     gbnfString,
+    //     generationSettings: generatePreset,
+    // })
 
-    const characterName = res.response
-    const character = characters.find((c) => c.name === characterName)
-    if (!character) {
-        throw new Error('Character not found')
-    }
-    return character._id
+    // const characterName = res.response
+    // const character = characters.find((c) => c.name === characterName)
+    // if (!character) {
+    //     throw new Error('Character not found')
+    // }
+    // return character._id
 }
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
@@ -108,8 +118,8 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    if (!modelStore.loaded) {
-        throw new Error('Generation server not running or not connected')
+    if (!connectionStore.connected) {
+        throw new Error('Not connected to generation server')
     }
 
     // Only create a new user message if there is text
@@ -128,7 +138,7 @@ const impersonate = async () => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    if (!modelStore.loaded) {
+    if (!connectionStore.connected) {
         throw new Error('Generation server not running or not connected')
     }
 
@@ -153,30 +163,60 @@ const generateMessage = async () => {
     pendingMessage.value = true
     const lastMessage = chat.messages[chat.messages.length - 1]
 
+    // Realistically this probably can't happen but it keeps TS happy
     if (!lastMessage) {
-        // Realistically this probably can't happen but it keeps TS happy
         throw new Error('No messages to generate into')
     }
 
+    const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
     try {
         const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
 
-        const iterable = await streamingClient.generate.generate.mutate(
-            {
-                systemPrompt,
-                messages: formattedMessages,
-                generationSettings: generatePreset,
+        const messages = []
+        messages.push({
+            role: 'system',
+            content: systemPrompt,
+        })
+        formattedMessages.forEach((message) => {
+            messages.push({
+                role: message.type === 'user' ? 'user' : 'model',
+                content: message.content,
+            })
+        })
+        messages.pop()
+
+        const response = await fetch(chatCompletionUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
             },
-            {signal: abortController.signal},
-        )
-        for await (const text of iterable) {
-            lastMessage.content[lastMessage.activeIndex] = text.trim()
-            await chatStore.save()
+            signal: abortController.signal,
+            body: JSON.stringify({
+                stream: true,
+                messages,
+                n_predict: generatePreset.maxTokens,
+                temperature: generatePreset.temperature,
+                min_p: generatePreset.minP,
+                top_p: generatePreset.topP,
+                top_k: generatePreset.topK,
+                // TODO add Penalties
+            }),
+        })
+        const iterable = responseToIterable(response)
+        let messageBuffer = ''
+        for await (const chunk of iterable) {
+            if (chunk.data !== '[DONE]') {
+                const wat = JSON.parse(chunk.data)
+                if (wat.choices[0].delta.content) {
+                    messageBuffer += wat.choices[0].delta.content
+                    lastMessage.content[lastMessage.activeIndex] = messageBuffer
+                    await chatStore.save()
+                }
+            }
         }
-        await chatStore.save()
+        console.log(messageBuffer)
     } catch (error) {
-        // Ignore abort errors
-        if (error instanceof Error && error.message === 'Invalid response or stream interrupted') return
+        if (error instanceof Error && error.name === 'AbortError') return
         throw error
     } finally {
         console.log('done pending')
@@ -254,7 +294,7 @@ const toggleCtxMenu = () => {
 
             <button
                 @click="fullSend"
-                :disabled="!modelStore.loaded"
+                :disabled="!connectionStore.connected"
                 v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 {{ pendingMessage ? '' : 'Send' }}
