@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRoute} from 'vue-router'
-import {useToast} from 'vue-toastification'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
@@ -11,7 +10,6 @@ import router from '@/router'
 import {responseToIterable} from '../lib/sse'
 
 const route = useRoute()
-const toast = useToast()
 const chatStore = useChatStore()
 const connectionStore = useConnectionStore()
 const chatId = route.params.id
@@ -22,13 +20,7 @@ const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
 // Check if API connection is good
-const checkFetch = await fetch(connectionStore.connectionUrl + '/health')
-const checkRes = await checkFetch.json()
-console.log(checkRes)
-if (checkRes.status !== 'ok') {
-    toast.error('Not connected to a generation API')
-}
-connectionStore.connected = true
+await connectionStore.checkConnection()
 
 if (!chatId || Array.isArray(chatId)) {
     router.push({name: 'chats'})
@@ -290,7 +282,7 @@ const toggleCtxMenu = () => {
                 id="message-input"
                 v-model="currentMessage"
                 @keydown.exact.enter="fullSend"
-                class="textarea textarea-bordered border-2 resize-none flex-1 textarea-xs align-middle text-base h-20 focus:outline-none focus:border-primary" />
+                class="textarea textarea-bordered border-2 resize-none flex-1 align-middle h-20 focus:outline-none focus:border-primary" />
 
             <button
                 @click="fullSend"

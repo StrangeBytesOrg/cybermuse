@@ -7,28 +7,28 @@ const toast = useToast()
 const connectionStore = useConnectionStore()
 
 const connect = async () => {
-    const healthUrl = connectionStore.connectionUrl + '/health'
-    const healthRes = await fetch(healthUrl)
-    const healthJson = await healthRes.json()
-
-    if (healthJson.status === 'ok') {
-        connectionStore.connected = true
-        connectionStore.save()
-        toast.success('Connected')
-    } else {
-        throw new Error('Connection failed')
-    }
+    await connectionStore.checkConnection()
+    connectionStore.save()
+    toast.success('Connected')
 }
 </script>
 
 <template>
     <TopBar title="Connection" />
 
-    <div class="flex flex-row m-2">
-        <label class="input">
-            <input type="text" v-model="connectionStore.connectionUrl" placeholder="Connection URL" />
-        </label>
+    <div class="m-2 flex flex-col">
+        <fieldset class="fieldset">
+            <!-- <legend class="fieldset-label text-sm">Connection Type</legend>
+            <select class="select">
+                <option value="llama.cpp">Llama.cpp Server</option>
+            </select> -->
 
-        <button class="btn btn-primary ml-2" @click="connect">Connect</button>
+            <label class="fieldset-label text-sm">Connection URL</label>
+            <div class="flex-row">
+                <input type="text" v-model="connectionStore.connectionUrl" class="input" />
+
+                <button class="btn btn-primary ml-2" @click="connect">Connect</button>
+            </div>
+        </fieldset>
     </div>
 </template>
