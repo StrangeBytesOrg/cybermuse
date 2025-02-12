@@ -56,7 +56,25 @@ const setupGeneration = async () => {
         c.description = characterTemplate.render({char: c.name})
     })
 
-    const systemPrompt = jinjaTemplate.render({characters, lore})
+    // Get character and lore strings
+    let characterString = ''
+    characters.forEach((character) => {
+        characterString += `${character.name}: ${character.description}\n`
+    })
+    let loreString = ''
+    lore.forEach((book) => {
+        loreString += `${book.name}\n`
+        book.entries.forEach((entry) => {
+            loreString += `${entry.name}: ${entry.content}\n`
+        })
+    })
+
+    // Render the system prompt
+    const systemPrompt = jinjaTemplate.render({
+        characters: characterString,
+        lore: loreString,
+    })
+
     const formattedMessages = chat.messages.map((message) => {
         const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
         return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}

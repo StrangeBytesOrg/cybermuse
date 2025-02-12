@@ -64,8 +64,22 @@ const getPreview = async () => {
         throw new Error('Template not found')
     }
 
+    let characterString = ''
+    characters.forEach((character) => {
+        characterString += `${character.name}: ${character.description}\n`
+    })
+    let loreString = ''
+    lore.forEach((book) => {
+        loreString += `${book.name}\n`
+        book.entries.forEach((entry) => {
+            loreString += `${entry.name}: ${entry.content}\n`
+        })
+    })
     const jinjaTemplate = new Template(activeTemplate.value.template)
-    example.value = jinjaTemplate.render({characters, lore})
+    example.value = jinjaTemplate.render({
+        characters: characterString,
+        lore: loreString,
+    })
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -105,7 +119,7 @@ onMounted(() => {
             <textarea
                 v-model="activeTemplate.template"
                 @input="resizeTextarea"
-                class="textarea textarea-bordered leading-normal p-2 focus:outline-none" />
+                class="textarea p-2 w-full textarea-bordered focus:outline-noneleading-normal" />
 
             <div class="flex flex-row space-x-2 mt-3">
                 <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>

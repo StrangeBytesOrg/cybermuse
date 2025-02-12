@@ -1,13 +1,9 @@
 import {characterCollection, templateCollection, generationPresetCollection, userCollection} from './index'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
-{% for character in characters %}{{character.name}}: {{character.description}}
-{% endfor %}
-{% if lore.length %}Use the following background information as lore.
-{% for book in lore %}
-{{ book.name }}
-{% for entry in book.entries %}{{ entry.name}}: {{entry.content}}{% endfor %}
-{% endfor %}{% endif %}`
+{{ characters }}
+{% if lore %}Use the following background information as lore.
+{{ lore }}{% endif %}`
 
 export const fixtureData = async () => {
     const users = await userCollection.find()
