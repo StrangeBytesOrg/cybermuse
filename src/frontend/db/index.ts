@@ -1,5 +1,5 @@
 import {Collection} from '@strangebytes/pouchdb-orm'
-import PouchDB from 'pouchdb'
+import PouchDB from 'pouchdb-browser'
 import find from 'pouchdb-find'
 import {z} from 'zod'
 
