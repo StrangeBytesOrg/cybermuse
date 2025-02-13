@@ -69,18 +69,18 @@ jobs:
 
       - name: Compress Linux Binary
         if: matrix.build.platform == 'linux/amd64'
-        run: cd build/bin && tar -cJf cybermuse-desktop-linux-x64.tar.xz cybermuse-desktop
+        run: cd build/bin && tar -cJf cybermuse-linux-x64.tar.xz cybermuse
 
       - name: Compress Windows Binary/Installer
         if: matrix.build.platform == 'windows/amd64'
         run: |
           cd build/bin
-          zip -r cybermuse-desktop-windows-x64.zip cybermuse-desktop.exe
-          zip -r cybermuse-desktop-windows-installer.zip cybermuse-desktop-amd64-installer.exe
+          zip -r cybermuse-windows-x64.zip cybermuse.exe
+          zip -r cybermuse-windows-installer.zip cybermuse-amd64-installer.exe
 
       - name: Compress Mac Binary
         if: matrix.build.platform == 'darwin/amd64'
-        run: cd build/bin && zip -r cybermuse-desktop-mac-x64.zip cybermuse-desktop.app
+        run: cd build/bin && zip -r cybermuse-mac-x64.zip cybermuse.app
 
       - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2

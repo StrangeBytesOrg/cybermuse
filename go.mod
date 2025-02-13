@@ -1,4 +1,4 @@
-module cybermuse-desktop
+module cybermuse
 
 go 1.22
 
