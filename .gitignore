@@ -1,7 +1,7 @@
 node_modules
-dist
-out
 archive
-llamacpp
-dev.db
 rclone.conf
+wailsjs/
+dist
+build/bin/
+build/windows/

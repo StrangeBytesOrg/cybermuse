@@ -50,33 +50,21 @@ const resizeTextarea = async (event: Event) => {
 <template>
     <TopBar title="Create Template" back />
 
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 pt-0 m-2">
-        <label class="form-control w-full">
-            <div class="label">
-                <span class="label-text">Template Name</span>
-            </div>
-            <input
-                type="text"
-                v-model="template.name"
-                class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
-        </label>
-        <div class="flex flex-col w-full">
-            <label class="form-control w-full">
-                <div class="label">
-                    <span class="label-text">Template</span>
-                </div>
-                <textarea
-                    v-model="template.template"
-                    @input="resizeTextarea"
-                    class="textarea textarea-bordered leading-normal p-2 focus:outline-none focus:border-primary" />
-            </label>
-        </div>
+    <fieldset class="flex flex-col bg-base-200 rounded-lg p-3 pt-1 m-2">
+        <label class="fieldset-label text-sm">Template Name</label>
+        <input v-model="template.name" type="text" class="input focus:outline-none" />
+
+        <label class="fieldset-label text-sm mt-3">Template</label>
+        <textarea
+            v-model="template.template"
+            @input="resizeTextarea"
+            class="textarea textarea-bordered leading-normal p-2 focus:outline-none" />
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
             <button @click="createTemplate" class="btn btn-primary flex-grow">Create Template</button>
         </div>
-    </div>
+    </fieldset>
 
     <div v-if="example" class="flex w-full bg-base-200 rounded-lg p-3 m-2 whitespace-pre-wrap">
         {{ example }}

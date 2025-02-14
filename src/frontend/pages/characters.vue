@@ -1,12 +1,13 @@
 <script lang="ts" setup>
 import {reactive, ref, computed} from 'vue'
 import {RouterLink} from 'vue-router'
-import {characterCollection} from '@/db'
+import {characterCollection, db} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const searchName = ref('')
 const characterType = ref<'user' | 'character' | 'both'>('both')
 const characters = reactive(await characterCollection.find({limit: 110}))
+const avatars: Record<string, string> = {}
 
 // Computed property to filter characters based on search input and character type
 const filteredCharacters = computed(() => {
@@ -16,6 +17,14 @@ const filteredCharacters = computed(() => {
         return matchesName && matchesType
     })
 })
+
+// Get avatar image from attachments
+for (const character of characters) {
+    if (character._attachments) {
+        const avatar = (await db.getAttachment(character._id, 'avatar')) as Blob
+        avatars[character._id] = URL.createObjectURL(avatar)
+    }
+}
 </script>
 
 <template>
@@ -49,7 +58,8 @@ const filteredCharacters = computed(() => {
                     class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     <div class="avatar">
                         <div class="w-36 max-h-36 rounded-xl">
-                            <img v-if="character.image" :src="`/avatars/${character.image}`" :alt="character.name" />
+                            <!-- <img v-if="character.image" :src="character.image" :alt="character.name" /> -->
+                            <img v-if="avatars[character._id]" :src="avatars[character._id]" :alt="character.name" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>
@@ -63,6 +73,12 @@ const filteredCharacters = computed(() => {
                                 {{ character.description }}
                             </p>
                         </div>
+                        <!-- <template v-if="character._attachments">
+                            Type: {{ character._attachments['avatar.png']?.content_type }}
+                            <br />
+                            Digest: {{ character._attachments['avatar.png']?.digest }}
+                        </template> -->
+                        <!-- <img v-if="character.avatar" :src="character.avatar" /> -->
                     </div>
                 </router-link>
             </div>

@@ -7,8 +7,6 @@ on:
       - ci
 
 env:
-  # Necessary for most environments as build failure can occur due to OOM issues
-  NODE_OPTIONS: "--max-old-space-size=4096"
   APP_VERSION: "v0.${{ github.run_number }}"
   VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
 
@@ -35,45 +33,62 @@ jobs:
       matrix:
         build:
           - name: build-linux
-            os: ubuntu-latest
+            os: ubuntu-22.04
             platform: linux/amd64
+          - name: build-windows
+            os: ubuntu-22.04
+            platform: windows/amd64
           - name: build-mac
             os: macos-latest
             platform: darwin/amd64
-          - name: build-windows
-            os: windows-latest
-            platform: windows/amd64
     runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # Covers both libgtk for Linux build and nsis for Windows installer build
+      - name: Install System Dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
         with:
-          node-version: '20.14.0'
+          go-version: '1.23.5'
 
-      - name: Install Node Dependencies
-        run: npm ci
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Build Frontend and Backend
-        run: npm run build
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
 
-      - name: Build Electron
-        run: npm run make
+      - name: Build App
+        run: wails build -skipbindings -platform=${{ matrix.build.platform }} -nsis=${{ matrix.build.platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
 
-      - name: Zip installer on Windows
+      - name: Compress Linux Binary
+        if: matrix.build.platform == 'linux/amd64'
+        run: cd build/bin && tar -cJf cybermuse-linux-x64.tar.xz cybermuse
+
+      - name: Compress Windows Binary/Installer
         if: matrix.build.platform == 'windows/amd64'
-        run: Compress-Archive -Path out/cybermuse-desktop-win-x64.exe -DestinationPath out/cybermuse-desktop-win-x64.zip
+        run: |
+          cd build/bin
+          zip -r cybermuse-windows-x64.zip cybermuse.exe
+          zip -r cybermuse-windows-installer.zip cybermuse-amd64-installer.exe
 
-      # Github release files
+      - name: Compress Mac Binary
+        if: matrix.build.platform == 'darwin/amd64'
+        run: cd build/bin && zip -r cybermuse-mac-x64.zip cybermuse.app
+
       - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ env.APP_VERSION }}
           files: |
-            out/*.tar.xz
-            out/*.zip
+            build/bin/*.tar.xz
+            build/bin/*.zip
 
       # - name: Setup RClone
       #   uses: AnimMouse/setup-rclone@v1

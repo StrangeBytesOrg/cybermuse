@@ -1,12 +1,11 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {client} from '@/api-client'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
-import {decodeChunks} from '@/lib/decode-png-chunks'
+// import {decodeChunks} from '@/lib/decode-png-chunks'
 
 const toast = useToast()
 const router = useRouter()
@@ -15,8 +14,8 @@ const character = reactive({
     description: '',
     firstMessage: '',
     type: 'character' as 'character' | 'user',
-    image: '',
 })
+const characterImage = ref<string>()
 
 const createCharacter = async () => {
     await characterCollection.put(character)
@@ -24,44 +23,49 @@ const createCharacter = async () => {
     await router.push({name: 'characters'})
 }
 
-const uploadAvatar = async (image: string) => {
-    if (image === '') return
-    character.image = await client.avatars.uploadAvatar.mutate(image)
-    toast.success('Avatar uploaded')
+const uploadAvatar = async (file: File) => {
+    character._attachments = {
+        avatar: {
+            content_type: file.type,
+            data: file,
+        },
+    }
+    characterImage.value = URL.createObjectURL(file)
 }
 
 const removeImage = () => {
-    character.image = ''
+    delete character._attachments
+    characterImage.value = undefined
 }
 
-const importCharacterPng = async (image: string) => {
-    if (image === '') return
-    // If the image is a png, check if it has V2 card data embedded
-    if (image.startsWith('data:image/png;base64')) {
-        // Convert the image from a dataurl to an ArrayBuffer
-        const dataurl = image.split(',')[1]
-        if (!dataurl) return
-        const binary = atob(dataurl)
-        const arrayBuffer = new ArrayBuffer(binary.length)
-        const uint8Array = new Uint8Array(arrayBuffer)
-        for (let i = 0; i < binary.length; i++) {
-            uint8Array[i] = binary.charCodeAt(i)
-        }
-        const metaChunks = decodeChunks(arrayBuffer)
-        const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
-        if (!cardMeta) return
-        const card = JSON.parse(atob(cardMeta.value))
-        character.name = card.data.name
-        character.description = card.data.description
-        character.firstMessage = card.data.first_mes
-        uploadAvatar(image)
-    }
-}
+// TODO re-implement this function
+// const importCharacterPng = async (file: File) => {
+//     // If the image is a png, check if it has V2 card data embedded
+//     if (image.startsWith('data:image/png;base64')) {
+//         // Convert the image from a dataurl to an ArrayBuffer
+//         const dataurl = image.split(',')[1]
+//         if (!dataurl) return
+//         const binary = atob(dataurl)
+//         const arrayBuffer = new ArrayBuffer(binary.length)
+//         const uint8Array = new Uint8Array(arrayBuffer)
+//         for (let i = 0; i < binary.length; i++) {
+//             uint8Array[i] = binary.charCodeAt(i)
+//         }
+//         const metaChunks = decodeChunks(arrayBuffer)
+//         const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
+//         if (!cardMeta) return
+//         const card = JSON.parse(atob(cardMeta.value))
+//         character.name = card.data.name
+//         character.description = card.data.description
+//         character.firstMessage = card.data.first_mes
+//         uploadAvatar(image)
+//     }
+// }
 </script>
 
 <template>
     <TopBar title="New Character" back>
-        <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" />
+        <!-- <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" /> -->
     </TopBar>
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
@@ -90,16 +94,13 @@ const importCharacterPng = async (image: string) => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img
-                        v-if="character.image"
-                        :src="`/avatars/${character.image}`"
-                        :alt="character.name + ' avatar'" />
+                    <img v-if="characterImage" :src="characterImage" :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
 
             <FileInput @changed="uploadAvatar" class="ml-5 mt-auto" />
-            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <button v-if="characterImage" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>

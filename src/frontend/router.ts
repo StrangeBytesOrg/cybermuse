@@ -11,12 +11,11 @@ import Lore from './pages/lore.vue'
 import LoreEdit from './pages/lore-edit.vue'
 import LoreCreate from './pages/lore-create.vue'
 import CreateChat from './pages/chat-create.vue'
-import Instruct from './pages/instruct.vue'
+import ConnectionSettings from './pages/connection.vue'
 import Templates from './pages/templates.vue'
 import CreateTemplate from './pages/template-create.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
-import BackendSettings from './pages/backend-settings.vue'
 import ThemeSettings from './pages/theme-settings.vue'
 import ErrorPage from './pages/error.vue'
 
@@ -79,11 +78,6 @@ export default createRouter({
             component: LoreCreate,
         },
         {
-            path: '/instruct',
-            name: 'instruct',
-            component: Instruct,
-        },
-        {
             path: '/templates',
             name: 'templates',
             component: Templates,
@@ -104,15 +98,15 @@ export default createRouter({
             component: CreatePreset,
         },
         {
-            path: '/backend-settings',
-            name: 'backend-settings',
-            component: BackendSettings,
+            path: '/connection',
+            name: 'connection-settings',
+            component: ConnectionSettings,
         },
-        {
-            path: '/instruct',
-            name: 'instruct',
-            component: Instruct,
-        },
+        // {
+        //     path: '/instruct',
+        //     name: 'instruct',
+        //     component: Instruct,
+        // },
         {
             path: '/theme-settings',
             name: 'settings',

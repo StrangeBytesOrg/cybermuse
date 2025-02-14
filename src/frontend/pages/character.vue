@@ -1,14 +1,14 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, ref} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {client} from '@/api-client'
-import {characterCollection} from '@/db'
+import {db, characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 import TopBar from '@/components/top-bar.vue'
 
 const route = useRoute()
 const router = useRouter()
 const characterId = route.params.id
+const characterImage = ref<string>()
 
 if (!characterId || Array.isArray(characterId)) {
     router.push({name: 'characters'})
@@ -19,6 +19,10 @@ const character = reactive(await characterCollection.findById(characterId))
 if (!character) {
     router.push({name: 'characters'})
     throw new Error('Character not found')
+}
+if (character._attachments) {
+    const avatar = (await db.getAttachment(characterId, 'avatar')) as Blob
+    characterImage.value = URL.createObjectURL(avatar)
 }
 
 const updateCharacter = async () => {
@@ -31,12 +35,19 @@ const deleteCharacter = async () => {
     router.push({name: 'characters'})
 }
 
-const uploadAvatar = async (image: string) => {
-    character.image = await client.avatars.uploadAvatar.mutate(image)
+const uploadAvatar = async (file: File) => {
+    character._attachments = {
+        avatar: {
+            content_type: file.type,
+            data: file,
+        },
+    }
+    characterImage.value = URL.createObjectURL(file)
 }
 
 const removeImage = () => {
-    character.image = ''
+    characterImage.value = undefined
+    delete character._attachments
 }
 </script>
 
@@ -68,15 +79,12 @@ const removeImage = () => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img
-                        v-if="character.image"
-                        :src="`/avatars/${character.image}`"
-                        :alt="character.name + ' avatar'" />
+                    <img v-if="characterImage" :src="characterImage" :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
             <FileSelect @changed="uploadAvatar" class="ml-5 mt-auto" />
-            <button v-if="character.image" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <button v-if="characterImage" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>

@@ -63,112 +63,65 @@ const deletePreset = async () => {
 
         <div v-if="activePreset" class="flex flex-col justify-between bg-base-200 rounded-lg p-3 pt-1 mt-3">
             <div class="flex flex-row">
-                <div class="flex flex-col flex-grow mr-8">
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Preset Name</span>
-                        </div>
-                        <input
-                            type="text"
-                            v-model="activePreset.name"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                <fieldset class="fieldset">
+                    <legend class="fieldset-legend">Basic Settings</legend>
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Max Response Tokens</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.maxTokens"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                    <label class="fieldset-label text-sm">Preset Name</label>
+                    <input v-model="activePreset.name" type="text" class="input focus:outline-none" />
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Temperature</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.temperature"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                    <label class="fieldset-label text-sm">Max Response Tokens</label>
+                    <NumberInput v-model="activePreset.maxTokens" class="input input-bordered focus:outline-none" />
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Seed</span>
-                            <div class="tooltip" data-tip="Leave empty for random">
-                                <div class="badge badge-secondary badge-md">?</div>
-                            </div>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.seed"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                    <label class="fieldset-label text-sm">Temperature</label>
+                    <NumberInput v-model="activePreset.temperature" class="input input-bordered focus:outline-none" />
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Min P</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.minP"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                    <label class="fieldset-label text-sm">Seed</label>
+                    <NumberInput v-model="activePreset.seed" class="input input-bordered focus:outline-none" />
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Top P</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.topP"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
+                    <label class="fieldset-label text-sm">Min P</label>
+                    <NumberInput v-model="activePreset.minP" class="input input-bordered focus:outline-none" />
 
-                    <label class="form-control w-full">
-                        <div class="label">
-                            <span class="label-text">Top K</span>
-                        </div>
-                        <NumberInput
-                            v-model="activePreset.topK"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                </div>
+                    <label class="fieldset-label text-sm">Top P</label>
+                    <NumberInput v-model="activePreset.topP" class="input input-bordered focus:outline-none" />
 
-                <div class="flex flex-col flex-grow">
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Repeat-penalty</span></div>
-                        <NumberInput
-                            v-model="activePreset.repeatPenalty.penalty"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Presence-penalty</span></div>
-                        <NumberInput
-                            v-model="activePreset.repeatPenalty.presencePenalty"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Frequency-penalty</span></div>
-                        <NumberInput
-                            v-model="activePreset.repeatPenalty.frequencyPenalty"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Last Tokens</span></div>
-                        <NumberInput
-                            v-model="activePreset.repeatPenalty.lastTokens"
-                            class="input input-bordered focus:outline-none focus:border-primary" />
-                    </label>
-                    <label class="form-control w-full">
-                        <div class="label"><span class="label-text">Penalize-nl</span></div>
-                        <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select select-bordered">
-                            <option :value="true">true</option>
-                            <option :value="false">false</option>
-                        </select>
-                    </label>
-                </div>
+                    <label class="fieldset-label text-sm">Top K</label>
+                    <NumberInput v-model="activePreset.topK" class="input input-bordered focus:outline-none" />
+                </fieldset>
+
+                <fieldset class="fieldset ml-5">
+                    <legend class="fieldset-legend">Penalties</legend>
+
+                    <label class="fieldset-label text-sm">Repeat-penalty</label>
+                    <NumberInput
+                        v-model="activePreset.repeatPenalty.penalty"
+                        class="input input-bordered focus:outline-none" />
+
+                    <label class="fieldset-label text-sm">Presence-penalty</label>
+                    <NumberInput
+                        v-model="activePreset.repeatPenalty.presencePenalty"
+                        class="input input-bordered focus:outline-none" />
+
+                    <label class="fieldset-label text-sm">Frequency-penalty</label>
+                    <NumberInput
+                        v-model="activePreset.repeatPenalty.frequencyPenalty"
+                        class="input input-bordered focus:outline-none" />
+
+                    <label class="fieldset-label text-sm">Last Tokens</label>
+                    <NumberInput
+                        v-model="activePreset.repeatPenalty.lastTokens"
+                        class="input input-bordered focus:outline-none" />
+
+                    <label class="fieldset-label text-sm">Penalize-nl</label>
+                    <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                        <option :value="true">true</option>
+                        <option :value="false">false</option>
+                    </select>
+                </fieldset>
             </div>
+
             <div class="flex flex-row space-x-2 mt-5">
-                <button @click="updatePreset" class="btn btn-primary flex-grow">Save</button>
-                <button @click="deletePreset" class="btn btn-error flex-grow">Delete</button>
+                <button @click="updatePreset" class="btn btn-primary">Save</button>
+                <button @click="deletePreset" class="btn btn-error">Delete</button>
             </div>
         </div>
         <div v-else>Preset not found</div>

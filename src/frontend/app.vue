@@ -65,8 +65,8 @@ const toggleMenu = () => {
                     <router-link to="/instruct" class="font-bold px-2 mb-1" active-class="active">Instruct</router-link>
                 </li> -->
                 <li>
-                    <router-link to="/backend-settings" class="font-bold px-2 mb-1" active-class="active">
-                        Models
+                    <router-link to="/connection" class="font-bold px-2 mb-1" active-class="active">
+                        Connection
                     </router-link>
                 </li>
                 <li>
