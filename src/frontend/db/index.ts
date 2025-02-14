@@ -3,7 +3,7 @@ import PouchDB from 'pouchdb-browser'
 import find from 'pouchdb-find'
 import {z} from 'zod'
 
-const dbName = 'devdb'
+const dbName = 'cybermuse'
 export const db = new PouchDB(dbName, {
     revs_limit: 10, // TODO verify if auto-compaction is necessary with revs_limit
 })
