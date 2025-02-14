@@ -12,6 +12,16 @@ PouchDB.plugin(find)
 const baseSchema = z.object({
     _id: z.string(),
     _rev: z.string().optional(),
+    _attachments: z
+        .record(
+            z.object({
+                content_type: z.string(),
+                data: z.instanceof(File).optional(),
+                digest: z.string().optional(),
+                length: z.number().optional(),
+            }),
+        )
+        .optional(),
 })
 
 /** Character */
@@ -21,7 +31,6 @@ const characterSchema = baseSchema.extend({
     type: z.union([z.literal('user'), z.literal('character')]),
     description: z.string().min(1, {message: 'Character description cannot be empty'}),
     firstMessage: z.string().optional(),
-    image: z.string().optional(),
 })
 export const characterCollection = new Collection(db, 'character', characterSchema)
 

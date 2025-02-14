@@ -46,12 +46,12 @@ const deleteChat = async () => {
 
         <!-- Characters -->
         <div class="mt-3">
-            <div class="text-lg">Characters</div>
+            <div class="text-lg">Characters:</div>
             <div v-for="character in chat.characters" :key="character">
                 {{ characters.find((c) => c._id === character)?.name }}
             </div>
 
-            <div class="text-lg">User</div>
+            <div class="text-lg">User Character:</div>
             {{ characters.find((c) => c._id === chat.userCharacter)?.name }}
         </div>
 

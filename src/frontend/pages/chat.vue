@@ -3,7 +3,14 @@ import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import {Template} from '@huggingface/jinja'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
-import {characterCollection, loreCollection, templateCollection, generationPresetCollection, userCollection} from '@/db'
+import {
+    db,
+    characterCollection,
+    loreCollection,
+    templateCollection,
+    generationPresetCollection,
+    userCollection,
+} from '@/db'
 import {useChatStore, useConnectionStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
@@ -42,6 +49,15 @@ const lore = await loreCollection.find({
 })
 const characterMap = Object.fromEntries(characters.map((c) => [c._id, c]))
 characterMap[chat.userCharacter] = userCharacter
+
+// Create a map of avatars
+const avatars: Record<string, string> = {}
+for (const character of characters) {
+    if (character._attachments) {
+        const avatar = (await db.getAttachment(character._id, 'avatar')) as Blob
+        avatars[character._id] = URL.createObjectURL(avatar)
+    }
+}
 
 // Common setup function for generation
 const setupGeneration = async () => {
@@ -273,6 +289,7 @@ const toggleCtxMenu = () => {
                 :index="chat.messages.length - 1 - index"
                 :message="message"
                 :characterMap="characterMap"
+                :avatars="avatars"
                 :loading="false"
                 :showSwipes="index === 0 && message.type === 'model'"
                 @new-swipe="newSwipe" />

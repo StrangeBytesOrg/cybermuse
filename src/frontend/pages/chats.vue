@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
-import {chatCollection, characterCollection} from '@/db'
+import {db, chatCollection, characterCollection} from '@/db'
 import type {Chat} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
@@ -8,6 +8,16 @@ import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 const chats = reactive(await chatCollection.find({limit: 100}))
 const characters = reactive(await characterCollection.find())
 const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
+const avatars: Record<string, string> = {}
+
+for (const chat of chats) {
+    for (const character of chat.characters) {
+        if (characterMap[character]?._attachments) {
+            const avatar = (await db.getAttachment(character, 'avatar')) as Blob
+            avatars[character] = URL.createObjectURL(avatar)
+        }
+    }
+}
 
 const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -43,10 +53,7 @@ const formatTitle = (chat: Chat) => {
             <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
                 <div v-for="character in chat.characters" :key="character" class="avatar">
                     <div class="h-14">
-                        <img
-                            v-if="characterMap[character]?.image"
-                            :src="`/avatars/${characterMap[character]?.image}`"
-                            alt="Character Image" />
+                        <img v-if="avatars[character]" :src="avatars[character]" alt="Character Image" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
                 </div>
