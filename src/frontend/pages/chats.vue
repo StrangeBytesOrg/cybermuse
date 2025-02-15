@@ -41,26 +41,29 @@ const formatTitle = (chat: Chat) => {
     </TopBar>
 
     <div class="flex flex-col m-2">
-        <router-link
-            :to="{name: 'chat', params: {id: chat._id}}"
-            v-for="chat in chats"
-            :key="chat._id"
-            class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">
-            <div class="text-lg font-bold">
-                {{ formatTitle(chat) }}
-            </div>
-            <div class="text-sm">{{ formatDate(chat.createDate) }}</div>
-            <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
-                <div v-for="character in chat.characters" :key="character" class="avatar">
-                    <div class="h-14">
-                        <img v-if="avatars[character]" :src="avatars[character]" alt="Character Image" />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+        <template v-if="chats.length">
+            <router-link
+                :to="{name: 'chat', params: {id: chat._id}}"
+                v-for="chat in chats"
+                :key="chat._id"
+                class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">
+                <div class="text-lg font-bold">
+                    {{ formatTitle(chat) }}
+                </div>
+                <div class="text-sm">{{ formatDate(chat.createDate) }}</div>
+                <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
+                    <div v-for="character in chat.characters" :key="character" class="avatar">
+                        <div class="h-14">
+                            <img v-if="avatars[character]" :src="avatars[character]" alt="Character Image" />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                        </div>
                     </div>
                 </div>
-            </div>
-            <RouterLink :to="`/edit-chat/${chat._id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
-                <PencilSquareIcon class="size-6" />
-            </RouterLink>
-        </router-link>
+                <RouterLink :to="`/edit-chat/${chat._id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
+                    <PencilSquareIcon class="size-6" />
+                </RouterLink>
+            </router-link>
+        </template>
+        <template v-else>No chats yet. Make one to get started.</template>
     </div>
 </template>
