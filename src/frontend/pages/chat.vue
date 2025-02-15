@@ -93,10 +93,18 @@ const setupGeneration = async () => {
 
     const formattedMessages = chat.messages.map((message) => {
         const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
-        return {type: message.type, content: prefix + (message.content[message.activeIndex] || '')}
+        return {
+            role: message.type,
+            content: prefix + (message.content[message.activeIndex] || ''),
+        }
     })
 
-    return {systemPrompt, formattedMessages, generatePreset}
+    formattedMessages.unshift({
+        role: 'system',
+        content: systemPrompt,
+    })
+
+    return {formattedMessages, generatePreset}
 }
 
 const pickCharacter = async () => {
@@ -110,32 +118,34 @@ const pickCharacter = async () => {
         return chat.characters[0]
     }
 
-    // TODO implement
-    throw new Error('Multiple characters not implemented')
-
     // For multiple characters, use GBNF to select one
-    // pendingMessage.value = true
-    // const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
+    pendingMessage.value = true
+    const {formattedMessages} = await setupGeneration()
 
-    // // Add empty message for response
-    // formattedMessages.push({type: 'model', content: ''})
+    // Call generate, passing a grammar to be used for character picking
+    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
+    const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
+    const response = await fetch(chatCompletionUrl, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        signal: abortController.signal,
+        body: JSON.stringify({
+            stream: false,
+            grammar: gbnfString,
+            messages: formattedMessages,
+            n_predict: 8,
+        }),
+    })
+    const res = await response.json()
+    const characterName = res.choices[0].message.content
 
-    // // Call generate, passing a grammar to be used for character picking
-    // const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
-
-    // const res = await client.generate.generateNonStreaming.mutate({
-    //     systemPrompt,
-    //     messages: formattedMessages,
-    //     gbnfString,
-    //     generationSettings: generatePreset,
-    // })
-
-    // const characterName = res.response
-    // const character = characters.find((c) => c.name === characterName)
-    // if (!character) {
-    //     throw new Error('Character not found')
-    // }
-    // return character._id
+    const character = characters.find((c) => c.name === characterName)
+    if (!character) {
+        throw new Error('Character not found')
+    }
+    return character._id
 }
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
@@ -196,20 +206,11 @@ const generateMessage = async () => {
 
     const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
     try {
-        const {systemPrompt, formattedMessages, generatePreset} = await setupGeneration()
+        const {formattedMessages, generatePreset} = await setupGeneration()
+        formattedMessages.pop()
 
-        const messages = []
-        messages.push({
-            role: 'system',
-            content: systemPrompt,
-        })
-        formattedMessages.forEach((message) => {
-            messages.push({
-                role: message.type === 'user' ? 'user' : 'model',
-                content: message.content,
-            })
-        })
-        messages.pop()
+        // Create a GBNF string to make sure the message starts with the character's name
+        const gbnfString = `root ::= "${characterMap[lastMessage.characterId]?.name}: " <character>*`
 
         const response = await fetch(chatCompletionUrl, {
             method: 'POST',
@@ -219,7 +220,8 @@ const generateMessage = async () => {
             signal: abortController.signal,
             body: JSON.stringify({
                 stream: true,
-                messages,
+                grammar: gbnfString,
+                messages: formattedMessages,
                 n_predict: generatePreset.maxTokens,
                 temperature: generatePreset.temperature,
                 min_p: generatePreset.minP,
@@ -230,22 +232,26 @@ const generateMessage = async () => {
         })
         const iterable = responseToIterable(response)
         let messageBuffer = ''
+        let initialBuffer = ''
         for await (const chunk of iterable) {
-            if (chunk.data !== '[DONE]') {
-                const wat = JSON.parse(chunk.data)
-                if (wat.choices[0].delta.content) {
-                    messageBuffer += wat.choices[0].delta.content
-                    lastMessage.content[lastMessage.activeIndex] = messageBuffer
-                    await chatStore.save()
+            if (chunk.data === '[DONE]') continue
+
+            const responseText = JSON.parse(chunk.data)
+            const content = responseText.choices[0].delta.content
+            if (content) {
+                if (initialBuffer.includes(`${characterMap[lastMessage.characterId]?.name}:`)) {
+                    messageBuffer += content
+                } else {
+                    initialBuffer += content
                 }
+                lastMessage.content[lastMessage.activeIndex] = messageBuffer
+                await chatStore.save()
             }
         }
-        console.log(messageBuffer)
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return
         throw error
     } finally {
-        console.log('done pending')
         pendingMessage.value = false
     }
 }
