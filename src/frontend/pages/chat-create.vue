@@ -2,18 +2,26 @@
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import {Template} from '@huggingface/jinja'
-import {chatCollection, characterCollection, loreCollection} from '@/db'
+import {db, chatCollection, characterCollection, loreCollection} from '@/db'
 import type {Message} from '@/db'
 import TopBar from '@/components/top-bar.vue'
 
 const router = useRouter()
 const selectedCharacters = ref<string[]>([])
 const selectedLore = ref<string[]>([])
-const userCharacter = ref()
+const userCharacter = ref('default-user-character')
 const chatName = ref('')
 
 const characters = await characterCollection.find()
 const lore = await loreCollection.find()
+const avatars: Record<string, string> = {}
+
+for (const character of characters) {
+    if (character._attachments) {
+        const avatar = (await db.getAttachment(character._id, 'avatar')) as Blob
+        avatars[character._id] = URL.createObjectURL(avatar)
+    }
+}
 
 const createChat = async () => {
     // If characters have a first message, add it to the chat
@@ -87,7 +95,7 @@ const userCharacters = computed(() => {
                     :key="character._id"
                     class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
                     <div class="avatar w-20 h-20">
-                        <img v-if="character.image" :src="`/avatars/${character.image}`" class="rounded-lg" />
+                        <img v-if="avatars[character._id]" :src="avatars[character._id]" class="rounded-lg" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
                     </div>
                     <div class="text-lg ml-2">{{ character.name }}</div>
@@ -137,14 +145,13 @@ const userCharacters = computed(() => {
         </div>
 
         <!-- Chat Name -->
-        <label class="form-control w-full">
-            <div class="label"><span class="label-text font-bold">Chat Name</span></div>
-            <input
-                type="text"
-                placeholder="(optional)"
-                v-model="chatName"
-                class="input input-bordered focus:outline-none focus:border-primary" />
-        </label>
+        <h2 class="text-xl font-bold mt-5">Chat Name</h2>
+        <div class="divider mt-0 mb-1"></div>
+        <input
+            type="text"
+            placeholder="(optional)"
+            v-model="chatName"
+            class="input input-bordered focus:outline-none focus:border-primary" />
 
         <div class="flex flex-row mt-5">
             <button class="btn btn-primary" @click="createChat">Create Chat</button>
