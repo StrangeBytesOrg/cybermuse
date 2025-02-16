@@ -32,7 +32,7 @@ for (const character of characters) {
         <RouterLink to="/create-character" class="btn btn-sm btn-primary ml-auto">Create Character +</RouterLink>
     </TopBar>
 
-    <div class="flex flex-row p-3">
+    <div class="p-3">
         <label class="form-control w-full mr-5">
             <input
                 type="text"
@@ -73,12 +73,6 @@ for (const character of characters) {
                                 {{ character.description }}
                             </p>
                         </div>
-                        <!-- <template v-if="character._attachments">
-                            Type: {{ character._attachments['avatar.png']?.content_type }}
-                            <br />
-                            Digest: {{ character._attachments['avatar.png']?.digest }}
-                        </template> -->
-                        <!-- <img v-if="character.avatar" :src="character.avatar" /> -->
                     </div>
                 </router-link>
             </div>
