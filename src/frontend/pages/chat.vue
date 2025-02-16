@@ -210,7 +210,8 @@ const generateMessage = async () => {
         formattedMessages.pop()
 
         // Create a GBNF string to make sure the message starts with the character's name
-        const gbnfString = `root ::= "${characterMap[lastMessage.characterId]?.name}: " <character>*`
+        const characterName = characterMap[lastMessage.characterId]?.name
+        const gbnfString = `root ::= "${characterName}:" [\\u0000-\\U0010FFFF]*`
 
         const response = await fetch(chatCompletionUrl, {
             method: 'POST',
@@ -239,10 +240,10 @@ const generateMessage = async () => {
             const responseText = JSON.parse(chunk.data)
             const content = responseText.choices[0].delta.content
             if (content) {
-                if (initialBuffer.includes(`${characterMap[lastMessage.characterId]?.name}:`)) {
-                    messageBuffer += content
-                } else {
+                if (!initialBuffer.includes(`${characterName}: `)) {
                     initialBuffer += content
+                } else {
+                    messageBuffer += content
                 }
                 lastMessage.content[lastMessage.activeIndex] = messageBuffer
                 await chatStore.save()
