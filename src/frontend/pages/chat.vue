@@ -69,7 +69,10 @@ const setupGeneration = async () => {
     // Render each character description
     characters.forEach((c) => {
         const characterTemplate = new Template(c.description)
-        c.description = characterTemplate.render({char: c.name})
+        c.description = characterTemplate.render({
+            char: c.name,
+            user: userCharacter.name,
+        })
     })
 
     // Get character and lore strings
