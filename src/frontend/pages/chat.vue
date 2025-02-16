@@ -240,7 +240,7 @@ const generateMessage = async () => {
             const responseText = JSON.parse(chunk.data)
             const content = responseText.choices[0].delta.content
             if (content) {
-                if (!initialBuffer.includes(`${characterName}: `)) {
+                if (!initialBuffer.includes(`${characterName}:`)) {
                     initialBuffer += content
                 } else {
                     messageBuffer += content
