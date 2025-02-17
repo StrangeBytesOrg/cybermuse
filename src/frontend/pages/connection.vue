@@ -20,7 +20,12 @@ const connect = async () => {
                 <option value="llama.cpp">Llama.cpp Server</option>
             </select> -->
 
-            <label class="fieldset-label text-sm">Connection URL</label>
+            <label class="fieldset-label text-sm">
+                Connection URL
+                <div class="tooltip tooltip-bottom" data-tip="Requires a llama.cpp server">
+                    <div class="badge badge-secondary">?</div>
+                </div>
+            </label>
             <div class="flex-row">
                 <input type="text" v-model="connectionStore.connectionUrl" class="input" />
 
