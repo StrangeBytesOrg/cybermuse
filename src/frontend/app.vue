@@ -40,7 +40,7 @@ onErrorCaptured((error) => {
 
         <!-- Main -->
         <div class="flex min-h-0 ml-0 sm:ml-52 pt-12">
-            <div class="flex flex-col flex-1 sm:pt-2 sm:px-2">
+            <div class="flex flex-col flex-1 px-1 pt-1 sm:pt-2 sm:px-2">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />
