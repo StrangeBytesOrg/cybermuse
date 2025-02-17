@@ -9,8 +9,8 @@ on:
     #   - ci
 
 env:
-  APP_VERSION: "v0.${{ github.ref_name }}"
-  VITE_CLIENT_VERSION: "v0.${{ github.ref_name }}"
+  APP_VERSION: "${{ github.ref_name }}"
+  VITE_CLIENT_VERSION: "${{ github.ref_name }}"
 
 jobs:
   build:
