@@ -26,6 +26,7 @@ export default createRouter({
             path: '/',
             name: 'index',
             component: Index,
+            meta: {title: 'Cybermuse'},
         },
         {
             path: '/characters',
