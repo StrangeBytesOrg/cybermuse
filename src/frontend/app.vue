@@ -17,7 +17,12 @@ const toast = useToast()
 
 onErrorCaptured((error) => {
     if (error instanceof ZodError) {
-        const validationError = fromError(error, {issueSeparator: `\n`, prefix: '', prefixSeparator: ''})
+        const validationError = fromError(error, {
+            issueSeparator: `\n`,
+            prefix: '',
+            prefixSeparator: '',
+            includePath: false,
+        })
         toast.error(validationError.message)
     } else {
         toast.error(error.message)
