@@ -32,7 +32,7 @@ const updatePreset = async () => {
 }
 
 const deletePreset = async () => {
-    if (activePreset.value?._id === 'default-preset') {
+    if (activePreset.value?._id === 'default-generation-preset') {
         throw new Error('Cannot delete the default preset')
     }
 
