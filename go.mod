@@ -4,10 +4,7 @@ go 1.23.0
 
 toolchain go1.24.0
 
-require (
-	github.com/danielgtaylor/huma/v2 v2.28.0
-	github.com/wailsapp/wails/v2 v2.10.0
-)
+require github.com/wailsapp/wails/v2 v2.10.0
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
