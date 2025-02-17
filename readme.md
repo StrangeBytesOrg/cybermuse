@@ -1,6 +1,6 @@
 # A Batteries Included chat app
 
-![Screenshot](https://chat-desktop.strangebytes.org/chat-app-1.png)
+![Screenshot](https://chat-desktop.strangebytes.org/chat-app-2.webp)
 
 ## Features
 
