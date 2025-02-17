@@ -1,6 +1,6 @@
 <template>
-    <div class="flex flex-col m-2">
+    <main class="flex flex-col">
         <h1 class="text-xl">Uh Oh!</h1>
         <p>An error occurred.</p>
-    </div>
+    </main>
 </template>

@@ -65,24 +65,24 @@ const removeImage = () => {
 <template>
     <!-- <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" /> -->
 
-    <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
+    <main class="flex flex-col p-3 bg-base-200 rounded-lg">
         <input
             type="text"
             v-model="character.name"
             placeholder="Character Name"
-            class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary" />
+            class="input input-bordered w-full sm:max-w-80 mb-auto mr-5 border-2 focus:outline-none focus:border-primary" />
 
         <textarea
             v-model="character.description"
             placeholder="Description"
-            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
         <textarea
             v-model="character.firstMessage"
             placeholder="First Message"
-            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
-        <select v-model="character.type" class="select select-bordered mt-5">
+        <select v-model="character.type" class="select select-bordered w-full sm:max-w-80 mt-5">
             <option value="character">Character</option>
             <option value="user">User</option>
         </select>
@@ -105,5 +105,5 @@ const removeImage = () => {
             <button class="btn btn-primary" @click="createCharacter">Create</button>
             <button class="btn btn-error ml-2" @click="router.back">Cancel</button>
         </div>
-    </div>
+    </main>
 </template>

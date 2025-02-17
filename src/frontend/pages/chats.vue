@@ -39,7 +39,7 @@ const formatTitle = (chat: Chat) => {
         <RouterLink to="/create-chat" class="btn btn-sm btn-primary absolute top-2 left-2">New Chat +</RouterLink>
     </Teleport>
 
-    <div class="flex flex-col m-2">
+    <main class="flex flex-col">
         <template v-if="chats.length">
             <router-link
                 :to="{name: 'chat', params: {id: chat._id}}"
@@ -64,5 +64,5 @@ const formatTitle = (chat: Chat) => {
             </router-link>
         </template>
         <template v-else>No chats yet. Make one to get started.</template>
-    </div>
+    </main>
 </template>

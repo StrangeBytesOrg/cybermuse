@@ -32,7 +32,7 @@ const deleteChat = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
+    <main class="flex flex-col p-3 bg-base-200 rounded-lg">
         <label class="form-control w-full max-w-64">
             <input
                 type="text"
@@ -65,5 +65,5 @@ const deleteChat = async () => {
             <button @click.prevent="updateChat" class="btn btn-primary">Update</button>
             <button @click.prevent="deleteChat" class="btn btn-error ml-3">Delete</button>
         </div>
-    </div>
+    </main>
 </template>

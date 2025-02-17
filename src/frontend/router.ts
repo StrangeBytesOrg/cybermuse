@@ -117,11 +117,6 @@ export default createRouter({
             component: ConnectionSettings,
             meta: {title: 'Connection Settings'},
         },
-        // {
-        //     path: '/instruct',
-        //     name: 'instruct',
-        //     component: Instruct,
-        // },
         {
             path: '/theme-settings',
             name: 'settings',

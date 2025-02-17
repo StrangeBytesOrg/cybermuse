@@ -13,7 +13,7 @@ const connect = async () => {
 </script>
 
 <template>
-    <div class="m-2 flex flex-col">
+    <main class="flex flex-col">
         <fieldset class="fieldset">
             <!-- <legend class="fieldset-label text-sm">Connection Type</legend>
             <select class="select">
@@ -27,5 +27,5 @@ const connect = async () => {
                 <button class="btn btn-primary ml-2" @click="connect">Connect</button>
             </div>
         </fieldset>
-    </div>
+    </main>
 </template>

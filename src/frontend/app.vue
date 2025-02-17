@@ -39,8 +39,8 @@ onErrorCaptured((error) => {
             :class="{hidden: !menuStore.visible}"></div>
 
         <!-- Main -->
-        <div class="flex min-h-0 ml-0 sm:ml-52 pt-14">
-            <div class="flex flex-col flex-1">
+        <div class="flex min-h-0 ml-0 sm:ml-52 pt-12">
+            <div class="flex flex-col flex-1 sm:pt-2 sm:px-2">
                 <!-- TODO: Add loading indicator -->
                 <Suspense>
                     <RouterView />

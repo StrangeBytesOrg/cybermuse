@@ -19,9 +19,6 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
             <li>
                 <router-link to="/lore" class="font-bold px-2 mb-1" active-class="active">Lore</router-link>
             </li>
-            <!-- <li>
-                    <router-link to="/instruct" class="font-bold px-2 mb-1" active-class="active">Instruct</router-link>
-                </li> -->
             <li>
                 <router-link to="/templates" class="font-bold px-2 mb-1" active-class="active">
                     Prompt Templates

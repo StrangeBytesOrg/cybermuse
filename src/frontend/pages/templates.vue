@@ -96,7 +96,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="py-3 px-2">
+    <main class="">
         <div class="flex flex-row">
             <div class="flex flex-col">
                 <select v-model="selectedTemplate" @change="setActiveTemplate" class="select select-bordered min-w-60">
@@ -129,5 +129,5 @@ onMounted(() => {
         <div class="w-full" v-if="example">
             <div class="flex w-full bg-base-200 rounded-lg p-3 mt-3 whitespace-pre-wrap">{{ example }}</div>
         </div>
-    </div>
+    </main>
 </template>

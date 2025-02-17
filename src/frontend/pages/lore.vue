@@ -11,7 +11,7 @@ const loreBooks = reactive(await loreCollection.find())
         <RouterLink to="/create-lore" class="btn btn-sm btn-primary absolute top-2 left-2">New Lorebook +</RouterLink>
     </Teleport>
 
-    <div class="flex flex-row m-2">
+    <main class="flex flex-row">
         <div class="bg-base-200 rounded-lg w-full max-w-96 p-3">
             <template v-if="loreBooks.length">
                 <RouterLink
@@ -25,5 +25,5 @@ const loreBooks = reactive(await loreCollection.find())
             </template>
             <div v-else>No lorebooks</div>
         </div>
-    </div>
+    </main>
 </template>

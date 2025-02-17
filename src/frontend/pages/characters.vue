@@ -33,7 +33,7 @@ for (const character of characters) {
         </RouterLink>
     </Teleport>
 
-    <div class="p-3 flex flex-col sm:flex-row">
+    <div class="p-2 flex flex-col sm:flex-row">
         <label class="form-control w-full sm:w-1/2 mr-5">
             <input
                 type="text"

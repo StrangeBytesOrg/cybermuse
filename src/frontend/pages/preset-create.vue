@@ -35,7 +35,7 @@ const createTemplate = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
+    <main class="flex flex-col bg-base-200 rounded-lg p-3">
         <div class="flex flex-row">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Basic Settings</legend>
@@ -92,5 +92,5 @@ const createTemplate = async () => {
         </div>
 
         <button @click="createTemplate" class="btn btn-primary max-w-32 mt-2">Create Preset</button>
-    </div>
+    </main>
 </template>

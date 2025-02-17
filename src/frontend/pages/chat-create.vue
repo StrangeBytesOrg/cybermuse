@@ -81,7 +81,7 @@ const userCharacters = computed(() => {
 </script>
 
 <template>
-    <div class="p-2">
+    <main class="p-2">
         <!-- Characters -->
         <h2 class="text-xl font-bold">Characters</h2>
         <div class="divider mt-0 mb-1"></div>
@@ -154,5 +154,5 @@ const userCharacters = computed(() => {
             <button class="btn btn-primary" @click="createChat">Create Chat</button>
             <button class="btn btn-error ml-3" @click="router.back">Cancel</button>
         </div>
-    </div>
+    </main>
 </template>

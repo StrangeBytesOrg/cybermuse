@@ -51,24 +51,24 @@ const removeImage = () => {
 </script>
 
 <template>
-    <div v-if="character" class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
+    <main v-if="character" class="flex flex-col w-full bg-base-200 rounded-lg p-3">
         <input
             type="text"
             v-model="character.name"
-            class="input input-bordered mb-auto mr-5 max-w-80 border-2 focus:outline-none focus:border-primary"
+            class="input input-bordered w-full sm:max-w-80 mb-auto mr-5 border-2 focus:outline-none focus:border-primary"
             placeholder="Character Name" />
 
         <textarea
             v-model="character.description"
             placeholder="Description"
-            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
         <textarea
             v-model="character.firstMessage"
             placeholder="First Message"
-            class="textarea textarea-bordered mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
+            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary" />
 
-        <select v-model="character.type" class="select select-bordered mt-5">
+        <select v-model="character.type" class="select select-bordered w-full sm:max-w-80 mt-5">
             <option value="character">Character</option>
             <option value="user">User</option>
         </select>
@@ -89,7 +89,7 @@ const removeImage = () => {
             <button class="btn btn-primary" @click="updateCharacter()">Update</button>
             <button class="btn btn-error ml-5" onclick="delete_confirm.showModal()">Delete</button>
         </div>
-    </div>
+    </main>
 
     <dialog id="delete_confirm" class="modal">
         <div class="modal-box">

@@ -47,7 +47,7 @@ const resizeTextarea = async (event: Event) => {
 </script>
 
 <template>
-    <fieldset class="flex flex-col bg-base-200 rounded-lg p-3 pt-1 m-2">
+    <fieldset class="flex flex-col bg-base-200 rounded-lg p-2">
         <label class="fieldset-label text-sm">Template Name</label>
         <input v-model="template.name" type="text" class="input focus:outline-none" />
 
@@ -63,7 +63,7 @@ const resizeTextarea = async (event: Event) => {
         </div>
     </fieldset>
 
-    <div v-if="example" class="flex w-full bg-base-200 rounded-lg p-3 m-2 whitespace-pre-wrap">
+    <div v-if="example" class="flex w-full bg-base-200 rounded-lg p-3 mt-3 whitespace-pre-wrap">
         {{ example }}
     </div>
 </template>
