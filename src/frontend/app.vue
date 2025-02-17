@@ -32,11 +32,6 @@ onErrorCaptured((error) => {
         <TopBar />
 
         <SideBar :showMenu="menuStore.visible" />
-        <!-- Menu Overlay -->
-        <div
-            @click="menuStore.toggle"
-            class="menu-overlay z-10 fixed w-full h-full bg-gray-500 opacity-50"
-            :class="{hidden: !menuStore.visible}"></div>
 
         <!-- Main -->
         <div class="flex min-h-0 ml-0 sm:ml-52 pt-12">
@@ -49,16 +44,3 @@ onErrorCaptured((error) => {
         </div>
     </div>
 </template>
-
-<style>
-@media screen and (max-width: 640px) {
-    .customHide {
-        transform: translateX(-100%);
-        transition: transform 0.3s;
-    }
-    .customShow {
-        transform: translateX(0%);
-        transition: transform 0.3s;
-    }
-}
-</style>

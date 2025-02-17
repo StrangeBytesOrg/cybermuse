@@ -1,7 +1,11 @@
 <script lang="ts" setup>
+import {useMenuStore} from '@/store'
+
 defineProps({
     showMenu: Boolean,
 })
+
+const menuStore = useMenuStore()
 const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 </script>
 
@@ -41,4 +45,23 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
         <div class="absolute bottom-0 w-full text-center">Version: {{ version }}</div>
     </div>
+
+    <!-- Overlay -->
+    <div
+        @click="menuStore.toggle"
+        class="menu-overlay z-10 fixed w-full h-full bg-gray-500 opacity-50"
+        :class="{hidden: !menuStore.visible}"></div>
 </template>
+
+<style>
+@media screen and (max-width: 640px) {
+    .customHide {
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+    }
+    .customShow {
+        transform: translateX(0%);
+        transition: transform 0.3s;
+    }
+}
+</style>
