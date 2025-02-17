@@ -3,30 +3,17 @@ name: App Build
 on:
   workflow_dispatch:
   push:
-    branches:
-      - ci
+    tags:
+      - v*
+    # branches:
+    #   - ci
 
 env:
-  APP_VERSION: "v0.${{ github.run_number }}"
-  VITE_CLIENT_VERSION: "v0.${{ github.run_number }}"
+  APP_VERSION: "v0.${{ github.ref_name }}"
+  VITE_CLIENT_VERSION: "v0.${{ github.ref_name }}"
 
 jobs:
-  create_release:
-    name: Create Release
-    permissions: write-all
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Release
-        id: create_release
-        uses: softprops/action-gh-release@v2
-        with:
-          name: ${{ env.APP_VERSION }}
-          tag_name: ${{ env.APP_VERSION }}
-          draft: false
-          prerelease: false
-
   build:
-    needs: create_release
     permissions: write-all
     strategy:
       fail-fast: false
