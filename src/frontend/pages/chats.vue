@@ -2,7 +2,6 @@
 import {reactive} from 'vue'
 import {db, chatCollection, characterCollection} from '@/db'
 import type {Chat} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 
 const chats = reactive(await chatCollection.find({limit: 100}))
@@ -36,9 +35,9 @@ const formatTitle = (chat: Chat) => {
 </script>
 
 <template>
-    <TopBar title="Chats">
-        <RouterLink to="/create-chat" class="btn btn-sm btn-primary ml-auto">New Chat +</RouterLink>
-    </TopBar>
+    <Teleport to="#topbar">
+        <RouterLink to="/create-chat" class="btn btn-sm btn-primary absolute top-2 left-2">New Chat +</RouterLink>
+    </Teleport>
 
     <div class="flex flex-col m-2">
         <template v-if="chats.length">

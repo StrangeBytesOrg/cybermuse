@@ -4,7 +4,6 @@ import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
-import TopBar from '@/components/top-bar.vue'
 // import {decodeChunks} from '@/lib/decode-png-chunks'
 
 const toast = useToast()
@@ -64,9 +63,7 @@ const removeImage = () => {
 </script>
 
 <template>
-    <TopBar title="New Character" back>
-        <!-- <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" /> -->
-    </TopBar>
+    <!-- <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" /> -->
 
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
         <input

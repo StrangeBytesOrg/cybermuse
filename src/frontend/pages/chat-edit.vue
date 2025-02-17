@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import TopBar from '@/components/top-bar.vue'
 import {chatCollection, characterCollection} from '@/db'
 
 const route = useRoute()
@@ -33,8 +32,6 @@ const deleteChat = async () => {
 </script>
 
 <template>
-    <TopBar title="Edit Chat" back />
-
     <div class="flex flex-col m-2 p-3 bg-base-200 rounded-lg">
         <label class="form-control w-full max-w-64">
             <input

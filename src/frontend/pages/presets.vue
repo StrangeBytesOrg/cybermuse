@@ -2,7 +2,6 @@
 import {ref, reactive, computed} from 'vue'
 import {useToast} from 'vue-toastification'
 import {generationPresetCollection, userCollection} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToast()
@@ -46,8 +45,6 @@ const deletePreset = async () => {
 </script>
 
 <template>
-    <TopBar title="Generation Presets" />
-
     <div class="py-3 px-2">
         <div class="flex flex-row">
             <div class="flex flex-col">

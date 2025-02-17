@@ -4,7 +4,6 @@ import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {Template} from '@huggingface/jinja'
 import {templateCollection} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const router = useRouter()
@@ -48,8 +47,6 @@ const resizeTextarea = async (event: Event) => {
 </script>
 
 <template>
-    <TopBar title="Create Template" back />
-
     <fieldset class="flex flex-col bg-base-200 rounded-lg p-3 pt-1 m-2">
         <label class="fieldset-label text-sm">Template Name</label>
         <input v-model="template.name" type="text" class="input focus:outline-none" />

@@ -2,7 +2,6 @@
 import {reactive, ref, computed} from 'vue'
 import {RouterLink} from 'vue-router'
 import {characterCollection, db} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 
 const searchName = ref('')
 const characterType = ref<'user' | 'character' | 'both'>('both')
@@ -28,21 +27,26 @@ for (const character of characters) {
 </script>
 
 <template>
-    <TopBar title="Characters">
-        <RouterLink to="/create-character" class="btn btn-sm btn-primary ml-auto">Create Character +</RouterLink>
-    </TopBar>
+    <Teleport to="#topbar">
+        <RouterLink to="/create-character" class="btn btn-sm btn-primary absolute top-2 left-2">
+            Create Character +
+        </RouterLink>
+    </Teleport>
 
-    <div class="p-3">
-        <label class="form-control w-full mr-5">
+    <div class="p-3 flex flex-col sm:flex-row">
+        <label class="form-control w-full sm:w-1/2 mr-5">
             <input
                 type="text"
                 v-model="searchName"
                 placeholder="Search by name"
-                class="input input-bordered focus:outline-none focus:border-primary" />
+                class="input input-bordered w-full focus:outline-none focus:border-primary" />
         </label>
 
-        <label class="form-control w-full">
-            <select v-model="characterType" placeholder="Character Type" class="select select-bordered">
+        <label class="form-control w-full sm:w-1/2">
+            <select
+                v-model="characterType"
+                placeholder="Character Type"
+                class="select select-bordered w-full mt-3 sm:mt-0">
                 <option value="both" default>Character Type</option>
                 <option value="character">Character</option>
                 <option value="user">User</option>

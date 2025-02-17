@@ -1,16 +1,29 @@
 <script lang="ts" setup>
-import BackButton from './back-button.vue'
+import {useRouter, useRoute} from 'vue-router'
+import {Bars4Icon, ArrowUturnLeftIcon} from '@heroicons/vue/24/outline'
+import {useMenuStore} from '@/store'
 
-const props = defineProps({
-    title: String,
-    back: Boolean,
-})
+const router = useRouter()
+const route = useRoute()
+const menuStore = useMenuStore()
+
+const goBack = () => router.back()
 </script>
 
 <template>
-    <div class="flex flex-row p-3 bg-base-300">
-        <BackButton v-if="props.back" class="mr-5" />
-        <h1 class="text-xl">{{ props.title }}</h1>
+    <div id="topbar" class="fixed h-12 z-20 w-full flex flex-row items-center p-1 sm:p-3 bg-base-300">
+        <button v-if="route.meta.back" @click="goBack" class="btn btn-sm btn-square btn-neutral absolute top-2 left-2">
+            <ArrowUturnLeftIcon class="size-6" />
+        </button>
+
+        <div class="flex-grow text-center">
+            <h1 class="text-xl">{{ route.meta.title }}</h1>
+        </div>
+
+        <button @click="menuStore.toggle" class="btn btn-sm btn-square btn-neutral absolute top-2 right-2 sm:hidden">
+            <Bars4Icon class="size-10" />
+        </button>
+
         <slot />
     </div>
 </template>

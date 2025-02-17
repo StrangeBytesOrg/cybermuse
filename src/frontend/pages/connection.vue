@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import {useToast} from 'vue-toastification'
 import {useConnectionStore} from '@/store'
-import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 const connectionStore = useConnectionStore()
@@ -14,8 +13,6 @@ const connect = async () => {
 </script>
 
 <template>
-    <TopBar title="Connection" />
-
     <div class="m-2 flex flex-col">
         <fieldset class="fieldset">
             <!-- <legend class="fieldset-label text-sm">Connection Type</legend>

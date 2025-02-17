@@ -3,7 +3,6 @@ import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {loreCollection} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 
 type Entry = {name: string; content: string}
 type Lore = {name: string; entries: Entry[]}
@@ -32,8 +31,6 @@ const createLore = async () => {
 </script>
 
 <template>
-    <TopBar title="Create Lorebook" back />
-
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
         <input type="text" v-model="lore.name" class="input input-bordered" placeholder="Lore Name" />
         <div class="flex flex-col">

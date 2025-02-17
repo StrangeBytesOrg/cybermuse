@@ -3,7 +3,6 @@ import {ref, reactive, computed, onMounted} from 'vue'
 import {useToast} from 'vue-toastification'
 import {Template} from '@huggingface/jinja'
 import {templateCollection, userCollection} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 
 const toast = useToast()
 let templates = reactive(await templateCollection.find())
@@ -97,7 +96,6 @@ onMounted(() => {
 </script>
 
 <template>
-    <TopBar title="Prompt Templates" />
     <div class="py-3 px-2">
         <div class="flex flex-row">
             <div class="flex flex-col">

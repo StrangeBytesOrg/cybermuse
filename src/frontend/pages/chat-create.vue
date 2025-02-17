@@ -4,7 +4,6 @@ import {useRouter} from 'vue-router'
 import {Template} from '@huggingface/jinja'
 import {db, chatCollection, characterCollection, loreCollection} from '@/db'
 import type {Message} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 
 const router = useRouter()
 const selectedCharacters = ref<string[]>([])
@@ -82,8 +81,6 @@ const userCharacters = computed(() => {
 </script>
 
 <template>
-    <TopBar title="Create Chat" back />
-
     <div class="p-2">
         <!-- Characters -->
         <h2 class="text-xl font-bold">Characters</h2>

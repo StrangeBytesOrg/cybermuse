@@ -3,7 +3,6 @@ import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
 import {generationPresetCollection, userCollection} from '@/db'
-import TopBar from '@/components/top-bar.vue'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToast()
@@ -36,8 +35,6 @@ const createTemplate = async () => {
 </script>
 
 <template>
-    <TopBar title="Create Preset" back />
-
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
         <div class="flex flex-row">
             <fieldset class="fieldset">
