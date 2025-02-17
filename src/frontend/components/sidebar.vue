@@ -11,7 +11,7 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 
 <template>
     <div
-        class="fixed left-0 top-12 h-full w-2/3 sm:w-52 bg-base-200 z-20"
+        class="fixed left-0 top-12 bottom-0 w-2/3 sm:w-52 bg-base-200 z-20"
         :class="{customShow: showMenu, customHide: !showMenu}">
         <ul class="menu">
             <li>
