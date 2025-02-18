@@ -1,25 +1,17 @@
-html,
-body,
-html:focus-within {
+html {
     scroll-behavior: smooth;
-    /* height: 100vh; */
-    /* height: var(--doc-height); */ /* Fix for mobile scrollbar */
-    min-height: 100%;
+    /* Web Standard scrollbar */
+    scrollbar-color: var(--color-primary);
 }
 
-/* Mostly fixes mobile style issues */
-/* :root {
-    --doc-height: 100%;
-} */
-
-/* Fancy Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: oklch(var(--p));
+    /* TODO Doesn't update with theme changes */
+    background-color: var(--color-primary);
     border-radius: 10px;
     border: none;
 }

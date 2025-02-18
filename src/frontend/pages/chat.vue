@@ -286,10 +286,7 @@ const toggleCtxMenu = () => {
 </script>
 
 <template>
-    <main class="flex flex-col pt-2 min-h-[100vh] max-h-[100vh]">
-        <!-- expanding spacer -->
-        <div class="flex-grow" />
-
+    <main class="flex flex-col fixed top-0 bottom-0 left-0 right-0 pt-14 pb-20 pl-1 sm:pl-52">
         <!-- Messages -->
         <div
             ref="messagesElement"
@@ -307,7 +304,7 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
-        <div class="flex md:px-2 md:pb-2 w-full max-w-[70em] ml-auto mr-auto">
+        <div class="flex absolute bottom-0 left-0 right-0 sm:pl-52 px-1">
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <Bars4Icon class="size-10" />
