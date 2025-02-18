@@ -33,7 +33,7 @@ onErrorCaptured((error) => {
 </script>
 
 <template>
-    <div :data-theme="themeStore.theme" class="min-h-[100vh]">
+    <div :data-theme="themeStore.theme" class="h-dvh">
         <TopBar />
 
         <SideBar :showMenu="menuStore.visible" />
