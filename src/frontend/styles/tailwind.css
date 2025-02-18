@@ -22,7 +22,7 @@
 }
 @plugin "daisyui/theme" {
     name: 'dracula';
-    --quote: oklch(var(--p));
+    --quote: var(--color-primary);
 }
 @plugin "daisyui/theme" {
     name: 'aqua';
@@ -37,5 +37,5 @@
     name: 'pastel';
     --radius-field: 0.5rem;
     --msg: #000000;
-    --quote: oklch(0.6 0.3 310);
+    --quote: var(--color-primary-content);
 }
