@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import {reactive, ref} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 // import {decodeChunks} from '@/lib/decode-png-chunks'
 
-const toast = useToast()
+const toast = useToastStore()
 const router = useRouter()
 const character = reactive({
     name: '',

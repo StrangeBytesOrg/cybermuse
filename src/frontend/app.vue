@@ -1,19 +1,18 @@
 <script lang="ts" setup>
 import {onErrorCaptured} from 'vue'
 import {RouterView} from 'vue-router'
-import {useToast} from 'vue-toastification'
 import {ZodError} from 'zod'
 import {fromError} from 'zod-validation-error'
-import {useMenuStore, useThemeStore} from './store'
+import {useMenuStore, useThemeStore, useToastStore} from './store'
 import './styles/global.css'
 import './styles/tailwind.css'
-import 'vue-toastification/dist/index.css'
 import TopBar from '@/components/top-bar.vue'
 import SideBar from '@/components/sidebar.vue'
+import Toast from '@/components/toast.vue'
 
 const menuStore = useMenuStore()
 const themeStore = useThemeStore()
-const toast = useToast()
+const toast = useToastStore()
 
 onErrorCaptured((error) => {
     if (error instanceof ZodError) {
@@ -46,5 +45,7 @@ onErrorCaptured((error) => {
                 <RouterView />
             </Suspense>
         </div>
+
+        <Toast />
     </div>
 </template>

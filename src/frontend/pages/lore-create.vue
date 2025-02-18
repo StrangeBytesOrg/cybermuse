@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
 
 type Entry = {name: string; content: string}
@@ -11,7 +11,7 @@ const lore = reactive<Lore>({
     entries: [],
 })
 const router = useRouter()
-const toast = useToast()
+const toast = useToastStore()
 
 const addEntry = () => {
     lore.entries.push({name: '', content: ''})

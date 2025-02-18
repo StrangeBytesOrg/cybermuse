@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {chatCollection, characterCollection} from '@/db'
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
+const toast = useToastStore()
 const chatId = route.params.id
 if (!chatId || Array.isArray(chatId)) {
     router.push({name: 'chats'})

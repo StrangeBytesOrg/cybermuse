@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import {ref, reactive, computed, onMounted} from 'vue'
-import {useToast} from 'vue-toastification'
 import Handlebars from 'handlebars'
+import {useToastStore} from '@/store'
 import {templateCollection, userCollection} from '@/db'
 
-const toast = useToast()
+const toast = useToastStore()
 let templates = reactive(await templateCollection.find())
 let user = reactive(await userCollection.findById('default-user'))
 const example = ref('')

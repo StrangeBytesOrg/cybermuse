@@ -1,11 +1,10 @@
 <script lang="ts" setup>
 import {ref, reactive, computed} from 'vue'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {generationPresetCollection, userCollection} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
-const toast = useToast()
-
+const toast = useToastStore()
 const presets = reactive(await generationPresetCollection.find())
 const user = reactive(await userCollection.findById('default-user'))
 const selectedPresetId = ref(user.generatePresetId)

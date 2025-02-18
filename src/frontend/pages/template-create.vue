@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
 import Handlebars from 'handlebars'
+import {useToastStore} from '@/store'
 import {templateCollection} from '@/db'
 
-const toast = useToast()
+const toast = useToastStore()
 const router = useRouter()
 const example = ref('')
 const template = reactive({

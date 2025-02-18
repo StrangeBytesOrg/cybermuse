@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
 import {TrashIcon} from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const router = useRouter()
-const toast = useToast()
+const toast = useToastStore()
 const loreId = route.params.id
 
 if (!loreId || Array.isArray(loreId)) {

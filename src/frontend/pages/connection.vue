@@ -1,8 +1,7 @@
 <script lang="ts" setup>
-import {useToast} from 'vue-toastification'
-import {useConnectionStore} from '@/store'
+import {useConnectionStore, useToastStore} from '@/store'
 
-const toast = useToast()
+const toast = useToastStore()
 const connectionStore = useConnectionStore()
 
 const connect = async () => {

@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToast} from 'vue-toastification'
+import {useToastStore} from '@/store'
 import {generationPresetCollection, userCollection} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
-const toast = useToast()
+const toast = useToastStore()
 const router = useRouter()
 const preset = reactive({
     name: '',
