@@ -2,7 +2,12 @@
 
 <template>
     <main class="flex flex-col">
-        <p>To get started, download and load a model.</p>
-        <p>After that, create a character and a chat.</p>
+        <p class="text-center sm:text-left">
+            A connection to a Llama.cpp server is required.
+            <br />
+            Set the server address in the connection tab.
+            <br />
+            Then create a new character and chat to begin.
+        </p>
     </main>
 </template>
