@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, reactive, computed, onMounted} from 'vue'
 import {useToast} from 'vue-toastification'
-import {Template} from '@huggingface/jinja'
+import Handlebars from 'handlebars'
 import {templateCollection, userCollection} from '@/db'
 
 const toast = useToast()
@@ -74,8 +74,8 @@ const getPreview = async () => {
             loreString += `${entry.name}: ${entry.content}\n`
         })
     })
-    const jinjaTemplate = new Template(activeTemplate.value.template)
-    example.value = jinjaTemplate.render({
+    const hbTemplate = Handlebars.compile(activeTemplate.value.template)
+    example.value = hbTemplate({
         characters: characterString,
         lore: loreString,
     })

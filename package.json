@@ -11,7 +11,6 @@
     },
     "devDependencies": {
         "@heroicons/vue": "^2.2.0",
-        "@huggingface/jinja": "^0.3.3",
         "@strangebytes/pouchdb-orm": "^0.0.15",
         "@tailwindcss/vite": "^4.0.6",
         "@types/node": "^22.13.4",
@@ -26,6 +25,7 @@
         "eslint-plugin-vue": "^9.32.0",
         "events": "^3.3.0",
         "eventsource-parser": "^3.0.0",
+        "handlebars": "^4.7.8",
         "marked": "^15.0.7",
         "pinia": "^3.0.1",
         "pouchdb-browser": "^9.0.0",

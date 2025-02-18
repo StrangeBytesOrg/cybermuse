@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useRoute} from 'vue-router'
-import {Template} from '@huggingface/jinja'
+import Handlebars from 'handlebars'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {
     db,
@@ -64,12 +64,12 @@ const setupGeneration = async () => {
     const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
     const generatePreset = await generationPresetCollection.findById(generatePresetId)
     const template = await templateCollection.findById(promptTemplateId)
-    const jinjaTemplate = new Template(template.template)
+    const hbTemplate = Handlebars.compile(template.template)
 
     // Render each character description
     characters.forEach((c) => {
-        const characterTemplate = new Template(c.description)
-        c.description = characterTemplate.render({
+        const characterTemplate = Handlebars.compile(c.description)
+        c.description = characterTemplate({
             char: c.name,
             user: userCharacter.name,
         })
@@ -89,7 +89,7 @@ const setupGeneration = async () => {
     })
 
     // Render the system prompt
-    const systemPrompt = jinjaTemplate.render({
+    const systemPrompt = hbTemplate({
         characters: characterString,
         lore: loreString,
     })
@@ -107,6 +107,7 @@ const setupGeneration = async () => {
         content: systemPrompt,
     })
 
+    console.log(formattedMessages)
     return {formattedMessages, generatePreset}
 }
 

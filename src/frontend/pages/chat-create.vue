@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
-import {Template} from '@huggingface/jinja'
+import Handlebars from 'handlebars'
 import {db, chatCollection, characterCollection, loreCollection} from '@/db'
 import type {Message} from '@/db'
 
@@ -29,8 +29,8 @@ const createChat = async () => {
         const character = characters.find((c) => c._id === characterId)
         if (character?.firstMessage) {
             // Parse firstMessage template
-            const jinjaTemplate = new Template(character.firstMessage)
-            const content = jinjaTemplate.render({char: character.name})
+            const hbTemplate = Handlebars.compile(character.firstMessage)
+            const content = hbTemplate({char: character.name})
             messages.push({
                 id: Math.random().toString(36).slice(2),
                 type: 'model',

@@ -2,7 +2,7 @@
 import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToast} from 'vue-toastification'
-import {Template} from '@huggingface/jinja'
+import Handlebars from 'handlebars'
 import {templateCollection} from '@/db'
 
 const toast = useToast()
@@ -35,8 +35,23 @@ const getPreview = async () => {
         throw new Error('Template not found')
     }
 
-    const jinjaTemplate = new Template(template.template)
-    example.value = jinjaTemplate.render({characters, lore})
+    let characterString = ''
+    characters.forEach((character) => {
+        characterString += `${character.name}: ${character.description}\n`
+    })
+    let loreString = ''
+    lore.forEach((book) => {
+        loreString += `${book.name}\n`
+        book.entries.forEach((entry) => {
+            loreString += `${entry.name}: ${entry.content}\n`
+        })
+    })
+
+    const hbTemplate = Handlebars.compile(template.template)
+    example.value = hbTemplate({
+        characters: characterString,
+        lore: loreString,
+    })
 }
 
 const resizeTextarea = async (event: Event) => {
@@ -55,7 +70,7 @@ const resizeTextarea = async (event: Event) => {
         <textarea
             v-model="template.template"
             @input="resizeTextarea"
-            class="textarea textarea-bordered leading-normal p-2 focus:outline-none" />
+            class="textarea textarea-bordered w-full leading-normal p-2 focus:outline-none" />
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
