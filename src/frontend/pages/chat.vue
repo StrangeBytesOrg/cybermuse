@@ -26,9 +26,6 @@ const messagesElement = ref<HTMLElement>()
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
-// Check if API connection is good
-await connectionStore.checkConnection()
-
 if (!chatId || Array.isArray(chatId)) {
     router.push({name: 'chats'})
     throw new Error('Invalid chat ID')
@@ -158,9 +155,6 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    if (!connectionStore.connected) {
-        throw new Error('Not connected to generation server')
-    }
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
@@ -235,6 +229,7 @@ const generateMessage = async () => {
                 // TODO add Penalties
             }),
         })
+        if (!response.ok) throw new Error('Connection to server failed')
         const iterable = responseToIterable(response)
         let messageBuffer = ''
         let initialBuffer = ''
@@ -329,7 +324,6 @@ const toggleCtxMenu = () => {
 
             <button
                 @click="fullSend"
-                :disabled="!connectionStore.connected"
                 v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 {{ pendingMessage ? '' : 'Send' }}

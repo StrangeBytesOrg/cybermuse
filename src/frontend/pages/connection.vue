@@ -5,6 +5,9 @@ const toast = useToastStore()
 const connectionStore = useConnectionStore()
 
 const connect = async () => {
+    if (!connectionStore.connectionUrl.startsWith('http') && !connectionStore.connectionUrl.startsWith('https')) {
+        throw new Error('Connection URL must start with http or https')
+    }
     await connectionStore.checkConnection()
     connectionStore.save()
     toast.success('Connected')
@@ -26,7 +29,7 @@ const connect = async () => {
                 </div>
             </label>
             <div class="flex-row">
-                <input type="text" v-model="connectionStore.connectionUrl" class="input" />
+                <input type="text" v-model="connectionStore.connectionUrl" class="input max-w-72" />
 
                 <button class="btn btn-primary ml-2" @click="connect">Connect</button>
             </div>
