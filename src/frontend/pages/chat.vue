@@ -171,9 +171,6 @@ const impersonate = async () => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    if (!connectionStore.connected) {
-        throw new Error('Generation server not running or not connected')
-    }
 
     await createMessage(userCharacter._id, '', 'model')
     await generateMessage()
@@ -298,7 +295,7 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
-        <div class="flex absolute bottom-0 left-0 right-0 sm:pl-52 px-1">
+        <div class="flex absolute bottom-0 left-0 right-0 px-1 sm:pl-52 sm:pb-1 sm:pr-2">
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <Bars4Icon class="size-10" />
