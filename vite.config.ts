@@ -13,12 +13,6 @@ export default defineConfig({
         outDir: path.resolve(import.meta.dirname, 'dist'),
         emptyOutDir: true,
     },
-    server: {
-        proxy: {
-            '/avatars': 'http://localhost:31700',
-            '/trpc': 'http://localhost:31700',
-        },
-    },
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src/frontend', import.meta.url)),
