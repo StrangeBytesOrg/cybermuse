@@ -17,8 +17,10 @@ const baseSchema = z.object({
             z.object({
                 content_type: z.string(),
                 data: z.instanceof(File).optional(),
+                stub: z.boolean().optional(),
                 digest: z.string().optional(),
                 length: z.number().optional(),
+                revpos: z.number().optional(),
             }),
         )
         .optional(),

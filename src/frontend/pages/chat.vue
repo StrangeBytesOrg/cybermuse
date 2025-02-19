@@ -104,7 +104,6 @@ const setupGeneration = async () => {
         content: systemPrompt,
     })
 
-    console.log(formattedMessages)
     return {formattedMessages, generatePreset}
 }
 
