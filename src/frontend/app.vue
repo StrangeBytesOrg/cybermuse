@@ -40,9 +40,12 @@ onErrorCaptured((error) => {
         <!-- Main -->
         <div
             class="flex flex-col min-h-0 absolute top-12 bottom-0 left-0 right-0 sm:left-52 overflow-y-auto px-1 py-2 sm:px-2">
-            <!-- TODO: Add loading indicator -->
             <Suspense>
                 <RouterView />
+
+                <template #fallback>
+                    <span class="loading loading-spinner loading-xl"></span>
+                </template>
             </Suspense>
         </div>
 
