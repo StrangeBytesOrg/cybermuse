@@ -6,12 +6,16 @@ const toastStore = useToastStore()
 </script>
 
 <template>
-    <div v-show="toastStore.visible" class="toast toast-end">
-        <div class="alert min-h-14 min-w-70 text-lg" :class="`alert-${toastStore.type}`">
-            <InformationCircleIcon v-if="toastStore.type === 'info'" class="size-6" />
-            <CheckCircleIcon v-if="toastStore.type === 'success'" class="size-6" />
-            <ExclamationTriangleIcon v-if="toastStore.type === 'error'" class="size-6" />
-            {{ toastStore.message }}
+    <div class="toast toast-end">
+        <div
+            v-for="[toastId, toast] in toastStore.toasts"
+            :key="toastId"
+            class="alert min-h-14 min-w-70 text-lg"
+            :class="toast.type">
+            <InformationCircleIcon v-if="toast.type === 'alert-info'" class="size-6" />
+            <CheckCircleIcon v-if="toast.type === 'alert-success'" class="size-6" />
+            <ExclamationTriangleIcon v-if="toast.type === 'alert-error'" class="size-6" />
+            {{ toast.message }}
         </div>
     </div>
 </template>

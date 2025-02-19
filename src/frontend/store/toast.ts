@@ -1,38 +1,37 @@
 import {defineStore} from 'pinia'
 
+type Toast = {
+    message: string
+    type: 'alert-info' | 'alert-success' | 'alert-error'
+}
+
 export const useToastStore = defineStore('toast', {
     state: () => {
         return {
-            visible: false,
-            message: '',
-            type: 'error' as 'info' | 'success' | 'error',
-            timeout: 3000,
+            toasts: new Map() as Map<number, Toast>,
         }
     },
     actions: {
-        info(message: string) {
-            this.visible = true
-            this.message = message
-            this.type = 'info'
+        info(message: string, timeout: number = 3000) {
+            const id = Math.random()
+            this.toasts.set(id, {message, type: 'alert-info'})
             setTimeout(() => {
-                this.visible = false
-            }, this.timeout)
+                this.toasts.delete(id)
+            }, timeout)
         },
-        success(message: string) {
-            this.visible = true
-            this.message = message
-            this.type = 'success'
+        success(message: string, timeout: number = 3000) {
+            const id = Math.random()
+            this.toasts.set(id, {message, type: 'alert-success'})
             setTimeout(() => {
-                this.visible = false
-            }, this.timeout)
+                this.toasts.delete(id)
+            }, timeout)
         },
-        error(message: string) {
-            this.visible = true
-            this.message = message
-            this.type = 'error'
+        error(message: string, timeout: number = 3000) {
+            const id = Math.random()
+            this.toasts.set(id, {message, type: 'alert-error'})
             setTimeout(() => {
-                this.visible = false
-            }, this.timeout)
+                this.toasts.delete(id)
+            }, timeout)
         },
     },
 })
