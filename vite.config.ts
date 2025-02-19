@@ -10,7 +10,8 @@ export default defineConfig({
     plugins: [vue(), tailwindcss()],
     build: {
         sourcemap: true,
-        outDir: path.resolve(import.meta.dirname, 'dist', 'frontend'),
+        outDir: path.resolve(import.meta.dirname, 'dist'),
+        emptyOutDir: true,
     },
     server: {
         proxy: {
