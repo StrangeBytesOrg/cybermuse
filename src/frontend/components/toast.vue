@@ -15,7 +15,7 @@ const toastStore = useToastStore()
             <InformationCircleIcon v-if="toast.type === 'alert-info'" class="size-6" />
             <CheckCircleIcon v-if="toast.type === 'alert-success'" class="size-6" />
             <ExclamationTriangleIcon v-if="toast.type === 'alert-error'" class="size-6" />
-            {{ toast.message }}
+            <span class="whitespace-pre">{{ toast.message }}</span>
         </div>
     </div>
 </template>
