@@ -4,7 +4,7 @@ import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
-// import {decodeChunks} from '@/lib/decode-png-chunks'
+import {decodeChunks} from '@/lib/decode-png-chunks'
 
 const toast = useToastStore()
 const router = useRouter()
@@ -13,6 +13,7 @@ const character = reactive({
     description: '',
     firstMessage: '',
     type: 'character' as 'character' | 'user',
+    _attachments: undefined as undefined | Record<string, {content_type: string; data: File}>,
 })
 const characterImage = ref<string>()
 
@@ -37,34 +38,40 @@ const removeImage = () => {
     characterImage.value = undefined
 }
 
-// TODO re-implement this function
-// const importCharacterPng = async (file: File) => {
-//     // If the image is a png, check if it has V2 card data embedded
-//     if (image.startsWith('data:image/png;base64')) {
-//         // Convert the image from a dataurl to an ArrayBuffer
-//         const dataurl = image.split(',')[1]
-//         if (!dataurl) return
-//         const binary = atob(dataurl)
-//         const arrayBuffer = new ArrayBuffer(binary.length)
-//         const uint8Array = new Uint8Array(arrayBuffer)
-//         for (let i = 0; i < binary.length; i++) {
-//             uint8Array[i] = binary.charCodeAt(i)
-//         }
-//         const metaChunks = decodeChunks(arrayBuffer)
-//         const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
-//         if (!cardMeta) return
-//         const card = JSON.parse(atob(cardMeta.value))
-//         character.name = card.data.name
-//         character.description = card.data.description
-//         character.firstMessage = card.data.first_mes
-//         uploadAvatar(image)
-//     }
-// }
+const importCharacterPng = (file: File) => {
+    if (file.type !== 'image/png') {
+        throw new Error('Can only import characters from PNG files')
+    }
+
+    const reader = new FileReader()
+    reader.onload = () => {
+        const image = reader.result as string
+        const dataurl = image.split(',')[1]
+        if (!dataurl) return
+        const binary = atob(dataurl)
+        const arrayBuffer = new ArrayBuffer(binary.length)
+        const uint8Array = new Uint8Array(arrayBuffer)
+        for (let i = 0; i < binary.length; i++) {
+            uint8Array[i] = binary.charCodeAt(i)
+        }
+        const metaChunks = decodeChunks(arrayBuffer)
+        const cardMeta = metaChunks.find((chunk) => chunk.keyword === 'chara')
+        if (!cardMeta) {
+            toast.error('No character data found in PNG')
+            return
+        }
+        const card = JSON.parse(atob(cardMeta.value))
+        character.name = card.data.name
+        character.description = card.data.description
+        character.firstMessage = card.data.first_mes
+        uploadAvatar(file)
+        toast.success('Character imported')
+    }
+    reader.readAsDataURL(file)
+}
 </script>
 
 <template>
-    <!-- <FileInput @changed="importCharacterPng" button-label="Import Character" button-size="btn-sm" class="ml-auto" /> -->
-
     <main class="flex flex-col p-3 bg-base-200 rounded-lg">
         <input
             type="text"
@@ -103,6 +110,7 @@ const removeImage = () => {
         <div class="divider"></div>
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
+            <FileInput @changed="importCharacterPng" button-label="Import Character" class="ml-2" />
             <button class="btn btn-error ml-2" @click="router.back">Cancel</button>
         </div>
     </main>
