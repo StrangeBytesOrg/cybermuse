@@ -68,7 +68,7 @@ const resizeTextarea = async (event: Event) => {
 </script>
 
 <template>
-    <div class="flex flex-col relative mb-2 bg-base-200 rounded-xl">
+    <div class="flex flex-col relative mt-2 bg-base-200 rounded-xl">
         <!-- Message Content -->
         <div class="flex flex-row pb-2 pt-3">
             <div class="avatar ml-2">
