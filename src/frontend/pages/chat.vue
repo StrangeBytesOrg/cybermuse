@@ -240,7 +240,7 @@ const generateMessage = async () => {
                 } else {
                     messageBuffer += content
                 }
-                lastMessage.content[lastMessage.activeIndex] = messageBuffer
+                lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
                 await chatStore.save()
             }
         }
