@@ -24,13 +24,17 @@ for (const character of characters) {
 
 const createChat = async () => {
     // If characters have a first message, add it to the chat
+    const userName = characters.find((c) => c._id === userCharacter.value)?.name
     const messages: Message[] = []
     selectedCharacters.value.forEach(async (characterId) => {
         const character = characters.find((c) => c._id === characterId)
         if (character?.firstMessage) {
             // Parse firstMessage template
             const hbTemplate = Handlebars.compile(character.firstMessage)
-            const content = hbTemplate({char: character.name})
+            const content = hbTemplate({
+                char: character.name,
+                user: userName,
+            })
             messages.push({
                 id: Math.random().toString(36).slice(2),
                 type: 'model',
