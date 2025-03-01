@@ -1,6 +1,6 @@
 {
     "extends": "@vue/tsconfig/tsconfig.dom.json",
-    "include": ["./**/*.ts", "./**/*.vue", "../backend/router.ts"],
+    "include": ["./**/*.ts", "./**/*.vue"],
     "compilerOptions": {
         "strict": true,
         "composite": true,
