@@ -66,6 +66,7 @@ const chatSchema = baseSchema.extend({
             activeIndex: z.number(),
         }),
     ),
+    archived: z.boolean().default(false),
 })
 export const chatCollection = new Collection(db, 'chat', chatSchema)
 export type Chat = z.infer<typeof chatSchema>

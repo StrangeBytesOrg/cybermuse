@@ -1,15 +1,16 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, ref, computed} from 'vue'
 import {db, chatCollection, characterCollection} from '@/db'
 import type {Chat} from '@/db'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 
-const chats = reactive(await chatCollection.find({limit: 100}))
+const showArchivedChats = ref(false)
+const allChats = reactive(await chatCollection.find({limit: 100}))
 const characters = reactive(await characterCollection.find())
 const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
 const avatars: Record<string, string> = {}
 
-for (const chat of chats) {
+for (const chat of allChats) {
     for (const character of chat.characters) {
         if (characterMap[character]?._attachments) {
             const avatar = (await db.getAttachment(character, 'avatar')) as Blob
@@ -17,6 +18,10 @@ for (const chat of chats) {
         }
     }
 }
+
+const chats = computed(() => {
+    return showArchivedChats.value ? allChats : allChats.filter(chat => !chat.archived)
+})
 
 const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(undefined, {
@@ -40,6 +45,13 @@ const formatTitle = (chat: Chat) => {
     </Teleport>
 
     <main class="flex flex-col">
+        <div class="flex justify-end mb-4">
+            <label class="label cursor-pointer">
+                <span class="label-text mr-2">Show archived</span>
+                <input v-model="showArchivedChats" type="checkbox" class="toggle toggle-primary" />
+            </label>
+        </div>
+
         <template v-if="chats.length">
             <router-link
                 :to="{name: 'chat', params: {id: chat._id}}"

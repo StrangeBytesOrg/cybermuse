@@ -25,6 +25,12 @@ const updateChat = async () => {
     router.push({name: 'chats'})
 }
 
+const archiveChat = async () => {
+    chat.archived = true
+    await chatCollection.put(chat)
+    router.push({name: 'chats'})
+}
+
 const deleteChat = async () => {
     await chatCollection.removeById(chatId)
     router.push({name: 'chats'})
@@ -64,7 +70,21 @@ const deleteChat = async () => {
         <div class="divider mb-3"></div>
         <div>
             <button @click.prevent="updateChat" class="btn btn-primary">Update</button>
-            <button @click.prevent="deleteChat" class="btn btn-error ml-3">Delete</button>
+            <button @click.prevent="archiveChat" class="btn btn-warning ml-3">Archive</button>
+            <button onclick="delete_confirm.showModal()" class="btn btn-error ml-3">Delete</button>
         </div>
     </main>
+
+    <dialog id="delete_confirm" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">Are you sure you want to delete this chat?</h3>
+            <p class="pt-4">This cannot be undone.</p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn">Cancel</button>
+                </form>
+                <button class="btn btn-error" @click="deleteChat">Delete</button>
+            </div>
+        </div>
+    </dialog>
 </template>
