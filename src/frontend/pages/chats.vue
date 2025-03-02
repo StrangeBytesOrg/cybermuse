@@ -62,6 +62,7 @@ const formatTitle = (chat: Chat) => {
                     {{ formatTitle(chat) }}
                 </div>
                 <div class="text-sm">{{ formatDate(chat.createDate) }}</div>
+                <div class="text-sm">Messages: {{ chat.messages.length }}</div>
                 <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
                     <div v-for="character in chat.characters" :key="character" class="avatar">
                         <div class="h-14">
