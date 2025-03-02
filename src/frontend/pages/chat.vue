@@ -291,7 +291,8 @@ const toggleCtxMenu = () => {
                 :avatars="avatars"
                 :loading="false"
                 :showSwipes="index === 0 && message.type === 'model'"
-                @new-swipe="newSwipe" />
+                @new-swipe="newSwipe"
+            />
         </div>
 
         <!-- Chat Controls -->
@@ -316,7 +317,8 @@ const toggleCtxMenu = () => {
                 id="message-input"
                 v-model="currentMessage"
                 @keydown.exact.enter="fullSend"
-                class="textarea textarea-bordered border-2 resize-none flex-1 align-middle h-20 focus:outline-none focus:border-primary" />
+                class="textarea textarea-bordered border-2 resize-none flex-1 align-middle h-20 focus:outline-none focus:border-primary"
+            />
 
             <button
                 @click="fullSend"

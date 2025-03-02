@@ -54,7 +54,8 @@ const deleteLore = async () => {
                                 type="text"
                                 v-model="entry.name"
                                 class="input input-bordered mt-2 max-w-96"
-                                placeholder="Entry Name" />
+                                placeholder="Entry Name"
+                            />
                             <textarea
                                 v-model="entry.content"
                                 class="textarea textarea-bordered mt-2"

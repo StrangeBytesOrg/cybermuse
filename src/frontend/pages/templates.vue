@@ -117,7 +117,8 @@ onMounted(() => {
             <textarea
                 v-model="activeTemplate.template"
                 @input="resizeTextarea"
-                class="textarea p-2 w-full textarea-bordered focus:outline-noneleading-normal" />
+                class="textarea p-2 w-full textarea-bordered focus:outline-noneleading-normal"
+            />
 
             <div class="flex flex-row space-x-2 mt-3">
                 <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>

@@ -38,8 +38,7 @@ onErrorCaptured((error) => {
         <SideBar :showMenu="menuStore.visible" />
 
         <!-- Main -->
-        <div
-            class="flex flex-col min-h-0 absolute top-12 bottom-0 left-0 right-0 sm:left-52 overflow-y-auto px-1 py-2 sm:px-2">
+        <div class="flex flex-col min-h-0 absolute top-12 bottom-0 left-0 right-0 sm:left-52 overflow-y-auto px-1 py-2 sm:px-2">
             <Suspense>
                 <RouterView />
 

@@ -89,22 +89,26 @@ const deletePreset = async () => {
                 <label class="fieldset-label text-sm">Repeat-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.penalty"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Presence-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.presencePenalty"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.frequencyPenalty"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Last Tokens</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.lastTokens"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Penalize-nl</label>
                 <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select select-bordered">

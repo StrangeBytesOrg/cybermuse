@@ -76,7 +76,8 @@ const resizeTextarea = async (event: Event) => {
                     <img
                         v-if="avatars[message.characterId]"
                         :src="avatars[message.characterId]"
-                        alt="character avatar" />
+                        alt="character avatar"
+                    />
                     <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />
                 </div>
             </div>
@@ -89,7 +90,8 @@ const resizeTextarea = async (event: Event) => {
                 <div
                     v-show="!editMode"
                     v-html="formatText(message.content[message.activeIndex] || '')"
-                    class="messageText mx-[-1px] px-[1px] [word-break:break-word]" />
+                    class="messageText mx-[-1px] px-[1px] [word-break:break-word]"
+                />
                 <textarea
                     v-show="editMode"
                     ref="message-input"
@@ -99,7 +101,8 @@ const resizeTextarea = async (event: Event) => {
                     @keydown.ctrl.enter="update"
                     @keydown.esc="editMode = false"
                     data-1p-ignore
-                    class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]" />
+                    class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]"
+                />
             </div>
         </div>
 

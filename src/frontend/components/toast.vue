@@ -8,7 +8,7 @@ const toastStore = useToastStore()
 <template>
     <div class="toast toast-end">
         <div
-            v-for="[toastId, toast] in toastStore.toasts"
+            v-for="([toastId, toast]) in toastStore.toasts"
             :key="toastId"
             class="alert min-h-14 min-w-70 text-lg"
             :class="toast.type">

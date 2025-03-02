@@ -1,6 +1,6 @@
 import {EventSourceParserStream, type EventSourceMessage} from 'eventsource-parser/stream'
 
-export const convertToAsyncIterable = async function* <T>(stream: ReadableStream<T>): AsyncGenerator<T> {
+export const convertToAsyncIterable = async function*<T>(stream: ReadableStream<T>): AsyncGenerator<T> {
     const reader = stream.getReader()
     try {
         while (true) {

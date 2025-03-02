@@ -106,7 +106,8 @@ const userCharacters = computed(() => {
                             :value="character._id"
                             :checked="selectedCharacters.includes(character._id)"
                             @change="setSelected"
-                            class="checkbox absolute top-2 right-4" />
+                            class="checkbox absolute top-2 right-4"
+                        />
                     </label>
                 </div>
             </template>
@@ -139,7 +140,8 @@ const userCharacters = computed(() => {
                             type="checkbox"
                             :value="loreBook._id"
                             @change="setSelectedLore"
-                            class="checkbox absolute top-2 right-4" />
+                            class="checkbox absolute top-2 right-4"
+                        />
                     </label>
                 </div>
             </div>
@@ -152,7 +154,8 @@ const userCharacters = computed(() => {
             type="text"
             placeholder="(optional)"
             v-model="chatName"
-            class="input input-bordered focus:outline-none focus:border-primary" />
+            class="input input-bordered focus:outline-none focus:border-primary"
+        />
 
         <div class="flex flex-row mt-5">
             <button class="btn btn-primary" @click="createChat">Create Chat</button>

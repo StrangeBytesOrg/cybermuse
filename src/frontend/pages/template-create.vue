@@ -70,7 +70,8 @@ const resizeTextarea = async (event: Event) => {
         <textarea
             v-model="template.template"
             @input="resizeTextarea"
-            class="textarea textarea-bordered w-full leading-normal p-2 focus:outline-none" />
+            class="textarea textarea-bordered w-full leading-normal p-2 focus:outline-none"
+        />
 
         <div class="flex flex-row space-x-2 mt-2">
             <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>

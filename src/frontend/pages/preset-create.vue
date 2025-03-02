@@ -71,17 +71,20 @@ const createTemplate = async () => {
                 <label class="fieldset-label text-sm">Presence-penalty</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.presencePenalty"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.frequencyPenalty"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Last Tokens</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.lastTokens"
-                    class="input input-bordered focus:outline-none" />
+                    class="input input-bordered focus:outline-none"
+                />
 
                 <label class="fieldset-label text-sm">Penalize-nl</label>
                 <select v-model="preset.repeatPenalty.penalizeNewLine" class="select select-bordered">
