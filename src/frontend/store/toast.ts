@@ -15,23 +15,17 @@ export const useToastStore = defineStore('toast', {
         info(message: string, timeout: number = 3000) {
             const id = Math.random()
             this.toasts.set(id, {message, type: 'alert-info'})
-            setTimeout(() => {
-                this.toasts.delete(id)
-            }, timeout)
+            setTimeout(() => this.toasts.delete(id), timeout)
         },
         success(message: string, timeout: number = 3000) {
             const id = Math.random()
             this.toasts.set(id, {message, type: 'alert-success'})
-            setTimeout(() => {
-                this.toasts.delete(id)
-            }, timeout)
+            setTimeout(() => this.toasts.delete(id), timeout)
         },
         error(message: string, timeout: number = 3000) {
             const id = Math.random()
             this.toasts.set(id, {message, type: 'alert-error'})
-            setTimeout(() => {
-                this.toasts.delete(id)
-            }, timeout)
+            setTimeout(() => this.toasts.delete(id), timeout)
         },
     },
 })
