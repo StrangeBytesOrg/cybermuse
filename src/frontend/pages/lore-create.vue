@@ -39,7 +39,7 @@ const createLore = async () => {
                 <input type="text" v-model="entry.name" class="input mt-2" placeholder="Entry Name" />
                 <textarea
                     v-model="entry.content"
-                    class="textarea w-full mt-2"
+                    class="textarea w-full min-h-32 mt-2"
                     placeholder="Entry Content"></textarea>
             </div>
         </div>

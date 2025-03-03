@@ -58,7 +58,7 @@ const deleteLore = async () => {
                             />
                             <textarea
                                 v-model="entry.content"
-                                class="textarea w-full mt-2"
+                                class="textarea w-full min-h-32 mt-2"
                                 placeholder="Entry Content"></textarea>
                         </div>
                         <button @click="removeEntry(index)" class="btn btn-sm btn-error mt-auto ml-3">
