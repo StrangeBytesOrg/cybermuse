@@ -46,7 +46,7 @@ const deletePreset = async () => {
 <template>
     <div class="flex flex-row">
         <div class="flex flex-col">
-            <select v-model="selectedPresetId" @change="setActivePreset" class="select select-bordered min-w-60">
+            <select v-model="selectedPresetId" @change="setActivePreset" class="select min-w-60">
                 <option v-for="preset in presets" :key="preset._id" :value="preset._id">
                     {{ preset.name }}
                 </option>
@@ -65,22 +65,22 @@ const deletePreset = async () => {
                 <input v-model="activePreset.name" type="text" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Max Response Tokens</label>
-                <NumberInput v-model="activePreset.maxTokens" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.maxTokens" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Temperature</label>
-                <NumberInput v-model="activePreset.temperature" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.temperature" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Seed</label>
-                <NumberInput v-model="activePreset.seed" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.seed" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Min P</label>
-                <NumberInput v-model="activePreset.minP" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.minP" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Top P</label>
-                <NumberInput v-model="activePreset.topP" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.topP" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Top K</label>
-                <NumberInput v-model="activePreset.topK" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="activePreset.topK" class="input focus:outline-none" />
             </fieldset>
 
             <fieldset class="fieldset ml-5">
@@ -89,29 +89,29 @@ const deletePreset = async () => {
                 <label class="fieldset-label text-sm">Repeat-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.penalty"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Presence-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.presencePenalty"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.frequencyPenalty"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Last Tokens</label>
                 <NumberInput
                     v-model="activePreset.repeatPenalty.lastTokens"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Penalize-nl</label>
-                <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select">
                     <option :value="true">true</option>
                     <option :value="false">false</option>
                 </select>

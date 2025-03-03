@@ -42,7 +42,7 @@ const deleteLore = async () => {
 
 <template>
     <main class="flex flex-col bg-base-200 rounded-lg p-3">
-        <input type="text" v-model="lore.name" class="input input-bordered" placeholder="Lore Name" />
+        <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
 
         <div class="flex flex-col">
             <div v-for="(entry, index) in lore.entries" :key="index" class="w-full">
@@ -53,12 +53,12 @@ const deleteLore = async () => {
                             <input
                                 type="text"
                                 v-model="entry.name"
-                                class="input input-bordered mt-2 max-w-96"
+                                class="input mt-2 max-w-96"
                                 placeholder="Entry Name"
                             />
                             <textarea
                                 v-model="entry.content"
-                                class="textarea textarea-bordered mt-2"
+                                class="textarea mt-2"
                                 placeholder="Entry Content"></textarea>
                         </div>
                         <button @click="removeEntry(index)" class="btn btn-sm btn-error mt-auto ml-3">

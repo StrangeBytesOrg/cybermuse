@@ -39,12 +39,12 @@ const deleteChat = async () => {
 
 <template>
     <main class="flex flex-col p-3 bg-base-200 rounded-lg">
-        <label class="form-control w-full max-w-64">
+        <label class="w-full max-w-64">
             <input
                 type="text"
                 v-model="chat.name"
                 placeholder="Chat name (optional)"
-                class="input input-bordered focus:outline-none focus:border-primary"
+                class="input focus:outline-none focus:border-primary"
             />
         </label>
 

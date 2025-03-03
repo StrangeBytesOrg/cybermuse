@@ -99,7 +99,7 @@ onMounted(() => {
     <main class="">
         <div class="flex flex-row">
             <div class="flex flex-col">
-                <select v-model="selectedTemplate" @change="setActiveTemplate" class="select select-bordered min-w-60">
+                <select v-model="selectedTemplate" @change="setActiveTemplate" class="select min-w-60">
                     <option v-for="template in templates" :key="template._id" :value="template._id">
                         {{ template.name }}
                     </option>
@@ -111,13 +111,13 @@ onMounted(() => {
 
         <fieldset v-if="activeTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">
             <label class="label text-sm">Template Name</label>
-            <input v-model="activeTemplate.name" type="text" class="input input-bordered focus:outline-none" />
+            <input v-model="activeTemplate.name" type="text" class="input focus:outline-none" />
 
             <label class="label text-sm mt-3">Template</label>
             <textarea
                 v-model="activeTemplate.template"
                 @input="resizeTextarea"
-                class="textarea p-2 w-full textarea-bordered focus:outline-noneleading-normal"
+                class="textarea p-2 w-full focus:outline-noneleading-normal"
             />
 
             <div class="flex flex-row space-x-2 mt-3">

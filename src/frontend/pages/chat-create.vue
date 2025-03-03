@@ -154,7 +154,7 @@ const userCharacters = computed(() => {
             type="text"
             placeholder="(optional)"
             v-model="chatName"
-            class="input input-bordered focus:outline-none focus:border-primary"
+            class="input focus:outline-none focus:border-primary"
         />
 
         <div class="flex flex-row mt-5">

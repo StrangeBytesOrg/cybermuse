@@ -34,20 +34,20 @@ for (const character of characters) {
     </Teleport>
 
     <div class="p-2 flex flex-col sm:flex-row">
-        <label class="form-control w-full sm:w-1/2 mr-5">
+        <label class="w-full sm:w-1/2 mr-5">
             <input
                 type="text"
                 v-model="searchName"
                 placeholder="Search by name"
-                class="input input-bordered w-full focus:outline-none focus:border-primary"
+                class="input w-full focus:outline-none focus:border-primary"
             />
         </label>
 
-        <label class="form-control w-full sm:w-1/2">
+        <label class="w-full sm:w-1/2">
             <select
                 v-model="characterType"
                 placeholder="Character Type"
-                class="select select-bordered w-full mt-3 sm:mt-0">
+                class="select w-full mt-3 sm:mt-0">
                 <option value="both" default>Character Type</option>
                 <option value="character">Character</option>
                 <option value="user">User</option>

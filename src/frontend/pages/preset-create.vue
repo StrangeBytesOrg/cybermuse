@@ -44,50 +44,50 @@ const createTemplate = async () => {
                 <input v-model="preset.name" type="text" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Max Response Tokens</label>
-                <NumberInput v-model="preset.maxTokens" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.maxTokens" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Temperature</label>
-                <NumberInput v-model="preset.temperature" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.temperature" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Seed</label>
-                <NumberInput v-model="preset.seed" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.seed" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Min P</label>
-                <NumberInput v-model="preset.minP" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.minP" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Top P</label>
-                <NumberInput v-model="preset.topP" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.topP" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Top K</label>
-                <NumberInput v-model="preset.topK" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.topK" class="input focus:outline-none" />
             </fieldset>
 
             <fieldset class="fieldset ml-5">
                 <legend class="fieldset-legend">Penalties</legend>
 
                 <label class="fieldset-label text-sm">Repeat-penalty</label>
-                <NumberInput v-model="preset.repeatPenalty.penalty" class="input input-bordered focus:outline-none" />
+                <NumberInput v-model="preset.repeatPenalty.penalty" class="input focus:outline-none" />
 
                 <label class="fieldset-label text-sm">Presence-penalty</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.presencePenalty"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.frequencyPenalty"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Last Tokens</label>
                 <NumberInput
                     v-model="preset.repeatPenalty.lastTokens"
-                    class="input input-bordered focus:outline-none"
+                    class="input focus:outline-none"
                 />
 
                 <label class="fieldset-label text-sm">Penalize-nl</label>
-                <select v-model="preset.repeatPenalty.penalizeNewLine" class="select select-bordered">
+                <select v-model="preset.repeatPenalty.penalizeNewLine" class="select">
                     <option :value="true">true</option>
                     <option :value="false">false</option>
                 </select>

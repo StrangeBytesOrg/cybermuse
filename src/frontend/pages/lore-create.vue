@@ -32,14 +32,14 @@ const createLore = async () => {
 
 <template>
     <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
-        <input type="text" v-model="lore.name" class="input input-bordered" placeholder="Lore Name" />
+        <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
         <div class="flex flex-col">
             <div v-for="(entry, index) in lore.entries" :key="index" class="flex flex-col">
                 <div class="divider"></div>
-                <input type="text" v-model="entry.name" class="input input-bordered mt-2" placeholder="Entry Name" />
+                <input type="text" v-model="entry.name" class="input mt-2" placeholder="Entry Name" />
                 <textarea
                     v-model="entry.content"
-                    class="textarea textarea-bordered mt-2"
+                    class="textarea mt-2"
                     placeholder="Entry Content"></textarea>
             </div>
         </div>

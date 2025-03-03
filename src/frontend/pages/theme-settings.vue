@@ -13,7 +13,7 @@ const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 <template>
     <fieldset class="p-2">
         <label class="fieldset-label text-sm">Theme</label>
-        <select class="select select-bordered mt-2" v-model="themeStore.theme" @change="saveSettings">
+        <select class="select mt-2" v-model="themeStore.theme" @change="saveSettings">
             <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
         </select>
     </fieldset>

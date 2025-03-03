@@ -77,22 +77,22 @@ const importCharacterPng = (file: File) => {
             type="text"
             v-model="character.name"
             placeholder="Character Name"
-            class="input input-bordered w-full sm:max-w-80 mb-auto mr-5 border-2 focus:outline-none focus:border-primary"
+            class="input w-full sm:max-w-80 mb-auto mr-5 border-2 focus:outline-none focus:border-primary"
         />
 
         <textarea
             v-model="character.description"
             placeholder="Description"
-            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
+            class="textarea w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
         />
 
         <textarea
             v-model="character.firstMessage"
             placeholder="First Message"
-            class="textarea textarea-bordered w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
+            class="textarea w-full mt-5 min-h-36 border-2 leading-normal focus:outline-none focus:border-primary"
         />
 
-        <select v-model="character.type" class="select select-bordered w-full sm:max-w-80 mt-5">
+        <select v-model="character.type" class="select w-full sm:max-w-80 mt-5">
             <option value="character">Character</option>
             <option value="user">User</option>
         </select>
