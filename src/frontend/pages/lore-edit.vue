@@ -58,7 +58,7 @@ const deleteLore = async () => {
                             />
                             <textarea
                                 v-model="entry.content"
-                                class="textarea mt-2"
+                                class="textarea w-full mt-2"
                                 placeholder="Entry Content"></textarea>
                         </div>
                         <button @click="removeEntry(index)" class="btn btn-sm btn-error mt-auto ml-3">
@@ -72,7 +72,20 @@ const deleteLore = async () => {
         <div class="flex flex-row mt-3">
             <button @click="addEntry" class="btn btn-sm btn-primary">+ Add Entry</button>
             <button @click="updateLore" class="btn btn-sm btn-primary ml-3">Save</button>
-            <button @click="deleteLore" class="btn btn-sm btn-error ml-3">Delete</button>
+            <button onclick="delete_confirm.showModal()" class="btn btn-sm btn-error ml-3">Delete</button>
         </div>
     </main>
+
+    <dialog id="delete_confirm" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">Are you sure you want to delete this Lorebook?</h3>
+            <p class="pt-4">This will also remove if from all existing chats</p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn">Cancel</button>
+                </form>
+                <button class="btn btn-error" @click="deleteLore">Delete</button>
+            </div>
+        </div>
+    </dialog>
 </template>

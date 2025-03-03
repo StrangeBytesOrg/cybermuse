@@ -102,7 +102,7 @@ const removeImage = () => {
                 <form method="dialog">
                     <button class="btn">Cancel</button>
                 </form>
-                <button class="btn btn-error" @click="deleteCharacter()">Delete</button>
+                <button class="btn btn-error" @click="deleteCharacter">Delete</button>
             </div>
         </div>
     </dialog>
