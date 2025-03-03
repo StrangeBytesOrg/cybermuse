@@ -17,6 +17,7 @@ import CreateTemplate from './pages/template-create.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import ThemeSettings from './pages/theme-settings.vue'
+import About from './pages/about.vue'
 import ErrorPage from './pages/error.vue'
 
 export default createRouter({
@@ -123,6 +124,12 @@ export default createRouter({
             name: 'settings',
             component: ThemeSettings,
             meta: {title: 'Theme Settings'},
+        },
+        {
+            path: '/about',
+            name: 'about',
+            component: About,
+            meta: {title: 'About'},
         },
         {
             path: '/:pathMatch(.*)*',

@@ -41,6 +41,9 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
             <li>
                 <router-link to="/connection" class="font-bold px-2 mb-1" active-class="active">Connection</router-link>
             </li>
+            <li>
+                <router-link to="/about" class="font-bold px-2 mb-1" active-class="active">About</router-link>
+            </li>
         </ul>
 
         <div class="absolute bottom-0 w-full text-center">Version: {{ version }}</div>
