@@ -59,12 +59,12 @@ const getPreview = async () => {
 <template>
     <fieldset class="flex flex-col bg-base-200 rounded-lg p-2">
         <label class="fieldset-label text-sm">Template Name</label>
-        <input v-model="template.name" type="text" class="input focus:outline-none" />
+        <input v-model="template.name" type="text" class="input" />
 
         <label class="fieldset-label text-sm mt-3">Template</label>
         <Editable
             v-model="template.template"
-            class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2 focus:outline-none"
+            class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2"
         />
 
         <div class="flex flex-row space-x-2 mt-2">

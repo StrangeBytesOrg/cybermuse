@@ -44,7 +44,7 @@ const deleteChat = async () => {
                 type="text"
                 v-model="chat.name"
                 placeholder="Chat name (optional)"
-                class="input focus:outline-none focus:border-primary"
+                class="input focus:border-primary"
             />
         </label>
 

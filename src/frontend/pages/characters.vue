@@ -39,7 +39,7 @@ for (const character of characters) {
                 type="text"
                 v-model="searchName"
                 placeholder="Search by name"
-                class="input w-full focus:outline-none focus:border-primary"
+                class="input w-full focus:border-primary"
             />
         </label>
 

@@ -40,7 +40,7 @@ const createLore = async () => {
                 <input type="text" v-model="entry.name" class="input" placeholder="Entry Name" />
                 <Editable
                     v-model="entry.content"
-                    class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2 focus:outline-none"
+                    class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2"
                 />
             </div>
         </div>

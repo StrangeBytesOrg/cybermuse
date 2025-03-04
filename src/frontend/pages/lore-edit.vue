@@ -59,7 +59,7 @@ const deleteLore = async () => {
                             />
                             <Editable
                                 v-model="entry.content"
-                                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2 focus:outline-none"
+                                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2"
                             />
                         </div>
                         <button @click="removeEntry(index)" class="btn btn-sm btn-error mt-auto ml-3">

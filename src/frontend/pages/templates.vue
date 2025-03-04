@@ -100,12 +100,12 @@ const getPreview = async () => {
 
         <fieldset v-if="activeTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">
             <label class="label text-sm">Template Name</label>
-            <input v-model="activeTemplate.name" type="text" class="input focus:outline-none" />
+            <input v-model="activeTemplate.name" type="text" class="input" />
 
             <label class="label text-sm mt-3">Template</label>
             <Editable
                 v-model="activeTemplate.template"
-                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2 focus:outline-none"
+                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2"
             />
 
             <div class="flex flex-row space-x-2 mt-3">

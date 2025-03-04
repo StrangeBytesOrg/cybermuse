@@ -59,3 +59,7 @@ html {
     --msg: #000000;
     --quote: var(--color-primary-content);
 }
+
+.input, .textarea, .select {
+    @apply focus:outline-none;
+}
