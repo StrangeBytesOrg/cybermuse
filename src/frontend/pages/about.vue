@@ -21,7 +21,7 @@ if (import.meta.env.PROD) {
 </template>
 
 <style>
-@reference "../styles/tailwind.css";
+@reference "../styles/global.css";
 .licenses h2 {
     @apply text-lg font-bold mt-4;
 }

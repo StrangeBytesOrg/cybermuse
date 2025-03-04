@@ -91,7 +91,7 @@ const formatText = (text: string) => {
                     @keydown.ctrl.enter="update"
                     @keydown.esc="editMode = false"
                     data-1p-ignore
-                    class="mt-2 messageText bg-base-100 [word-break:break-word]"
+                    class="messageText bg-base-100 [word-break:break-word] mt-2"
                 />
             </div>
         </div>
@@ -142,7 +142,7 @@ const formatText = (text: string) => {
 </template>
 
 <style>
-@reference "../styles/tailwind.css";
+@reference "../styles/global.css";
 .messageText p {
     @apply mt-2;
     color: var(--msg);
