@@ -4,6 +4,7 @@ import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
 import {TrashIcon} from '@heroicons/vue/24/outline'
+import Editable from '@/components/editable.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -56,10 +57,10 @@ const deleteLore = async () => {
                                 class="input mt-2 max-w-96"
                                 placeholder="Entry Name"
                             />
-                            <textarea
+                            <Editable
                                 v-model="entry.content"
-                                class="textarea w-full min-h-32 mt-2"
-                                placeholder="Entry Content"></textarea>
+                                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2 focus:outline-none"
+                            />
                         </div>
                         <button @click="removeEntry(index)" class="btn btn-sm btn-error mt-auto ml-3">
                             <TrashIcon class="size-6" />

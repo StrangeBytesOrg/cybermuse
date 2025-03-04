@@ -4,6 +4,7 @@ import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
 import {useToastStore} from '@/store'
 import {templateCollection} from '@/db'
+import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
 const router = useRouter()
@@ -53,12 +54,6 @@ const getPreview = async () => {
         lore: loreString,
     })
 }
-
-const resizeTextarea = async (event: Event) => {
-    const textarea = event.target as HTMLTextAreaElement
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight + 4}px`
-}
 </script>
 
 <template>
@@ -67,10 +62,9 @@ const resizeTextarea = async (event: Event) => {
         <input v-model="template.name" type="text" class="input focus:outline-none" />
 
         <label class="fieldset-label text-sm mt-3">Template</label>
-        <textarea
+        <Editable
             v-model="template.template"
-            @input="resizeTextarea"
-            class="textarea w-full leading-normal p-2 focus:outline-none"
+            class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2 focus:outline-none"
         />
 
         <div class="flex flex-row space-x-2 mt-2">

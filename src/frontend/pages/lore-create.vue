@@ -3,6 +3,7 @@ import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
+import Editable from '@/components/editable.vue'
 
 type Entry = {name: string; content: string}
 type Lore = {name: string; entries: Entry[]}
@@ -36,11 +37,11 @@ const createLore = async () => {
         <div class="flex flex-col">
             <div v-for="(entry, index) in lore.entries" :key="index" class="flex flex-col">
                 <div class="divider"></div>
-                <input type="text" v-model="entry.name" class="input mt-2" placeholder="Entry Name" />
-                <textarea
+                <input type="text" v-model="entry.name" class="input" placeholder="Entry Name" />
+                <Editable
                     v-model="entry.content"
-                    class="textarea w-full min-h-32 mt-2"
-                    placeholder="Entry Content"></textarea>
+                    class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2 focus:outline-none"
+                />
             </div>
         </div>
         <div class="flex flex-row mt-3">

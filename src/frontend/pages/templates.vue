@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import {ref, reactive, computed, onMounted} from 'vue'
+import {ref, reactive, computed} from 'vue'
 import Handlebars from 'handlebars'
 import {useToastStore} from '@/store'
 import {templateCollection, userCollection} from '@/db'
+import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
 let templates = reactive(await templateCollection.find())
@@ -74,25 +75,13 @@ const getPreview = async () => {
             loreString += `${entry.name}: ${entry.content}\n`
         })
     })
+
     const hbTemplate = Handlebars.compile(activeTemplate.value.template)
     example.value = hbTemplate({
         characters: characterString,
         lore: loreString,
     })
 }
-
-const resizeTextarea = async (event: Event) => {
-    const textarea = event.target as HTMLTextAreaElement
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight + 4}px`
-}
-
-onMounted(() => {
-    document.querySelectorAll('textarea').forEach((textarea) => {
-        textarea.style.height = 'auto'
-        textarea.style.height = `${textarea.scrollHeight + 4}px`
-    })
-})
 </script>
 
 <template>
@@ -114,10 +103,9 @@ onMounted(() => {
             <input v-model="activeTemplate.name" type="text" class="input focus:outline-none" />
 
             <label class="label text-sm mt-3">Template</label>
-            <textarea
+            <Editable
                 v-model="activeTemplate.template"
-                @input="resizeTextarea"
-                class="textarea p-2 w-full focus:outline-noneleading-normal"
+                class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2 focus:outline-none"
             />
 
             <div class="flex flex-row space-x-2 mt-3">
