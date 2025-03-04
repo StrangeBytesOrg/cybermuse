@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, nextTick, useTemplateRef} from 'vue'
+import {ref} from 'vue'
 import {marked} from 'marked'
 import type {Message} from '@/db'
 import {useChatStore} from '@/store'
@@ -11,6 +11,7 @@ import {
     CheckIcon,
     PencilSquareIcon,
 } from '@heroicons/vue/24/outline'
+import Editable from '@/components/editable.vue'
 
 type Props = {
     index: number
@@ -29,7 +30,6 @@ type Props = {
 const props = defineProps<Props>()
 const editMode = ref(false)
 const editedText = ref('')
-const textarea = useTemplateRef<HTMLTextAreaElement>('message-input')
 const emit = defineEmits<{
     (event: 'newSwipe', index: number): void
 }>()
@@ -47,8 +47,6 @@ const swipeRight = async () => chatStore.swipeRight(props.index)
 const enterEdit = async () => {
     editMode.value = !editMode.value
     editedText.value = props.message.content[props.message.activeIndex] || ''
-    await nextTick()
-    textarea.value?.focus()
 }
 
 const quoteWrap = (text: string) => {
@@ -58,12 +56,6 @@ const quoteWrap = (text: string) => {
 const formatText = (text: string) => {
     const withQuotes = quoteWrap(text)
     return marked(withQuotes, {breaks: true})
-}
-
-const resizeTextarea = async (event: Event) => {
-    const textarea = event.target as HTMLTextAreaElement
-    textarea.style.height = 'auto'
-    textarea.style.height = `${textarea.scrollHeight}px`
 }
 </script>
 
@@ -90,18 +82,16 @@ const resizeTextarea = async (event: Event) => {
                 <div
                     v-show="!editMode"
                     v-html="formatText(message.content[message.activeIndex] || '')"
-                    class="messageText mx-[-1px] px-[1px] [word-break:break-word]"
+                    class="messageText [word-break:break-word]"
                 />
-                <textarea
+                <Editable
                     v-show="editMode"
-                    ref="message-input"
                     v-model="editedText"
-                    @input="resizeTextarea"
-                    @focus="resizeTextarea"
+                    :focus="editMode"
                     @keydown.ctrl.enter="update"
                     @keydown.esc="editMode = false"
                     data-1p-ignore
-                    class="textarea block w-full text-base mx-[-1px] mt-2 px-[1px] py-0 border-none min-h-[0px]"
+                    class="mt-2 messageText bg-base-100 [word-break:break-word]"
                 />
             </div>
         </div>
