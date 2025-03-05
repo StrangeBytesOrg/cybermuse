@@ -1,29 +1,32 @@
 <script lang="ts" setup>
 import {onMounted, watch, ref, nextTick} from 'vue'
 
+const model = defineModel({
+    type: String,
+    default: '',
+})
 const element = ref<HTMLElement>()
 const props = defineProps({
-    modelValue: String,
     editable: {
         type: Boolean,
         default: true,
     },
     focus: Boolean,
 })
-const emit = defineEmits(['update:modelValue'])
+
 const handleUpdate = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (target.value === '') return emit('update:modelValue', undefined)
-    emit('update:modelValue', target.innerText)
+    const target = event.target as HTMLElement
+    if (target.innerText === '') return
+    model.value = target.innerText
 }
 onMounted(() => {
     if (!element.value) return
-    element.value.innerText = props.modelValue || ''
+    element.value.innerText = model.value
 })
-watch(() => props.modelValue, (newVal) => {
+watch(() => model.value, (newVal) => {
     if (!element.value) return
     if (newVal !== element.value.innerText) {
-        element.value.innerText = newVal || ''
+        element.value.innerText = newVal
     }
 })
 watch(() => props.focus, async (newVal) => {
