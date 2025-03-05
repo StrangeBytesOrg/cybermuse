@@ -15,34 +15,60 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
         :class="{customShow: showMenu, customHide: !showMenu}">
         <ul class="menu">
             <li>
-                <router-link to="/chats" class="font-bold px-2 mb-1" active-class="active">Chats</router-link>
+                <router-link
+                    to="/chats"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
+                    Chats
+                </router-link>
             </li>
             <li>
-                <router-link to="/characters" class="font-bold px-2 mb-1" active-class="active">Characters</router-link>
+                <router-link
+                    to="/characters"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
+                    Characters
+                </router-link>
             </li>
             <li>
-                <router-link to="/lore" class="font-bold px-2 mb-1" active-class="active">Lore</router-link>
+                <router-link
+                    to="/lore"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
+                    Lore
+                </router-link>
             </li>
             <li>
-                <router-link to="/templates" class="font-bold px-2 mb-1" active-class="active">
+                <router-link
+                    to="/templates"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
                     Prompt Templates
                 </router-link>
             </li>
             <li>
-                <router-link to="/presets" class="font-bold px-2 mb-1" active-class="active">
+                <router-link
+                    to="/presets"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
                     Generation Presets
                 </router-link>
             </li>
             <li>
-                <router-link to="/theme-settings" class="font-bold px-2 mb-1" active-class="active">
+                <router-link
+                    to="/theme-settings"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
                     Theme Settings
                 </router-link>
             </li>
             <li>
-                <router-link to="/connection" class="font-bold px-2 mb-1" active-class="active">Connection</router-link>
-            </li>
-            <li>
-                <router-link to="/about" class="font-bold px-2 mb-1" active-class="active">About</router-link>
+                <router-link
+                    to="/about"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
+                    About
+                </router-link>
             </li>
         </ul>
 
