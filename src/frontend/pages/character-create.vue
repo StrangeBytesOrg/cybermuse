@@ -18,7 +18,10 @@ const character = reactive({
 const characterImage = ref<string>()
 
 const createCharacter = async () => {
-    await characterCollection.put(character)
+    await characterCollection.put({
+        _id: `character-${character.name.toLowerCase()}`,
+        ...character,
+    })
     toast.success('Character created')
     await router.push({name: 'characters'})
 }

@@ -25,7 +25,10 @@ const preset = reactive({
 })
 
 const createTemplate = async () => {
-    const {id} = await generationPresetCollection.put(preset)
+    const {id} = await generationPresetCollection.put({
+        _id: `preset-${preset.name.toLowerCase()}`,
+        ...preset,
+    })
     const user = await userCollection.findById('default-user')
     user.generatePresetId = id
     await userCollection.update(user)

@@ -15,7 +15,10 @@ const template = reactive({
 })
 
 const createTemplate = async () => {
-    await templateCollection.put(template)
+    await templateCollection.put({
+        _id: `template-${template.name.toLowerCase()}`,
+        ...template,
+    })
     toast.success('Template created')
     router.push({name: 'templates'})
 }
