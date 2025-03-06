@@ -296,7 +296,7 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
-        <div class="flex absolute bottom-0 left-0 right-0 px-1 sm:pl-52 sm:pb-1 sm:pr-2">
+        <div class="flex absolute bottom-0 left-0 sm:left-52 right-0 px-1 sm:pb-1 sm:pr-2 max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
             <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <Bars4Icon class="size-10" />
