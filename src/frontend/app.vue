@@ -3,6 +3,7 @@ import {onErrorCaptured} from 'vue'
 import {RouterView} from 'vue-router'
 import {ZodError} from 'zod'
 import {fromError} from 'zod-validation-error'
+import {db} from '@/db'
 import {useMenuStore, useThemeStore, useToastStore} from './store'
 import './styles/global.css'
 import TopBar from '@/components/top-bar.vue'
@@ -28,6 +29,17 @@ onErrorCaptured((error) => {
     console.error(error)
     return false
 })
+
+// Export all changes before switching away from PouchDB
+const downloadChanges = async () => {
+    const changes = await db.changes({since: 0, include_docs: true, conflicts: true})
+    const blob = new Blob([JSON.stringify(changes)], {type: 'application/json'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'cybermuse-changes.json'
+    a.click()
+}
 </script>
 
 <template>
@@ -35,6 +47,10 @@ onErrorCaptured((error) => {
         <TopBar />
 
         <SideBar :showMenu="menuStore.visible" />
+
+        <button @click="downloadChanges" class="btn btn-primary btn-sm fixed z-40 top-2 right-2">
+            Export data
+        </button>
 
         <!-- Main -->
         <div class="flex flex-col min-h-0 absolute top-12 bottom-0 left-0 right-0 sm:left-52 overflow-y-auto px-1 py-2 sm:px-2">
