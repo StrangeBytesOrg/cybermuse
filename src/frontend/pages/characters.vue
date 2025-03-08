@@ -6,7 +6,6 @@ import {db} from '@/db'
 const searchName = ref('')
 const characterType = ref<'user' | 'character' | 'both'>('both')
 const characters = reactive(await db.characters.toArray())
-const avatars: Record<string, string> = {}
 
 // Computed property to filter characters based on search input and character type
 const filteredCharacters = computed(() => {
@@ -16,13 +15,6 @@ const filteredCharacters = computed(() => {
         return matchesName && matchesType
     })
 })
-
-// Get avatar images
-for (const character of characters) {
-    if (character.avatar) {
-        avatars[character.id] = URL.createObjectURL(character.avatar)
-    }
-}
 </script>
 
 <template>
@@ -62,7 +54,7 @@ for (const character of characters) {
                     class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     <div class="avatar">
                         <div class="w-36 max-h-36 rounded-xl">
-                            <img v-if="avatars[character.id]" :src="avatars[character.id]" :alt="character.name" />
+                            <img v-if="character.avatar" :src="character.avatar" :alt="character.name" />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>

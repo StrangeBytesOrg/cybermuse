@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, ref, toRaw} from 'vue'
+import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {db} from '@/db'
@@ -14,9 +14,8 @@ const character = reactive({
     description: '',
     firstMessage: '',
     type: 'character' as 'character' | 'user',
-    avatar: undefined as undefined | File,
+    avatar: '' as string | undefined,
 })
-const characterImage = ref<string>()
 
 const createCharacter = async () => {
     await db.characters.put({
@@ -29,13 +28,15 @@ const createCharacter = async () => {
 }
 
 const uploadAvatar = async (file: File) => {
-    character.avatar = file
-    characterImage.value = URL.createObjectURL(file)
+    const reader = new FileReader()
+    reader.onload = () => {
+        character.avatar = reader.result as string
+    }
+    reader.readAsDataURL(file)
 }
 
 const removeImage = () => {
     delete character.avatar
-    characterImage.value = undefined
 }
 
 const importCharacterPng = (file: File) => {
@@ -101,13 +102,13 @@ const importCharacterPng = (file: File) => {
         <div class="flex flex-row mt-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
-                    <img v-if="characterImage" :src="characterImage" :alt="character.name + ' avatar'" />
+                    <img v-if="character.avatar" :src="character.avatar" :alt="character.name + ' avatar'" />
                     <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
 
             <FileInput @changed="uploadAvatar" class="ml-5 mt-auto" />
-            <button v-if="characterImage" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <button v-if="character.avatar" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>

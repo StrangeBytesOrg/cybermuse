@@ -20,10 +20,9 @@ type Props = {
         string,
         {
             name: string
-            image?: string
+            avatar?: string
         }
     >
-    avatars: Record<string, string>
     loading: boolean
     showSwipes: boolean
 }
@@ -66,8 +65,8 @@ const formatText = (text: string) => {
             <div class="avatar ml-2">
                 <div class="w-16 h-16 rounded-full">
                     <img
-                        v-if="avatars[message.characterId]"
-                        :src="avatars[message.characterId]"
+                        v-if="characterMap[message.characterId]?.avatar"
+                        :src="characterMap[message.characterId]?.avatar"
                         alt="character avatar"
                     />
                     <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />

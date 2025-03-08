@@ -32,14 +32,6 @@ const lore = await db.lore.where('id').anyOf(chat.lore).toArray()
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
 characterMap[chat.userCharacter] = userCharacter
 
-// Create a map of avatars
-const avatars: Record<string, string> = {}
-for (const character of characters) {
-    if (character.avatar) {
-        avatars[character.id] = URL.createObjectURL(character.avatar)
-    }
-}
-
 // Common setup function for generation
 const setupGeneration = async () => {
     const {promptTemplateId, generatePresetId} = await db.users.get('default-user')
@@ -272,7 +264,6 @@ const toggleCtxMenu = () => {
                 :index="chat.messages.length - 1 - index"
                 :message="message"
                 :characterMap="characterMap"
-                :avatars="avatars"
                 :loading="false"
                 :showSwipes="index === 0 && message.type === 'model'"
                 @new-swipe="newSwipe"

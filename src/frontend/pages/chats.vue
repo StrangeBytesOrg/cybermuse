@@ -7,15 +7,6 @@ const showArchivedChats = ref(false)
 const allChats = reactive(await db.chats.toArray())
 const characters = reactive(await db.characters.toArray())
 const characterMap = Object.fromEntries(characters.map((character) => [character.id, character]))
-const avatars: Record<string, string> = {}
-
-for (const chat of allChats) {
-    for (const character of chat.characters) {
-        if (characterMap[character]?.avatar) {
-            avatars[character] = URL.createObjectURL(characterMap[character].avatar)
-        }
-    }
-}
 
 const chats = computed(() => {
     return showArchivedChats.value ? allChats : allChats.filter(chat => !chat.archived)
@@ -64,7 +55,11 @@ const formatTitle = (chat: Chat) => {
                 <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
                     <div v-for="character in chat.characters" :key="character" class="avatar">
                         <div class="h-14">
-                            <img v-if="avatars[character]" :src="avatars[character]" alt="Character Image" />
+                            <img
+                                v-if="characterMap[character]?.avatar"
+                                :src="characterMap[character].avatar"
+                                alt="Character Image"
+                            />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>

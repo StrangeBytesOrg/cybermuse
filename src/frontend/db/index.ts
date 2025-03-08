@@ -9,7 +9,7 @@ interface Character {
     type: 'user' | 'character'
     description: string
     firstMessage?: string
-    avatar?: File
+    avatar?: string
 }
 
 interface Lore {
@@ -75,12 +75,12 @@ interface User {
 }
 
 const db = new Dexie(dbName) as Dexie & {
-    characters: EntityTable<Character>
-    lore: EntityTable<Lore>
-    chats: EntityTable<Chat>
-    templates: EntityTable<Template>
-    generationPresets: EntityTable<GenerationPreset>
-    users: EntityTable<User>
+    characters: EntityTable<Character, 'id'>
+    lore: EntityTable<Lore, 'id'>
+    chats: EntityTable<Chat, 'id'>
+    templates: EntityTable<Template, 'id'>
+    generationPresets: EntityTable<GenerationPreset, 'id'>
+    users: EntityTable<User, 'id'>
 }
 
 db.version(1).stores({
@@ -93,5 +93,5 @@ db.version(1).stores({
 })
 
 export {db}
-export type {Character, Chat}
+export type {Character, Chat, GenerationPreset, Lore, Template, User}
 export type Message = Chat['messages'][0]

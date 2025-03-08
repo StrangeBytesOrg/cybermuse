@@ -12,13 +12,6 @@ const chatName = ref('')
 
 const characters = await db.characters.toArray()
 const lore = await db.lore.toArray()
-const avatars: Record<string, string> = {}
-
-for (const character of characters) {
-    if (character.avatar) {
-        avatars[character.id] = URL.createObjectURL(character.avatar)
-    }
-}
 
 const createChat = async () => {
     // If characters have a first message, add it to the chat
@@ -97,7 +90,7 @@ const userCharacters = computed(() => {
                     :key="character.id"
                     class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
                     <div class="avatar w-20 h-20">
-                        <img v-if="avatars[character.id]" :src="avatars[character.id]" class="rounded-lg" />
+                        <img v-if="character.avatar" :src="character.avatar" class="rounded-lg" />
                         <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
                     </div>
                     <div class="text-lg ml-2">{{ character.name }}</div>
