@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, toRaw} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {loreCollection} from '@/db'
+import {db} from '@/db'
 import {TrashIcon} from '@heroicons/vue/24/outline'
 import Editable from '@/components/editable.vue'
 
@@ -16,7 +16,7 @@ if (!loreId || Array.isArray(loreId)) {
     throw new Error('No lore ID provided')
 }
 
-const lore = reactive(await loreCollection.findById(loreId))
+const lore = reactive(await db.lore.get(loreId))
 
 const addEntry = () => {
     lore.entries.push({name: '', content: ''})
@@ -27,15 +27,12 @@ const removeEntry = (index: number) => {
 }
 
 const updateLore = async () => {
-    // Remove any entries that have empty content
-    lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
-
-    await loreCollection.update(lore)
+    await db.lore.put(toRaw(lore))
     toast.success('Lore updated')
 }
 
 const deleteLore = async () => {
-    await loreCollection.removeById(loreId)
+    await db.lore.delete(loreId)
     toast.success('Lore deleted')
     router.push({name: 'lore'})
 }

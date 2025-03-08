@@ -3,14 +3,7 @@ import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import Handlebars from 'handlebars'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
-import {
-    db,
-    characterCollection,
-    loreCollection,
-    templateCollection,
-    generationPresetCollection,
-    userCollection,
-} from '@/db'
+import {db} from '@/db'
 import {useChatStore, useConnectionStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
@@ -33,34 +26,25 @@ if (!chatId || Array.isArray(chatId)) {
 
 await chatStore.getChat(chatId)
 const chat = chatStore.chat
-const characters = await characterCollection.find({
-    selector: {
-        _id: {$in: chat.characters},
-    },
-})
-const userCharacter = await characterCollection.findById(chat.userCharacter)
-const lore = await loreCollection.find({
-    selector: {
-        _id: {$in: chat.lore},
-    },
-})
-const characterMap = Object.fromEntries(characters.map((c) => [c._id, c]))
+const characters = await db.characters.where('id').anyOf(chat.characters).toArray()
+const userCharacter = await db.characters.get(chat.userCharacter)
+const lore = await db.lore.where('id').anyOf(chat.lore).toArray()
+const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
 characterMap[chat.userCharacter] = userCharacter
 
 // Create a map of avatars
 const avatars: Record<string, string> = {}
 for (const character of characters) {
-    if (character._attachments) {
-        const avatar = (await db.getAttachment(character._id, 'avatar')) as Blob
-        avatars[character._id] = URL.createObjectURL(avatar)
+    if (character.avatar) {
+        avatars[character.id] = URL.createObjectURL(character.avatar)
     }
 }
 
 // Common setup function for generation
 const setupGeneration = async () => {
-    const {promptTemplateId, generatePresetId} = await userCollection.findById('default-user')
-    const generatePreset = await generationPresetCollection.findById(generatePresetId)
-    const template = await templateCollection.findById(promptTemplateId)
+    const {promptTemplateId, generatePresetId} = await db.users.get('default-user')
+    const generatePreset = await db.generationPresets.get(generatePresetId)
+    const template = await db.templates.get(promptTemplateId)
     const hbTemplate = Handlebars.compile(template.template)
 
     // Render each character description
@@ -145,7 +129,7 @@ const pickCharacter = async () => {
     if (!character) {
         throw new Error('Character not found')
     }
-    return character._id
+    return character.id
 }
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
@@ -157,7 +141,7 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
-        await createMessage(userCharacter._id, currentMessage.value, 'user')
+        await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
 
     // Create a new empty message for the response
@@ -172,7 +156,7 @@ const impersonate = async () => {
         throw new Error('Message already in progress')
     }
 
-    await createMessage(userCharacter._id, '', 'model')
+    await createMessage(userCharacter.id, '', 'model')
     await generateMessage()
 }
 

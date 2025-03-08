@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {loreCollection} from '@/db'
+import {db} from '@/db'
 import Editable from '@/components/editable.vue'
 
 type Entry = {name: string; content: string}
@@ -19,16 +19,14 @@ const addEntry = () => {
 }
 
 const createLore = async () => {
-    // Remove any entries that have empty content
-    lore.entries = lore.entries.filter((entry) => entry.content.trim() !== '')
-
-    await loreCollection.put({
-        _id: `lore-${lore.name.toLowerCase()}`,
+    await db.lore.add({
+        id: lore.name.toLowerCase().replace(/ /g, '-'),
+        lastUpdate: Date.now(),
         name: lore.name,
-        entries: lore.entries,
+        entries: toRaw(lore.entries),
     })
     toast.success('Lore created')
-    router.push({name: 'lore'})
+    await router.push({name: 'lore'})
 }
 </script>
 

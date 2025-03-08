@@ -1,43 +1,40 @@
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
+import {reactive, ref, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {characterCollection} from '@/db'
+import {db} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import {decodeChunks} from '@/lib/decode-png-chunks'
 
 const toast = useToastStore()
 const router = useRouter()
+// TODO this should probably use an existing type from the DB
 const character = reactive({
     name: '',
     description: '',
     firstMessage: '',
     type: 'character' as 'character' | 'user',
-    _attachments: undefined as undefined | Record<string, {content_type: string; data: File}>,
+    avatar: undefined as undefined | File,
 })
 const characterImage = ref<string>()
 
 const createCharacter = async () => {
-    await characterCollection.put({
-        _id: `character-${character.name.toLowerCase()}`,
-        ...character,
+    await db.characters.put({
+        id: character.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        lastUpdate: Date.now(),
+        ...toRaw(character),
     })
     toast.success('Character created')
     await router.push({name: 'characters'})
 }
 
 const uploadAvatar = async (file: File) => {
-    character._attachments = {
-        avatar: {
-            content_type: file.type,
-            data: file,
-        },
-    }
+    character.avatar = file
     characterImage.value = URL.createObjectURL(file)
 }
 
 const removeImage = () => {
-    delete character._attachments
+    delete character.avatar
     characterImage.value = undefined
 }
 

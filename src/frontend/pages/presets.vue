@@ -1,45 +1,44 @@
 <script lang="ts" setup>
-import {ref, reactive, computed} from 'vue'
+import {ref, reactive, computed, toRaw} from 'vue'
 import {useToastStore} from '@/store'
-import {generationPresetCollection, userCollection} from '@/db'
+import {db} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
-const presets = reactive(await generationPresetCollection.find())
-const user = reactive(await userCollection.findById('default-user'))
+const presets = reactive(await db.generationPresets.toArray())
+const user = reactive(await db.users.get('default-user'))
 const selectedPresetId = ref(user.generatePresetId)
 
 const activePreset = computed(() => {
-    return presets.find((preset) => preset._id === user.generatePresetId)
+    return presets.find((preset) => preset.id === user.generatePresetId)
 })
 
 const setActivePreset = async () => {
-    // Check if the preset exists
-    await generationPresetCollection.findById(selectedPresetId.value)
-
-    user.generatePresetId = selectedPresetId.value
-    await userCollection.update(user)
+    if (await db.generationPresets.get(selectedPresetId.value)) {
+        user.generatePresetId = selectedPresetId.value
+        await db.users.update('default-user', {generatePresetId: selectedPresetId.value})
+    }
 
     toast.success('Active preset set')
 }
 
 const updatePreset = async () => {
     if (activePreset.value) {
-        await generationPresetCollection.update(activePreset.value)
+        await db.generationPresets.update(activePreset.value.id, toRaw(activePreset.value))
         toast.success('Preset updated')
     }
 }
 
 const deletePreset = async () => {
-    if (activePreset.value?._id === 'default-generation-preset') {
+    if (activePreset.value?.id === 'default-generation-preset') {
         throw new Error('Cannot delete the default preset')
     }
 
-    await generationPresetCollection.removeById(selectedPresetId.value)
-    // Set the default preset as active
-    user.generatePresetId = 'default-generation-preset'
-    selectedPresetId.value = 'default-generation-preset'
-    await userCollection.update(user)
+    if (activePreset.value) {
+        await db.generationPresets.delete(activePreset.value.id)
+        await db.users.update('default-user', {generatePresetId: 'default-generation-preset'})
+        location.reload() // FIXME Refresh the page as an easy way to reset the state
+    }
 }
 </script>
 
@@ -47,7 +46,7 @@ const deletePreset = async () => {
     <div class="flex flex-row">
         <div class="flex flex-col">
             <select v-model="selectedPresetId" @change="setActivePreset" class="select min-w-60">
-                <option v-for="preset in presets" :key="preset._id" :value="preset._id">
+                <option v-for="preset in presets" :key="preset.id" :value="preset.id">
                     {{ preset.name }}
                 </option>
             </select>

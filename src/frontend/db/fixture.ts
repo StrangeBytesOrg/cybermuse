@@ -1,4 +1,4 @@
-import {characterCollection, templateCollection, generationPresetCollection, userCollection} from './index'
+import {db} from './index'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {{ characters }}
@@ -6,11 +6,12 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 {{ lore }}{{/if}}`
 
 export const fixtureData = async () => {
-    const users = await userCollection.find()
+    const users = await db.users.toArray()
     if (users.length === 0) {
         console.log('Creating default user')
-        await userCollection.put({
-            _id: 'default-user',
+        await db.users.put({
+            id: 'default-user',
+            lastUpdate: Date.now(),
             name: 'Default',
             generatePresetId: 'default-generation-preset',
             promptTemplateId: 'default-template',
@@ -18,37 +19,42 @@ export const fixtureData = async () => {
     }
 
     // Characters
-    const characters = await characterCollection.find()
+    const characters = await db.characters.toArray()
     if (characters.length === 0) {
         console.log('Creating default characters')
-        await characterCollection.put({
-            _id: 'default-user-character',
+        await db.characters.put({
+            id: 'default-user-character',
+            lastUpdate: Date.now(),
             name: 'User',
             type: 'user',
             description: 'The user of the system.',
         })
-        await characterCollection.put({
+        await db.characters.put({
+            id: 'default-character',
+            lastUpdate: Date.now(),
             name: 'Assistant',
             type: 'character',
             description: 'A helpful assistant designed to guide you through the process.',
         })
     }
 
-    const templates = await templateCollection.find()
+    const templates = await db.templates.toArray()
     if (templates.length === 0) {
         console.log('Creating default template')
-        await templateCollection.put({
-            _id: 'default-template',
+        await db.templates.put({
+            id: 'default-template',
+            lastUpdate: Date.now(),
             name: 'Default',
             template: defaultTemplate,
         })
     }
 
-    const generationPresets = await generationPresetCollection.find()
+    const generationPresets = await db.generationPresets.toArray()
     if (generationPresets.length === 0) {
         console.log('Creating default generation preset')
-        await generationPresetCollection.put({
-            _id: 'default-generation-preset',
+        await db.generationPresets.put({
+            id: 'default-generation-preset',
+            lastUpdate: Date.now(),
             name: 'Default',
             maxTokens: 512,
             temperature: 1,

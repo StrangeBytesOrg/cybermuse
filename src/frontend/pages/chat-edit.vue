@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {chatCollection, characterCollection} from '@/db'
+import {db} from '@/db'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,27 +12,26 @@ if (!chatId || Array.isArray(chatId)) {
     throw new Error('Invalid chat ID')
 }
 
-const chat = await chatCollection.findById(chatId)
-const characters = await characterCollection.find()
+const chat = await db.chats.get(chatId)
+const characters = await db.characters.toArray()
 if (!chat) {
     router.push({name: 'chats'})
     throw new Error('Chat not found')
 }
 
 const updateChat = async () => {
-    await chatCollection.put(chat)
+    await db.chats.update(chatId, chat)
     toast.success('Updated')
     router.push({name: 'chats'})
 }
 
 const archiveChat = async () => {
-    chat.archived = true
-    await chatCollection.put(chat)
+    await db.chats.update(chatId, {archived: true})
     router.push({name: 'chats'})
 }
 
 const deleteChat = async () => {
-    await chatCollection.removeById(chatId)
+    await db.chats.delete(chatId)
     router.push({name: 'chats'})
 }
 </script>
@@ -52,11 +51,11 @@ const deleteChat = async () => {
         <div class="mt-3">
             <div class="text-lg">Characters:</div>
             <div v-for="character in chat.characters" :key="character">
-                {{ characters.find((c) => c._id === character)?.name }}
+                {{ characters.find((c) => c.id === character)?.name }}
             </div>
 
             <div class="text-lg">User Character:</div>
-            {{ characters.find((c) => c._id === chat.userCharacter)?.name }}
+            {{ characters.find((c) => c.id === chat.userCharacter)?.name }}
         </div>
 
         <!-- Lore -->

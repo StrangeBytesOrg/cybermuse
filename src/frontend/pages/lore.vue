@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
 import {RouterLink} from 'vue-router'
-import {loreCollection} from '@/db'
+import {db} from '@/db'
 
-const loreBooks = reactive(await loreCollection.find())
+const loreBooks = await db.lore.toArray()
 </script>
 
 <template>
@@ -16,8 +15,8 @@ const loreBooks = reactive(await loreCollection.find())
             <template v-if="loreBooks.length">
                 <RouterLink
                     v-for="book in loreBooks"
-                    :key="book._id"
-                    :to="{name: 'edit-lore', params: {id: book._id}}"
+                    :key="book.id"
+                    :to="{name: 'edit-lore', params: {id: book.id}}"
                     class="block bg-base-100 min-h-32 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     {{ book.name }} <div>Entries: {{ book.entries.length }}</div>
                 </RouterLink>

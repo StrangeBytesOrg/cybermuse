@@ -2,48 +2,43 @@
 import {ref, reactive, computed} from 'vue'
 import Handlebars from 'handlebars'
 import {useToastStore} from '@/store'
-import {templateCollection, userCollection} from '@/db'
+import {db} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
-let templates = reactive(await templateCollection.find())
-let user = reactive(await userCollection.findById('default-user'))
+let templates = reactive(await db.templates.toArray())
+let user = reactive(await db.users.get('default-user'))
 const example = ref('')
 
 const selectedTemplate = ref(user.promptTemplateId)
 const activeTemplate = computed(() => {
-    return templates.find((t) => t._id === selectedTemplate.value)
+    return templates.find((t) => t.id === selectedTemplate.value)
 })
 
 const setActiveTemplate = async () => {
     example.value = ''
-
-    // Check if the template exists
-    await templateCollection.findById(selectedTemplate.value)
-
-    user.promptTemplateId = selectedTemplate.value
-    await userCollection.update(user)
+    if (await db.templates.get(selectedTemplate.value)) {
+        await db.users.update('default-user', {promptTemplateId: selectedTemplate.value})
+    }
 }
 
 const updateTemplate = async () => {
     if (activeTemplate.value) {
-        await templateCollection.update(activeTemplate.value)
+        await db.templates.update(activeTemplate.value.id, activeTemplate.value)
     }
-
     toast.success('Template updated')
 }
 
 const deleteTemplate = async () => {
-    if (activeTemplate.value?._id === 'default-template') {
+    if (activeTemplate.value?.id === 'default-template') {
         throw new Error('Cannot delete the default template')
     }
 
     if (activeTemplate.value) {
-        await templateCollection.removeById(activeTemplate.value._id)
+        await db.templates.delete(activeTemplate.value.id)
         // Set the default template as active
-        user.promptTemplateId = 'default-template'
         selectedTemplate.value = 'default-template'
-        await userCollection.update(user)
+        await db.users.update('default-user', {promptTemplateId: 'default-template'})
         toast.success('Template deleted')
     }
 }
@@ -89,7 +84,7 @@ const getPreview = async () => {
         <div class="flex flex-row">
             <div class="flex flex-col">
                 <select v-model="selectedTemplate" @change="setActiveTemplate" class="select min-w-60">
-                    <option v-for="template in templates" :key="template._id" :value="template._id">
+                    <option v-for="template in templates" :key="template.id" :value="template.id">
                         {{ template.name }}
                     </option>
                 </select>

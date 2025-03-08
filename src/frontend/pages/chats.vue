@@ -1,20 +1,18 @@
 <script lang="ts" setup>
 import {reactive, ref, computed} from 'vue'
-import {db, chatCollection, characterCollection} from '@/db'
-import type {Chat} from '@/db'
+import {db, type Chat} from '@/db'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 
 const showArchivedChats = ref(false)
-const allChats = reactive(await chatCollection.find({limit: 100}))
-const characters = reactive(await characterCollection.find())
-const characterMap = Object.fromEntries(characters.map((character) => [character._id, character]))
+const allChats = reactive(await db.chats.toArray())
+const characters = reactive(await db.characters.toArray())
+const characterMap = Object.fromEntries(characters.map((character) => [character.id, character]))
 const avatars: Record<string, string> = {}
 
 for (const chat of allChats) {
     for (const character of chat.characters) {
-        if (characterMap[character]?._attachments) {
-            const avatar = (await db.getAttachment(character, 'avatar')) as Blob
-            avatars[character] = URL.createObjectURL(avatar)
+        if (characterMap[character]?.avatar) {
+            avatars[character] = URL.createObjectURL(characterMap[character].avatar)
         }
     }
 }
@@ -54,9 +52,9 @@ const formatTitle = (chat: Chat) => {
 
         <template v-if="chats.length">
             <router-link
-                :to="{name: 'chat', params: {id: chat._id}}"
+                :to="{name: 'chat', params: {id: chat.id}}"
                 v-for="chat in chats"
-                :key="chat._id"
+                :key="chat.id"
                 class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">
                 <div class="text-lg font-bold">
                     {{ formatTitle(chat) }}
@@ -71,7 +69,7 @@ const formatTitle = (chat: Chat) => {
                         </div>
                     </div>
                 </div>
-                <RouterLink :to="`/edit-chat/${chat._id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
+                <RouterLink :to="`/edit-chat/${chat.id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
                     <PencilSquareIcon class="size-6" />
                 </RouterLink>
             </router-link>

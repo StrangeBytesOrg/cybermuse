@@ -3,7 +3,7 @@ import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
 import {useToastStore} from '@/store'
-import {templateCollection} from '@/db'
+import {db} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
@@ -15,8 +15,9 @@ const template = reactive({
 })
 
 const createTemplate = async () => {
-    await templateCollection.put({
-        _id: `template-${template.name.toLowerCase()}`,
+    await db.templates.put({
+        id: template.name.toLowerCase().replace(/\s/g, '-'),
+        lastUpdate: Date.now(),
         ...template,
     })
     toast.success('Template created')

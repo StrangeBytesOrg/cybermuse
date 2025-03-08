@@ -1,7 +1,7 @@
 <script lang="ts" setup>
-import {reactive, ref} from 'vue'
+import {reactive, ref, toRaw} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {db, characterCollection} from '@/db'
+import {db, type Character} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 
 const route = useRoute()
@@ -14,39 +14,33 @@ if (!characterId || Array.isArray(characterId)) {
     throw new Error('Character not found')
 }
 
-const character = reactive(await characterCollection.findById(characterId))
+const character = reactive(await db.characters.get(characterId))
 if (!character) {
     router.push({name: 'characters'})
     throw new Error('Character not found')
 }
-if (character._attachments) {
-    const avatar = (await db.getAttachment(characterId, 'avatar')) as Blob
-    characterImage.value = URL.createObjectURL(avatar)
+if (character.avatar) {
+    characterImage.value = URL.createObjectURL(character.avatar)
 }
 
 const updateCharacter = async () => {
-    await characterCollection.put(character)
+    await db.characters.put(toRaw(character))
     router.push({name: 'characters'})
 }
 
 const deleteCharacter = async () => {
-    await characterCollection.removeById(characterId)
+    await db.characters.delete(characterId)
     router.push({name: 'characters'})
 }
 
 const uploadAvatar = async (file: File) => {
-    character._attachments = {
-        avatar: {
-            content_type: file.type,
-            data: file,
-        },
-    }
+    character.avatar = file
     characterImage.value = URL.createObjectURL(file)
 }
 
 const removeImage = () => {
     characterImage.value = undefined
-    delete character._attachments
+    delete character.avatar
 }
 </script>
 

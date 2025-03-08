@@ -1,8 +1,8 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
+import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {generationPresetCollection, userCollection} from '@/db'
+import {db} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
@@ -24,14 +24,13 @@ const preset = reactive({
     },
 })
 
-const createTemplate = async () => {
-    const {id} = await generationPresetCollection.put({
-        _id: `preset-${preset.name.toLowerCase()}`,
-        ...preset,
+const createPreset = async () => {
+    await db.generationPresets.put({
+        id: preset.name.toLowerCase().replace(/ /g, '-'),
+        lastUpdate: Date.now(),
+        ...toRaw(preset),
     })
-    const user = await userCollection.findById('default-user')
-    user.generatePresetId = id
-    await userCollection.update(user)
+    await db.users.update('default-user', {generatePresetId: preset.name.toLowerCase().replace(/ /g, '-')})
     toast.success('Created new preset')
     router.push({name: 'presets'})
 }
@@ -97,6 +96,6 @@ const createTemplate = async () => {
             </fieldset>
         </div>
 
-        <button @click="createTemplate" class="btn btn-primary max-w-32 mt-2">Create Preset</button>
+        <button @click="createPreset" class="btn btn-primary max-w-32 mt-2">Create Preset</button>
     </main>
 </template>

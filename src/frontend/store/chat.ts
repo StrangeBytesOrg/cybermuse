@@ -1,6 +1,6 @@
 import {defineStore} from 'pinia'
-import {chatCollection} from '@/db'
-import type {Chat} from '@/db'
+import {toRaw} from 'vue'
+import {db, type Chat} from '@/db'
 
 export const useChatStore = defineStore('chat', {
     state: () => {
@@ -8,10 +8,10 @@ export const useChatStore = defineStore('chat', {
     },
     actions: {
         async getChat(chatId: string) {
-            this.chat = await chatCollection.findById(chatId)
+            this.chat = await db.chats.get(chatId)
         },
         async save() {
-            await chatCollection.update(this.chat)
+            await db.chats.put(toRaw(this.chat))
         },
         async updateMessage(index: number, content: string) {
             const message = this.chat.messages[index]
