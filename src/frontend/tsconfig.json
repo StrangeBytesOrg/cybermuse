@@ -6,9 +6,10 @@
         "composite": true,
         "noUncheckedIndexedAccess": true,
         "types": ["vite/client"],
-        "baseUrl": ".", // Resolves relative to this file
+        "baseUrl": ".",
         "paths": {
             "@/*": ["./*"]
-        }
+        },
+        "noEmit": true
     }
 }
