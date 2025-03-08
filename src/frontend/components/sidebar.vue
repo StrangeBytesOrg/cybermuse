@@ -64,6 +64,14 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
             </li>
             <li>
                 <router-link
+                    to="/connection"
+                    class="font-bold px-2 mb-1"
+                    active-class="bg-primary text-primary-content">
+                    Connection
+                </router-link>
+            </li>
+            <li>
+                <router-link
                     to="/about"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
