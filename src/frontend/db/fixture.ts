@@ -11,7 +11,7 @@ export const fixtureData = async () => {
         console.log('Creating default user')
         await db.users.put({
             id: 'default-user',
-            lastUpdate: Date.now(),
+            lastUpdate: 0,
             name: 'Default',
             generatePresetId: 'default-generation-preset',
             promptTemplateId: 'default-template',
@@ -24,14 +24,14 @@ export const fixtureData = async () => {
         console.log('Creating default characters')
         await db.characters.put({
             id: 'default-user-character',
-            lastUpdate: Date.now(),
+            lastUpdate: 0,
             name: 'User',
             type: 'user',
             description: 'The user of the system.',
         })
         await db.characters.put({
             id: 'default-character',
-            lastUpdate: Date.now(),
+            lastUpdate: 0,
             name: 'Assistant',
             type: 'character',
             description: 'A helpful assistant designed to guide you through the process.',
@@ -43,7 +43,7 @@ export const fixtureData = async () => {
         console.log('Creating default template')
         await db.templates.put({
             id: 'default-template',
-            lastUpdate: Date.now(),
+            lastUpdate: 0,
             name: 'Default',
             template: defaultTemplate,
         })
@@ -54,7 +54,7 @@ export const fixtureData = async () => {
         console.log('Creating default generation preset')
         await db.generationPresets.put({
             id: 'default-generation-preset',
-            lastUpdate: Date.now(),
+            lastUpdate: 0,
             name: 'Default',
             maxTokens: 512,
             temperature: 1,
