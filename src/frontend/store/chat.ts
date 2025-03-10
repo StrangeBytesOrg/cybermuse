@@ -11,6 +11,7 @@ export const useChatStore = defineStore('chat', {
             this.chat = await db.chats.get(chatId)
         },
         async save() {
+            this.chat.lastUpdate = Date.now()
             await db.chats.put(toRaw(this.chat))
         },
         async updateMessage(index: number, content: string) {

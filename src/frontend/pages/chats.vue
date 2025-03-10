@@ -4,7 +4,7 @@ import {db, type Chat} from '@/db'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 
 const showArchivedChats = ref(false)
-const allChats = reactive(await db.chats.toArray())
+const allChats = reactive(await db.chats.orderBy('lastUpdate').reverse().toArray())
 const characters = reactive(await db.characters.toArray())
 const characterMap = Object.fromEntries(characters.map((character) => [character.id, character]))
 
