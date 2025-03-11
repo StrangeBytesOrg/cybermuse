@@ -84,13 +84,24 @@ const db = new Dexie(dbName) as Dexie & {
 }
 
 db.version(1).stores({
-    characters: 'id, name, type',
+    characters: 'id,name,type',
     lore: 'id',
     chats: 'id,lastUpdate',
     templates: 'id',
     generationPresets: 'id',
     users: 'id',
 })
+
+for (const table of db.tables) {
+    table.hook('creating', (primKey, obj) => {
+        if (!obj.lastUpdate) {
+            return {...obj, lastUpdate: Date.now()}
+        }
+    })
+    table.hook('updating', (modifications) => {
+        return {...modifications, lastUpdate: Date.now()}
+    })
+}
 
 export {db}
 export type {Character, Chat, GenerationPreset, Lore, Template, User}
