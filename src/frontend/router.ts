@@ -18,6 +18,7 @@ import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
 import ThemeSettings from './pages/theme-settings.vue'
 import Hub from './pages/hub.vue'
+import Sync from './pages/sync.vue'
 import About from './pages/about.vue'
 import ErrorPage from './pages/error.vue'
 
@@ -131,6 +132,12 @@ export default createRouter({
             name: 'hub',
             component: Hub,
             meta: {title: 'Hub'},
+        },
+        {
+            path: '/sync',
+            name: 'sync',
+            component: Sync,
+            meta: {title: 'Sync'},
         },
         {
             path: '/about',

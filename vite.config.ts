@@ -17,7 +17,7 @@ export default defineConfig({
                     let licenses = ''
                     packages.forEach((pkg) => {
                         licenses += `## ${pkg.name} (${pkg.license})\n`
-                        licenses += `${pkg.licenseText.split('\n').map(line => `> ${line}`).join('\n')}\n\n`
+                        licenses += `${pkg.licenseText?.split('\n').map(line => `> ${line}`).join('\n')}\n\n`
                     })
                     return licenses
                 },

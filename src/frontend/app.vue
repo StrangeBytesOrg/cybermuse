@@ -23,6 +23,7 @@ onErrorCaptured((error) => {
         })
         toast.error(validationError.message)
     } else {
+        // TODO handle errors without a message
         toast.error(error.message)
     }
     console.error(error)

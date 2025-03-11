@@ -1,35 +1,30 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useToastStore} from '@/store'
+import client from '@/hub-client'
 
 const toast = useToastStore()
 const username = ref('')
 const password = ref('')
 const authenticated = ref(false)
-const hubUrl = import.meta.env.VITE_HUB_URL
 
 if (localStorage.getItem('token')) {
     authenticated.value = true
 }
 
 const login = async () => {
-    const res = await fetch(`${hubUrl}/login`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+    const {data, error} = await client.POST('/login', {
+        body: {
             username: username.value,
             password: password.value,
-        }),
+        },
     })
-    if (res.ok) {
-        const data = await res.json()
+    if (error) {
+        toast.error(`Error logging in: ${error}`)
+    } else {
         localStorage.setItem('token', data.token)
         authenticated.value = true
         toast.success('Logged in successfully')
-    } else {
-        toast.error(`Error logging in: ${res.statusText}`)
     }
 }
 
