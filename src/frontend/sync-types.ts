@@ -20,7 +20,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/upload/{key}": {
+    "/upload/": {
         parameters: {
             query?: never;
             header?: never;
@@ -28,7 +28,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        put: operations["putUploadByKey"];
+        put: operations["putUpload"];
         post?: never;
         delete?: never;
         options?: never;
@@ -36,14 +36,14 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/download/{key}": {
+    "/download/{collection}/{key}": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get: operations["getDownloadByKey"];
+        get: operations["getDownloadByCollectionByKey"];
         put?: never;
         post?: never;
         delete?: never;
@@ -82,48 +82,61 @@ export interface operations {
                 content: {
                     "application/json": {
                         key: string;
+                        collection: string;
                         lastUpdate: number;
                     }[];
                     "multipart/form-data": {
                         key: string;
+                        collection: string;
                         lastUpdate: number;
                     }[];
                     "text/plain": {
                         key: string;
+                        collection: string;
                         lastUpdate: number;
                     }[];
                 };
             };
         };
     };
-    putUploadByKey: {
+    putUpload: {
         parameters: {
             query?: never;
             header: {
                 token: string;
             };
-            path: {
-                key: string;
-            };
+            path?: never;
             cookie?: never;
         };
         requestBody: {
             content: {
                 "application/json": {
-                    lastUpdate: number;
-                    id: string;
+                    key: string;
+                    collection: string;
+                    doc: {
+                        id: string;
+                        lastUpdate: number;
+                    };
                 } & {
                     [key: string]: unknown;
                 };
                 "multipart/form-data": {
-                    lastUpdate: number;
-                    id: string;
+                    key: string;
+                    collection: string;
+                    doc: {
+                        id: string;
+                        lastUpdate: number;
+                    };
                 } & {
                     [key: string]: unknown;
                 };
                 "text/plain": {
-                    lastUpdate: number;
-                    id: string;
+                    key: string;
+                    collection: string;
+                    doc: {
+                        id: string;
+                        lastUpdate: number;
+                    };
                 } & {
                     [key: string]: unknown;
                 };
@@ -138,13 +151,14 @@ export interface operations {
             };
         };
     };
-    getDownloadByKey: {
+    getDownloadByCollectionByKey: {
         parameters: {
             query?: never;
             header: {
                 token: string;
             };
             path: {
+                collection: string;
                 key: string;
             };
             cookie?: never;

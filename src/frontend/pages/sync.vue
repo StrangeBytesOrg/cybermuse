@@ -17,20 +17,13 @@ const sync = async () => {
     }
 
     // Sync Down
-    for (const doc of remoteDocs) {
-        const [store, id] = doc.key.split('/')
-        const collection = db.tables.find(t => t.name === store)
-        if (!collection) {
-            console.error(`Collection not found: ${store}`)
-            return
-        }
-        const localDoc = await collection.get(id)
-
-        if (!localDoc || doc.lastUpdate > localDoc.lastUpdate) {
-            console.log(`Pulling: ${doc.key}`)
-            const {data, error} = await client.GET('/download/{key}', {
+    for (const {key, collection, lastUpdate} of remoteDocs) {
+        const localDoc = await db.tables.find(t => t.name === collection)?.get(key)
+        if (!localDoc || lastUpdate > localDoc.lastUpdate) {
+            console.log(`Pulling: ${collection}.${key}`)
+            const {data, error} = await client.GET('/download/{collection}/{key}', {
                 params: {
-                    path: {key: doc.key},
+                    path: {collection, key},
                     header: {token: localStorage.getItem('token') || ''},
                 },
             })
@@ -38,7 +31,7 @@ const sync = async () => {
                 toast.error(`Syncing failed: ${error}`)
                 return
             }
-            await collection.put(data)
+            await db.tables.find(t => t.name === collection)?.put(data)
         }
     }
 
@@ -46,15 +39,18 @@ const sync = async () => {
     for (const table of db.tables) {
         const localDocs = await table.toArray()
         for (const doc of localDocs) {
-            const remoteDoc = remoteDocs.find(d => d.key === `${table.name}/${doc.id}`)
+            const remoteDoc = remoteDocs.find(d => d.collection === table.name && d.key === doc.id)
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
                 console.log(`Pushing: ${table.name}/${doc.id}`)
-                const {error} = await client.PUT('/upload/{key}', {
+                const {error} = await client.PUT('/upload/', {
                     params: {
-                        path: {key: `${table.name}/${doc.id}`},
                         header: {token: localStorage.getItem('token') || ''},
                     },
-                    body: doc,
+                    body: {
+                        key: doc.id,
+                        collection: table.name,
+                        doc,
+                    },
                 })
                 if (error) {
                     toast.error(`Syncing failed: ${error}`)
