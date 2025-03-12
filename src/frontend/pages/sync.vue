@@ -9,9 +9,7 @@ const syncProvider = ref('hub')
 
 const sync = async () => {
     const {data: remoteDocs, error} = await client.GET('/list', {
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-        },
+        params: {header: {token: localStorage.getItem('token') || ''}},
     })
     if (error) {
         toast.error(`Syncing failed: ${error}`)
@@ -31,7 +29,10 @@ const sync = async () => {
         if (!localDoc || doc.lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${doc.key}`)
             const {data, error} = await client.GET('/download/{key}', {
-                params: {path: {key: doc.key}},
+                params: {
+                    path: {key: doc.key},
+                    header: {token: localStorage.getItem('token') || ''},
+                },
             })
             if (error) {
                 toast.error(`Syncing failed: ${error}`)
@@ -49,7 +50,10 @@ const sync = async () => {
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
                 console.log(`Pushing: ${table.name}/${doc.id}`)
                 const {error} = await client.PUT('/upload/{key}', {
-                    params: {path: {key: `${table.name}/${doc.id}`}},
+                    params: {
+                        path: {key: `${table.name}/${doc.id}`},
+                        header: {token: localStorage.getItem('token') || ''},
+                    },
                     body: doc,
                 })
                 if (error) {
@@ -74,7 +78,7 @@ const sync = async () => {
                 <option value="self-hosted" disabled>Self Hosted</option>
             </select>
 
-            <button v-if="syncProvider === 'hub'" class="btn btn-primary ml-2" @click="sync">Sync</button>
+            <button v-if="syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
         </div>
     </main>
 </template>

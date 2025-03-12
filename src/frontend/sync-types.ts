@@ -67,7 +67,9 @@ export interface operations {
     getList: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                token: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -97,7 +99,9 @@ export interface operations {
     putUploadByKey: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                token: string;
+            };
             path: {
                 key: string;
             };
@@ -137,7 +141,9 @@ export interface operations {
     getDownloadByKey: {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                token: string;
+            };
             path: {
                 key: string;
             };
