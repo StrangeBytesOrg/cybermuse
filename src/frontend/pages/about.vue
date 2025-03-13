@@ -1,13 +1,11 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {marked} from 'marked'
 
-const licenseText = ref('')
+const packages = ref<{name: string; license: string; licenseText: string}[]>([
+    {name: 'Example', license: 'MIT', licenseText: 'Acknowledgements only built in production.'},
+])
 if (import.meta.env.PROD) {
-    const res = await fetch('./acknowledgements.md')
-    licenseText.value = await marked(await res.text(), {breaks: true})
-} else {
-    licenseText.value = '(License text only built in production)'
+    packages.value = await fetch('./oss-licenses.json').then(res => res.json())
 }
 </script>
 
@@ -16,17 +14,17 @@ if (import.meta.env.PROD) {
         <h1 class="text-xl">Acknowledgements</h1>
         <span class="mt-2">This project makes use of the following Open Source projects:</span>
 
-        <div v-html="licenseText" class="licenses mt-5"></div>
+        <div
+            v-for="pkg in packages"
+            :key="pkg.name"
+            class="collapse collapse-arrow bg-base-200 border-base-300 border mt-2">
+            <input type="checkbox">
+            <h2 class="collapse-title text-lg">{{ pkg.name }} - {{ pkg.license }}</h2>
+            <div class="collapse-content">
+                <blockquote class="px-2 text-base-content border-l border-l-primary whitespace-pre-wrap">
+                    {{ pkg.licenseText }}
+                </blockquote>
+            </div>
+        </div>
     </main>
 </template>
-
-<style>
-@reference "../styles/global.css";
-.licenses h2 {
-    @apply text-lg font-bold mt-4;
-}
-.licenses blockquote {
-    @apply bg-base-200 px-2 mt-3 text-base-content;
-    border-left: 4px solid var(--color-primary);
-}
-</style>

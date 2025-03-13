@@ -11,18 +11,7 @@ export default defineConfig({
     plugins: [
         vue(),
         tailwindcss(),
-        createViteLicensePlugin({
-            additionalFiles: {
-                'acknowledgements.md': (packages) => {
-                    let licenses = ''
-                    packages.forEach((pkg) => {
-                        licenses += `## ${pkg.name} (${pkg.license})\n`
-                        licenses += `${pkg.licenseText?.split('\n').map(line => `> ${line}`).join('\n')}\n\n`
-                    })
-                    return licenses
-                },
-            },
-        }),
+        createViteLicensePlugin(),
     ],
     build: {
         sourcemap: true,
