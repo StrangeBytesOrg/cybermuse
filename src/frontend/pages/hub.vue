@@ -7,9 +7,22 @@ const toast = useToastStore()
 const username = ref('')
 const password = ref('')
 const authenticated = ref(false)
+const token = localStorage.getItem('token')
 
-if (localStorage.getItem('token')) {
-    authenticated.value = true
+const getTokenPayload = (token: string) => {
+    const payload = token.split('.')[1]
+    if (!payload) throw new Error('Invalid token')
+    return JSON.parse(atob(payload))
+}
+
+if (token) {
+    const claim = getTokenPayload(token)
+    if ((claim.exp * 1000) > Date.now()) {
+        authenticated.value = true
+    } else {
+        toast.error('Token expired')
+        localStorage.removeItem('token')
+    }
 }
 
 const login = async () => {
