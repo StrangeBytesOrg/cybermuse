@@ -1,11 +1,15 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
 import {db} from '@/db'
-import {useToastStore} from '@/store'
+import {useToastStore, useSettingsStore} from '@/store'
 import client from '@/sync-client'
 
 const toast = useToastStore()
-const syncProvider = ref('hub')
+const settings = useSettingsStore()
+
+const setProvider = (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    settings.setSyncProvider(target.value)
+}
 
 const sync = async () => {
     const {data: remoteDocs, error} = await client.GET('/list', {
@@ -68,13 +72,13 @@ const sync = async () => {
     <main class="flex flex-col">
         <label class="label">Sync Provider</label>
         <div class="flex flex-row">
-            <select v-model="syncProvider" class="select">
+            <select @change="setProvider" :value="settings.syncProvider" class="select">
                 <option value="">Select a provider</option>
                 <option value="hub">Cybermuse Hub</option>
-                <option value="self-hosted" disabled>Self Hosted</option>
+                <option value="self-hosted">Self Hosted</option>
             </select>
 
-            <button v-if="syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
+            <button v-if="settings.syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
         </div>
     </main>
 </template>

@@ -1,11 +1,12 @@
 <script lang="ts" setup>
 import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
-import {useToastStore} from '@/store'
+import {useToastStore, useSettingsStore} from '@/store'
 import {db} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
+const settings = useSettingsStore()
 const router = useRouter()
 const preset = reactive({
     name: '',
@@ -25,12 +26,13 @@ const preset = reactive({
 })
 
 const createPreset = async () => {
+    const presetId = preset.name.toLowerCase().replace(/ /g, '-')
     await db.generationPresets.put({
-        id: preset.name.toLowerCase().replace(/ /g, '-'),
+        id: presetId,
         lastUpdate: Date.now(),
         ...toRaw(preset),
     })
-    await db.users.update('default-user', {generatePresetId: preset.name.toLowerCase().replace(/ /g, '-')})
+    settings.setPreset(presetId)
     toast.success('Created new preset')
     router.push({name: 'presets'})
 }

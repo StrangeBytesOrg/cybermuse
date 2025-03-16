@@ -6,19 +6,6 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 {{ lore }}{{/if}}`
 
 export const fixtureData = async () => {
-    const users = await db.users.toArray()
-    if (users.length === 0) {
-        console.log('Creating default user')
-        await db.users.put({
-            id: 'default-user',
-            lastUpdate: 0,
-            name: 'Default',
-            generatePresetId: 'default-generation-preset',
-            promptTemplateId: 'default-template',
-        })
-    }
-
-    // Characters
     const characters = await db.characters.toArray()
     if (characters.length === 0) {
         console.log('Creating default characters')

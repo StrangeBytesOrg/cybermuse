@@ -3,15 +3,15 @@ import {onErrorCaptured} from 'vue'
 import {RouterView} from 'vue-router'
 import {ZodError} from 'zod'
 import {fromError} from 'zod-validation-error'
-import {useMenuStore, useThemeStore, useToastStore} from './store'
+import {useMenuStore, useToastStore, useSettingsStore} from './store'
 import './styles/global.css'
 import TopBar from '@/components/top-bar.vue'
 import SideBar from '@/components/sidebar.vue'
 import Toast from '@/components/toast.vue'
 
 const menuStore = useMenuStore()
-const themeStore = useThemeStore()
 const toast = useToastStore()
+const settings = useSettingsStore()
 
 onErrorCaptured((error) => {
     if (error instanceof ZodError) {
@@ -32,7 +32,7 @@ onErrorCaptured((error) => {
 </script>
 
 <template>
-    <div :data-theme="themeStore.theme" class="h-dvh">
+    <div :data-theme="settings.theme" class="h-dvh">
         <TopBar />
 
         <SideBar :showMenu="menuStore.visible" />

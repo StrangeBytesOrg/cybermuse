@@ -1,24 +1,21 @@
 <script lang="ts" setup>
-import {ref, reactive, computed, toRaw} from 'vue'
-import {useToastStore} from '@/store'
+import {computed, toRaw} from 'vue'
+import {useToastStore, useSettingsStore} from '@/store'
+import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {db} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
-const presets = reactive(await db.generationPresets.toArray())
-const user = reactive(await db.users.get('default-user'))
-const selectedPresetId = ref(user.generatePresetId)
+const settings = useSettingsStore()
+const presets = await useDexieLiveQuery(() => db.generationPresets.toArray())
 
 const activePreset = computed(() => {
-    return presets.find((preset) => preset.id === user.generatePresetId)
+    return presets.value.find((preset) => preset.id === settings.preset)
 })
 
-const setActivePreset = async () => {
-    if (await db.generationPresets.get(selectedPresetId.value)) {
-        user.generatePresetId = selectedPresetId.value
-        await db.users.update('default-user', {generatePresetId: selectedPresetId.value})
-    }
-
+const setActivePreset = async (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    settings.setPreset(target.value)
     toast.success('Active preset set')
 }
 
@@ -36,8 +33,8 @@ const deletePreset = async () => {
 
     if (activePreset.value) {
         await db.generationPresets.delete(activePreset.value.id)
-        await db.users.update('default-user', {generatePresetId: 'default-generation-preset'})
-        location.reload() // FIXME Refresh the page as an easy way to reset the state
+        settings.setPreset('default-generation-preset')
+        toast.success('Preset deleted')
     }
 }
 </script>
@@ -45,7 +42,7 @@ const deletePreset = async () => {
 <template>
     <div class="flex flex-row">
         <div class="flex flex-col">
-            <select v-model="selectedPresetId" @change="setActivePreset" class="select min-w-60">
+            <select @change="setActivePreset" :value="activePreset?.id" class="select min-w-60">
                 <option v-for="preset in presets" :key="preset.id" :value="preset.id">
                     {{ preset.name }}
                 </option>

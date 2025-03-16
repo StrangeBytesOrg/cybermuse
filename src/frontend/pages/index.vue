@@ -1,5 +1,3 @@
-<script lang="ts" setup></script>
-
 <template>
     <main class="flex flex-col">
         <p class="text-center sm:text-left">

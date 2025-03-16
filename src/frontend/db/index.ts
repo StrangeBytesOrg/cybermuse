@@ -57,7 +57,7 @@ interface GenerationPreset {
     topK?: number
     topP?: number
     minP?: number
-    repeatPenalty?: {
+    repeatPenalty: {
         penalty?: number
         presencePenalty?: number
         frequencyPenalty?: number
@@ -66,21 +66,12 @@ interface GenerationPreset {
     }
 }
 
-interface User {
-    id: string
-    lastUpdate: number
-    name: string
-    generatePresetId: string
-    promptTemplateId: string
-}
-
 const db = new Dexie(dbName) as Dexie & {
     characters: EntityTable<Character, 'id'>
     lore: EntityTable<Lore, 'id'>
     chats: EntityTable<Chat, 'id'>
     templates: EntityTable<Template, 'id'>
     generationPresets: EntityTable<GenerationPreset, 'id'>
-    users: EntityTable<User, 'id'>
 }
 
 db.version(1).stores({
@@ -104,5 +95,5 @@ for (const table of db.tables) {
 }
 
 export {db}
-export type {Character, Chat, GenerationPreset, Lore, Template, User}
+export type {Character, Chat, GenerationPreset, Lore, Template}
 export type Message = Chat['messages'][0]

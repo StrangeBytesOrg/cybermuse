@@ -5,7 +5,7 @@ import Handlebars from 'handlebars'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {db} from '@/db'
-import {useConnectionStore} from '@/store'
+import {useConnectionStore, useSettingsStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
 import {responseToIterable} from '@/lib/sse'
@@ -19,6 +19,7 @@ const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
 
 const route = useRoute()
 const connectionStore = useConnectionStore()
+const settings = useSettingsStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -75,42 +76,46 @@ const createMessage = async (characterId: string, text: string = '', type: 'user
     currentMessage.value = ''
 }
 
+const getSystemPrompt = async () => {
+    const template = await getOrThrow(db.templates.get(settings.template))
+    const hbTemplate = Handlebars.compile(template.template)
+
+    // Render each character description
+    characters.forEach((c) => {
+        const characterTemplate = Handlebars.compile(c.description)
+        c.description = characterTemplate({
+            char: c.name,
+            user: userCharacter.name,
+        })
+    })
+
+    // Get character and lore strings
+    let characterString = ''
+    characters.forEach((character) => {
+        characterString += `${character.name}: ${character.description}\n`
+    })
+    let loreString = ''
+    lore.forEach((book) => {
+        loreString += `${book.name}\n`
+        book.entries.forEach((entry) => {
+            loreString += `${entry.name}: ${entry.content}\n`
+        })
+    })
+
+    // Render the system prompt
+    const systemPrompt = hbTemplate({
+        characters: characterString,
+        lore: loreString,
+    })
+
+    return systemPrompt
+}
+
 const generateMessage = async (respondent?: string) => {
     pendingMessage.value = true
 
     try {
-        const {promptTemplateId, generatePresetId} = await getOrThrow(db.users.get('default-user'))
-        const template = await getOrThrow(db.templates.get(promptTemplateId))
-        const hbTemplate = Handlebars.compile(template.template)
-
-        // Render each character description
-        characters.forEach((c) => {
-            const characterTemplate = Handlebars.compile(c.description)
-            c.description = characterTemplate({
-                char: c.name,
-                user: userCharacter.name,
-            })
-        })
-
-        // Get character and lore strings
-        let characterString = ''
-        characters.forEach((character) => {
-            characterString += `${character.name}: ${character.description}\n`
-        })
-        let loreString = ''
-        lore.forEach((book) => {
-            loreString += `${book.name}\n`
-            book.entries.forEach((entry) => {
-                loreString += `${entry.name}: ${entry.content}\n`
-            })
-        })
-
-        // Render the system prompt
-        const systemPrompt = hbTemplate({
-            characters: characterString,
-            lore: loreString,
-        })
-
+        const systemPrompt = await getSystemPrompt()
         const chatHistory = chat.value.messages.map((message) => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {
@@ -138,23 +143,21 @@ const generateMessage = async (respondent?: string) => {
             gbnfString = `root ::= names [\\u0000-\\U0010FFFF]*\n${namesGbnf}`
         }
 
-        const generatePreset = await getOrThrow(db.generationPresets.get(generatePresetId))
+        const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
         const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
         const response = await fetch(chatCompletionUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: {'Content-Type': 'application/json'},
             signal: abortController.signal,
             body: JSON.stringify({
                 stream: true,
                 grammar: gbnfString,
                 messages: formattedMessages,
-                n_predict: generatePreset.maxTokens,
-                temperature: generatePreset.temperature,
-                min_p: generatePreset.minP,
-                top_p: generatePreset.topP,
-                top_k: generatePreset.topK,
+                n_predict: generationPreset.maxTokens,
+                temperature: generationPreset.temperature,
+                min_p: generationPreset.minP,
+                top_p: generationPreset.topP,
+                top_k: generationPreset.topK,
                 // TODO add Penalties
             }),
         })

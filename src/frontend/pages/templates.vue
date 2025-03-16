@@ -1,25 +1,24 @@
 <script lang="ts" setup>
-import {ref, reactive, computed} from 'vue'
+import {ref, computed} from 'vue'
 import Handlebars from 'handlebars'
-import {useToastStore} from '@/store'
+import {useToastStore, useSettingsStore} from '@/store'
+import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {db} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
-let templates = reactive(await db.templates.toArray())
-let user = reactive(await db.users.get('default-user'))
+const settings = useSettingsStore()
+const templates = await useDexieLiveQuery(() => db.templates.toArray())
 const example = ref('')
 
-const selectedTemplate = ref(user.promptTemplateId)
 const activeTemplate = computed(() => {
-    return templates.find((t) => t.id === selectedTemplate.value)
+    return templates.value.find((template) => template.id === settings.template)
 })
 
-const setActiveTemplate = async () => {
-    example.value = ''
-    if (await db.templates.get(selectedTemplate.value)) {
-        await db.users.update('default-user', {promptTemplateId: selectedTemplate.value})
-    }
+const setActiveTemplate = async (event: Event) => {
+    const target = event.target as HTMLSelectElement
+    settings.setTemplate(target.value)
+    toast.success('Active template set')
 }
 
 const updateTemplate = async () => {
@@ -36,9 +35,7 @@ const deleteTemplate = async () => {
 
     if (activeTemplate.value) {
         await db.templates.delete(activeTemplate.value.id)
-        // Set the default template as active
-        selectedTemplate.value = 'default-template'
-        await db.users.update('default-user', {promptTemplateId: 'default-template'})
+        settings.setTemplate('default-template')
         toast.success('Template deleted')
     }
 }
@@ -83,7 +80,7 @@ const getPreview = async () => {
     <main class="">
         <div class="flex flex-row">
             <div class="flex flex-col">
-                <select v-model="selectedTemplate" @change="setActiveTemplate" class="select min-w-60">
+                <select @change="setActiveTemplate" :value="settings.template" class="select min-w-60">
                     <option v-for="template in templates" :key="template.id" :value="template.id">
                         {{ template.name }}
                     </option>
