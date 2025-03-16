@@ -130,19 +130,19 @@ const generateMessage = async (respondent?: string) => {
             ...chatHistory,
         ]
 
-        // If a respondent was specified, this is a regeneration, so we the last message will be empty
+        // If a respondent was specified, this is a regeneration, so the last message will be empty
         if (respondent) {
             formattedMessages.pop()
         }
 
         // Create a GBNF string to make sure the message starts with a pre-determined character, or one of the chat characters
-        let gbnfString: string
+        let nameString
         if (respondent) {
-            gbnfString = `root ::= "${respondent}:" [\\u0000-\\U0010FFFF]*`
+            nameString = `"${respondent}:"`
         } else {
-            const namesGbnf = `names ::= ${characters.map((c) => `"${c.name}:"`).join(' | ')}`
-            gbnfString = `root ::= names [\\u0000-\\U0010FFFF]*\n${namesGbnf}`
+            nameString = `(${characters.map((c) => `"${c.name}:"`).join(' | ')})`
         }
+        const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
 
         const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
         const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
