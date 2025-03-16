@@ -38,6 +38,7 @@ const userCharacter = await getOrThrow(db.characters.get(chat.value.userCharacte
 const lore = await db.lore.where('id').anyOf(chat.value.lore).toArray()
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
 characterMap[chat.value.userCharacter] = userCharacter
+const allCharacter = [userCharacter, ...characters]
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
@@ -60,7 +61,7 @@ const impersonate = async () => {
     }
 
     await createMessage(userCharacter.id, '', 'model')
-    await generateMessage()
+    await generateMessage(userCharacter.name)
 }
 
 const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
@@ -159,6 +160,7 @@ const generateMessage = async (respondent?: string) => {
                 top_p: generationPreset.topP,
                 top_k: generationPreset.topK,
                 // TODO add Penalties
+                // TODO stop strings
             }),
         })
         if (!response.ok) throw new Error('Connection to server failed')
@@ -176,7 +178,7 @@ const generateMessage = async (respondent?: string) => {
             // Determine which character is speaking before outputting to the chat
             if (!characterPicked) {
                 initialBuffer += content
-                const character = characters.find((c) => initialBuffer.includes(`${c.name}:`))
+                const character = allCharacter.find((c) => initialBuffer.includes(`${c.name}:`))
                 if (character) {
                     console.log('Picked:', character.name)
                     characterPicked = true
@@ -249,7 +251,7 @@ const toggleCtxMenu = () => {
         <!-- Chat Controls -->
         <div class="flex absolute bottom-0 left-0 sm:left-52 right-0 px-1 sm:pb-1 sm:pr-2 max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
-            <button class="relative mr-2" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
+            <button class="relative mr-2 cursor-pointer" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
                 <Bars4Icon class="size-10" />
                 <Transition
                     name="fade"
