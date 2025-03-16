@@ -16,13 +16,10 @@ if (import.meta.env.PROD) {
     <div
         v-for="pkg in packages"
         :key="pkg.name"
-        class="collapse collapse-arrow bg-base-200 border-base-300 border mt-2">
-        <input type="checkbox">
-        <h2 class="collapse-title text-lg">{{ pkg.name }} - {{ pkg.license }}</h2>
-        <div class="collapse-content">
-            <blockquote class="px-2 text-base-content border-l border-l-primary whitespace-pre-wrap">
-                {{ pkg.licenseText }}
-            </blockquote>
-        </div>
+        class="bg-base-200 border-base-300 border rounded-box px-2 mt-2">
+        <h2 class="text-lg">{{ pkg.name }} - {{ pkg.license }}</h2>
+        <blockquote class="px-2 mt-2 text-base-content border-l border-l-primary whitespace-pre-wrap">
+            {{ pkg.licenseText }}
+        </blockquote>
     </div>
 </template>
