@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {useToastStore} from '@/store'
-import client from '@/hub-client'
+import client from '@/clients/hub-client'
 
 const toast = useToastStore()
 const username = ref('')

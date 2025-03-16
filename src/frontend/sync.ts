@@ -1,5 +1,5 @@
 import {db} from '@/db'
-import client from '@/sync-client'
+import client from '@/clients/sync-client'
 
 export const sync = async () => {
     const {data: remoteDocs, error} = await client.GET('/list', {
