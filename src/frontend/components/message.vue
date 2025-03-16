@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
 import {marked} from 'marked'
-import type {Message} from '@/db'
-import {useChatStore} from '@/store'
+import {db, type Message} from '@/db'
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
@@ -16,6 +15,7 @@ import Editable from '@/components/editable.vue'
 type Props = {
     index: number
     message: Message
+    chatId: string
     characterMap: Record<
         string,
         {
@@ -32,16 +32,43 @@ const editedText = ref('')
 const emit = defineEmits<{
     (event: 'newSwipe', index: number): void
 }>()
-const chatStore = useChatStore()
 
 const newSwipe = () => emit('newSwipe', props.index)
-const update = () => {
-    chatStore.updateMessage(props.index, editedText.value)
+const update = async () => {
+    const message = props.message
+    message.content[message.activeIndex] = editedText.value
+    const chat = await db.chats.get(props.chatId)
+    if (!chat) throw new Error('Chat not found')
+    chat.messages[props.index] = message
+    await db.chats.update(props.chatId, {messages: chat.messages})
     editMode.value = false
 }
-const deleteMe = async () => chatStore.deleteMessage(props.index)
-const swipeLeft = async () => chatStore.swipeLeft(props.index)
-const swipeRight = async () => chatStore.swipeRight(props.index)
+
+const deleteMe = async () => {
+    const chat = await db.chats.get(props.chatId)
+    if (!chat) throw new Error('Chat not found')
+    chat.messages.splice(props.index, 1)
+    db.chats.put(chat)
+}
+
+const swipeLeft = async () => {
+    const chat = await db.chats.get(props.chatId)
+    if (!chat) throw new Error('Chat not found')
+    const message = chat.messages[props.index]
+    if (message && message.activeIndex > 0) {
+        message.activeIndex -= 1
+        await db.chats.update(props.chatId, {messages: chat.messages})
+    }
+}
+const swipeRight = async () => {
+    const chat = await db.chats.get(props.chatId)
+    if (!chat) throw new Error('Chat not found')
+    const message = chat.messages[props.index]
+    if (message && message.activeIndex < message.content.length - 1) {
+        message.activeIndex += 1
+        await db.chats.update(props.chatId, {messages: chat.messages})
+    }
+}
 
 const enterEdit = async () => {
     editMode.value = !editMode.value

@@ -2,15 +2,22 @@
 import {ref} from 'vue'
 import {useRoute} from 'vue-router'
 import Handlebars from 'handlebars'
+import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {db} from '@/db'
-import {useChatStore, useConnectionStore} from '@/store'
+import {useConnectionStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
-import {responseToIterable} from '../lib/sse'
+import {responseToIterable} from '@/lib/sse'
+
+// Function to wrap Dexie get calls with a throw on undefined
+const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
+    const result = await promise
+    if (!result) throw new Error('Not found')
+    return result
+}
 
 const route = useRoute()
-const chatStore = useChatStore()
 const connectionStore = useConnectionStore()
 const chatId = route.params.id
 const currentMessage = ref('')
@@ -24,19 +31,18 @@ if (!chatId || Array.isArray(chatId)) {
     throw new Error('Invalid chat ID')
 }
 
-await chatStore.getChat(chatId)
-const chat = chatStore.chat
-const characters = await db.characters.where('id').anyOf(chat.characters).toArray()
-const userCharacter = await db.characters.get(chat.userCharacter)
-const lore = await db.lore.where('id').anyOf(chat.lore).toArray()
+const chat = await useDexieLiveQuery(() => getOrThrow(db.chats.get(chatId)))
+const characters = await getOrThrow(db.characters.where('id').anyOf(chat.value.characters).toArray())
+const userCharacter = await getOrThrow(db.characters.get(chat.value.userCharacter))
+const lore = await db.lore.where('id').anyOf(chat.value.lore).toArray()
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
-characterMap[chat.userCharacter] = userCharacter
+characterMap[chat.value.userCharacter] = userCharacter
 
 // Common setup function for generation
 const setupGeneration = async () => {
-    const {promptTemplateId, generatePresetId} = await db.users.get('default-user')
-    const generatePreset = await db.generationPresets.get(generatePresetId)
-    const template = await db.templates.get(promptTemplateId)
+    const {promptTemplateId, generatePresetId} = await getOrThrow(db.users.get('default-user'))
+    const generatePreset = await getOrThrow(db.generationPresets.get(generatePresetId))
+    const template = await getOrThrow(db.templates.get(promptTemplateId))
     const hbTemplate = Handlebars.compile(template.template)
 
     // Render each character description
@@ -67,7 +73,7 @@ const setupGeneration = async () => {
         lore: loreString,
     })
 
-    const formattedMessages = chat.messages.map((message) => {
+    const formattedMessages = chat.value.messages.map((message) => {
         const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
         return {
             role: message.type,
@@ -83,47 +89,6 @@ const setupGeneration = async () => {
     return {formattedMessages, generatePreset}
 }
 
-const pickCharacter = async () => {
-    // If there are no characters, throw an error
-    if (chat.characters.length === 0) {
-        throw new Error('Missing characters')
-    }
-
-    // If there's only one character, use that one
-    if (chat.characters.length === 1 && chat.characters[0]) {
-        return chat.characters[0]
-    }
-
-    // For multiple characters, use GBNF to select one
-    pendingMessage.value = true
-    const {formattedMessages} = await setupGeneration()
-
-    // Call generate, passing a grammar to be used for character picking
-    const gbnfString = 'root ::= ' + characters.map((c) => `"${c.name}"`).join(' | ')
-    const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
-    const response = await fetch(chatCompletionUrl, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        signal: abortController.signal,
-        body: JSON.stringify({
-            stream: false,
-            grammar: gbnfString,
-            messages: formattedMessages,
-            n_predict: 8,
-        }),
-    })
-    const res = await response.json()
-    const characterName = res.choices[0].message.content
-
-    const character = characters.find((c) => c.name === characterName)
-    if (!character) {
-        throw new Error('Character not found')
-    }
-    return character.id
-}
-
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
@@ -135,10 +100,6 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     if (currentMessage.value !== '') {
         await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
-
-    // Create a new empty message for the response
-    const characterId = await pickCharacter()
-    await createMessage(characterId, '', 'model')
 
     await generateMessage()
 }
@@ -153,36 +114,37 @@ const impersonate = async () => {
 }
 
 const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
-    chat.messages.push({
+    chat.value.messages.push({
         id: Math.random().toString(36).slice(2),
         characterId,
         type,
         content: [text],
         activeIndex: 0,
     })
-    await chatStore.save()
+    await db.chats.put(chat.value)
 
     currentMessage.value = ''
 }
 
-const generateMessage = async () => {
+const generateMessage = async (respondent?: string) => {
     pendingMessage.value = true
-    const lastMessage = chat.messages[chat.messages.length - 1]
 
-    // Realistically this probably can't happen but it keeps TS happy
-    if (!lastMessage) {
-        throw new Error('No messages to generate into')
-    }
-
-    const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
     try {
         const {formattedMessages, generatePreset} = await setupGeneration()
-        formattedMessages.pop()
+        if (respondent) {
+            formattedMessages.pop()
+        }
 
-        // Create a GBNF string to make sure the message starts with the character's name
-        const characterName = characterMap[lastMessage.characterId]?.name
-        const gbnfString = `root ::= "${characterName}:" [\\u0000-\\U0010FFFF]*`
+        // Create a GBNF string to make sure the message starts with a pre-determined character, or one of the chat characters
+        let gbnfString: string
+        if (respondent) {
+            gbnfString = `root ::= "${respondent}:" [\\u0000-\\U0010FFFF]*`
+        } else {
+            const namesGbnf = `names ::= ${characters.map((c) => `"${c.name}:"`).join(' | ')}`
+            gbnfString = `root ::= names [\\u0000-\\U0010FFFF]*\n${namesGbnf}`
+        }
 
+        const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
         const response = await fetch(chatCompletionUrl, {
             method: 'POST',
             headers: {
@@ -205,19 +167,32 @@ const generateMessage = async () => {
         const iterable = responseToIterable(response)
         let messageBuffer = ''
         let initialBuffer = ''
+        let characterPicked = false
         for await (const chunk of iterable) {
             if (chunk.data === '[DONE]') continue
 
             const responseText = JSON.parse(chunk.data)
             const content = responseText.choices[0].delta.content
-            if (content) {
-                if (!initialBuffer.includes(`${characterName}:`)) {
-                    initialBuffer += content
-                } else {
-                    messageBuffer += content
+            if (!content) continue
+
+            // Determine which character is speaking before outputting to the chat
+            if (!characterPicked) {
+                initialBuffer += content
+                const character = characters.find((c) => initialBuffer.includes(`${c.name}:`))
+                if (character) {
+                    console.log('Picked:', character.name)
+                    characterPicked = true
+
+                    // If a respondent was not specified we need to create a new message
+                    if (!respondent) {
+                        createMessage(character.id, '', 'model')
+                    }
                 }
-                lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
-                await chatStore.save()
+            } else {
+                messageBuffer += content
+                const activeIndex = chat.value.messages[chat.value.messages.length - 1].activeIndex
+                chat.value.messages[chat.value.messages.length - 1].content[activeIndex] = messageBuffer.trim()
+                await db.chats.update(chatId, {messages: chat.value.messages})
             }
         }
     } catch (error) {
@@ -232,12 +207,13 @@ const newSwipe = async (messageIndex: number) => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    const message = chat.messages[messageIndex]
+    const message = chat.value.messages[messageIndex]
     if (message) {
         message.content.push('')
         message.activeIndex = message.content.length - 1
-        await chatStore.save()
-        await generateMessage()
+        await db.chats.put(chat.value)
+        const characterName = characterMap[message.characterId]?.name
+        await generateMessage(characterName)
     }
 }
 
@@ -259,10 +235,11 @@ const toggleCtxMenu = () => {
             ref="messagesElement"
             class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <Message
-                v-for="(message, index) in chat.messages.slice().reverse()"
+                v-for="(message, index) in chat?.messages.slice().reverse()"
                 v-bind:key="message.id"
                 :index="chat.messages.length - 1 - index"
                 :message="message"
+                :chatId="chat.id"
                 :characterMap="characterMap"
                 :loading="false"
                 :showSwipes="index === 0 && message.type === 'model'"
