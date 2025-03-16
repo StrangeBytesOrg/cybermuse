@@ -38,57 +38,6 @@ const lore = await db.lore.where('id').anyOf(chat.value.lore).toArray()
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
 characterMap[chat.value.userCharacter] = userCharacter
 
-// Common setup function for generation
-const setupGeneration = async () => {
-    const {promptTemplateId, generatePresetId} = await getOrThrow(db.users.get('default-user'))
-    const generatePreset = await getOrThrow(db.generationPresets.get(generatePresetId))
-    const template = await getOrThrow(db.templates.get(promptTemplateId))
-    const hbTemplate = Handlebars.compile(template.template)
-
-    // Render each character description
-    characters.forEach((c) => {
-        const characterTemplate = Handlebars.compile(c.description)
-        c.description = characterTemplate({
-            char: c.name,
-            user: userCharacter.name,
-        })
-    })
-
-    // Get character and lore strings
-    let characterString = ''
-    characters.forEach((character) => {
-        characterString += `${character.name}: ${character.description}\n`
-    })
-    let loreString = ''
-    lore.forEach((book) => {
-        loreString += `${book.name}\n`
-        book.entries.forEach((entry) => {
-            loreString += `${entry.name}: ${entry.content}\n`
-        })
-    })
-
-    // Render the system prompt
-    const systemPrompt = hbTemplate({
-        characters: characterString,
-        lore: loreString,
-    })
-
-    const formattedMessages = chat.value.messages.map((message) => {
-        const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
-        return {
-            role: message.type,
-            content: prefix + (message.content[message.activeIndex] || ''),
-        }
-    })
-
-    formattedMessages.unshift({
-        role: 'system',
-        content: systemPrompt,
-    })
-
-    return {formattedMessages, generatePreset}
-}
-
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
@@ -130,7 +79,52 @@ const generateMessage = async (respondent?: string) => {
     pendingMessage.value = true
 
     try {
-        const {formattedMessages, generatePreset} = await setupGeneration()
+        const {promptTemplateId, generatePresetId} = await getOrThrow(db.users.get('default-user'))
+        const template = await getOrThrow(db.templates.get(promptTemplateId))
+        const hbTemplate = Handlebars.compile(template.template)
+
+        // Render each character description
+        characters.forEach((c) => {
+            const characterTemplate = Handlebars.compile(c.description)
+            c.description = characterTemplate({
+                char: c.name,
+                user: userCharacter.name,
+            })
+        })
+
+        // Get character and lore strings
+        let characterString = ''
+        characters.forEach((character) => {
+            characterString += `${character.name}: ${character.description}\n`
+        })
+        let loreString = ''
+        lore.forEach((book) => {
+            loreString += `${book.name}\n`
+            book.entries.forEach((entry) => {
+                loreString += `${entry.name}: ${entry.content}\n`
+            })
+        })
+
+        // Render the system prompt
+        const systemPrompt = hbTemplate({
+            characters: characterString,
+            lore: loreString,
+        })
+
+        const chatHistory = chat.value.messages.map((message) => {
+            const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
+            return {
+                role: message.type,
+                content: prefix + (message.content[message.activeIndex] || ''),
+            }
+        })
+
+        const formattedMessages = [
+            {role: 'system', content: systemPrompt},
+            ...chatHistory,
+        ]
+
+        // If a respondent was specified, this is a regeneration, so we the last message will be empty
         if (respondent) {
             formattedMessages.pop()
         }
@@ -144,6 +138,7 @@ const generateMessage = async (respondent?: string) => {
             gbnfString = `root ::= names [\\u0000-\\U0010FFFF]*\n${namesGbnf}`
         }
 
+        const generatePreset = await getOrThrow(db.generationPresets.get(generatePresetId))
         const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
         const response = await fetch(chatCompletionUrl, {
             method: 'POST',
@@ -190,8 +185,9 @@ const generateMessage = async (respondent?: string) => {
                 }
             } else {
                 messageBuffer += content
-                const activeIndex = chat.value.messages[chat.value.messages.length - 1].activeIndex
-                chat.value.messages[chat.value.messages.length - 1].content[activeIndex] = messageBuffer.trim()
+                const lastMessage = chat.value.messages[chat.value.messages.length - 1]
+                if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
+                lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
                 await db.chats.update(chatId, {messages: chat.value.messages})
             }
         }
