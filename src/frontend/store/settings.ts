@@ -7,6 +7,7 @@ export const useSettingsStore = defineStore('settings', {
             preset: localStorage.getItem('preset') ?? 'default-generation-preset',
             template: localStorage.getItem('template') ?? 'default-template',
             syncProvider: localStorage.getItem('syncProvider'),
+            connectionProvider: localStorage.getItem('connectionProvider'),
         }
     },
     actions: {
@@ -25,6 +26,10 @@ export const useSettingsStore = defineStore('settings', {
         setSyncProvider(syncProvider: string) {
             this.syncProvider = syncProvider
             localStorage.setItem('syncProvider', syncProvider)
+        },
+        setConnectionProvider(connectionProvider: string) {
+            this.connectionProvider = connectionProvider
+            localStorage.setItem('connectionProvider', connectionProvider)
         },
     },
 })

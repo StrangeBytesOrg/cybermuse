@@ -56,10 +56,10 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
             </li>
             <li>
                 <router-link
-                    to="/theme-settings"
+                    to="/settings"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
-                    Theme Settings
+                    Settings
                 </router-link>
             </li>
             <li>
@@ -68,22 +68,6 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Connect to Hub
-                </router-link>
-            </li>
-            <li>
-                <router-link
-                    to="/connection"
-                    class="font-bold px-2 mb-1"
-                    active-class="bg-primary text-primary-content">
-                    Connection
-                </router-link>
-            </li>
-            <li>
-                <router-link
-                    to="/sync"
-                    class="font-bold px-2 mb-1"
-                    active-class="bg-primary text-primary-content">
-                    Sync
                 </router-link>
             </li>
             <li>

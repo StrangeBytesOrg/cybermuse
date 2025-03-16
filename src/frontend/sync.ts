@@ -1,24 +1,11 @@
-<script lang="ts" setup>
 import {db} from '@/db'
-import {useToastStore, useSettingsStore} from '@/store'
 import client from '@/sync-client'
 
-const toast = useToastStore()
-const settings = useSettingsStore()
-
-const setProvider = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    settings.setSyncProvider(target.value)
-}
-
-const sync = async () => {
+export const sync = async () => {
     const {data: remoteDocs, error} = await client.GET('/list', {
         params: {header: {token: localStorage.getItem('token') || ''}},
     })
-    if (error) {
-        toast.error(`Syncing failed: ${error}`)
-        return
-    }
+    if (error) throw error
 
     // Sync Down
     for (const {key, collection, lastUpdate} of remoteDocs) {
@@ -31,10 +18,7 @@ const sync = async () => {
                     header: {token: localStorage.getItem('token') || ''},
                 },
             })
-            if (error) {
-                toast.error(`Syncing failed: ${error}`)
-                return
-            }
+            if (error) throw error
             await db.tables.find(t => t.name === collection)?.put(data)
         }
     }
@@ -56,27 +40,8 @@ const sync = async () => {
                         doc,
                     },
                 })
-                if (error) {
-                    toast.error(`Syncing failed: ${error}`)
-                    return
-                }
+                if (error) throw error
             }
         }
     }
-
-    toast.success('Synced')
 }
-</script>
-
-<template>
-    <label class="label">Sync Provider</label>
-    <div class="flex flex-row">
-        <select @change="setProvider" :value="settings.syncProvider" class="select">
-            <option value="">Select a provider</option>
-            <option value="hub">Cybermuse Hub</option>
-            <option value="self-hosted">Self Hosted</option>
-        </select>
-
-        <button v-if="settings.syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
-    </div>
-</template>

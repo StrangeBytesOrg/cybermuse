@@ -3,7 +3,6 @@ import {defineStore} from 'pinia'
 export const useConnectionStore = defineStore('connection', {
     state: () => {
         return {
-            connectionProvider: localStorage.getItem('connectionProvider') ?? '',
             connectionUrl: localStorage.getItem('connectionUrl') ?? '',
             connected: false,
         }
@@ -11,7 +10,6 @@ export const useConnectionStore = defineStore('connection', {
     actions: {
         save() {
             localStorage.setItem('connectionUrl', this.connectionUrl)
-            localStorage.setItem('connectionProvider', this.connectionProvider)
         },
         async checkConnection() {
             const healthUrl = `${this.connectionUrl}/health`

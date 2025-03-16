@@ -11,14 +11,12 @@ import Lore from './pages/lore.vue'
 import LoreEdit from './pages/lore-edit.vue'
 import LoreCreate from './pages/lore-create.vue'
 import CreateChat from './pages/chat-create.vue'
-import ConnectionSettings from './pages/connection.vue'
 import Templates from './pages/templates.vue'
 import CreateTemplate from './pages/template-create.vue'
 import Presets from './pages/presets.vue'
 import CreatePreset from './pages/preset-create.vue'
-import ThemeSettings from './pages/theme-settings.vue'
+import Settings from './pages/settings.vue'
 import Hub from './pages/hub.vue'
-import Sync from './pages/sync.vue'
 import About from './pages/about.vue'
 import ErrorPage from './pages/error.vue'
 
@@ -116,28 +114,16 @@ export default createRouter({
             meta: {title: 'Create Preset', back: true},
         },
         {
-            path: '/connection',
-            name: 'connection-settings',
-            component: ConnectionSettings,
-            meta: {title: 'Connection Settings'},
-        },
-        {
-            path: '/theme-settings',
+            path: '/settings',
             name: 'settings',
-            component: ThemeSettings,
-            meta: {title: 'Theme Settings'},
+            component: Settings,
+            meta: {title: 'Settings'},
         },
         {
             path: '/hub',
             name: 'hub',
             component: Hub,
             meta: {title: 'Hub'},
-        },
-        {
-            path: '/sync',
-            name: 'sync',
-            component: Sync,
-            meta: {title: 'Sync'},
         },
         {
             path: '/about',
