@@ -35,7 +35,7 @@ const logout = async () => {
 </script>
 
 <template>
-    <main class="flex flex-1 items-center justify-center">
+    <div class="flex flex-1 items-center justify-center">
         <div class="max-w-md w-full p-4">
             <div class="card bg-base-300 shadow-xl">
                 <div class="card-body">
@@ -70,5 +70,5 @@ const logout = async () => {
                 </div>
             </div>
         </div>
-    </main>
+    </div>
 </template>

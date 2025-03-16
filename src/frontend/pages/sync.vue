@@ -69,16 +69,14 @@ const sync = async () => {
 </script>
 
 <template>
-    <main class="flex flex-col">
-        <label class="label">Sync Provider</label>
-        <div class="flex flex-row">
-            <select @change="setProvider" :value="settings.syncProvider" class="select">
-                <option value="">Select a provider</option>
-                <option value="hub">Cybermuse Hub</option>
-                <option value="self-hosted">Self Hosted</option>
-            </select>
+    <label class="label">Sync Provider</label>
+    <div class="flex flex-row">
+        <select @change="setProvider" :value="settings.syncProvider" class="select">
+            <option value="">Select a provider</option>
+            <option value="hub">Cybermuse Hub</option>
+            <option value="self-hosted">Self Hosted</option>
+        </select>
 
-            <button v-if="settings.syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
-        </div>
-    </main>
+        <button v-if="settings.syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
+    </div>
 </template>

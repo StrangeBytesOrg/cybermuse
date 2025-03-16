@@ -228,7 +228,7 @@ const toggleCtxMenu = () => {
 </script>
 
 <template>
-    <main class="flex flex-col fixed top-0 bottom-0 left-0 right-0 pt-14 pb-22 pl-1 sm:pl-52">
+    <div class="flex flex-col fixed top-0 bottom-0 left-0 right-0 pt-14 pb-22 pl-1 sm:pl-52">
         <!-- Messages -->
         <div
             ref="messagesElement"
@@ -285,5 +285,5 @@ const toggleCtxMenu = () => {
                 Stop
             </button>
         </div>
-    </main>
+    </div>
 </template>

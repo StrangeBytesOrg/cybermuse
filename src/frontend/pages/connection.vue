@@ -15,31 +15,29 @@ const connect = async () => {
 </script>
 
 <template>
-    <main class="flex flex-col">
-        <label class="label">Generation Provider</label>
-        <div class="flex flex-row">
-            <select v-model="connectionStore.connectionProvider" class="select">
-                <option value="">Select a provider</option>
-                <option value="hub" disabled>Cybermuse Hub</option>
-                <option value="self-hosted">Self Hosted</option>
-            </select>
-        </div>
+    <label class="label">Generation Provider</label>
+    <div class="flex flex-row">
+        <select v-model="connectionStore.connectionProvider" class="select">
+            <option value="">Select a provider</option>
+            <option value="hub" disabled>Cybermuse Hub</option>
+            <option value="self-hosted">Self Hosted</option>
+        </select>
+    </div>
 
-        <template v-if="connectionStore.connectionProvider === 'self-hosted'">
-            <label class="label">
-                Connection URL
-                <div class="tooltip tooltip-bottom" data-tip="Requires a llama.cpp server">
-                    <div class="badge badge-secondary">?</div>
-                </div>
-            </label>
-            <div class="flex flex-row">
-                <input
-                    type="text"
-                    v-model="connectionStore.connectionUrl"
-                    class="input max-w-80"
-                />
-                <button class="btn btn-primary ml-2" @click="connect">Connect</button>
+    <template v-if="connectionStore.connectionProvider === 'self-hosted'">
+        <label class="label">
+            Connection URL
+            <div class="tooltip tooltip-bottom" data-tip="Requires a llama.cpp server">
+                <div class="badge badge-secondary">?</div>
             </div>
-        </template>
-    </main>
+        </label>
+        <div class="flex flex-row">
+            <input
+                type="text"
+                v-model="connectionStore.connectionUrl"
+                class="input max-w-80"
+            />
+            <button class="btn btn-primary ml-2" @click="connect">Connect</button>
+        </div>
+    </template>
 </template>

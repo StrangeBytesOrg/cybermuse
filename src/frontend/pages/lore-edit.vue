@@ -39,7 +39,7 @@ const deleteLore = async () => {
 </script>
 
 <template>
-    <main class="flex flex-col bg-base-200 rounded-lg p-3">
+    <div class="flex flex-col bg-base-200 rounded-lg p-3">
         <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
 
         <div class="flex flex-col">
@@ -72,7 +72,7 @@ const deleteLore = async () => {
             <button @click="updateLore" class="btn btn-sm btn-primary ml-3">Save</button>
             <button onclick="delete_confirm.showModal()" class="btn btn-sm btn-error ml-3">Delete</button>
         </div>
-    </main>
+    </div>
 
     <dialog id="delete_confirm" class="modal">
         <div class="modal-box">

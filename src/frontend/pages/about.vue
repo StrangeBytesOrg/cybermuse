@@ -10,21 +10,19 @@ if (import.meta.env.PROD) {
 </script>
 
 <template>
-    <main>
-        <h1 class="text-xl">Acknowledgements</h1>
-        <span class="mt-2">This project makes use of the following Open Source projects:</span>
+    <h1 class="text-xl">Acknowledgements</h1>
+    <span class="mt-2">This project makes use of the following Open Source projects:</span>
 
-        <div
-            v-for="pkg in packages"
-            :key="pkg.name"
-            class="collapse collapse-arrow bg-base-200 border-base-300 border mt-2">
-            <input type="checkbox">
-            <h2 class="collapse-title text-lg">{{ pkg.name }} - {{ pkg.license }}</h2>
-            <div class="collapse-content">
-                <blockquote class="px-2 text-base-content border-l border-l-primary whitespace-pre-wrap">
-                    {{ pkg.licenseText }}
-                </blockquote>
-            </div>
+    <div
+        v-for="pkg in packages"
+        :key="pkg.name"
+        class="collapse collapse-arrow bg-base-200 border-base-300 border mt-2">
+        <input type="checkbox">
+        <h2 class="collapse-title text-lg">{{ pkg.name }} - {{ pkg.license }}</h2>
+        <div class="collapse-content">
+            <blockquote class="px-2 text-base-content border-l border-l-primary whitespace-pre-wrap">
+                {{ pkg.licenseText }}
+            </blockquote>
         </div>
-    </main>
+    </div>
 </template>

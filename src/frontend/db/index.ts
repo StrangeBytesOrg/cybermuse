@@ -80,7 +80,6 @@ db.version(1).stores({
     chats: 'id,lastUpdate',
     templates: 'id',
     generationPresets: 'id',
-    users: 'id',
 })
 
 for (const table of db.tables) {

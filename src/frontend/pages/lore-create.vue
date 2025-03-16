@@ -31,7 +31,7 @@ const createLore = async () => {
 </script>
 
 <template>
-    <div class="flex flex-col bg-base-200 rounded-lg p-3 m-2">
+    <div class="flex flex-col bg-base-200 rounded-lg p-3">
         <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
         <div class="flex flex-col">
             <div v-for="(entry, index) in lore.entries" :key="index" class="flex flex-col">

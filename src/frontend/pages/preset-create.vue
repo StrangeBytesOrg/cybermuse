@@ -39,7 +39,7 @@ const createPreset = async () => {
 </script>
 
 <template>
-    <main class="flex flex-col bg-base-200 rounded-lg p-3">
+    <div class="flex flex-col bg-base-200 rounded-lg p-3">
         <div class="flex flex-row">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Basic Settings</legend>
@@ -99,5 +99,5 @@ const createPreset = async () => {
         </div>
 
         <button @click="createPreset" class="btn btn-primary max-w-32 mt-2">Create Preset</button>
-    </main>
+    </div>
 </template>

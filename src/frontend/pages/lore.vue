@@ -10,7 +10,7 @@ const loreBooks = await db.lore.toArray()
         <RouterLink to="/create-lore" class="btn btn-sm btn-primary absolute top-2 left-2">New Lorebook +</RouterLink>
     </Teleport>
 
-    <main class="flex flex-row">
+    <div class="flex flex-row">
         <div class="bg-base-200 rounded-lg w-full max-w-96 p-3">
             <template v-if="loreBooks.length">
                 <RouterLink
@@ -23,5 +23,5 @@ const loreBooks = await db.lore.toArray()
             </template>
             <div v-else>No lorebooks</div>
         </div>
-    </main>
+    </div>
 </template>

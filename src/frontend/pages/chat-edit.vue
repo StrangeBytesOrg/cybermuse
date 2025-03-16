@@ -37,7 +37,7 @@ const deleteChat = async () => {
 </script>
 
 <template>
-    <main class="flex flex-col p-3 bg-base-200 rounded-lg">
+    <div class="flex flex-col p-3 bg-base-200 rounded-lg">
         <label class="w-full max-w-64">
             <input
                 type="text"
@@ -72,7 +72,7 @@ const deleteChat = async () => {
             <button @click.prevent="archiveChat" class="btn btn-warning ml-3">Archive</button>
             <button onclick="delete_confirm.showModal()" class="btn btn-error ml-3">Delete</button>
         </div>
-    </main>
+    </div>
 
     <dialog id="delete_confirm" class="modal">
         <div class="modal-box">

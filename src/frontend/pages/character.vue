@@ -43,7 +43,7 @@ const removeImage = () => {
 </script>
 
 <template>
-    <main v-if="character" class="flex flex-col w-full bg-base-200 rounded-lg p-3">
+    <div v-if="character" class="flex flex-col w-full bg-base-200 rounded-lg p-3">
         <input
             type="text"
             v-model="character.name"
@@ -84,7 +84,7 @@ const removeImage = () => {
             <button class="btn btn-primary" @click="updateCharacter()">Update</button>
             <button class="btn btn-error ml-5" onclick="delete_confirm.showModal()">Delete</button>
         </div>
-    </main>
+    </div>
 
     <dialog id="delete_confirm" class="modal">
         <div class="modal-box">

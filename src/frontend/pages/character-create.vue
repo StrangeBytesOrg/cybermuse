@@ -73,7 +73,7 @@ const importCharacterPng = (file: File) => {
 </script>
 
 <template>
-    <main class="flex flex-col p-3 bg-base-200 rounded-lg">
+    <div class="flex flex-col p-3 bg-base-200 rounded-lg">
         <input
             type="text"
             v-model="character.name"
@@ -117,5 +117,5 @@ const importCharacterPng = (file: File) => {
             <FileInput @changed="importCharacterPng" button-label="Import Character" class="ml-2" />
             <button class="btn btn-error ml-2" @click="router.back">Cancel</button>
         </div>
-    </main>
+    </div>
 </template>

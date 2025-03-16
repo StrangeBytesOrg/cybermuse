@@ -52,7 +52,7 @@ const deletePreset = async () => {
         <router-link to="/create-preset" class="btn btn-primary mt-auto ml-3">Create Preset</router-link>
     </div>
 
-    <main v-if="activePreset" class="flex flex-col justify-between bg-base-200 rounded-lg p-3 pt-1 mt-3">
+    <div v-if="activePreset" class="flex flex-col justify-between bg-base-200 rounded-lg p-3 pt-1 mt-3">
         <div class="flex flex-row">
             <fieldset class="fieldset">
                 <legend class="fieldset-legend">Basic Settings</legend>
@@ -118,6 +118,6 @@ const deletePreset = async () => {
             <button @click="updatePreset" class="btn btn-primary">Save</button>
             <button @click="deletePreset" class="btn btn-error">Delete</button>
         </div>
-    </main>
+    </div>
     <div v-else>Preset not found</div>
 </template>
