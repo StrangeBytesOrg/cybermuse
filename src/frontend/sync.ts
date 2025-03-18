@@ -1,9 +1,28 @@
 import {db} from '@/db'
 import client from '@/clients/sync-client'
+import {useSettingsStore} from '@/store'
+import {SignJWT} from 'jose'
 
 export const sync = async () => {
+    const settings = useSettingsStore()
+    const baseUrl = settings.syncProvider === 'hub' ? import.meta.env.VITE_SYNC_URL : settings.syncServer
+    let token
+    if (settings.syncProvider === 'hub') {
+        token = localStorage.getItem('token') ?? ''
+    } else if (settings.syncProvider === 'self-hosted') {
+        const secret = new TextEncoder().encode(settings.syncSecret ?? '')
+        const user = import.meta.env.VITE_USER ?? 'default-user'
+        token = await new SignJWT({sub: user}).setProtectedHeader({alg: 'HS256'}).sign(secret)
+    } else {
+        throw new Error('No sync provider selected')
+    }
+
+    if (!baseUrl) throw new Error('No sync server selected')
+    if (!token) throw new Error('No token found')
+
     const {data: remoteDocs, error} = await client.GET('/list', {
-        params: {header: {token: localStorage.getItem('token') || ''}},
+        baseUrl,
+        params: {header: {token}},
     })
     if (error) throw error
 
@@ -13,9 +32,10 @@ export const sync = async () => {
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${collection}.${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
+                baseUrl,
                 params: {
                     path: {collection, key},
-                    header: {token: localStorage.getItem('token') || ''},
+                    header: {token},
                 },
             })
             if (error) throw error
@@ -31,9 +51,8 @@ export const sync = async () => {
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
                 console.log(`Pushing: ${table.name}/${doc.id}`)
                 const {error} = await client.PUT('/upload/', {
-                    params: {
-                        header: {token: localStorage.getItem('token') || ''},
-                    },
+                    baseUrl,
+                    params: {header: {token}},
                     body: {
                         key: doc.id,
                         collection: table.name,

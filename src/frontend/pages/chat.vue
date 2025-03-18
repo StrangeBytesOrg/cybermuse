@@ -5,10 +5,11 @@ import Handlebars from 'handlebars'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {db} from '@/db'
-import {useConnectionStore, useSettingsStore} from '@/store'
+import {useSettingsStore} from '@/store'
 import Message from '@/components/message.vue'
 import router from '@/router'
 import {responseToIterable} from '@/lib/sse'
+import client from '@/clients/gen-client'
 
 // Function to wrap Dexie get calls with a throw on undefined
 const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
@@ -18,7 +19,6 @@ const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
 }
 
 const route = useRoute()
-const connectionStore = useConnectionStore()
 const settings = useSettingsStore()
 const chatId = route.params.id
 const currentMessage = ref('')
@@ -145,13 +145,13 @@ const generateMessage = async (respondent?: string) => {
         const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
 
         const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
-        const chatCompletionUrl = connectionStore.connectionUrl + '/chat/completions'
-        const response = await fetch(chatCompletionUrl, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            signal: abortController.signal,
-            body: JSON.stringify({
-                stream: true,
+        const baseUrl = settings.connectionProvider === 'hub'
+            ? import.meta.env.VITE_GEN_URL
+            : settings.connectionServer
+        const {response} = await client.POST('/generate', {
+            baseUrl,
+            params: {header: {token: localStorage.getItem('token') || ''}},
+            body: {
                 grammar: gbnfString,
                 messages: formattedMessages,
                 n_predict: generationPreset.maxTokens,
@@ -161,23 +161,19 @@ const generateMessage = async (respondent?: string) => {
                 top_k: generationPreset.topK,
                 // TODO add Penalties
                 // TODO stop strings
-            }),
+            },
+            signal: abortController.signal,
+            parseAs: 'stream',
         })
         if (!response.ok) throw new Error('Connection to server failed')
         const iterable = responseToIterable(response)
         let messageBuffer = ''
         let initialBuffer = ''
         let characterPicked = false
-        for await (const chunk of iterable) {
-            if (chunk.data === '[DONE]') continue
-
-            const responseText = JSON.parse(chunk.data)
-            const content = responseText.choices[0].delta.content
-            if (!content) continue
-
+        for await (const {data} of iterable) {
             // Determine which character is speaking before outputting to the chat
             if (!characterPicked) {
-                initialBuffer += content
+                initialBuffer += data
                 const character = allCharacter.find((c) => initialBuffer.includes(`${c.name}:`))
                 if (character) {
                     console.log('Picked:', character.name)
@@ -189,7 +185,7 @@ const generateMessage = async (respondent?: string) => {
                     }
                 }
             } else {
-                messageBuffer += content
+                messageBuffer += data
                 const lastMessage = chat.value.messages[chat.value.messages.length - 1]
                 if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
                 lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()

@@ -1,9 +1,8 @@
 <script lang="ts" setup>
-import {useToastStore, useSettingsStore, useConnectionStore} from '@/store'
+import {useToastStore, useSettingsStore} from '@/store'
 import {sync} from '@/sync'
 
 const settings = useSettingsStore()
-const connectionStore = useConnectionStore()
 const toast = useToastStore()
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 
@@ -17,17 +16,37 @@ const setSyncProvider = (event: Event) => {
     settings.setSyncProvider(target.value)
 }
 
+const setSyncServer = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    settings.setSyncServer(target.value)
+}
+
+const setSyncSecret = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    settings.setSyncSecret(target.value)
+}
+
 const setConnectionProvider = (event: Event) => {
     const target = event.target as HTMLSelectElement
     settings.setConnectionProvider(target.value)
 }
 
-const connect = async () => {
-    if (!connectionStore.connectionUrl.startsWith('http') && !connectionStore.connectionUrl.startsWith('https')) {
-        throw new Error('Connection URL must start with http or https')
+const setConnectionServer = (event: Event) => {
+    const target = event.target as HTMLInputElement
+    settings.setConnectionServer(target.value)
+}
+
+const doSync = async () => {
+    await sync()
+    toast.success('Synced')
+}
+
+const checkConnection = async () => {
+    const healthResponse = await fetch(`${settings.connectionServer}/health`)
+    const healthJson = await healthResponse.json()
+    if (healthJson.status === 'ok') {
+        throw new Error('Connection failed')
     }
-    await connectionStore.checkConnection()
-    connectionStore.save()
     toast.success('Connected')
 }
 </script>
@@ -46,27 +65,27 @@ const connect = async () => {
         <legend class="fieldset-legend">Connection</legend>
 
         <label class="fieldset-label text-sm">Generation Provider</label>
-        <select class="select mt-2" @change="setConnectionProvider" :value="settings.connectionProvider">
+        <select class="select mt-1" @change="setConnectionProvider" :value="settings.connectionProvider">
             <option value="">Select a provider</option>
             <option value="hub">Cybermuse Hub</option>
             <option value="self-hosted">Self Hosted</option>
         </select>
 
         <template v-if="settings.connectionProvider === 'self-hosted'">
-            <label class="fieldset-label text-sm mt-2">
-                Connection URL
-                <div class="tooltip tooltip-bottom" data-tip="Requires a llama.cpp server">
-                    <div class="badge badge-secondary">?</div>
-                </div>
-            </label>
-            <div class="flex flex-row">
+            <div class="flex flex-col mt-2">
+                <label class="fieldset-label text-sm">Server URL</label>
                 <input
-                    type="text"
-                    v-model="connectionStore.connectionUrl"
-                    class="input max-w-80"
+                    @change="setConnectionServer"
+                    :value="settings.connectionServer"
+                    type="url"
+                    class="input validator mt-1"
+                    placeholder="Local Generation Server"
+                    pattern="^(https?://)(localhost(:[0-9]{1,5})?|([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*)$"
+                    title="Must be a valid URL"
                 />
-                <button class="btn btn-primary ml-2" @click="connect">Connect</button>
+                <p class="validator-hint">Must start with "http" or "https"</p>
             </div>
+            <button @click="checkConnection" class="btn btn-primary mt-3">Test</button>
         </template>
     </fieldset>
 
@@ -75,18 +94,30 @@ const connect = async () => {
         <legend class="fieldset-legend">Sync</legend>
         <label class="fieldset-label text-sm">Sync Provider</label>
         <div class="flex flex-row">
-            <select @change="setSyncProvider" :value="settings.syncProvider" class="select">
+            <select @change="setSyncProvider" :value="settings.syncProvider" class="select mt-1">
                 <option value="">Select a provider</option>
                 <option value="hub">Cybermuse Hub</option>
                 <option value="self-hosted">Self Hosted</option>
             </select>
-
-            <button v-if="settings.syncProvider === 'hub'" @click="sync" class="btn btn-primary ml-2">Sync</button>
         </div>
 
         <template v-if="settings.syncProvider === 'self-hosted'">
-            <label class="fieldset-label text-sm mt-2">Sync Server URL</label>
-            <input type="text" class="input mt-2" placeholder="Coming Soon!" />
+            <label class="fieldset-label text-sm mt-2">Server URL</label>
+            <input
+                @change="setSyncServer"
+                :value="settings.syncServer"
+                class="input validator mt-1"
+                required
+                placeholder="Local Generation Server"
+                pattern="^(https?://)(localhost(:[0-9]{1,5})?|([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*)$"
+                title="Must be a valid URL"
+            />
+
+            <label class="fieldset-label text-sm mt-2">Password</label>
+            <input @change="setSyncSecret" :value="settings.syncSecret" type="text" class="input mt-1" />
         </template>
+
+        <br>
+        <button @click="doSync" class="btn btn-primary mt-3">Sync</button>
     </fieldset>
 </template>
