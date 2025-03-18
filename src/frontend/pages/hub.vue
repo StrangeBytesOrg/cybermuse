@@ -1,13 +1,12 @@
 <script lang="ts" setup>
 import {ref} from 'vue'
-import {useToastStore} from '@/store'
+import {useToastStore, useHubStore} from '@/store'
 import client from '@/clients/hub-client'
 
 const toast = useToastStore()
+const hub = useHubStore()
 const username = ref('')
 const password = ref('')
-const authenticated = ref(false)
-const token = localStorage.getItem('token')
 
 const getTokenPayload = (token: string) => {
     const payload = token.split('.')[1]
@@ -15,10 +14,10 @@ const getTokenPayload = (token: string) => {
     return JSON.parse(atob(payload))
 }
 
-if (token) {
-    const claim = getTokenPayload(token)
+if (hub.token) {
+    const claim = getTokenPayload(hub.token)
     if ((claim.exp * 1000) > Date.now()) {
-        authenticated.value = true
+        hub.authenticated = true
     } else {
         toast.error('Token expired')
         localStorage.removeItem('token')
@@ -35,15 +34,15 @@ const login = async () => {
     if (error) {
         toast.error(`Error logging in: ${error}`)
     } else {
-        localStorage.setItem('token', data.token)
-        authenticated.value = true
+        hub.setToken(data.token)
+        hub.authenticated = true
         toast.success('Logged in successfully')
     }
 }
 
 const logout = async () => {
-    localStorage.removeItem('token')
-    authenticated.value = false
+    hub.clearToken()
+    hub.authenticated = false
 }
 </script>
 
@@ -52,7 +51,7 @@ const logout = async () => {
         <div class="max-w-md w-full p-4">
             <div class="card bg-base-300 shadow-xl">
                 <div class="card-body">
-                    <template v-if="authenticated">
+                    <template v-if="hub.authenticated">
                         <h1 class="card-title">Connected</h1>
                         <button @click="logout" class="btn btn-primary w-full">Logout</button>
                     </template>

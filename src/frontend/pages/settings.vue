@@ -42,7 +42,9 @@ const doSync = async () => {
 }
 
 const checkConnection = async () => {
-    const healthResponse = await fetch(`${settings.connectionServer}/health`)
+    const healthResponse = await fetch(`${settings.connectionServer}/health`, {
+        headers: {token: 'dummy-token'},
+    })
     const healthJson = await healthResponse.json()
     if (healthJson.status !== 'ok') {
         throw new Error('Connection failed')

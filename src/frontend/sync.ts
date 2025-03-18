@@ -1,14 +1,15 @@
 import {db} from '@/db'
 import client from '@/clients/sync-client'
-import {useSettingsStore} from '@/store'
+import {useSettingsStore, useHubStore} from '@/store'
 import {SignJWT} from 'jose'
 
 export const sync = async () => {
     const settings = useSettingsStore()
+    const hub = useHubStore()
     const baseUrl = settings.syncProvider === 'hub' ? import.meta.env.VITE_SYNC_URL : settings.syncServer
     let token
     if (settings.syncProvider === 'hub') {
-        token = localStorage.getItem('token') ?? ''
+        token = hub.token
     } else if (settings.syncProvider === 'self-hosted') {
         const secret = new TextEncoder().encode(settings.syncSecret ?? '')
         const user = import.meta.env.VITE_USER ?? 'default-user'

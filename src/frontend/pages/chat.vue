@@ -5,11 +5,11 @@ import Handlebars from 'handlebars'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {db} from '@/db'
-import {useSettingsStore} from '@/store'
-import Message from '@/components/message.vue'
-import router from '@/router'
+import {useSettingsStore, useHubStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
 import client from '@/clients/gen-client'
+import Message from '@/components/message.vue'
+import router from '@/router'
 
 // Function to wrap Dexie get calls with a throw on undefined
 const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
@@ -20,6 +20,7 @@ const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
 
 const route = useRoute()
 const settings = useSettingsStore()
+const hubStore = useHubStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -145,12 +146,20 @@ const generateMessage = async (respondent?: string) => {
         const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
 
         const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
-        const baseUrl = settings.connectionProvider === 'hub'
-            ? import.meta.env.VITE_GEN_URL
-            : settings.connectionServer
+        const baseUrl = settings.connectionProvider === 'hub' ? import.meta.env.VITE_GEN_URL : settings.connectionServer
+        let token
+        if (settings.connectionProvider === 'hub') {
+            token = hubStore.token
+        } else {
+            token = 'dummy-token'
+        }
+
+        if (!baseUrl) throw new Error('No connection provider set')
+        if (!token) throw new Error('No token set')
+
         const {response} = await client.POST('/generate', {
             baseUrl,
-            params: {header: {token: localStorage.getItem('token') || ''}},
+            params: {header: {token}},
             body: {
                 grammar: gbnfString,
                 messages: formattedMessages,
