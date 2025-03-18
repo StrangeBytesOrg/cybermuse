@@ -44,7 +44,7 @@ const doSync = async () => {
 const checkConnection = async () => {
     const healthResponse = await fetch(`${settings.connectionServer}/health`)
     const healthJson = await healthResponse.json()
-    if (healthJson.status === 'ok') {
+    if (healthJson.status !== 'ok') {
         throw new Error('Connection failed')
     }
     toast.success('Connected')
@@ -72,20 +72,19 @@ const checkConnection = async () => {
         </select>
 
         <template v-if="settings.connectionProvider === 'self-hosted'">
-            <div class="flex flex-col mt-2">
-                <label class="fieldset-label text-sm">Server URL</label>
-                <input
-                    @change="setConnectionServer"
-                    :value="settings.connectionServer"
-                    type="url"
-                    class="input validator mt-1"
-                    placeholder="Local Generation Server"
-                    pattern="^(https?://)(localhost(:[0-9]{1,5})?|([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*)$"
-                    title="Must be a valid URL"
-                />
-                <p class="validator-hint">Must start with "http" or "https"</p>
-            </div>
-            <button @click="checkConnection" class="btn btn-primary mt-3">Test</button>
+            <label class="fieldset-label text-sm mt-2">Server URL</label>
+            <input
+                @change="setConnectionServer"
+                :value="settings.connectionServer"
+                type="url"
+                class="input validator mt-1"
+                placeholder="Local Generation Server"
+                pattern="^(https?://).*$"
+                title="Must be a valid URL"
+            />
+            <p class="validator-hint hidden">Must start with "http" or "https"</p>
+
+            <button @click="checkConnection" class="btn btn-primary block mt-3">Test</button>
         </template>
     </fieldset>
 
@@ -109,15 +108,15 @@ const checkConnection = async () => {
                 class="input validator mt-1"
                 required
                 placeholder="Local Generation Server"
-                pattern="^(https?://)(localhost(:[0-9]{1,5})?|([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*)$"
+                pattern="^(https?://).*$"
                 title="Must be a valid URL"
             />
+            <p class="validator-hint hidden">Must start with "http" or "https"</p>
 
             <label class="fieldset-label text-sm mt-2">Password</label>
             <input @change="setSyncSecret" :value="settings.syncSecret" type="text" class="input mt-1" />
         </template>
 
-        <br>
-        <button @click="doSync" class="btn btn-primary mt-3">Sync</button>
+        <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>
     </fieldset>
 </template>
