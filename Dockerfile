@@ -2,6 +2,7 @@ FROM oven/bun AS build
 
 COPY ./src /app/src
 COPY ./package.json /app/package.json
+COPY ./vite.config.ts /app/vite.config.ts
 COPY ./bun.lock /app/bun.lock
 WORKDIR /app
 
