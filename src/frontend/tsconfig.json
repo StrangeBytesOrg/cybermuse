@@ -4,12 +4,12 @@
     "compilerOptions": {
         "strict": true,
         "composite": true,
-        "noUncheckedIndexedAccess": true,
         "types": ["vite/client"],
         "baseUrl": ".",
         "paths": {
             "@/*": ["./*"]
         },
-        "noEmit": true
+        "noEmit": true,
+        "noUncheckedIndexedAccess": true
     }
 }

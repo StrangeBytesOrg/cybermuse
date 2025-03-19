@@ -1,5 +1,6 @@
 import pluginVue from 'eslint-plugin-vue'
 import vueTsEslintConfig from '@vue/eslint-config-typescript'
+import oxlint from 'eslint-plugin-oxlint'
 
 export default [
     {
@@ -12,6 +13,7 @@ export default [
     },
     ...pluginVue.configs['flat/essential'],
     ...vueTsEslintConfig(),
+    ...oxlint.configs['flat/recommended'],
     {
         rules: {
             'vue/multi-word-component-names': 'off',
