@@ -4,23 +4,7 @@
  */
 
 export interface paths {
-    '/health': {
-        parameters: {
-            query?: never
-            header?: never
-            path?: never
-            cookie?: never
-        }
-        get: operations['getHealth']
-        put?: never
-        post?: never
-        delete?: never
-        options?: never
-        head?: never
-        patch?: never
-        trace?: never
-    }
-    '/load': {
+    '/chat/completions': {
         parameters: {
             query?: never
             header?: never
@@ -29,23 +13,7 @@ export interface paths {
         }
         get?: never
         put?: never
-        post: operations['postLoad']
-        delete?: never
-        options?: never
-        head?: never
-        patch?: never
-        trace?: never
-    }
-    '/generate': {
-        parameters: {
-            query?: never
-            header?: never
-            path?: never
-            cookie?: never
-        }
-        get?: never
-        put?: never
-        post: operations['postGenerate']
+        post: operations['postChatCompletions']
         delete?: never
         options?: never
         head?: never
@@ -64,56 +32,12 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-    getHealth: {
+    postChatCompletions: {
         parameters: {
             query?: never
-            header?: never
-            path?: never
-            cookie?: never
-        }
-        requestBody?: never
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown
-                }
-                content?: never
+            header: {
+                token: string
             }
-        }
-    }
-    postLoad: {
-        parameters: {
-            query?: never
-            header?: never
-            path?: never
-            cookie?: never
-        }
-        requestBody: {
-            content: {
-                'application/json': {
-                    modelPath: string
-                }
-                'multipart/form-data': {
-                    modelPath: string
-                }
-                'text/plain': {
-                    modelPath: string
-                }
-            }
-        }
-        responses: {
-            200: {
-                headers: {
-                    [name: string]: unknown
-                }
-                content?: never
-            }
-        }
-    }
-    postGenerate: {
-        parameters: {
-            query?: never
-            header?: never
             path?: never
             cookie?: never
         }
@@ -122,7 +46,7 @@ export interface operations {
                 'application/json': {
                     grammar: string
                     messages: {
-                        role: 'model' | 'system' | 'user'
+                        role: string
                         content: string
                     }[]
                     n_predict: number
@@ -135,7 +59,7 @@ export interface operations {
                 'multipart/form-data': {
                     grammar: string
                     messages: {
-                        role: 'model' | 'system' | 'user'
+                        role: string
                         content: string
                     }[]
                     n_predict: number
@@ -148,7 +72,7 @@ export interface operations {
                 'text/plain': {
                     grammar: string
                     messages: {
-                        role: 'model' | 'system' | 'user'
+                        role: string
                         content: string
                     }[]
                     n_predict: number

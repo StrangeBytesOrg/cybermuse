@@ -147,20 +147,16 @@ const generateMessage = async (respondent?: string) => {
 
         const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
         const baseUrl = settings.connectionProvider === 'hub' ? import.meta.env.VITE_GEN_URL : settings.connectionServer
-        let token
-        if (settings.connectionProvider === 'hub') {
-            token = hubStore.token
-        } else {
-            token = 'dummy-token'
-        }
+        const token = settings.connectionProvider === 'hub' ? hubStore.token : 'dummy-token'
 
         if (!baseUrl) throw new Error('No connection provider set')
         if (!token) throw new Error('No token set')
 
-        const {response} = await client.POST('/generate', {
+        const {response} = await client.POST('/chat/completions', {
             baseUrl,
             params: {header: {token}},
             body: {
+                stream: true,
                 grammar: gbnfString,
                 messages: formattedMessages,
                 n_predict: generationPreset.maxTokens,
@@ -180,9 +176,13 @@ const generateMessage = async (respondent?: string) => {
         let initialBuffer = ''
         let characterPicked = false
         for await (const {data} of iterable) {
+            if (data === '[DONE]') continue
+            const content = JSON.parse(data).choices[0].delta.content
+            if (!content) continue
+
             // Determine which character is speaking before outputting to the chat
             if (!characterPicked) {
-                initialBuffer += data
+                initialBuffer += content
                 const character = allCharacter.find((c) => initialBuffer.includes(`${c.name}:`))
                 if (character) {
                     console.log('Picked:', character.name)
@@ -194,11 +194,11 @@ const generateMessage = async (respondent?: string) => {
                     }
                 }
             } else {
-                messageBuffer += data
+                messageBuffer += content
                 const lastMessage = chat.value.messages[chat.value.messages.length - 1]
                 if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
                 lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
-                await db.chats.update(chatId, {messages: chat.value.messages})
+                await db.chats.update(chat.value.id, {messages: chat.value.messages})
             }
         }
     } catch (error) {
