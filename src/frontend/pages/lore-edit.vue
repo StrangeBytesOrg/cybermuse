@@ -32,13 +32,15 @@ const updateLore = async () => {
 }
 
 const deleteLore = async () => {
-    await db.lore.delete(loreId)
+    await db.lore.update(loreId, {deleted: 1})
     toast.success('Lore deleted')
     router.push({name: 'lore'})
 }
 </script>
 
 <template>
+    <div v-if="lore.deleted" class="alert alert-error mb-2">Pending Deletion</div>
+
     <div class="flex flex-col bg-base-200 rounded-lg p-3">
         <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
 

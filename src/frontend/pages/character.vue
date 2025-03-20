@@ -25,15 +25,15 @@ const updateCharacter = async () => {
 }
 
 const deleteCharacter = async () => {
-    await db.characters.delete(characterId)
+    await db.characters.update(characterId, {deleted: 1})
     router.push({name: 'characters'})
 }
 
 const uploadAvatar = async (file: File) => {
     const fileReader = new FileReader()
-    fileReader.onload = () => {
+    fileReader.addEventListener('load', () => {
         character.avatar = fileReader.result as string
-    }
+    })
     fileReader.readAsDataURL(file)
 }
 
@@ -43,6 +43,7 @@ const removeImage = () => {
 </script>
 
 <template>
+    <div v-if="character.deleted" class="alert alert-error mb-2">Pending Deletion</div>
     <div v-if="character" class="flex flex-col w-full bg-base-200 rounded-lg p-3">
         <input
             type="text"

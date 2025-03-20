@@ -2,7 +2,7 @@
 import {ref, computed, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
-import {db, type Message} from '@/db'
+import {db, notDeleted, type Message} from '@/db'
 
 const router = useRouter()
 const selectedCharacters = ref<string[]>([])
@@ -10,7 +10,7 @@ const selectedLore = ref<string[]>([])
 const userCharacter = ref('default-user-character')
 const chatName = ref('')
 
-const characters = await db.characters.toArray()
+const characters = await db.characters.filter(notDeleted).toArray()
 const lore = await db.lore.toArray()
 
 const createChat = async () => {

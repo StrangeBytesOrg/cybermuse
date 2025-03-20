@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import {reactive, ref, computed} from 'vue'
 import {RouterLink} from 'vue-router'
-import {db} from '@/db'
+import {db, notDeleted} from '@/db'
 
 const searchName = ref('')
 const characterType = ref<'user' | 'character' | 'both'>('both')
-const characters = reactive(await db.characters.toArray())
+const characters = reactive(await db.characters.filter(notDeleted).toArray())
 
 // Computed property to filter characters based on search input and character type
 const filteredCharacters = computed(() => {

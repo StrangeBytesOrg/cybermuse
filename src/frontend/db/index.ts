@@ -5,6 +5,7 @@ const dbName = 'cybermuse'
 interface Character {
     id: string
     lastUpdate: number
+    deleted?: number
     name: string
     type: 'user' | 'character'
     description: string
@@ -15,6 +16,7 @@ interface Character {
 interface Lore {
     id: string
     lastUpdate: number
+    deleted?: number
     name: string
     entries: {
         name: string
@@ -25,6 +27,7 @@ interface Lore {
 interface Chat {
     id: string
     lastUpdate: number
+    deleted?: number
     name: string
     userCharacter: string
     characters: string[]
@@ -43,6 +46,7 @@ interface Chat {
 interface Template {
     id: string
     lastUpdate: number
+    deleted?: number
     name: string
     template: string
 }
@@ -50,6 +54,7 @@ interface Template {
 interface GenerationPreset {
     id: string
     lastUpdate: number
+    deleted?: number
     name: string
     maxTokens: number
     temperature: number
@@ -96,3 +101,5 @@ for (const table of db.tables) {
 export {db}
 export type {Character, Chat, GenerationPreset, Lore, Template}
 export type Message = Chat['messages'][0]
+
+export const notDeleted = <T extends {deleted?: number}>(doc: T) => !doc.deleted

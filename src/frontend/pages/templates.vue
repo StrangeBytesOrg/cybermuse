@@ -3,12 +3,12 @@ import {ref, computed} from 'vue'
 import Handlebars from 'handlebars'
 import {useToastStore, useSettingsStore} from '@/store'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
-import {db} from '@/db'
+import {db, notDeleted} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
 const settings = useSettingsStore()
-const templates = await useDexieLiveQuery(() => db.templates.toArray())
+const templates = await useDexieLiveQuery(() => db.templates.filter(notDeleted).toArray())
 const example = ref('')
 
 const activeTemplate = computed(() => {
@@ -34,7 +34,7 @@ const deleteTemplate = async () => {
     }
 
     if (activeTemplate.value) {
-        await db.templates.delete(activeTemplate.value.id)
+        await db.templates.update(activeTemplate.value.id, {deleted: 1})
         settings.setTemplate('default-template')
         toast.success('Template deleted')
     }
@@ -105,6 +105,7 @@ const getPreview = async () => {
             <button @click="deleteTemplate" class="btn btn-error flex-grow">Delete</button>
         </div>
     </fieldset>
+    <div v-else class="mt-3">Template Not Found</div>
 
     <div class="w-full" v-if="example">
         <div class="flex w-full bg-base-200 rounded-lg p-3 mt-3 whitespace-pre-wrap">{{ example }}</div>

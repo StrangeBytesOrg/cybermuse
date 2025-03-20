@@ -4,7 +4,7 @@ import {useRoute} from 'vue-router'
 import Handlebars from 'handlebars'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
-import {db} from '@/db'
+import {db, notDeleted} from '@/db'
 import {useSettingsStore, useHubStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
 import client from '@/clients/gen-client'
@@ -34,7 +34,7 @@ if (!chatId || Array.isArray(chatId)) {
 }
 
 const chat = await useDexieLiveQuery(() => getOrThrow(db.chats.get(chatId)))
-const characters = await getOrThrow(db.characters.where('id').anyOf(chat.value.characters).toArray())
+const characters = await getOrThrow(db.characters.where('id').anyOf(chat.value.characters).filter(notDeleted).toArray())
 const userCharacter = await getOrThrow(db.characters.get(chat.value.userCharacter))
 const lore = await db.lore.where('id').anyOf(chat.value.lore).toArray()
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))

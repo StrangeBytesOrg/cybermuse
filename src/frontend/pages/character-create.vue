@@ -29,9 +29,9 @@ const createCharacter = async () => {
 
 const uploadAvatar = async (file: File) => {
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.addEventListener('load', () => {
         character.avatar = reader.result as string
-    }
+    })
     reader.readAsDataURL(file)
 }
 
@@ -45,7 +45,7 @@ const importCharacterPng = (file: File) => {
     }
 
     const reader = new FileReader()
-    reader.onload = () => {
+    reader.addEventListener('load', () => {
         const image = reader.result as string
         const dataurl = image.split(',')[1]
         if (!dataurl) return
@@ -67,7 +67,7 @@ const importCharacterPng = (file: File) => {
         character.firstMessage = card.data.first_mes
         uploadAvatar(file)
         toast.success('Character imported')
-    }
+    })
     reader.readAsDataURL(file)
 }
 </script>

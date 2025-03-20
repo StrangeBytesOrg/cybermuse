@@ -2,12 +2,12 @@
 import {computed, toRaw} from 'vue'
 import {useToastStore, useSettingsStore} from '@/store'
 import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
-import {db} from '@/db'
+import {db, notDeleted} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
 const settings = useSettingsStore()
-const presets = await useDexieLiveQuery(() => db.generationPresets.toArray())
+const presets = await useDexieLiveQuery(() => db.generationPresets.filter(notDeleted).toArray())
 
 const activePreset = computed(() => {
     return presets.value.find((preset) => preset.id === settings.preset)
@@ -32,7 +32,7 @@ const deletePreset = async () => {
     }
 
     if (activePreset.value) {
-        await db.generationPresets.delete(activePreset.value.id)
+        await db.generationPresets.update(activePreset.value.id, {deleted: 1})
         settings.setPreset('default-generation-preset')
         toast.success('Preset deleted')
     }
