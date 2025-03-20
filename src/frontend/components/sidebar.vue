@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import {useMenuStore} from '@/store'
+import pkg from '../../../package.json'
 
 defineProps({
     showMenu: Boolean,
 })
 
 const menuStore = useMenuStore()
-const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
 </script>
 
 <template>
@@ -80,7 +80,7 @@ const version = import.meta.env.VITE_CLIENT_VERSION ?? 'dev'
             </li>
         </ul>
 
-        <div class="absolute bottom-0 w-full text-center">Version: {{ version }}</div>
+        <div class="absolute bottom-0 w-full text-center">Version: {{ pkg.version }}</div>
     </div>
 
     <!-- Overlay -->

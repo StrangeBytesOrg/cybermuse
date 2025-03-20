@@ -3,14 +3,7 @@ name: App Build
 on:
   workflow_dispatch:
   push:
-    tags:
-      - v*
-    # branches:
-    #   - ci
-
-env:
-  APP_VERSION: "${{ github.ref_name }}"
-  VITE_CLIENT_VERSION: "${{ github.ref_name }}"
+    tags: ['v*']
 
 jobs:
   build:
@@ -72,7 +65,7 @@ jobs:
       - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ env.APP_VERSION }}
+          tag_name: ${{ github.ref_name }}
           files: |
             build/bin/*.tar.xz
             build/bin/*.zip

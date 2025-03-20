@@ -1,6 +1,6 @@
 {
     "name": "cybermuse",
-    "version": "0.221.0",
+    "version": "0.222.0",
     "type": "module",
     "description": "A batteries included AI Chat Application",
     "author": "Strange Bytes",
