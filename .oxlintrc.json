@@ -1,38 +1,26 @@
 {
     "$schema": "./node_modules/oxlint/configuration_schema.json",
     "plugins": [
-        "typescript"
+        "typescript",
+        "unicorn",
+        "oxc"
     ],
-    "env": {
-        "builtin": true
-    },
     "categories": {
         "correctness": "error",
         "suspicious": "warn"
     },
-    "ignorePatterns": ["**/dist/**"],
     "rules": {
         "eqeqeq": "warn",
         "no-array-constructor": "error",
         "no-unused-expressions": "error",
-        "no-unused-vars": "warn",
         "@typescript-eslint/ban-ts-comment": "error",
-        "@typescript-eslint/no-duplicate-enum-values": "error",
         "@typescript-eslint/no-empty-object-type": "error",
         "@typescript-eslint/no-explicit-any": "error",
-        "@typescript-eslint/no-extra-non-null-assertion": "error",
-        "@typescript-eslint/no-misused-new": "error",
         "@typescript-eslint/no-namespace": "error",
-        "@typescript-eslint/no-non-null-asserted-optional-chain": "error",
         "@typescript-eslint/no-require-imports": "error",
-        "@typescript-eslint/no-this-alias": "error",
         "@typescript-eslint/no-unnecessary-type-constraint": "error",
-        "@typescript-eslint/no-unsafe-declaration-merging": "error",
         "@typescript-eslint/no-unsafe-function-type": "error",
-        "@typescript-eslint/no-wrapper-object-types": "error",
-        "@typescript-eslint/prefer-as-const": "error",
-        "@typescript-eslint/prefer-namespace-keyword": "error",
-        "@typescript-eslint/triple-slash-reference": "error"
+        "@typescript-eslint/prefer-namespace-keyword": "error"
     },
     "overrides": [
         {
@@ -58,5 +46,9 @@
                 "prefer-spread": "error"
             }
         }
-    ]
+    ],
+    "ignorePatterns": ["**/dist/**"],
+    "env": {
+        "builtin": true
+    }
 }
