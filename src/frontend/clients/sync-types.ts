@@ -68,7 +68,7 @@ export interface operations {
         parameters: {
             query?: never
             header: {
-                token: string
+                authorization: string
             }
             path?: never
             cookie?: never
@@ -103,7 +103,7 @@ export interface operations {
         parameters: {
             query?: never
             header: {
-                token: string
+                authorization: string
             }
             path?: never
             cookie?: never
@@ -155,7 +155,7 @@ export interface operations {
         parameters: {
             query?: never
             header: {
-                token: string
+                authorization: string
             }
             path: {
                 collection: string

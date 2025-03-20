@@ -1,29 +1,19 @@
 import {db} from '@/db'
 import client from '@/clients/sync-client'
 import {useSettingsStore, useHubStore} from '@/store'
-import {SignJWT} from 'jose'
 
 export const sync = async () => {
     const settings = useSettingsStore()
     const hub = useHubStore()
     const baseUrl = settings.syncProvider === 'hub' ? import.meta.env.VITE_SYNC_URL : settings.syncServer
-    let token
-    if (settings.syncProvider === 'hub') {
-        token = hub.token
-    } else if (settings.syncProvider === 'self-hosted') {
-        const secret = new TextEncoder().encode(settings.syncSecret ?? '')
-        const user = import.meta.env.VITE_USER ?? 'default-user'
-        token = await new SignJWT({sub: user}).setProtectedHeader({alg: 'HS256'}).sign(secret)
-    } else {
-        throw new Error('No sync provider selected')
-    }
+    const token = settings.syncProvider === 'hub' ? hub.token : settings.syncSecret
 
     if (!baseUrl) throw new Error('No sync server selected')
-    if (!token) throw new Error('No token found')
+    if (!token) throw new Error('Sync token not set')
 
     const {data: remoteDocs, error} = await client.GET('/list', {
         baseUrl,
-        params: {header: {token}},
+        params: {header: {authorization: `Bearer ${token}`}},
     })
     if (error) throw error
 
@@ -36,7 +26,7 @@ export const sync = async () => {
                 baseUrl,
                 params: {
                     path: {collection, key},
-                    header: {token},
+                    header: {authorization: `Bearer ${token}`},
                 },
             })
             if (error) throw error
@@ -53,7 +43,7 @@ export const sync = async () => {
                 console.log(`Pushing: ${table.name}/${doc.id}`)
                 const {error} = await client.PUT('/upload/', {
                     baseUrl,
-                    params: {header: {token}},
+                    params: {header: {authorization: `Bearer ${token}`}},
                     body: {
                         key: doc.id,
                         collection: table.name,
