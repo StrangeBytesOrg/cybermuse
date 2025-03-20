@@ -80,7 +80,7 @@ const db = new Dexie(dbName) as Dexie & {
 }
 
 db.version(1).stores({
-    characters: 'id,name,type',
+    characters: 'id',
     lore: 'id',
     chats: 'id,lastUpdate',
     templates: 'id',
