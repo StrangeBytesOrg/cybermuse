@@ -10,7 +10,7 @@
         "importDeclaration.sortNamedImports": "maintain"
     },
     "markup": {
-        "printWidth": 120,
+        "printWidth": 160,
         "indentWidth": 4,
         "closingBracketSameLine": true,
         "closingTagLineBreakForEmpty": "never"

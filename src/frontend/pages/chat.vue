@@ -1,22 +1,15 @@
 <script lang="ts" setup>
-import {ref} from 'vue'
+import {ref, reactive} from 'vue'
 import {useRoute} from 'vue-router'
 import Handlebars from 'handlebars'
-import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
-import {db, notDeleted} from '@/db'
+import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
 import {useSettingsStore, useHubStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
 import client from '@/clients/gen-client'
 import Message from '@/components/message.vue'
 import router from '@/router'
-
-// Function to wrap Dexie get calls with a throw on undefined
-const getOrThrow = async <T>(promise: Promise<T | undefined>): Promise<T> => {
-    const result = await promise
-    if (!result) throw new Error('Not found')
-    return result
-}
+import {ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, TrashIcon} from '@heroicons/vue/24/outline'
 
 const route = useRoute()
 const settings = useSettingsStore()
@@ -24,7 +17,6 @@ const hubStore = useHubStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
-const messagesElement = ref<HTMLElement>()
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
 
@@ -33,13 +25,17 @@ if (!chatId || Array.isArray(chatId)) {
     throw new Error('Invalid chat ID')
 }
 
-const chat = await useDexieLiveQuery(() => getOrThrow(db.chats.get(chatId)))
-const characters = await getOrThrow(db.characters.where('id').anyOf(chat.value.characters).filter(notDeleted).toArray())
-const userCharacter = await getOrThrow(db.characters.get(chat.value.userCharacter))
-const lore = await db.lore.where('id').anyOf(chat.value.lore).toArray()
+const chat = reactive(await chatCollection.get(chatId))
+const characters = await characterCollection.whereIn(chat.characters)
+const userCharacter = await characterCollection.get(chat.userCharacter)
+const lore = await loreCollection.whereIn(chat.lore)
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
-characterMap[chat.value.userCharacter] = userCharacter
+characterMap[chat.userCharacter] = userCharacter
 const allCharacter = [userCharacter, ...characters]
+
+const updateChat = async () => {
+    await chatCollection.put(chat)
+}
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
@@ -66,20 +62,20 @@ const impersonate = async () => {
 }
 
 const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
-    chat.value.messages.push({
+    chat.messages.push({
         id: Math.random().toString(36).slice(2),
         characterId,
         type,
         content: [text],
         activeIndex: 0,
     })
-    await db.chats.put(chat.value)
+    await updateChat()
 
     currentMessage.value = ''
 }
 
 const getSystemPrompt = async () => {
-    const template = await getOrThrow(db.templates.get(settings.template))
+    const template = await templateCollection.get(settings.template)
     const hbTemplate = Handlebars.compile(template.template)
 
     // Render each character description
@@ -118,7 +114,7 @@ const generateMessage = async (respondent?: string) => {
 
     try {
         const systemPrompt = await getSystemPrompt()
-        const chatHistory = chat.value.messages.map((message) => {
+        const chatHistory = chat.messages.map((message) => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {
                 role: message.type,
@@ -145,7 +141,7 @@ const generateMessage = async (respondent?: string) => {
         }
         const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
 
-        const generationPreset = await getOrThrow(db.generationPresets.get(settings.preset))
+        const generationPreset = await generationPresetCollection.get(settings.preset)
         const baseUrl = settings.connectionProvider === 'hub' ? import.meta.env.VITE_GEN_URL : settings.connectionServer
         const token = settings.connectionProvider === 'hub' ? hubStore.token : 'dummy-token'
 
@@ -195,10 +191,10 @@ const generateMessage = async (respondent?: string) => {
                 }
             } else {
                 messageBuffer += content
-                const lastMessage = chat.value.messages[chat.value.messages.length - 1]
+                const lastMessage = chat.messages[chat.messages.length - 1]
                 if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
                 lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
-                await db.chats.update(chat.value.id, {messages: chat.value.messages})
+                await updateChat()
             }
         }
     } catch (error) {
@@ -209,18 +205,42 @@ const generateMessage = async (respondent?: string) => {
     }
 }
 
-const newSwipe = async (messageIndex: number) => {
+const newSwipe = async (messageId: string) => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
     }
-    const message = chat.value.messages[messageIndex]
-    if (message) {
-        message.content.push('')
-        message.activeIndex = message.content.length - 1
-        await db.chats.put(chat.value)
-        const characterName = characterMap[message.characterId]?.name
-        await generateMessage(characterName)
+    const message = chat.messages.find((m) => m.id === messageId)
+    if (!message) throw new Error('Message not found')
+    message.content.push('')
+    message.activeIndex = message.content.length - 1
+    await updateChat()
+    const characterName = characterMap[message.characterId]?.name
+    await generateMessage(characterName)
+}
+
+const swipeLeft = async (messageId: string) => {
+    const message = chat.messages.find((m) => m.id === messageId)
+    if (message && message.activeIndex > 0) {
+        message.activeIndex -= 1
+        await updateChat()
     }
+}
+
+const swipeRight = async (messageId: string) => {
+    const message = chat.messages.find((m) => m.id === messageId)
+    if (message && message.activeIndex < message.content.length - 1) {
+        message.activeIndex += 1
+        await updateChat()
+    }
+}
+
+const deleteMessage = async (messageId: string) => {
+    const messageIndex = chat.messages.findIndex((m) => m.id === messageId)
+    if (messageIndex === -1) {
+        throw new Error('Message not found')
+    }
+    chat.messages.splice(messageIndex, 1)
+    await updateChat()
 }
 
 const stopGeneration = () => {
@@ -237,20 +257,62 @@ const toggleCtxMenu = () => {
 <template>
     <div class="flex flex-col fixed top-0 bottom-0 left-0 right-0 pt-14 pb-22 pl-1 sm:pl-52">
         <!-- Messages -->
-        <div
-            ref="messagesElement"
-            class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
-            <Message
-                v-for="(message, index) in chat?.messages.slice().reverse()"
-                v-bind:key="message.id"
-                :index="chat.messages.length - 1 - index"
-                :message="message"
-                :chatId="chat.id"
-                :characterMap="characterMap"
-                :loading="false"
-                :showSwipes="index === 0 && message.type === 'model'"
-                @new-swipe="newSwipe"
-            />
+        <div class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
+            <div v-for="(message, index) in chat.messages.slice().reverse()" class="flex flex-col relative mt-2 bg-base-200 rounded-xl">
+                <!-- Message Content -->
+                <div class="flex flex-row pb-2 pt-3">
+                    <div class="avatar ml-2">
+                        <div class="w-16 h-16 rounded-full">
+                            <img
+                                v-if="characterMap[message.characterId]?.avatar"
+                                :src="characterMap[message.characterId]?.avatar"
+                                alt="character avatar"
+                            />
+                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />
+                        </div>
+                    </div>
+
+                    <!-- Delete -->
+                    <button class="btn btn-square btn-ghost btn-sm absolute top-1 right-11" @click="deleteMessage(message.id)">
+                        <TrashIcon class="size-6" />
+                    </button>
+
+                    <div class="flex flex-col flex-grow px-2">
+                        <div class="font-bold">
+                            {{ characterMap[message.characterId]?.name || 'Missing Character' }}
+                        </div>
+                        <Message v-if="chat.messages[index]" v-model="message.content[message.activeIndex]" @update="updateChat" />
+                    </div>
+                </div>
+
+                <!-- Swipe Controls -->
+                <div v-if="index === 0 && message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
+                    <!-- Swipe Left -->
+                    <div class="flex w-16">
+                        <button @click="swipeLeft(message.id)" v-show="message.activeIndex > 0" class="btn btn-sm btn-neutral">
+                            <ChevronLeftIcon class="size-6 /" />
+                        </button>
+                    </div>
+
+                    <!-- Swipe Count -->
+                    <div class="flex" v-show="message.content.length > 1">
+                        {{ message.activeIndex + 1 }} / {{ message.content.length }}
+                    </div>
+
+                    <!-- Swipe Right / Regen -->
+                    <div class="flex w-16 justify-end">
+                        <button
+                            @click="swipeRight(message.id)"
+                            v-show:="message.activeIndex < message.content.length - 1"
+                            class="btn btn-sm btn-neutral">
+                            <ChevronRightIcon class="size-6" />
+                        </button>
+                        <button @click="newSwipe(message.id)" class="btn btn-sm btn-neutral">
+                            <ArrowPathIcon class="size-6" />
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Chat Controls -->
@@ -282,8 +344,7 @@ const toggleCtxMenu = () => {
                 @click="fullSend"
                 v-show="!pendingMessage"
                 class="btn btn-primary align-middle md:ml-3 ml-[4px] h-20 md:w-32">
-                {{ pendingMessage ? '' : 'Send' }}
-                <span class="loading loading-spinner loading-md" :class="{hidden: !pendingMessage}" />
+                {{ pendingMessage ? '' : 'Send' }} <span class="loading loading-spinner loading-md" :class="{hidden: !pendingMessage}" />
             </button>
             <button
                 @click="stopGeneration"

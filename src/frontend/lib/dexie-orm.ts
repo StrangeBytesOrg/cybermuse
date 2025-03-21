@@ -1,0 +1,42 @@
+import z from 'zod'
+import Dexie from 'dexie'
+
+/** A strongly-typed collection wrapper for Dexie documents validated by Zod schemas. */
+export class Collection<T extends z.ZodSchema> {
+    constructor(
+        private table: Dexie.Table,
+        private schema: T,
+    ) {}
+
+    /** Get a document by its key. */
+    async get(key: string): Promise<z.infer<T>> {
+        return this.schema.parse(await this.table.get(key))
+    }
+
+    /** Put a document into the collection. */
+    async put(doc: z.infer<T>): Promise<void> {
+        await this.table.put(this.schema.parse(doc))
+    }
+
+    /** Update a document in the collection. */
+    async update(key: string, doc: Partial<z.infer<T>>): Promise<void> {
+        await this.table.update(key, doc)
+    }
+
+    /** Soft delete a document from the collection. */
+    async delete(key: string): Promise<void> {
+        await this.table.update(key, {deleted: 1, lastUpdate: Date.now()})
+    }
+
+    /** List all documents in the collection. */
+    async toArray(): Promise<z.infer<T>[]> {
+        const docs = await this.table.filter(doc => !doc.deleted).toArray()
+        return docs.map(doc => this.schema.parse(doc))
+    }
+
+    /** Get documents in an array */
+    async whereIn(keys: string[]): Promise<z.infer<T>[]> {
+        const docs = (await this.table.bulkGet(keys)).filter(doc => !doc.deleted)
+        return docs.map(doc => this.schema.parse(doc))
+    }
+}
