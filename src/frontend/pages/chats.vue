@@ -7,12 +7,19 @@ const showArchivedChats = ref(false)
 const allChats = await chatCollection.toArray()
 const characters = await characterCollection.toArray()
 const characterMap = Object.fromEntries(characters.map((character) => [character.id, character]))
+const orderBy = ref('newest-update')
 
 const chats = computed(() => {
-    const allSorted = allChats.sort((a, b) => {
-        return b.lastUpdate - a.lastUpdate
+    const filteredChats = showArchivedChats.value ? allChats : allChats.filter(chat => !chat.archived)
+
+    return filteredChats.sort((a, b) => {
+        if (orderBy.value === 'newest-update') return b.lastUpdate - a.lastUpdate
+        if (orderBy.value === 'oldest-update') return a.lastUpdate - b.lastUpdate
+        if (orderBy.value === 'newest-create') return b.createDate - a.createDate
+        if (orderBy.value === 'oldest-create') return a.createDate - b.createDate
+        if (orderBy.value === 'most-messages') return b.messages.length - a.messages.length
+        return 0
     })
-    return showArchivedChats.value ? allSorted : allSorted.filter(chat => !chat.archived)
 })
 
 const formatDate = (timestamp: number) => {
@@ -36,23 +43,36 @@ const formatTitle = (chat: Chat) => {
         <RouterLink to="/create-chat" class="btn btn-sm btn-primary absolute top-2 left-2">New Chat +</RouterLink>
     </Teleport>
 
-    <div class="flex justify-end mb-4">
-        <label class="label cursor-pointer">
-            <span class="label-text mr-2">Show archived</span>
-            <input v-model="showArchivedChats" type="checkbox" class="toggle toggle-primary" />
-        </label>
+    <div class="flex flex-row">
+        <div class="flex flex-col">
+            <select v-model="orderBy" class="select w-full">
+                <option value="newest-update">Recently Updated</option>
+                <option value="oldest-update">Oldest Updated</option>
+                <option value="newest-create">Recently Created</option>
+                <option value="oldest-create">Oldest Created</option>
+                <option value="most-messages">Most Messages</option>
+            </select>
+        </div>
+        <div class="flex ml-5">
+            <label class="label cursor-pointer">
+                <span class="label-text mr-2">Show archived</span>
+                <input v-model="showArchivedChats" type="checkbox" class="toggle toggle-primary" />
+            </label>
+        </div>
     </div>
 
-    <template v-if="chats.length">
+    <div v-if="chats.length" class="flex flex-col mt-2">
         <router-link
             :to="{name: 'chat', params: {id: chat.id}}"
             v-for="chat in chats"
             :key="chat.id"
+            :class="{'outline outline-warning': chat.archived}"
             class="relative p-2 mb-2 max-w-96 bg-base-200 rounded-md hover:outline outline-primary">
             <div class="text-lg font-bold">
                 {{ formatTitle(chat) }}
             </div>
-            <div class="text-sm">{{ formatDate(chat.createDate) }}</div>
+            <div class="text-sm">Updated: {{ formatDate(chat.lastUpdate) }}</div>
+            <div class="text-sm">Created: {{ formatDate(chat.createDate) }}</div>
             <div class="text-sm">Messages: {{ chat.messages.length }}</div>
             <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
                 <div v-for="character in chat.characters" :key="character" class="avatar">
@@ -70,6 +90,6 @@ const formatTitle = (chat: Chat) => {
                 <PencilSquareIcon class="size-6" />
             </RouterLink>
         </router-link>
-    </template>
+    </div>
     <template v-else>No chats yet. Make one to get started.</template>
 </template>

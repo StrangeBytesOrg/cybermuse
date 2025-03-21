@@ -39,4 +39,14 @@ export class Collection<T extends z.ZodSchema> {
         const docs = (await this.table.bulkGet(keys)).filter(doc => !doc.deleted)
         return docs.map(doc => this.schema.parse(doc))
     }
+
+    /** Return documents by order */
+    orderBy(field: string) {
+        return {
+            toArray: async (): Promise<z.infer<T>[]> => {
+                const docs = await this.table.orderBy(field).filter(doc => !doc.deleted).toArray()
+                return docs.map(doc => this.schema.parse(doc))
+            },
+        }
+    }
 }
