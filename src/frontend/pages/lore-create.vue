@@ -2,7 +2,7 @@
 import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {db} from '@/db'
+import {loreCollection} from '@/db'
 import Editable from '@/components/editable.vue'
 
 type Entry = {name: string; content: string}
@@ -19,7 +19,7 @@ const addEntry = () => {
 }
 
 const createLore = async () => {
-    await db.lore.add({
+    await loreCollection.put({
         id: lore.name.toLowerCase().replace(/ /g, '-'),
         lastUpdate: Date.now(),
         name: lore.name,

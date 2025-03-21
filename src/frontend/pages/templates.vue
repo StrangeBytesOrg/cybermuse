@@ -1,18 +1,17 @@
 <script lang="ts" setup>
-import {ref, computed} from 'vue'
+import {ref, computed, reactive} from 'vue'
 import Handlebars from 'handlebars'
 import {useToastStore, useSettingsStore} from '@/store'
-import {useDexieLiveQuery} from '@strangebytes/vue-dexie-live-query'
-import {db, notDeleted} from '@/db'
+import {templateCollection} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
 const settings = useSettingsStore()
-const templates = await useDexieLiveQuery(() => db.templates.filter(notDeleted).toArray())
+const templates = reactive(await templateCollection.toArray())
 const example = ref('')
 
 const activeTemplate = computed(() => {
-    return templates.value.find((template) => template.id === settings.template)
+    return templates.find((template) => template.id === settings.template)
 })
 
 const setActiveTemplate = async (event: Event) => {
@@ -23,7 +22,7 @@ const setActiveTemplate = async (event: Event) => {
 
 const updateTemplate = async () => {
     if (activeTemplate.value) {
-        await db.templates.update(activeTemplate.value.id, activeTemplate.value)
+        await templateCollection.update(activeTemplate.value.id, activeTemplate.value)
     }
     toast.success('Template updated')
 }
@@ -34,7 +33,7 @@ const deleteTemplate = async () => {
     }
 
     if (activeTemplate.value) {
-        await db.templates.update(activeTemplate.value.id, {deleted: 1})
+        await templateCollection.delete(activeTemplate.value.id)
         settings.setTemplate('default-template')
         toast.success('Template deleted')
     }

@@ -34,7 +34,7 @@ interface Chat {
     userCharacter: string
     characters: string[]
     lore: string[]
-    createDate: string
+    createDate: number
     messages: {
         id: string
         characterId: string
@@ -125,7 +125,7 @@ export const chatCollection = new Collection(
         userCharacter: z.string(),
         characters: z.array(z.string()),
         lore: z.array(z.string()),
-        createDate: z.string(),
+        createDate: z.number(),
         messages: z.array(z.object({
             id: z.string(),
             characterId: z.string(),

@@ -3,7 +3,7 @@ import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
 import {useToastStore, useSettingsStore} from '@/store'
-import {db} from '@/db'
+import {templateCollection} from '@/db'
 import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
@@ -17,7 +17,7 @@ const template = reactive({
 
 const createTemplate = async () => {
     const templateId = template.name.toLowerCase().replace(/\s/g, '-')
-    await db.templates.put({
+    await templateCollection.put({
         id: templateId,
         lastUpdate: Date.now(),
         ...template,

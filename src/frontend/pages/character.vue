@@ -1,7 +1,6 @@
 <script lang="ts" setup>
-import {reactive, toRaw} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
-import {db} from '@/db'
+import {characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 
 const route = useRoute()
@@ -13,19 +12,19 @@ if (!characterId || Array.isArray(characterId)) {
     throw new Error('Character not found')
 }
 
-const character = reactive(await db.characters.get(characterId))
+const character = await characterCollection.get(characterId)
 if (!character) {
     router.push({name: 'characters'})
     throw new Error('Character not found')
 }
 
 const updateCharacter = async () => {
-    await db.characters.put(toRaw(character))
+    await characterCollection.put(character)
     router.push({name: 'characters'})
 }
 
 const deleteCharacter = async () => {
-    await db.characters.update(characterId, {deleted: 1})
+    await characterCollection.delete(characterId)
     router.push({name: 'characters'})
 }
 

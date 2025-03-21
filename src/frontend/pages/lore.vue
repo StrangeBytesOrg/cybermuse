@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import {RouterLink} from 'vue-router'
-import {db, notDeleted} from '@/db'
+import {loreCollection} from '@/db'
 
-const loreBooks = await db.lore.filter(notDeleted).toArray()
+const loreBooks = await loreCollection.toArray()
 </script>
 
 <template>

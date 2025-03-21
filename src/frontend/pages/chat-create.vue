@@ -2,7 +2,7 @@
 import {ref, computed, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
-import {db, notDeleted, type Message} from '@/db'
+import {characterCollection, chatCollection, loreCollection, type Message} from '@/db'
 
 const router = useRouter()
 const selectedCharacters = ref<string[]>([])
@@ -10,8 +10,8 @@ const selectedLore = ref<string[]>([])
 const userCharacter = ref('default-user-character')
 const chatName = ref('')
 
-const characters = await db.characters.filter(notDeleted).toArray()
-const lore = await db.lore.toArray()
+const characters = await characterCollection.toArray()
+const lore = await loreCollection.toArray()
 
 const createChat = async () => {
     // If characters have a first message, add it to the chat
@@ -36,14 +36,14 @@ const createChat = async () => {
         }
     })
 
-    const id = await db.chats.put({
+    const id = await chatCollection.put({
         id: `chat-${Math.random().toString(36).slice(2)}`,
         lastUpdate: Date.now(),
         name: chatName.value,
         userCharacter: toRaw(userCharacter.value),
         characters: toRaw(selectedCharacters.value),
         lore: toRaw(selectedLore.value),
-        createDate: new Date().toISOString(),
+        createDate: Date.now(),
         messages: toRaw(messages),
         archived: false,
     })

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {db, notDeleted} from '@/db'
+import {chatCollection, characterCollection} from '@/db'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,26 +12,26 @@ if (!chatId || Array.isArray(chatId)) {
     throw new Error('Invalid chat ID')
 }
 
-const chat = await db.chats.get(chatId)
-const characters = await db.characters.filter(notDeleted).toArray()
+const chat = await chatCollection.get(chatId)
+const characters = await characterCollection.toArray()
 if (!chat) {
     router.push({name: 'chats'})
     throw new Error('Chat not found')
 }
 
 const updateChat = async () => {
-    await db.chats.update(chatId, chat)
+    await chatCollection.update(chatId, chat)
     toast.success('Updated')
     router.push({name: 'chats'})
 }
 
 const archiveChat = async () => {
-    await db.chats.update(chatId, {archived: true})
+    await chatCollection.update(chatId, {archived: true})
     router.push({name: 'chats'})
 }
 
 const deleteChat = async () => {
-    await db.chats.update(chatId, {deleted: 1})
+    await chatCollection.delete(chatId)
     router.push({name: 'chats'})
 }
 </script>

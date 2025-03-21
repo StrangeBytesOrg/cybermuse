@@ -1,19 +1,22 @@
 <script lang="ts" setup>
-import {reactive, ref, computed} from 'vue'
-import {db, notDeleted, type Chat} from '@/db'
+import {ref, computed} from 'vue'
+import {chatCollection, characterCollection, type Chat} from '@/db'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
 
 const showArchivedChats = ref(false)
-const allChats = reactive(await db.chats.orderBy('lastUpdate').reverse().filter(notDeleted).toArray())
-const characters = reactive(await db.characters.filter(notDeleted).toArray())
+const allChats = await chatCollection.toArray()
+const characters = await characterCollection.toArray()
 const characterMap = Object.fromEntries(characters.map((character) => [character.id, character]))
 
 const chats = computed(() => {
-    return showArchivedChats.value ? allChats : allChats.filter(chat => !chat.archived)
+    const allSorted = allChats.sort((a, b) => {
+        return b.lastUpdate - a.lastUpdate
+    })
+    return showArchivedChats.value ? allSorted : allSorted.filter(chat => !chat.archived)
 })
 
-const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString(undefined, {
+const formatDate = (timestamp: number) => {
+    return new Date(timestamp).toLocaleDateString(undefined, {
         year: 'numeric',
         month: 'long',
         day: 'numeric',

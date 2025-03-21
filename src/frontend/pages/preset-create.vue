@@ -2,7 +2,7 @@
 import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore, useSettingsStore} from '@/store'
-import {db} from '@/db'
+import {generationPresetCollection} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
@@ -27,7 +27,7 @@ const preset = reactive({
 
 const createPreset = async () => {
     const presetId = preset.name.toLowerCase().replace(/ /g, '-')
-    await db.generationPresets.put({
+    await generationPresetCollection.put({
         id: presetId,
         lastUpdate: Date.now(),
         ...toRaw(preset),

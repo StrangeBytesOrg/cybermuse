@@ -14,18 +14,18 @@ export class Collection<T extends z.ZodSchema> {
     }
 
     /** Put a document into the collection. */
-    async put(doc: z.infer<T>): Promise<void> {
-        await this.table.put(this.schema.parse(doc))
+    async put(doc: z.infer<T>) {
+        return await this.table.put(this.schema.parse(doc))
     }
 
     /** Update a document in the collection. */
-    async update(key: string, doc: Partial<z.infer<T>>): Promise<void> {
-        await this.table.update(key, doc)
+    async update(key: string, doc: Partial<z.infer<T>>) {
+        return await this.table.update(key, doc)
     }
 
     /** Soft delete a document from the collection. */
-    async delete(key: string): Promise<void> {
-        await this.table.update(key, {deleted: 1, lastUpdate: Date.now()})
+    async delete(key: string) {
+        return await this.table.update(key, {deleted: 1, lastUpdate: Date.now()})
     }
 
     /** List all documents in the collection. */

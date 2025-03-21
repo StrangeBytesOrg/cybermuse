@@ -2,7 +2,7 @@
 import {reactive, toRaw} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
-import {db} from '@/db'
+import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
 import {decodeChunks} from '@/lib/decode-png-chunks'
 
@@ -18,7 +18,7 @@ const character = reactive({
 })
 
 const createCharacter = async () => {
-    await db.characters.put({
+    await characterCollection.put({
         id: character.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         lastUpdate: Date.now(),
         ...toRaw(character),
