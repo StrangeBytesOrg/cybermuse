@@ -1,6 +1,6 @@
-# A Batteries Included chat app
+# Character oriented AI chat
 
-![Screenshot](https://chat-desktop.strangebytes.org/chat-app-2.webp)
+![Screenshot](https://https://static-assets.strangebytes.org/demo-screenshot-1.png)
 
 ## Features
 
@@ -14,7 +14,11 @@ Group chats utilize the LLM itself to pick which character should respond next i
 
 ### Template based prompt formatting
 
-Jinja is used for templating giving you complete control over how the prompt is formatted.
+A templating system based on Handlebars makes it easy to build powerful system prompts.
+
+## Installing
+
+Releases are uploaded regularly on Github. [Download Here](https://github.com/StrangeBytesOrg/cybermuse/releases)
 
 ## Building Locally
 
