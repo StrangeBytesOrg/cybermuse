@@ -20,7 +20,7 @@ export interface paths {
         patch?: never
         trace?: never
     }
-    '/upload/': {
+    '/upload': {
         parameters: {
             query?: never
             header?: never
@@ -84,16 +84,19 @@ export interface operations {
                         key: string
                         collection: string
                         lastUpdate: number
+                        deleted?: number
                     }[]
                     'multipart/form-data': {
                         key: string
                         collection: string
                         lastUpdate: number
+                        deleted?: number
                     }[]
                     'text/plain': {
                         key: string
                         collection: string
                         lastUpdate: number
+                        deleted?: number
                     }[]
                 }
             }
@@ -116,30 +119,30 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
+                    } & {
+                        [key: string]: unknown
                     }
-                } & {
-                    [key: string]: unknown
-                }
+                }[]
                 'multipart/form-data': {
                     key: string
                     collection: string
                     doc: {
                         id: string
                         lastUpdate: number
+                    } & {
+                        [key: string]: unknown
                     }
-                } & {
-                    [key: string]: unknown
-                }
+                }[]
                 'text/plain': {
                     key: string
                     collection: string
                     doc: {
                         id: string
                         lastUpdate: number
+                    } & {
+                        [key: string]: unknown
                     }
-                } & {
-                    [key: string]: unknown
-                }
+                }[]
             }
         }
         responses: {

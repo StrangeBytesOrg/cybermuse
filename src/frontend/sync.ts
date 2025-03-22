@@ -18,8 +18,8 @@ export const sync = async () => {
     if (error) throw error
 
     // Sync Down
-    for (const {key, collection, lastUpdate} of remoteDocs) {
-        const localDoc = await db.tables.find(t => t.name === collection)?.get(key)
+    for (const {key, collection, lastUpdate, deleted} of remoteDocs) {
+        const localDoc = await db.table(collection).get(key)
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${collection}.${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
@@ -30,28 +30,32 @@ export const sync = async () => {
                 },
             })
             if (error) throw error
-            await db.tables.find(t => t.name === collection)?.put(data)
+            await db.table(collection).put(data)
         }
     }
 
     // Sync up
+    const docsToPush = []
     for (const table of db.tables) {
         const localDocs = await table.toArray()
         for (const doc of localDocs) {
             const remoteDoc = remoteDocs.find(d => d.collection === table.name && d.key === doc.id)
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
                 console.log(`Pushing: ${table.name}/${doc.id}`)
-                const {error} = await client.PUT('/upload/', {
-                    baseUrl,
-                    params: {header: {authorization: `Bearer ${token}`}},
-                    body: {
-                        key: doc.id,
-                        collection: table.name,
-                        doc,
-                    },
+                docsToPush.push({
+                    key: doc.id,
+                    collection: table.name,
+                    doc,
                 })
-                if (error) throw error
             }
         }
+    }
+    if (docsToPush.length) {
+        const {error: pushError} = await client.PUT('/upload', {
+            baseUrl,
+            params: {header: {authorization: `Bearer ${token}`}},
+            body: docsToPush,
+        })
+        if (pushError) throw error
     }
 }
