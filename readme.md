@@ -1,6 +1,6 @@
 # Character oriented AI chat
 
-![Screenshot](https://https://static-assets.strangebytes.org/demo-screenshot-1.png)
+![Screenshot](https://static-assets.strangebytes.org/demo-screenshot-1.png)
 
 ## Features
 
