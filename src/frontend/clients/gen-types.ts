@@ -51,7 +51,7 @@ export interface operations {
                     }[]
                     n_predict: number
                     /** @default 1 */
-                    temperature: number
+                    temperature?: number
                     min_p?: number
                     top_p?: number
                     top_k?: number
@@ -64,7 +64,7 @@ export interface operations {
                     }[]
                     n_predict: number
                     /** @default 1 */
-                    temperature: number
+                    temperature?: number
                     min_p?: number
                     top_p?: number
                     top_k?: number
@@ -77,7 +77,7 @@ export interface operations {
                     }[]
                     n_predict: number
                     /** @default 1 */
-                    temperature: number
+                    temperature?: number
                     min_p?: number
                     top_p?: number
                     top_k?: number
