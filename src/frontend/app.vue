@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 import {onErrorCaptured} from 'vue'
 import {RouterView} from 'vue-router'
+import {ZodError} from 'zod'
+import {fromError} from 'zod-validation-error'
 import {useMenuStore, useToastStore, useSettingsStore} from './store'
 import './styles/global.css'
 import TopBar from '@/components/top-bar.vue'
@@ -13,7 +15,15 @@ const settings = useSettingsStore()
 
 onErrorCaptured((error) => {
     console.error(error)
-    if (error.message) {
+    if (error instanceof ZodError) {
+        const validationError = fromError(error, {
+            issueSeparator: `\n`,
+            prefix: '',
+            prefixSeparator: '',
+            includePath: false,
+        })
+        toast.error(validationError.message)
+    } else if (error.message) {
         toast.error(error.message)
     } else if (typeof error === 'string') {
         // Sometimes I hate JavaScript
