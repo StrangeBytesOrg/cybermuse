@@ -22,7 +22,7 @@ const setActiveTemplate = async (event: Event) => {
 
 const updateTemplate = async () => {
     if (activeTemplate.value) {
-        await templateCollection.update(activeTemplate.value.id, activeTemplate.value)
+        await templateCollection.put(activeTemplate.value)
     }
     toast.success('Template updated')
 }

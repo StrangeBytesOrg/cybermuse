@@ -20,7 +20,7 @@ if (!chat) {
 }
 
 const updateChat = async () => {
-    await chatCollection.update(chatId, chat)
+    await chatCollection.put(chat)
     toast.success('Updated')
     router.push({name: 'chats'})
 }

@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, toRaw} from 'vue'
+import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
@@ -27,7 +27,7 @@ const removeEntry = (index: number) => {
 }
 
 const updateLore = async () => {
-    await loreCollection.update(loreId, toRaw(lore))
+    await loreCollection.put(lore)
     toast.success('Lore updated')
 }
 

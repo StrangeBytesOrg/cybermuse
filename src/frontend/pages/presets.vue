@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {computed, toRaw} from 'vue'
+import {computed} from 'vue'
 import {useToastStore, useSettingsStore} from '@/store'
 import {generationPresetCollection} from '@/db'
 import NumberInput from '@/components/number-input.vue'
@@ -20,7 +20,7 @@ const setActivePreset = async (event: Event) => {
 
 const updatePreset = async () => {
     if (activePreset.value) {
-        await generationPresetCollection.update(activePreset.value.id, toRaw(activePreset.value))
+        await generationPresetCollection.put(activePreset.value)
         toast.success('Preset updated')
     }
 }

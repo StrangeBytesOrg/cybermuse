@@ -2,7 +2,7 @@ import z from 'zod'
 import Dexie from 'dexie'
 
 /** A strongly-typed collection wrapper for Dexie documents validated by Zod schemas. */
-export class Collection<T extends z.ZodSchema> {
+export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
     constructor(
         private table: Dexie.Table,
         public schema: T,
@@ -20,7 +20,7 @@ export class Collection<T extends z.ZodSchema> {
 
     /** Update a document in the collection. */
     async update(key: string, doc: Partial<z.infer<T>>) {
-        return await this.table.update(key, doc)
+        return await this.table.update(key, this.schema.partial().parse(doc))
     }
 
     /** Convert document into a tombstone */
