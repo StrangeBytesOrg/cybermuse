@@ -3,83 +3,7 @@ import {Collection} from '@/lib/dexie-orm'
 import z from 'zod'
 
 const dbName = 'cybermuse'
-
-interface Character {
-    id: string
-    lastUpdate: number
-    deleted?: number
-    name: string
-    type: 'user' | 'character'
-    description: string
-    firstMessage?: string
-    avatar?: string
-}
-
-interface Lore {
-    id: string
-    lastUpdate: number
-    deleted?: number
-    name: string
-    entries: {
-        name: string
-        content: string
-    }[]
-}
-
-interface Chat {
-    id: string
-    lastUpdate: number
-    deleted?: number
-    name: string
-    userCharacter: string
-    characters: string[]
-    lore: string[]
-    createDate: number
-    messages: {
-        id: string
-        characterId: string
-        type: 'user' | 'model' | 'system'
-        content: string[]
-        activeIndex: number
-    }[]
-    archived: boolean
-}
-
-interface Template {
-    id: string
-    lastUpdate: number
-    deleted?: number
-    name: string
-    template: string
-}
-
-interface GenerationPreset {
-    id: string
-    lastUpdate: number
-    deleted?: number
-    name: string
-    maxTokens: number
-    temperature: number
-    seed?: number
-    topK?: number
-    topP?: number
-    minP?: number
-    repeatPenalty: {
-        penalty?: number
-        presencePenalty?: number
-        frequencyPenalty?: number
-        lastTokens?: number
-        penalizeNewLine?: boolean
-    }
-}
-
-const db = new Dexie(dbName) as Dexie & {
-    characters: EntityTable<Character, 'id'>
-    lore: EntityTable<Lore, 'id'>
-    chats: EntityTable<Chat, 'id'>
-    templates: EntityTable<Template, 'id'>
-    generationPresets: EntityTable<GenerationPreset, 'id'>
-}
+const db = new Dexie(dbName)
 
 db.version(1).stores({
     characters: 'id',
@@ -90,12 +14,12 @@ db.version(1).stores({
 })
 
 export const characterCollection = new Collection(
-    db.characters,
+    db.table('characters'),
     z.object({
-        id: z.string(),
+        id: z.string().min(1, {message: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string(),
+        name: z.string().min(1, {message: 'Name cannot be empty'}),
         type: z.union([z.literal('user'), z.literal('character')]),
         description: z.string(),
         firstMessage: z.string().optional(),
@@ -103,12 +27,12 @@ export const characterCollection = new Collection(
     }),
 )
 export const loreCollection = new Collection(
-    db.lore,
+    db.table('lore'),
     z.object({
-        id: z.string(),
+        id: z.string().min(1, {message: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string(),
+        name: z.string().min(1, {message: 'Name cannot be empty'}),
         entries: z.array(z.object({
             name: z.string(),
             content: z.string(),
@@ -116,9 +40,9 @@ export const loreCollection = new Collection(
     }),
 )
 export const chatCollection = new Collection(
-    db.chats,
+    db.table('chats'),
     z.object({
-        id: z.string(),
+        id: z.string().min(1, {message: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
         name: z.string(),
@@ -137,22 +61,22 @@ export const chatCollection = new Collection(
     }),
 )
 export const templateCollection = new Collection(
-    db.templates,
+    db.table('templates'),
     z.object({
-        id: z.string(),
+        id: z.string().min(1, {message: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string(),
+        name: z.string().min(1, {message: 'Name cannot be empty'}),
         template: z.string(),
     }),
 )
 export const generationPresetCollection = new Collection(
-    db.generationPresets,
+    db.table('generationPresets'),
     z.object({
-        id: z.string(),
+        id: z.string().min(1, {message: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string(),
+        name: z.string().min(1, {message: 'Name cannot be empty'}),
         maxTokens: z.number(),
         temperature: z.number(),
         seed: z.number().optional(),
@@ -181,7 +105,3 @@ for (const table of db.tables) {
 }
 
 export {db}
-export type {Character, Chat, GenerationPreset, Lore, Template}
-export type Message = Chat['messages'][0]
-
-export const notDeleted = <T extends {deleted?: number}>(doc: T) => !doc.deleted

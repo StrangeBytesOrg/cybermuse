@@ -5,7 +5,7 @@ import Dexie from 'dexie'
 export class Collection<T extends z.ZodSchema> {
     constructor(
         private table: Dexie.Table,
-        private schema: T,
+        public schema: T,
     ) {}
 
     /** Get a document by its key. */
