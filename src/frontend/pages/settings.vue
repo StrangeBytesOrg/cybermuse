@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {useToastStore, useSettingsStore} from '@/store'
-import {sync} from '@/sync'
+import {sync, exportData} from '@/sync'
 
 const settings = useSettingsStore()
 const toast = useToastStore()
@@ -120,5 +120,11 @@ const checkConnection = async () => {
         </template>
 
         <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>
+    </fieldset>
+
+    <!-- Export -->
+    <fieldset class="mt-3 bg-base-200 rounded-box p-3">
+        <legend class="fieldset-legend">Export Data</legend>
+        <button @click="exportData" class="btn btn-primary block">Export Data</button>
     </fieldset>
 </template>

@@ -18,10 +18,10 @@ export const sync = async () => {
     if (error) throw error
 
     // Sync Down
-    for (const {key, collection, lastUpdate, deleted} of remoteDocs) {
+    for (const {key, collection, lastUpdate} of remoteDocs) {
         const localDoc = await db.table(collection).get(key)
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
-            console.log(`Pulling: ${collection}.${key}`)
+            console.log(`Pulling: ${collection}/${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
                 baseUrl,
                 params: {
@@ -58,4 +58,18 @@ export const sync = async () => {
         })
         if (pushError) throw error
     }
+}
+
+export const exportData = async () => {
+    const data: Record<string, unknown> = {}
+    for (const table of db.tables) {
+        data[table.name] = await table.toArray()
+    }
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'data.json'
+    a.click()
+    URL.revokeObjectURL(url)
 }
