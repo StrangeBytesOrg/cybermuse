@@ -1,4 +1,4 @@
-import {db} from './index'
+import {db, characterCollection, templateCollection, generationPresetCollection} from './index'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {{ characters }}
@@ -6,17 +6,17 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 {{ lore }}{{/if}}`
 
 export const fixtureData = async () => {
-    const characters = await db.characters.toArray()
+    const characters = await db.table('characters').toArray()
     if (characters.length === 0) {
         console.log('Creating default characters')
-        await db.characters.put({
+        await characterCollection.put({
             id: 'default-user-character',
             lastUpdate: 0,
             name: 'User',
             type: 'user',
             description: 'The user of the system.',
         })
-        await db.characters.put({
+        await characterCollection.put({
             id: 'default-character',
             lastUpdate: 0,
             name: 'Assistant',
@@ -25,10 +25,10 @@ export const fixtureData = async () => {
         })
     }
 
-    const templates = await db.templates.toArray()
+    const templates = await db.table('templates').toArray()
     if (templates.length === 0) {
         console.log('Creating default template')
-        await db.templates.put({
+        await templateCollection.put({
             id: 'default-template',
             lastUpdate: 0,
             name: 'Default',
@@ -36,10 +36,10 @@ export const fixtureData = async () => {
         })
     }
 
-    const generationPresets = await db.generationPresets.toArray()
+    const generationPresets = await db.table('generationPresets').toArray()
     if (generationPresets.length === 0) {
         console.log('Creating default generation preset')
-        await db.generationPresets.put({
+        await generationPresetCollection.put({
             id: 'default-generation-preset',
             lastUpdate: 0,
             name: 'Default',
