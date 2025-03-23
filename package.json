@@ -9,7 +9,7 @@
         "build": "vite build",
         "preview": "vite preview",
         "fmt": "dprint fmt",
-        "lint": "oxlint"
+        "lint": "oxlint && eslint"
     },
     "devDependencies": {
         "@heroicons/vue": "^2.2.0",
