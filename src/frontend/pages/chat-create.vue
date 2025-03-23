@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, computed, toRaw} from 'vue'
+import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
 import Handlebars from 'handlebars'
 import {characterCollection, chatCollection, loreCollection, type Message} from '@/db'
@@ -40,11 +40,11 @@ const createChat = async () => {
         id: `chat-${Math.random().toString(36).slice(2)}`,
         lastUpdate: Date.now(),
         name: chatName.value,
-        userCharacter: toRaw(userCharacter.value),
-        characters: toRaw(selectedCharacters.value),
-        lore: toRaw(selectedLore.value),
+        userCharacter: userCharacter.value,
+        characters: selectedCharacters.value,
+        lore: selectedLore.value,
         createDate: Date.now(),
-        messages: toRaw(messages),
+        messages: messages,
         archived: false,
     })
 

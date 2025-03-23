@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, toRaw} from 'vue'
+import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {loreCollection} from '@/db'
@@ -23,7 +23,7 @@ const createLore = async () => {
         id: lore.name.toLowerCase().replace(/ /g, '-'),
         lastUpdate: Date.now(),
         name: lore.name,
-        entries: toRaw(lore.entries),
+        entries: lore.entries,
     })
     toast.success('Lore created')
     await router.push({name: 'lore'})

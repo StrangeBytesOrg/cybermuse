@@ -1,4 +1,4 @@
-import Dexie, {type EntityTable} from 'dexie'
+import Dexie from 'dexie'
 import {Collection} from '@/lib/dexie-orm'
 import z from 'zod'
 
@@ -60,6 +60,8 @@ export const chatCollection = new Collection(
         archived: z.boolean(),
     }),
 )
+export type Chat = z.infer<typeof chatCollection.schema>
+export type Message = Chat['messages'][0]
 export const templateCollection = new Collection(
     db.table('templates'),
     z.object({
@@ -77,8 +79,8 @@ export const generationPresetCollection = new Collection(
         lastUpdate: z.number(),
         deleted: z.number().optional(),
         name: z.string().min(1, {message: 'Name cannot be empty'}),
-        maxTokens: z.number(),
-        temperature: z.number(),
+        maxTokens: z.number({message: 'Max tokens cannot be empty'}),
+        temperature: z.number().optional(),
         seed: z.number().optional(),
         topK: z.number().optional(),
         topP: z.number().optional(),

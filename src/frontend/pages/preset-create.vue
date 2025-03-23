@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, toRaw} from 'vue'
+import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore, useSettingsStore} from '@/store'
 import {generationPresetCollection} from '@/db'
@@ -30,7 +30,7 @@ const createPreset = async () => {
     await generationPresetCollection.put({
         id: presetId,
         lastUpdate: Date.now(),
-        ...toRaw(preset),
+        ...preset,
     })
     settings.setPreset(presetId)
     toast.success('Created new preset')

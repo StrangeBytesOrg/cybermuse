@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {reactive, toRaw} from 'vue'
+import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
 import {useToastStore} from '@/store'
 import {characterCollection} from '@/db'
@@ -21,7 +21,7 @@ const createCharacter = async () => {
     await characterCollection.put({
         id: character.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         lastUpdate: Date.now(),
-        ...toRaw(character),
+        ...character,
     })
     toast.success('Character created')
     await router.push({name: 'characters'})
