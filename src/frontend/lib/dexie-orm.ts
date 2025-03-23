@@ -23,9 +23,9 @@ export class Collection<T extends z.ZodSchema> {
         return await this.table.update(key, doc)
     }
 
-    /** Soft delete a document from the collection. */
+    /** Convert document into a tombstone */
     async delete(key: string) {
-        return await this.table.update(key, {deleted: 1, lastUpdate: Date.now()})
+        return await this.table.put({id: key, lastUpdate: Date.now(), deleted: 1})
     }
 
     /** List all documents in the collection. */

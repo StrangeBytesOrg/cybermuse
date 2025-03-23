@@ -119,9 +119,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
-                    } & {
-                        [key: string]: unknown
-                    }
+                    } & Record<string, never>
                 }[]
                 'multipart/form-data': {
                     key: string
@@ -129,9 +127,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
-                    } & {
-                        [key: string]: unknown
-                    }
+                    } & Record<string, never>
                 }[]
                 'text/plain': {
                     key: string
@@ -139,9 +135,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
-                    } & {
-                        [key: string]: unknown
-                    }
+                    } & Record<string, never>
                 }[]
             }
         }
