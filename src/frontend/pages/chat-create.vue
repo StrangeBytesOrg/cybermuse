@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, computed} from 'vue'
 import {useRouter} from 'vue-router'
-import Handlebars from 'handlebars'
+import {Liquid} from 'liquidjs'
 import {characterCollection, chatCollection, loreCollection, type Message} from '@/db'
 
 const router = useRouter()
@@ -14,6 +14,8 @@ const characters = await characterCollection.toArray()
 const lore = await loreCollection.toArray()
 
 const createChat = async () => {
+    const engine = new Liquid()
+
     // If characters have a first message, add it to the chat
     const userName = characters.find((c) => c.id === userCharacter.value)?.name
     const messages: Message[] = []
@@ -21,8 +23,7 @@ const createChat = async () => {
         const character = characters.find((c) => c.id === characterId)
         if (character?.firstMessage) {
             // Parse firstMessage template
-            const hbTemplate = Handlebars.compile(character.firstMessage)
-            const content = hbTemplate({
+            const content = engine.parseAndRenderSync(character.firstMessage, {
                 char: character.name,
                 user: userName,
             })

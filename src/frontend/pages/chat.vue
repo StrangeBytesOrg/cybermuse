@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, reactive} from 'vue'
 import {useRoute} from 'vue-router'
-import Handlebars from 'handlebars'
+import {Liquid} from 'liquidjs'
 import {Bars4Icon} from '@heroicons/vue/24/outline'
 import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
 import {useSettingsStore, useHubStore} from '@/store'
@@ -75,23 +75,20 @@ const createMessage = async (characterId: string, text: string = '', type: 'user
 }
 
 const getSystemPrompt = async () => {
-    const template = await templateCollection.get(settings.template)
-    const hbTemplate = Handlebars.compile(template.template)
+    const engine = new Liquid()
+    const {template} = await templateCollection.get(settings.template)
 
     // Render each character description
     characters.forEach((c) => {
-        const characterTemplate = Handlebars.compile(c.description)
-        c.description = characterTemplate({
+        c.description = engine.parseAndRenderSync(c.description, {
             char: c.name,
             user: userCharacter.name,
         })
     })
 
     // Get character and lore strings
-    let characterString = ''
-    characters.forEach((character) => {
-        characterString += `${character.name}: ${character.description}\n`
-    })
+    const characterString = characters.map((c) => `${c.name}: ${c.description}`).join('\n')
+
     let loreString = ''
     lore.forEach((book) => {
         loreString += `${book.name}\n`
@@ -101,12 +98,10 @@ const getSystemPrompt = async () => {
     })
 
     // Render the system prompt
-    const systemPrompt = hbTemplate({
+    return engine.parseAndRenderSync(template, {
         characters: characterString,
-        lore: loreString,
+        lore: loreString || undefined,
     })
-
-    return systemPrompt
 }
 
 const generateMessage = async (respondent?: string) => {
@@ -114,6 +109,7 @@ const generateMessage = async (respondent?: string) => {
 
     try {
         const systemPrompt = await getSystemPrompt()
+        console.log(systemPrompt)
         const chatHistory = chat.messages.map((message) => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {

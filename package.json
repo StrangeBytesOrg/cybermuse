@@ -1,6 +1,6 @@
 {
     "name": "cybermuse",
-    "version": "0.226.0",
+    "version": "0.227.0",
     "type": "module",
     "description": "A batteries included AI Chat Application",
     "author": "Strange Bytes",
@@ -25,8 +25,8 @@
         "eslint-plugin-oxlint": "^0.16.0",
         "eslint-plugin-vue": "^10.0.0",
         "eventsource-parser": "^3.0.0",
-        "handlebars": "^4.7.8",
         "jose": "^6.0.10",
+        "liquidjs": "^10.21.0",
         "marked": "^15.0.7",
         "openapi-fetch": "^0.13.4",
         "openapi-typescript": "^7.6.1",

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import {useRoute, useRouter} from 'vue-router'
+import {Liquid} from 'liquidjs'
 import {characterCollection} from '@/db'
 import FileSelect from '@/components/file-select.vue'
 
@@ -18,7 +19,24 @@ if (!character) {
     throw new Error('Character not found')
 }
 
+const validateTemplates = () => {
+    const engine = new Liquid()
+    try {
+        engine.parse(character.description)
+    } catch (error) {
+        console.error(error)
+        throw new Error('Description contains a templating error')
+    }
+    try {
+        engine.parse(character.firstMessage || '')
+    } catch (error) {
+        console.error(error)
+        throw new Error('First message contains a templating error')
+    }
+}
+
 const updateCharacter = async () => {
+    validateTemplates()
     await characterCollection.put(character)
     router.push({name: 'characters'})
 }

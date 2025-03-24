@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import {ref, reactive} from 'vue'
 import {useRouter} from 'vue-router'
-import Handlebars from 'handlebars'
+import {Liquid} from 'liquidjs'
 import {useToastStore, useSettingsStore} from '@/store'
 import {templateCollection} from '@/db'
 import Editable from '@/components/editable.vue'
@@ -15,7 +15,18 @@ const template = reactive({
     template: '',
 })
 
+const validateTemplate = () => {
+    const engine = new Liquid()
+    try {
+        engine.parse(template.template)
+    } catch (error) {
+        console.error(error)
+        throw new Error('Template contains an error')
+    }
+}
+
 const createTemplate = async () => {
+    validateTemplate()
     const templateId = template.name.toLowerCase().replace(/\s/g, '-')
     await templateCollection.put({
         id: templateId,
@@ -55,8 +66,8 @@ const getPreview = async () => {
         })
     })
 
-    const hbTemplate = Handlebars.compile(template.template)
-    example.value = hbTemplate({
+    const engine = new Liquid()
+    example.value = engine.parseAndRenderSync(template.template, {
         characters: characterString,
         lore: loreString,
     })

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {ref, computed, reactive} from 'vue'
-import Handlebars from 'handlebars'
+import {Liquid} from 'liquidjs'
 import {useToastStore, useSettingsStore} from '@/store'
 import {templateCollection} from '@/db'
 import Editable from '@/components/editable.vue'
@@ -20,10 +20,21 @@ const setActiveTemplate = async (event: Event) => {
     toast.success('Active template set')
 }
 
-const updateTemplate = async () => {
-    if (activeTemplate.value) {
-        await templateCollection.put(activeTemplate.value)
+const validateTemplate = () => {
+    if (!activeTemplate.value) throw new Error('Template not found')
+    const engine = new Liquid()
+    try {
+        engine.parse(activeTemplate.value.template)
+    } catch (error) {
+        console.error(error)
+        throw new Error('Template contains an error')
     }
+}
+
+const updateTemplate = async () => {
+    validateTemplate()
+    if (!activeTemplate.value) throw new Error('Template not set')
+    await templateCollection.put(activeTemplate.value)
     toast.success('Template updated')
 }
 
@@ -55,10 +66,8 @@ const getPreview = async () => {
         throw new Error('Template not found')
     }
 
-    let characterString = ''
-    characters.forEach((character) => {
-        characterString += `${character.name}: ${character.description}\n`
-    })
+    const characterString = characters.map((character) => `${character.name}: ${character.description}`).join('\n')
+
     let loreString = ''
     lore.forEach((book) => {
         loreString += `${book.name}\n`
@@ -67,10 +76,10 @@ const getPreview = async () => {
         })
     })
 
-    const hbTemplate = Handlebars.compile(activeTemplate.value.template)
-    example.value = hbTemplate({
+    const engine = new Liquid()
+    example.value = await engine.parseAndRender(activeTemplate.value.template, {
         characters: characterString,
-        lore: loreString,
+        lore: loreString ?? undefined,
     })
 }
 </script>

@@ -1,9 +1,9 @@
-import {db, characterCollection, templateCollection, generationPresetCollection} from './index'
+import {db, characterCollection, templateCollection, generationPresetCollection} from '@/db'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {{ characters }}
-{{#if lore}}Use the following background information as lore.
-{{ lore }}{{/if}}`
+{% if lore }Use the following background information as lore.
+{{ lore }}{% endif %}`
 
 export const fixtureData = async () => {
     const characters = await db.table('characters').toArray()

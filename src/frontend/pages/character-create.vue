@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {reactive} from 'vue'
 import {useRouter} from 'vue-router'
+import {Liquid} from 'liquidjs'
 import {useToastStore} from '@/store'
 import {characterCollection} from '@/db'
 import FileInput from '@/components/file-select.vue'
@@ -17,7 +18,24 @@ const character = reactive({
     avatar: '' as string | undefined,
 })
 
+const validateTemplates = () => {
+    const engine = new Liquid()
+    try {
+        engine.parse(character.description)
+    } catch (error) {
+        console.error(error)
+        throw new Error('Description contains a templating error')
+    }
+    try {
+        engine.parse(character.firstMessage || '')
+    } catch (error) {
+        console.error(error)
+        throw new Error('First message contains a templating error')
+    }
+}
+
 const createCharacter = async () => {
+    validateTemplates()
     await characterCollection.put({
         id: character.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
         lastUpdate: Date.now(),
