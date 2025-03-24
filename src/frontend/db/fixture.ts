@@ -2,7 +2,8 @@ import {db, characterCollection, templateCollection, generationPresetCollection}
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {{ characters }}
-{% if lore }Use the following background information as lore.
+{% if lore %}
+Use the following background information as lore.
 {{ lore }}{% endif %}`
 
 export const fixtureData = async () => {
