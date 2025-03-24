@@ -1,11 +1,21 @@
 <script lang="ts" setup>
-import {ref, computed} from 'vue'
+import {ref, reactive, computed} from 'vue'
 import {RouterLink} from 'vue-router'
 import {characterCollection} from '@/db'
 
 const searchName = ref('')
+const orderBy = ref('newest-update')
 const characterType = ref<'user' | 'character' | 'both'>('both')
-const characters = await characterCollection.toArray()
+const characters = reactive(await characterCollection.toArray())
+
+const updateSortOrder = () => {
+    characters.sort((a, b) => {
+        if (orderBy.value === 'newest-update') return b.lastUpdate - a.lastUpdate
+        if (orderBy.value === 'oldest-update') return a.lastUpdate - b.lastUpdate
+        if (orderBy.value === 'name') return a.name.localeCompare(b.name)
+        return 0
+    })
+}
 
 // Computed property to filter characters based on search input and character type
 const filteredCharacters = computed(() => {
@@ -24,26 +34,28 @@ const filteredCharacters = computed(() => {
         </RouterLink>
     </Teleport>
 
-    <div class="p-2 flex flex-col sm:flex-row">
-        <label class="w-full sm:w-1/2 mr-5">
-            <input
-                type="text"
-                v-model="searchName"
-                placeholder="Search by name"
-                class="input w-full"
-            />
-        </label>
+    <!-- Sort and filter -->
+    <div class="px-2 flex flex-col space-y-2 sm:flex-row sm:space-x-5">
+        <input
+            type="text"
+            v-model="searchName"
+            placeholder="Search by name"
+            class="input w-full sm:w-1/3"
+        />
 
-        <label class="w-full sm:w-1/2">
-            <select
-                v-model="characterType"
-                placeholder="Character Type"
-                class="select w-full mt-3 sm:mt-0">
-                <option value="both" default>Character Type</option>
-                <option value="character">Character</option>
-                <option value="user">User</option>
-            </select>
-        </label>
+        <select
+            v-model="characterType"
+            class="select w-full sm:w-1/3">
+            <option value="both" default>Character Type</option>
+            <option value="character">Character</option>
+            <option value="user">User</option>
+        </select>
+
+        <select @change="updateSortOrder" v-model="orderBy" class="select w-full sm:w-1/3">
+            <option value="newest-update">Recently Updated</option>
+            <option value="oldest-update">Oldest Updated</option>
+            <option value="name">Name</option>
+        </select>
     </div>
 
     <div class="flex flex-col m-2">
@@ -72,9 +84,9 @@ const filteredCharacters = computed(() => {
                 </router-link>
             </div>
         </template>
-        <template v-else>
-            <div>no characters</div>
-        </template>
+        <div v-else>
+            no characters
+        </div>
     </div>
 </template>
 
