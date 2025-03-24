@@ -1,28 +1,26 @@
 <script lang="ts" setup>
-import {ref, reactive, computed} from 'vue'
+import {ref, computed} from 'vue'
 import {RouterLink} from 'vue-router'
 import {characterCollection} from '@/db'
 
 const searchName = ref('')
 const orderBy = ref('newest-update')
 const characterType = ref<'user' | 'character' | 'both'>('both')
-const characters = reactive(await characterCollection.toArray())
+const characters = await characterCollection.toArray()
 
-const updateSortOrder = () => {
-    characters.sort((a, b) => {
+const filteredCharacters = computed(() => {
+    const filtered = characters.filter((character) => {
+        const matchesName = character.name.toLowerCase().includes(searchName.value.toLowerCase())
+        const matchesType = character.type === characterType.value || characterType.value === 'both'
+        return matchesName && matchesType
+    })
+
+    // Sort the filtered results
+    return [...filtered].sort((a, b) => {
         if (orderBy.value === 'newest-update') return b.lastUpdate - a.lastUpdate
         if (orderBy.value === 'oldest-update') return a.lastUpdate - b.lastUpdate
         if (orderBy.value === 'name') return a.name.localeCompare(b.name)
         return 0
-    })
-}
-
-// Computed property to filter characters based on search input and character type
-const filteredCharacters = computed(() => {
-    return characters.filter((character) => {
-        const matchesName = character.name.toLowerCase().includes(searchName.value.toLowerCase())
-        const matchesType = character.type === characterType.value || characterType.value === 'both'
-        return matchesName && matchesType
     })
 })
 </script>
@@ -51,7 +49,7 @@ const filteredCharacters = computed(() => {
             <option value="user">User</option>
         </select>
 
-        <select @change="updateSortOrder" v-model="orderBy" class="select w-full sm:w-1/3">
+        <select v-model="orderBy" class="select w-full sm:w-1/3">
             <option value="newest-update">Recently Updated</option>
             <option value="oldest-update">Oldest Updated</option>
             <option value="name">Name</option>
