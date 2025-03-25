@@ -104,6 +104,7 @@ const getPreview = async () => {
         <label class="label text-sm mt-3">Template</label>
         <Editable
             v-model="activeTemplate.template"
+            editable="plaintext-only"
             class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2"
         />
 

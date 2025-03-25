@@ -49,11 +49,12 @@ const update = async () => {
     <Editable
         v-show="editMode"
         v-model="editedText"
+        editable="plaintext-only"
         :focus="editMode"
         @keydown.ctrl.enter="update"
         @keydown.esc="editMode = false"
         data-1p-ignore
-        class="messageText bg-base-100 [word-break:break-word] mt-2"
+        class="messageText bg-base-100 whitespace-pre-wrap mt-2"
     />
 </template>
 

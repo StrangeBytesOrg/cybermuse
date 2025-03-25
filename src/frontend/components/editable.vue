@@ -6,13 +6,10 @@ const model = defineModel({
     default: '',
 })
 const element = ref<HTMLElement>()
-const props = defineProps({
-    editable: {
-        type: Boolean,
-        default: true,
-    },
-    focus: Boolean,
-})
+const {editable = 'true', focus = false} = defineProps<{
+    editable?: 'true' | 'false' | 'plaintext-only'
+    focus?: boolean
+}>()
 
 const handleUpdate = (event: Event) => {
     const target = event.target as HTMLElement
@@ -21,15 +18,15 @@ const handleUpdate = (event: Event) => {
 }
 onMounted(() => {
     if (!element.value) return
-    element.value.innerText = model.value
+    element.value.innerHTML = model.value
 })
 watch(() => model.value, (newVal) => {
     if (!element.value) return
     if (newVal !== element.value.innerText) {
-        element.value.innerText = newVal
+        element.value.innerHTML = newVal
     }
 })
-watch(() => props.focus, async (newVal) => {
+watch(() => focus, async (newVal) => {
     if (!element.value) return
     if (newVal === true) {
         await nextTick()

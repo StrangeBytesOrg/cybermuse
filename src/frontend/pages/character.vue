@@ -73,13 +73,13 @@ const removeImage = () => {
         <textarea
             v-model="character.description"
             placeholder="Description"
-            class="textarea w-full mt-5 min-h-36 border-2 leading-normal"
+            class="textarea w-full mt-5 min-h-36 sm:min-h-64 border-2 leading-normal"
         />
 
         <textarea
             v-model="character.firstMessage"
             placeholder="First Message"
-            class="textarea w-full mt-5 min-h-36 border-2 leading-normal"
+            class="textarea w-full mt-5 min-h-36 sm:min-h-64 border-2 leading-normal"
         />
 
         <select v-model="character.type" class="select w-full sm:max-w-80 mt-5">

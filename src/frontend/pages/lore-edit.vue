@@ -58,6 +58,7 @@ const deleteLore = async () => {
                             />
                             <Editable
                                 v-model="entry.content"
+                                editable="plaintext-only"
                                 class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap mt-2 p-2"
                             />
                         </div>

@@ -332,7 +332,6 @@ const toggleCtxMenu = () => {
             </button>
 
             <textarea
-                ref="inputElement"
                 id="message-input"
                 v-model="currentMessage"
                 @keydown.exact.enter="fullSend"
