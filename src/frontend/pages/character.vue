@@ -77,6 +77,12 @@ const removeImage = () => {
         />
 
         <textarea
+            v-model="character.shortDescription"
+            placeholder="Short Description (optional)"
+            class="textarea w-full mt-5 min-h-18 border-2 leading-normal"
+        />
+
+        <textarea
             v-model="character.firstMessage"
             placeholder="First Message"
             class="textarea w-full mt-5 min-h-36 sm:min-h-64 border-2 leading-normal"

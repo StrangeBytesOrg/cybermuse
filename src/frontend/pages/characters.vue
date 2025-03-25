@@ -82,7 +82,7 @@ const filteredCharacters = computed(() => {
                         </div>
                         <div class="text-gray-500 overflow-hidden h-full fadeout">
                             <p class="whitespace-pre-line">
-                                {{ character.description }}
+                                {{ character.shortDescription || character.description }}
                             </p>
                         </div>
                     </div>

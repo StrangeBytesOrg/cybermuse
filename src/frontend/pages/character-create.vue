@@ -12,10 +12,11 @@ const router = useRouter()
 // TODO this should probably use an existing type from the DB
 const character = reactive({
     name: '',
+    type: 'character' as 'character' | 'user',
     description: '',
     firstMessage: '',
-    type: 'character' as 'character' | 'user',
     avatar: '' as string | undefined,
+    shortDescription: '',
 })
 
 const validateTemplates = () => {
@@ -103,6 +104,12 @@ const importCharacterPng = (file: File) => {
             v-model="character.description"
             placeholder="Description"
             class="textarea w-full mt-5 min-h-36 border-2 leading-normal"
+        />
+
+        <textarea
+            v-model="character.shortDescription"
+            placeholder="Short Description (optional)"
+            class="textarea w-full mt-5 min-h-18 border-2 leading-normal"
         />
 
         <textarea
