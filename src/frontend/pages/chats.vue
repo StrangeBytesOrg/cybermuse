@@ -2,6 +2,7 @@
 import {ref, computed} from 'vue'
 import {chatCollection, characterCollection, type Chat} from '@/db'
 import {PencilSquareIcon} from '@heroicons/vue/24/outline'
+import Thumbnail from '@/components/thumbnail.vue'
 
 const showArchivedChats = ref(false)
 const allChats = await chatCollection.toArray()
@@ -77,10 +78,12 @@ const formatTitle = (chat: Chat) => {
             <div class="avatar-group mt-3 -space-x-4 rtl:space-x-reverse">
                 <div v-for="character in chat.characters" :key="character" class="avatar">
                     <div class="h-14">
-                        <img
+                        <Thumbnail
                             v-if="characterMap[character]?.avatar"
-                            :src="characterMap[character].avatar"
-                            alt="Character Image"
+                            :image="characterMap[character].avatar"
+                            :width="512"
+                            :height="512"
+                            :alt="characterMap[character].name"
                         />
                         <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>

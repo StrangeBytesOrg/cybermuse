@@ -2,6 +2,7 @@
 import {ref, computed} from 'vue'
 import {RouterLink} from 'vue-router'
 import {characterCollection} from '@/db'
+import Thumbnail from '@/components/thumbnail.vue'
 
 const searchName = ref('')
 const orderBy = ref('newest-update')
@@ -64,7 +65,13 @@ const filteredCharacters = computed(() => {
                     class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
                     <div class="avatar">
                         <div class="w-36 max-h-36 rounded-xl">
-                            <img v-if="character.avatar" :src="character.avatar" :alt="character.name" />
+                            <Thumbnail
+                                v-if="character.avatar"
+                                :image="character.avatar"
+                                :width="512"
+                                :height="512"
+                                :alt="character.name"
+                            />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                         </div>
                     </div>

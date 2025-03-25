@@ -8,6 +8,7 @@ import {useSettingsStore, useHubStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
 import client from '@/clients/gen-client'
 import Message from '@/components/message.vue'
+import Thumbnail from '@/components/thumbnail.vue'
 import router from '@/router'
 import {ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, TrashIcon} from '@heroicons/vue/24/outline'
 
@@ -259,9 +260,11 @@ const toggleCtxMenu = () => {
                 <div class="flex flex-row pb-2 pt-3">
                     <div class="avatar ml-2">
                         <div class="w-16 h-16 rounded-full">
-                            <img
+                            <Thumbnail
                                 v-if="characterMap[message.characterId]?.avatar"
-                                :src="characterMap[message.characterId]?.avatar"
+                                :image="characterMap[message.characterId]?.avatar"
+                                :width="512"
+                                :height="512"
                                 alt="character avatar"
                             />
                             <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />

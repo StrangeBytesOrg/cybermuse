@@ -2,8 +2,7 @@ import Dexie from 'dexie'
 import {Collection} from '@/lib/dexie-orm'
 import z from 'zod'
 
-const dbName = 'cybermuse'
-const db = new Dexie(dbName)
+export const db = new Dexie('cybermuse')
 
 db.version(1).stores({
     characters: 'id',
@@ -105,5 +104,3 @@ for (const table of db.tables) {
         return {...modifications, lastUpdate: Date.now()}
     })
 }
-
-export {db}

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import {reactive} from 'vue'
 import {useRoute, useRouter} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {characterCollection} from '@/db'
@@ -13,7 +14,7 @@ if (!characterId || Array.isArray(characterId)) {
     throw new Error('Character not found')
 }
 
-const character = await characterCollection.get(characterId)
+const character = reactive(await characterCollection.get(characterId))
 if (!character) {
     router.push({name: 'characters'})
     throw new Error('Character not found')
