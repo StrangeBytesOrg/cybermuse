@@ -87,8 +87,14 @@ const getSystemPrompt = async () => {
         })
     })
 
-    // Get character and lore strings
-    const characterString = characters.map((c) => `${c.name}: ${c.description}`).join('\n')
+    // Render User Character description
+    userCharacter.description = engine.parseAndRenderSync(userCharacter.description, {
+        char: userCharacter.name,
+    })
+
+    // Add the user character to the list of characters
+    let characterString = characters.map((c) => `${c.name}: ${c.description}`).join('\n')
+    characterString += `${userCharacter.name}: ${userCharacter.description}\n`
 
     let loreString = ''
     lore.forEach((book) => {
@@ -110,7 +116,6 @@ const generateMessage = async (respondent?: string) => {
 
     try {
         const systemPrompt = await getSystemPrompt()
-        console.log(systemPrompt)
         const chatHistory = chat.messages.map((message) => {
             const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
             return {
