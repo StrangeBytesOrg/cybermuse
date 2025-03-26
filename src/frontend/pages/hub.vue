@@ -19,8 +19,8 @@ if (hub.token) {
     if ((claim.exp * 1000) > Date.now()) {
         hub.authenticated = true
     } else {
-        toast.error('Token expired')
-        localStorage.removeItem('token')
+        toast.warn('Login expired. Please login again')
+        hub.clearToken()
     }
 }
 
