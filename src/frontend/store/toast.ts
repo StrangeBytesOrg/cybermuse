@@ -2,7 +2,7 @@ import {defineStore} from 'pinia'
 
 type Toast = {
     message: string
-    type: 'alert-info' | 'alert-success' | 'alert-error'
+    type: 'alert-info' | 'alert-success' | 'alert-warning' | 'alert-error'
 }
 
 export const useToastStore = defineStore('toast', {
@@ -20,6 +20,11 @@ export const useToastStore = defineStore('toast', {
         success(message: string, timeout: number = 3000) {
             const id = Math.random()
             this.toasts.set(id, {message, type: 'alert-success'})
+            setTimeout(() => this.toasts.delete(id), timeout)
+        },
+        warn(message: string, timeout: number = 3000) {
+            const id = Math.random()
+            this.toasts.set(id, {message, type: 'alert-warning'})
             setTimeout(() => this.toasts.delete(id), timeout)
         },
         error(message: string, timeout: number = 3000) {
