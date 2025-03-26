@@ -73,3 +73,11 @@ export const exportData = async () => {
     a.click()
     URL.revokeObjectURL(url)
 }
+
+export const clearData = async () => {
+    if (confirm('Are you sure you want to clear all data?')) {
+        await db.delete()
+        localStorage.clear()
+        window.location.reload()
+    }
+}
