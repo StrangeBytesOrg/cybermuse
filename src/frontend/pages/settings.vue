@@ -1,8 +1,9 @@
 <script lang="ts" setup>
-import {useToastStore, useSettingsStore} from '@/store'
+import {useToastStore, useSettingsStore, useHubStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
 
 const settings = useSettingsStore()
+const hub = useHubStore()
 const toast = useToastStore()
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 
@@ -54,78 +55,79 @@ const checkConnection = async () => {
 </script>
 
 <template>
-    <!-- Theme -->
-    <fieldset class="bg-base-200 rounded-box p-3">
-        <legend class="fieldset-legend">Theme</legend>
-        <select class="select" @change="setTheme" :value="settings.theme">
-            <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
-        </select>
-    </fieldset>
+    <div class="flex flex-col gap-1">
+        <!-- Theme -->
+        <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
+            <legend class="fieldset-legend">Theme</legend>
+            <select class="select" @change="setTheme" :value="settings.theme">
+                <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
+            </select>
+        </fieldset>
 
-    <!-- Connection -->
-    <fieldset class="mt-3 bg-base-200 rounded-box p-3">
-        <legend class="fieldset-legend">Connection</legend>
+        <!-- Connection -->
+        <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
+            <legend class="fieldset-legend">Connection</legend>
 
-        <label class="fieldset-label text-sm">Generation Provider</label>
-        <select class="select mt-1" @change="setConnectionProvider" :value="settings.connectionProvider">
-            <option value="">Select a provider</option>
-            <option value="hub">Cybermuse Hub</option>
-            <option value="self-hosted">Self Hosted</option>
-        </select>
-
-        <template v-if="settings.connectionProvider === 'self-hosted'">
-            <label class="fieldset-label text-sm mt-2">Server URL</label>
-            <input
-                @change="setConnectionServer"
-                :value="settings.connectionServer"
-                type="url"
-                class="input validator mt-1"
-                placeholder="Local Generation Server"
-                pattern="^(https?://).*$"
-                title="Must be a valid URL"
-            />
-            <p class="validator-hint hidden">Must start with "http" or "https"</p>
-
-            <button @click="checkConnection" class="btn btn-primary block mt-3">Test</button>
-        </template>
-    </fieldset>
-
-    <!-- Sync -->
-    <fieldset class="mt-3 bg-base-200 rounded-box p-3">
-        <legend class="fieldset-legend">Sync</legend>
-        <label class="fieldset-label text-sm">Sync Provider</label>
-        <div class="flex flex-row">
-            <select @change="setSyncProvider" :value="settings.syncProvider" class="select mt-1">
+            <label class="fieldset-label text-sm">Generation Provider</label>
+            <select class="select mt-1" @change="setConnectionProvider" :value="settings.connectionProvider">
                 <option value="">Select a provider</option>
-                <option value="hub">Cybermuse Hub</option>
+                <option value="hub" :disabled="!hub.token">Cybermuse Hub {{ !hub.token ? '(Login required)' : '' }}</option>
                 <option value="self-hosted">Self Hosted</option>
             </select>
-        </div>
 
-        <template v-if="settings.syncProvider === 'self-hosted'">
-            <label class="fieldset-label text-sm mt-2">Server URL</label>
-            <input
-                @change="setSyncServer"
-                :value="settings.syncServer"
-                class="input validator mt-1"
-                required
-                placeholder="Local Generation Server"
-                pattern="^(https?://).*$"
-                title="Must be a valid URL"
-            />
-            <p class="validator-hint hidden">Must start with "http" or "https"</p>
+            <template v-if="settings.connectionProvider === 'self-hosted'">
+                <label class="fieldset-label text-sm mt-2">Server URL</label>
+                <input
+                    @change="setConnectionServer"
+                    :value="settings.connectionServer"
+                    type="url"
+                    class="input validator mt-1"
+                    placeholder="Local Generation Server"
+                    pattern="^(https?://).*$"
+                    title="Must be a valid URL"
+                />
+                <p class="validator-hint hidden">Must start with "http" or "https"</p>
 
-            <label class="fieldset-label text-sm mt-2">Password</label>
-            <input @change="setSyncSecret" :value="settings.syncSecret" type="text" class="input mt-1" />
-        </template>
+                <button @click="checkConnection" class="btn btn-primary block mt-3">Test</button>
+            </template>
+        </fieldset>
 
-        <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>
-    </fieldset>
+        <!-- Sync -->
+        <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
+            <legend class="fieldset-legend">Sync</legend>
 
-    <!-- Data -->
-    <fieldset class="flex flex-row gap-3 mt-3 bg-base-200 rounded-box p-3">
-        <legend class="fieldset-legend">Manage Data</legend>
-        <button @click="exportData" class="btn btn-primary">Export Data</button>
-        <button @click="clearData" class="btn btn-error">Clear Data</button>
-    </fieldset>
+            <label class="fieldset-label text-sm">Sync Provider</label>
+            <select @change="setSyncProvider" :value="settings.syncProvider" class="select mt-1">
+                <option value="">Select a provider</option>
+                <option value="hub" :disabled="!hub.token">Cybermuse Hub {{ !hub.token ? '(Login required)' : '' }}</option>
+                <option value="self-hosted">Self Hosted</option>
+            </select>
+
+            <template v-if="settings.syncProvider === 'self-hosted'">
+                <label class="fieldset-label text-sm mt-2">Server URL</label>
+                <input
+                    @change="setSyncServer"
+                    :value="settings.syncServer"
+                    class="input validator mt-1"
+                    required
+                    placeholder="Local Generation Server"
+                    pattern="^(https?://).*$"
+                    title="Must be a valid URL"
+                />
+                <p class="validator-hint hidden">Must start with "http" or "https"</p>
+
+                <label class="fieldset-label text-sm mt-2">Password</label>
+                <input @change="setSyncSecret" :value="settings.syncSecret" type="text" class="input mt-1" />
+            </template>
+
+            <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>
+        </fieldset>
+
+        <!-- Data -->
+        <fieldset class="flex flex-row gap-3 bg-base-200 rounded-box p-3 sm:max-w-sm">
+            <legend class="fieldset-legend">Manage Data</legend>
+            <button @click="exportData" class="btn btn-primary">Export Data</button>
+            <button @click="clearData" class="btn btn-error">Clear Data</button>
+        </fieldset>
+    </div>
 </template>
