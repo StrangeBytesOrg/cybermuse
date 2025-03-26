@@ -94,5 +94,5 @@ const formatTitle = (chat: Chat) => {
             </RouterLink>
         </router-link>
     </div>
-    <template v-else>No chats yet. Make one to get started.</template>
+    <div v-else class="mt-2">No chats yet. Make one to get started.</div>
 </template>

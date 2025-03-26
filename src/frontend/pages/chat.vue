@@ -2,7 +2,7 @@
 import {ref, reactive} from 'vue'
 import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
-import {Bars4Icon} from '@heroicons/vue/24/outline'
+import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
 import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
 import {useSettingsStore, useHubStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
@@ -14,7 +14,7 @@ import {ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, TrashIcon} from '@hero
 
 const route = useRoute()
 const settings = useSettingsStore()
-const hubStore = useHubStore()
+const hub = useHubStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -40,6 +40,10 @@ const updateChat = async () => {
 
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
+
+    if (!settings.connectionProvider) {
+        throw new Error('Select a connection provider in settings')
+    }
 
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
@@ -145,7 +149,7 @@ const generateMessage = async (respondent?: string) => {
 
         const generationPreset = await generationPresetCollection.get(settings.preset)
         const baseUrl = settings.connectionProvider === 'hub' ? import.meta.env.VITE_GEN_URL : settings.connectionServer
-        const token = settings.connectionProvider === 'hub' ? hubStore.token : 'dummy-token'
+        const token = settings.connectionProvider === 'hub' ? hub.token : 'dummy-token'
 
         if (!baseUrl) throw new Error('No connection provider set')
         if (!token) throw new Error('No token set')
@@ -210,6 +214,9 @@ const generateMessage = async (respondent?: string) => {
 const newSwipe = async (messageId: string) => {
     if (pendingMessage.value) {
         throw new Error('Message already in progress')
+    }
+    if (!settings.connectionProvider) {
+        throw new Error('Select a connection provider in settings')
     }
     const message = chat.messages.find((m) => m.id === messageId)
     if (!message) throw new Error('Message not found')
@@ -320,6 +327,10 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
+        <div v-if="!settings.connectionProvider" class="alert alert-warning m-1" role="alert">
+            <ExclamationTriangleIcon class="size-6" />
+            Select a generation provider in settings
+        </div>
         <div class="flex absolute bottom-0 left-0 sm:left-52 right-0 px-1 sm:pb-1 sm:pr-2 max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
             <button class="relative mr-2 cursor-pointer" @click.stop="toggleCtxMenu" @blur="showCtxMenu = false">
