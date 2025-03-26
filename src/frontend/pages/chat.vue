@@ -41,13 +41,8 @@ const updateChat = async () => {
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
-    if (!settings.connectionProvider) {
-        throw new Error('Select a connection provider in settings')
-    }
-
-    if (pendingMessage.value) {
-        throw new Error('Message already in progress')
-    }
+    if (!settings.connectionProvider) throw new Error('Select a connection provider in settings')
+    if (pendingMessage.value) throw new Error('Message already in progress')
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
@@ -58,10 +53,7 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 }
 
 const impersonate = async () => {
-    if (pendingMessage.value) {
-        throw new Error('Message already in progress')
-    }
-
+    if (pendingMessage.value) throw new Error('Message already in progress')
     await createMessage(userCharacter.id, '', 'model')
     await generateMessage(userCharacter.name)
 }
@@ -212,12 +204,8 @@ const generateMessage = async (respondent?: string) => {
 }
 
 const newSwipe = async (messageId: string) => {
-    if (pendingMessage.value) {
-        throw new Error('Message already in progress')
-    }
-    if (!settings.connectionProvider) {
-        throw new Error('Select a connection provider in settings')
-    }
+    if (pendingMessage.value) throw new Error('Message already in progress')
+    if (!settings.connectionProvider) throw new Error('Select a connection provider in settings')
     const message = chat.messages.find((m) => m.id === messageId)
     if (!message) throw new Error('Message not found')
     message.content.push('')
@@ -245,9 +233,7 @@ const swipeRight = async (messageId: string) => {
 
 const deleteMessage = async (messageId: string) => {
     const messageIndex = chat.messages.findIndex((m) => m.id === messageId)
-    if (messageIndex === -1) {
-        throw new Error('Message not found')
-    }
+    if (messageIndex === -1) throw new Error('Message not found')
     chat.messages.splice(messageIndex, 1)
     await updateChat()
 }
