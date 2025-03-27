@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {useMenuStore} from '@/store'
-import pkg from '../../../package.json'
+import pkg from '@/../../package.json'
 
 defineProps({
     showMenu: Boolean,
@@ -56,18 +56,18 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/settings"
+                    to="/hub"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
-                    Settings
+                    Hub
                 </router-link>
             </li>
             <li>
                 <router-link
-                    to="/hub"
+                    to="/settings"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
-                    Connect to Hub
+                    Settings
                 </router-link>
             </li>
             <li>

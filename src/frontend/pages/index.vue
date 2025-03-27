@@ -1,9 +1,25 @@
+<script lang="ts" setup>
+import {useSettingsStore, useHubStore} from '@/store'
+
+const settings = useSettingsStore()
+const hub = useHubStore()
+</script>
+
 <template>
-    <p class="text-center sm:text-left">
-        A connection to a Llama.cpp server is required.
-        <br />
-        Set the server address in the connection tab.
-        <br />
-        Then create a new character and chat to begin.
-    </p>
+    <div class="flex flex-col flex-1 items-center justify-center">
+        <div v-if="!settings.connectionProvider" class="card flex justify-center mx-5">
+            <h1 class="text-2xl text-center">Welcome</h1>
+            <div class="text-lg mt-3">Select a generation provider in the settings to begin</div>
+            <router-link to="/settings" class="btn btn-sm btn-primary mt-5 mx-auto max-w-32">Go to Settings</router-link>
+        </div>
+
+        <div v-else-if="settings.connectionProvider === 'hub' && !hub.authenticated" class="card">
+            <div class="text-xl">Login Expired</div>
+            <router-link :to="{name: 'settings'}" class="btn btn-sm btn-primary mt-4">Go to Settings</router-link>
+        </div>
+
+        <div v-else class="card">
+            <h1 class="text-xl font-bold">Welcome back</h1>
+        </div>
+    </div>
 </template>

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {useToastStore, useSettingsStore, useHubStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
+import HubLogin from '@/components/hub-login.vue'
 
 const settings = useSettingsStore()
 const hub = useHubStore()
@@ -64,9 +65,20 @@ const checkConnection = async () => {
             </select>
         </fieldset>
 
-        <!-- Connection -->
+        <!-- Hub -->
         <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
-            <legend class="fieldset-legend">Connection</legend>
+            <legend class="fieldset-legend">Cybermuse Hub</legend>
+
+            <template v-if="hub.authenticated">
+                Logged into Hub
+                <button @click="hub.logout" class="btn btn-error block mt-3">Logout</button>
+            </template>
+            <HubLogin v-else />
+        </fieldset>
+
+        <!-- Generation -->
+        <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
+            <legend class="fieldset-legend">Generation</legend>
 
             <label class="fieldset-label text-sm">Generation Provider</label>
             <select class="select mt-1" @change="setConnectionProvider" :value="settings.connectionProvider">
