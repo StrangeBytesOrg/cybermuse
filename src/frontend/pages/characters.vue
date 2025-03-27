@@ -28,8 +28,8 @@ const filteredCharacters = computed(() => {
 
 <template>
     <Teleport to="#topbar">
-        <RouterLink to="/create-character" class="btn btn-sm btn-primary absolute top-2 left-2">
-            Create Character +
+        <RouterLink :to="{name: 'create-character'}" class="btn btn-sm btn-primary absolute top-2 left-2">
+            Create Character
         </RouterLink>
     </Teleport>
 

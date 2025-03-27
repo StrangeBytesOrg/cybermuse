@@ -7,7 +7,7 @@ const loreBooks = await loreCollection.toArray()
 
 <template>
     <Teleport to="#topbar">
-        <RouterLink to="/create-lore" class="btn btn-sm btn-primary absolute top-2 left-2">New Lorebook +</RouterLink>
+        <RouterLink :to="{name: 'create-lore'}" class="btn btn-sm btn-primary absolute top-2 left-2">New Lorebook +</RouterLink>
     </Teleport>
 
     <div class="flex flex-row">

@@ -17,7 +17,7 @@ const hub = useHubStore()
                     </template>
                     <div v-else>
                         <div class="text-lg">Not logged in.</div>
-                        <span class="text-sm">Login from <router-link to="/settings">settings</router-link></span>
+                        <span class="text-sm">Login from <router-link :to="{name: 'settings'}">settings</router-link></span>
                     </div>
                 </div>
             </div>

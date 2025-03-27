@@ -48,7 +48,7 @@ const deletePreset = async () => {
             </select>
         </div>
 
-        <router-link to="/create-preset" class="btn btn-primary mt-auto ml-3">Create Preset</router-link>
+        <router-link :to="{name: 'create-preset'}" class="btn btn-primary mt-auto ml-3">Create Preset</router-link>
     </div>
 
     <div v-if="activePreset" class="flex flex-col justify-between bg-base-200 rounded-lg p-3 pt-1 mt-3">

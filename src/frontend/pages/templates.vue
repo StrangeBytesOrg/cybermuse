@@ -94,7 +94,7 @@ const getPreview = async () => {
             </select>
         </div>
 
-        <router-link to="/create-template" class="btn btn-primary mt-auto ml-3">Create Template</router-link>
+        <router-link :to="{name: 'create-template'}" class="btn btn-primary mt-auto ml-3">Create Template</router-link>
     </div>
 
     <fieldset v-if="activeTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">

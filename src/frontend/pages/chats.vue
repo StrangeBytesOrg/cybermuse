@@ -41,7 +41,7 @@ const formatTitle = (chat: Chat) => {
 
 <template>
     <Teleport to="#topbar">
-        <RouterLink to="/create-chat" class="btn btn-sm btn-primary absolute top-2 left-2">New Chat +</RouterLink>
+        <RouterLink :to="{name: 'create-chat'}" class="btn btn-sm btn-primary absolute top-2 left-2">New Chat</RouterLink>
     </Teleport>
 
     <div class="flex flex-row">

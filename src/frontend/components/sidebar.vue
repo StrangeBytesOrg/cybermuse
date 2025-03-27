@@ -16,7 +16,7 @@ const menuStore = useMenuStore()
         <ul class="menu">
             <li>
                 <router-link
-                    to="/chats"
+                    :to="{name: 'chats'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Chats
@@ -24,7 +24,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/characters"
+                    :to="{name: 'characters'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Characters
@@ -32,7 +32,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/lore"
+                    :to="{name: 'lore'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Lore
@@ -40,7 +40,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/templates"
+                    :to="{name: 'templates'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Prompt Templates
@@ -48,7 +48,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/presets"
+                    :to="{name: 'presets'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Generation Presets
@@ -56,7 +56,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/hub"
+                    :to="{name: 'hub'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Hub
@@ -64,7 +64,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/settings"
+                    :to="{name: 'settings'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     Settings
@@ -72,7 +72,7 @@ const menuStore = useMenuStore()
             </li>
             <li>
                 <router-link
-                    to="/about"
+                    :to="{name: 'about'}"
                     class="font-bold px-2 mb-1"
                     active-class="bg-primary text-primary-content">
                     About
