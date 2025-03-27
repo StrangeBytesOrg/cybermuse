@@ -60,22 +60,22 @@ const deletePreset = async () => {
                 <input v-model="activePreset.name" type="text" class="input" />
 
                 <label class="fieldset-label text-sm">Max Response Tokens</label>
-                <NumberInput v-model="activePreset.maxTokens" class="input" />
+                <NumberInput v-model="activePreset.maxTokens" class="input" min="0" />
 
                 <label class="fieldset-label text-sm">Temperature</label>
-                <NumberInput v-model="activePreset.temperature" class="input" />
+                <NumberInput v-model="activePreset.temperature" class="input" step="0.1" min="0" />
 
                 <label class="fieldset-label text-sm">Seed</label>
-                <NumberInput v-model="activePreset.seed" class="input" />
+                <NumberInput v-model="activePreset.seed" class="input" min="0" />
 
                 <label class="fieldset-label text-sm">Min P</label>
-                <NumberInput v-model="activePreset.minP" class="input" />
+                <NumberInput v-model="activePreset.minP" class="input" step="0.01" min="0" />
 
                 <label class="fieldset-label text-sm">Top P</label>
-                <NumberInput v-model="activePreset.topP" class="input" />
+                <NumberInput v-model="activePreset.topP" class="input" step="0.01" min="0" />
 
                 <label class="fieldset-label text-sm">Top K</label>
-                <NumberInput v-model="activePreset.topK" class="input" />
+                <NumberInput v-model="activePreset.topK" class="input" min="0" />
             </fieldset>
 
             <fieldset class="fieldset ml-5">
