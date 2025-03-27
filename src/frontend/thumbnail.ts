@@ -14,7 +14,7 @@ thumbnailDb.version(1).stores({thumbs: 'id'})
 
 const memCache = new Map<string, string>()
 
-export const createThumbnail = async (data: string, maxWidth: number, maxHeight: number) => {
+export const createThumbnail = (data: string, maxWidth: number, maxHeight: number) => {
     return new Promise<Blob>((resolve, reject) => {
         const image = new Image()
         image.src = data

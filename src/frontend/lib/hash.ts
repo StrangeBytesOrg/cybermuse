@@ -8,8 +8,8 @@ export const hash = (str: string) => {
     const FNV_PRIME = 0x01000193
     let hash = 0x811c9dc5
     let stepSize = 1
-    if (str.length > 100_000) {
-        stepSize = Math.max(1, Math.floor(str.length / 100_000))
+    if (str.length > 10_000) {
+        stepSize = Math.max(1, Math.floor(str.length / 10_000))
     }
     for (let i = 0; i < str.length; i += stepSize) {
         hash ^= str.charCodeAt(i)
