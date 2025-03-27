@@ -21,6 +21,9 @@ import About from './pages/about.vue'
 import ErrorPage from './pages/error.vue'
 
 export default createRouter({
+    scrollBehavior() {
+        document.getElementById('main')?.scrollTo({top: 0, left: 0})
+    },
     history: createWebHistory(),
     routes: [
         {
