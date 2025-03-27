@@ -154,7 +154,6 @@ const userCharacters = computed(() => {
 
         <div class="flex flex-row mt-5">
             <button class="btn btn-primary" @click="createChat">Create Chat</button>
-            <button class="btn btn-error ml-3" @click="router.back">Cancel</button>
         </div>
     </div>
 </template>

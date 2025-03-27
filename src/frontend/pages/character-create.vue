@@ -140,7 +140,6 @@ const importCharacterPng = (file: File) => {
         <div class="flex flex-row">
             <button class="btn btn-primary" @click="createCharacter">Create</button>
             <FileInput @changed="importCharacterPng" button-label="Import Character" class="ml-2" />
-            <button class="btn btn-error ml-2" @click="router.back">Cancel</button>
         </div>
     </div>
 </template>
