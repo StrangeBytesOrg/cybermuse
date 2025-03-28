@@ -8,6 +8,8 @@ const hub = useHubStore()
 const toast = useToastStore()
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 
+hub.checkAuth()
+
 const setTheme = async (event: Event) => {
     const target = event.target as HTMLSelectElement
     settings.setTheme(target.value)
@@ -69,7 +71,7 @@ const checkConnection = async () => {
         <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
             <legend class="fieldset-legend">Cybermuse Hub</legend>
 
-            <template v-if="hub.authenticated">
+            <template v-if="hub.token">
                 Logged into Hub
                 <button @click="hub.logout" class="btn btn-error block mt-3">Logout</button>
             </template>

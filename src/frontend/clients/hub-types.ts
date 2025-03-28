@@ -36,6 +36,38 @@ export interface paths {
         patch?: never
         trace?: never
     }
+    '/logout': {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        get?: never
+        put?: never
+        post: operations['postLogout']
+        delete?: never
+        options?: never
+        head?: never
+        patch?: never
+        trace?: never
+    }
+    '/verify': {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        get: operations['getVerify']
+        put?: never
+        post?: never
+        delete?: never
+        options?: never
+        head?: never
+        patch?: never
+        trace?: never
+    }
     '/characters': {
         parameters: {
             query?: never
@@ -90,14 +122,20 @@ export interface operations {
         requestBody: {
             content: {
                 'application/json': {
+                    /** Format: email */
+                    email: string
                     username: string
                     password: string
                 }
                 'multipart/form-data': {
+                    /** Format: email */
+                    email: string
                     username: string
                     password: string
                 }
                 'text/plain': {
+                    /** Format: email */
+                    email: string
                     username: string
                     password: string
                 }
@@ -108,7 +146,17 @@ export interface operations {
                 headers: {
                     [name: string]: unknown
                 }
-                content?: never
+                content: {
+                    'application/json': {
+                        token: string
+                    }
+                    'multipart/form-data': {
+                        token: string
+                    }
+                    'text/plain': {
+                        token: string
+                    }
+                }
             }
         }
     }
@@ -151,6 +199,44 @@ export interface operations {
                         token: string
                     }
                 }
+            }
+        }
+    }
+    postLogout: {
+        parameters: {
+            query?: never
+            header: {
+                authorization: string
+            }
+            path?: never
+            cookie?: never
+        }
+        requestBody?: never
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content?: never
+            }
+        }
+    }
+    getVerify: {
+        parameters: {
+            query?: never
+            header: {
+                authorization: string
+            }
+            path?: never
+            cookie?: never
+        }
+        requestBody?: never
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content?: never
             }
         }
     }

@@ -9,7 +9,7 @@ const hub = useHubStore()
         <div class="max-w-md w-full p-4">
             <div class="card bg-base-300 shadow-xl">
                 <div class="card-body">
-                    <template v-if="hub.authenticated">
+                    <template v-if="hub.token">
                         <h1 class="card-title">Connected</h1>
                         <div class="alert alert-info">
                             Coming Soon: Hub stuff

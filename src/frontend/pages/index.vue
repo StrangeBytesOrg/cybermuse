@@ -13,7 +13,7 @@ const hub = useHubStore()
             <router-link :to="{name: 'settings'}" class="btn btn-sm btn-primary mt-5 mx-auto max-w-32">Go to Settings</router-link>
         </div>
 
-        <div v-else-if="settings.connectionProvider === 'hub' && !hub.authenticated" class="card">
+        <div v-else-if="settings.connectionProvider === 'hub' && !hub.token" class="card">
             <div class="text-xl">Login Expired</div>
             <router-link :to="{name: 'settings'}" class="btn btn-sm btn-primary mt-4">Go to Settings</router-link>
         </div>
