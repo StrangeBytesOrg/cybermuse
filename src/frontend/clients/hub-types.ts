@@ -4,6 +4,38 @@
  */
 
 export interface paths {
+    '/get_email_token': {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        get?: never
+        put?: never
+        post: operations['postGet_email_token']
+        delete?: never
+        options?: never
+        head?: never
+        patch?: never
+        trace?: never
+    }
+    '/check_email_token': {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        get?: never
+        put?: never
+        post: operations['postCheck_email_token']
+        delete?: never
+        options?: never
+        head?: never
+        patch?: never
+        trace?: never
+    }
     '/signup': {
         parameters: {
             query?: never
@@ -52,14 +84,14 @@ export interface paths {
         patch?: never
         trace?: never
     }
-    '/verify': {
+    '/verify_token': {
         parameters: {
             query?: never
             header?: never
             path?: never
             cookie?: never
         }
-        get: operations['getVerify']
+        get: operations['getVerify_token']
         put?: never
         post?: never
         delete?: never
@@ -112,7 +144,7 @@ export interface components {
 }
 export type $defs = Record<string, never>
 export interface operations {
-    postSignup: {
+    postGet_email_token: {
         parameters: {
             query?: never
             header?: never
@@ -124,19 +156,119 @@ export interface operations {
                 'application/json': {
                     /** Format: email */
                     email: string
-                    username: string
-                    password: string
                 }
                 'multipart/form-data': {
                     /** Format: email */
                     email: string
-                    username: string
-                    password: string
                 }
                 'text/plain': {
                     /** Format: email */
                     email: string
+                }
+            }
+        }
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content?: never
+            }
+            401: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
+            }
+            500: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
+            }
+        }
+    }
+    postCheck_email_token: {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        requestBody: {
+            content: {
+                'application/json': {
+                    /** Format: email */
+                    email: string
+                    emailToken: string
+                }
+                'multipart/form-data': {
+                    /** Format: email */
+                    email: string
+                    emailToken: string
+                }
+                'text/plain': {
+                    /** Format: email */
+                    email: string
+                    emailToken: string
+                }
+            }
+        }
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content?: never
+            }
+            401: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
+            }
+        }
+    }
+    postSignup: {
+        parameters: {
+            query?: never
+            header?: never
+            path?: never
+            cookie?: never
+        }
+        requestBody: {
+            content: {
+                'application/json': {
+                    emailToken: string
                     username: string
+                    /** Format: email */
+                    email: string
+                    password: string
+                }
+                'multipart/form-data': {
+                    emailToken: string
+                    username: string
+                    /** Format: email */
+                    email: string
+                    password: string
+                }
+                'text/plain': {
+                    emailToken: string
+                    username: string
+                    /** Format: email */
+                    email: string
                     password: string
                 }
             }
@@ -156,6 +288,16 @@ export interface operations {
                     'text/plain': {
                         token: string
                     }
+                }
+            }
+            401: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
                 }
             }
         }
@@ -200,14 +342,22 @@ export interface operations {
                     }
                 }
             }
+            401: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
+            }
         }
     }
     postLogout: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path?: never
             cookie?: never
         }
@@ -221,12 +371,10 @@ export interface operations {
             }
         }
     }
-    getVerify: {
+    getVerify_token: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path?: never
             cookie?: never
         }
