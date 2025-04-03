@@ -67,9 +67,7 @@ export interface operations {
     getList: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path?: never
             cookie?: never
         }
@@ -105,9 +103,7 @@ export interface operations {
     putUpload: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path?: never
             cookie?: never
         }
@@ -151,9 +147,7 @@ export interface operations {
     getDownloadByCollectionByKey: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path: {
                 collection: string
                 key: string
@@ -179,6 +173,16 @@ export interface operations {
                         id: string
                         lastUpdate: number
                     }
+                }
+            }
+            404: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
                 }
             }
         }

@@ -1,4 +1,14 @@
 import createClient from 'openapi-fetch'
 import type {paths} from './gen-types'
+import {useHubStore} from '@/store'
 
-export default createClient<paths>()
+const genClient = createClient<paths>()
+genClient.use({
+    onRequest: ({request}) => {
+        const hub = useHubStore()
+        if (hub.token) {
+            request.headers.set('Authorization', `Bearer ${hub.token}`)
+        }
+    },
+})
+export default genClient

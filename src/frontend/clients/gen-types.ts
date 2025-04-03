@@ -35,9 +35,7 @@ export interface operations {
     postChatCompletions: {
         parameters: {
             query?: never
-            header: {
-                authorization: string
-            }
+            header?: never
             path?: never
             cookie?: never
         }

@@ -148,7 +148,6 @@ const generateMessage = async (respondent?: string) => {
 
         const {response} = await client.POST('/chat/completions', {
             baseUrl,
-            params: {header: {authorization: `Bearer ${token}`}},
             body: {
                 stream: true,
                 grammar: gbnfString,

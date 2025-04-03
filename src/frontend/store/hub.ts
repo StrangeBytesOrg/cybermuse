@@ -18,16 +18,12 @@ export const useHubStore = defineStore('hub', {
             localStorage.removeItem('hubToken')
         },
         async logout() {
-            await hubClient.POST('/logout', {
-                params: {header: {authorization: `Bearer ${this.token}`}},
-            })
+            await hubClient.POST('/logout')
             this.removeToken()
         },
         async checkAuth() {
             if (!this.token) return false
-            const {response} = await hubClient.GET('/verify_token', {
-                params: {header: {authorization: `Bearer ${this.token}`}},
-            })
+            const {response} = await hubClient.GET('/verify_token')
             if (response.status === 401) {
                 useToastStore().warn('Hub login expired. Please login again.')
                 this.removeToken()
