@@ -87,7 +87,7 @@ const getPreview = async () => {
         />
 
         <div class="flex flex-row space-x-2 mt-2">
-            <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
+            <button @click="getPreview" class="btn flex-grow">Preview</button>
             <button @click="createTemplate" class="btn btn-primary flex-grow">Create Template</button>
         </div>
     </fieldset>

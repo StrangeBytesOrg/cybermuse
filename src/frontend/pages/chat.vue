@@ -347,7 +347,7 @@ const toggleCtxMenu = () => {
             <button
                 @click="stopGeneration"
                 v-show="pendingMessage !== false"
-                class="btn btn-neutral align-middle md:ml-3 ml-[4px] h-20 md:w-32">
+                class="btn align-middle md:ml-3 ml-[4px] h-20 md:w-32">
                 Stop
             </button>
         </div>

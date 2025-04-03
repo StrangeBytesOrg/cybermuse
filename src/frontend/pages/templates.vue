@@ -110,7 +110,7 @@ const getPreview = async () => {
 
         <div class="flex flex-row space-x-2 mt-3">
             <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
-            <button @click="getPreview" class="btn btn-neutral flex-grow">Preview</button>
+            <button @click="getPreview" class="btn flex-grow">Preview</button>
             <button @click="deleteTemplate" class="btn btn-error flex-grow">Delete</button>
         </div>
     </fieldset>

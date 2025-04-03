@@ -59,35 +59,34 @@ const filteredCharacters = computed(() => {
 
     <div class="flex flex-col m-2">
         <template v-if="filteredCharacters.length">
-            <div v-for="character in filteredCharacters" :key="character.name">
-                <router-link
-                    :to="{name: 'character', params: {id: character.id}}"
-                    class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
-                    <div class="avatar">
-                        <div class="w-36 max-h-36 rounded-xl">
-                            <Thumbnail
-                                v-if="character.avatar"
-                                :image="character.avatar"
-                                :width="512"
-                                :height="512"
-                                :alt="character.name"
-                            />
-                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
-                        </div>
+            <router-link
+                v-for="character in filteredCharacters"
+                :key="character.name"
+                :to="{name: 'character', params: {id: character.id}}"
+                class="flex bg-base-200 rounded-lg p-2 mb-3 hover:outline outline-primary">
+                <div class="avatar">
+                    <div class="w-36 max-h-36 rounded-xl">
+                        <Thumbnail
+                            v-if="character.avatar"
+                            :image="character.avatar"
+                            :width="512"
+                            :height="512"
+                            :alt="character.name"
+                        />
+                        <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
-
-                    <div class="inline-flex flex-col h-36 ml-3">
-                        <div class="font-bold">
-                            {{ character.name }}
-                        </div>
-                        <div class="text-gray-500 overflow-hidden h-full fadeout">
-                            <p class="whitespace-pre-line">
-                                {{ character.shortDescription || character.description }}
-                            </p>
-                        </div>
+                </div>
+                <div class="inline-flex flex-col h-36 ml-3">
+                    <div class="font-bold">
+                        {{ character.name }}
                     </div>
-                </router-link>
-            </div>
+                    <div class="text-gray-500 overflow-hidden h-full fadeout">
+                        <p class="whitespace-pre-line">
+                            {{ character.shortDescription || character.description }}
+                        </p>
+                    </div>
+                </div>
+            </router-link>
         </template>
         <div v-else>
             no characters
