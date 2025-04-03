@@ -254,18 +254,17 @@ const toggleCtxMenu = () => {
         <div class="flex flex-grow flex-col-reverse overflow-y-auto px-1 md:px-2 w-full max-w-[70em] ml-auto mr-auto">
             <div v-for="(message, index) in chat.messages.slice().reverse()" :key="message.id" class="flex flex-col relative mt-2 bg-base-200 rounded-xl">
                 <!-- Message Content -->
-                <div class="flex flex-row pb-2 pt-3">
-                    <div class="avatar ml-2">
-                        <div class="w-16 h-16 rounded-full">
-                            <Thumbnail
-                                v-if="characterMap[message.characterId]?.avatar"
-                                :image="characterMap[message.characterId]?.avatar"
-                                :width="512"
-                                :height="512"
-                                alt="character avatar"
-                            />
-                            <img v-else src="../assets/img/placeholder-avatar.webp" alt="Oh no" />
-                        </div>
+                <div class="flex flex-row pb-2 pt-2">
+                    <div class="w-18 min-w-18 pl-2">
+                        <Thumbnail
+                            v-if="characterMap[message.characterId]?.avatar"
+                            :image="characterMap[message.characterId]?.avatar"
+                            :width="512"
+                            :height="512"
+                            class="w-full rounded"
+                            alt="character avatar"
+                        />
+                        <img v-else src="../assets/img/placeholder-avatar.webp" class="w-full rounded" alt="character avatar" />
                     </div>
 
                     <!-- Delete -->
