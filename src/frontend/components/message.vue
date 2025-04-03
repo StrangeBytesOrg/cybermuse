@@ -37,7 +37,7 @@ const update = async () => {
         <button v-if="editMode" @click="update" class="btn btn-square btn-sm btn-accent ml-2 align-top">
             <CheckIcon class="size-6" />
         </button>
-        <button class="btn btn-square btn-sm btn-ghost ml-2" @click="enterEdit">
+        <button class="btn btn-square btn-sm ml-2" @click="enterEdit">
             <PencilSquareIcon class="size-6" />
         </button>
     </div>

@@ -89,7 +89,7 @@ const formatTitle = (chat: Chat) => {
                     </div>
                 </div>
             </div>
-            <RouterLink :to="`/edit-chat/${chat.id}`" class="btn btn-neutral btn-sm absolute top-2 right-2">
+            <RouterLink :to="`/edit-chat/${chat.id}`" class="btn btn-sm absolute top-2 right-2">
                 <PencilSquareIcon class="size-6" />
             </RouterLink>
         </router-link>

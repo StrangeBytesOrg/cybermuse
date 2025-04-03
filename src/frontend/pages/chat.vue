@@ -268,7 +268,7 @@ const toggleCtxMenu = () => {
                     </div>
 
                     <!-- Delete -->
-                    <button class="btn btn-square btn-ghost btn-sm absolute top-1 right-11" @click="deleteMessage(message.id)">
+                    <button class="btn btn-square btn-sm absolute top-1 right-11" @click="deleteMessage(message.id)">
                         <TrashIcon class="size-6" />
                     </button>
 
@@ -284,7 +284,7 @@ const toggleCtxMenu = () => {
                 <div v-if="index === 0 && message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
                     <!-- Swipe Left -->
                     <div class="flex w-16">
-                        <button @click="swipeLeft(message.id)" v-show="message.activeIndex > 0" class="btn btn-sm btn-neutral">
+                        <button @click="swipeLeft(message.id)" v-show="message.activeIndex > 0" class="btn btn-sm">
                             <ChevronLeftIcon class="size-6 /" />
                         </button>
                     </div>
@@ -299,10 +299,10 @@ const toggleCtxMenu = () => {
                         <button
                             @click="swipeRight(message.id)"
                             v-show:="message.activeIndex < message.content.length - 1"
-                            class="btn btn-sm btn-neutral">
+                            class="btn btn-sm">
                             <ChevronRightIcon class="size-6" />
                         </button>
-                        <button @click="newSwipe(message.id)" class="btn btn-sm btn-neutral">
+                        <button @click="newSwipe(message.id)" class="btn btn-sm">
                             <ArrowPathIcon class="size-6" />
                         </button>
                     </div>
