@@ -1,6 +1,6 @@
 import {db} from '@/db'
 import client from '@/clients/sync-client'
-import {useSettingsStore, useHubStore} from '@/store'
+import {useSettingsStore} from '@/store'
 
 export const sync = async () => {
     const settings = useSettingsStore()
