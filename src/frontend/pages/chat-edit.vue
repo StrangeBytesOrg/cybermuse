@@ -34,6 +34,17 @@ const deleteChat = async () => {
     await chatCollection.delete(chatId)
     router.push({name: 'chats'})
 }
+
+const duplicateChat = async () => {
+    await chatCollection.put({
+        ...chat,
+        id: `chat-${Math.random().toString(36).slice(2)}`,
+        lastUpdate: Date.now(),
+        createDate: Date.now(),
+    })
+    toast.success('Chat duplicated')
+    router.push({name: 'chats'})
+}
 </script>
 
 <template>
@@ -67,10 +78,11 @@ const deleteChat = async () => {
         </div>
 
         <div class="divider mb-3"></div>
-        <div>
+        <div class="flex flex-row space-x-3">
             <button @click.prevent="updateChat" class="btn btn-primary">Update</button>
-            <button @click.prevent="archiveChat" class="btn btn-warning ml-3">Archive</button>
-            <button onclick="delete_confirm.showModal()" class="btn btn-error ml-3">Delete</button>
+            <button @click.prevent="duplicateChat" class="btn btn-primary">Duplicate</button>
+            <button @click.prevent="archiveChat" class="btn btn-warning">Archive</button>
+            <button onclick="delete_confirm.showModal()" class="btn btn-error">Delete</button>
         </div>
     </div>
 
