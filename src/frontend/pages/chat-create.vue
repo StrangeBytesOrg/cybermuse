@@ -57,9 +57,9 @@ const createChat = async () => {
     router.push({name: 'chat', params: {id}})
 }
 
-const removeCharacter = (character: Character) => {
-    selectedCharacters.value = selectedCharacters.value.filter((c) => c.id !== character.id)
-    if (userCharacter.value === character.id) {
+const removeCharacter = (characterId: string) => {
+    selectedCharacters.value = selectedCharacters.value.filter((c) => c.id !== characterId)
+    if (userCharacter.value === characterId) {
         userCharacter.value = ''
     }
 }
@@ -86,7 +86,7 @@ const removeLore = (loreId: string) => {
                             </div>
                             <div class="text-lg ml-2">{{ character.name }}</div>
 
-                            <button class="btn btn-sm btn-square btn-error absolute top-2 right-2" @click="removeCharacter(character)">
+                            <button class="btn btn-sm btn-square btn-error absolute top-2 right-2" @click="removeCharacter(character.id)">
                                 <TrashIcon class="size-4" />
                             </button>
 
