@@ -19,7 +19,6 @@ export const characterCollection = new Collection(
         lastUpdate: z.number(),
         deleted: z.number().optional(),
         name: z.string().min(1, {message: 'Name cannot be empty'}),
-        type: z.union([z.literal('user'), z.literal('character')]),
         description: z.string().min(1, {message: 'Description cannot be empty'}),
         firstMessage: z.string().optional(),
         avatar: z.string().optional(),

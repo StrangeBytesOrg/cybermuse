@@ -31,8 +31,6 @@ const characters = await characterCollection.whereIn(chat.characters)
 const userCharacter = await characterCollection.get(chat.userCharacter)
 const lore = await loreCollection.whereIn(chat.lore)
 const characterMap = Object.fromEntries(characters.map((c) => [c.id, c]))
-characterMap[chat.userCharacter] = userCharacter
-const allCharacter = [userCharacter, ...characters]
 
 const updateChat = async () => {
     await chatCollection.put(chat)
@@ -135,7 +133,7 @@ const generateMessage = async (respondent?: string) => {
         if (respondent) {
             nameString = `"${respondent}:"`
         } else {
-            nameString = `(${characters.map((c) => `"${c.name}:"`).join(' | ')})`
+            nameString = `(${characters.filter(c => c.id !== userCharacter.id).map((c) => `"${c.name}:"`).join(' | ')})`
         }
         const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
 
@@ -176,7 +174,7 @@ const generateMessage = async (respondent?: string) => {
             // Determine which character is speaking before outputting to the chat
             if (!characterPicked) {
                 initialBuffer += content
-                const character = allCharacter.find((c) => initialBuffer.includes(`${c.name}:`))
+                const character = characters.find((c) => initialBuffer.includes(`${c.name}:`))
                 if (character) {
                     console.log('Picked:', character.name)
                     characterPicked = true

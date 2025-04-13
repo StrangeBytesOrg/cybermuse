@@ -14,15 +14,8 @@ export const fixtureData = async () => {
             id: 'default-user-character',
             lastUpdate: 0,
             name: 'User',
-            type: 'user',
             description: 'The user of the system.',
-        })
-        await characterCollection.put({
-            id: 'default-character',
-            lastUpdate: 0,
-            name: 'Assistant',
-            type: 'character',
-            description: 'A helpful assistant designed to guide you through the process.',
+            shortDescription: 'A default user character you can use.',
         })
     }
 

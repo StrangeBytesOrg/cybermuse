@@ -15,7 +15,7 @@ const onChangeFile = (event: Event) => {
 
 <template>
     <div>
-        <input type="file" @change="onChangeFile" ref="fileInput" class="hidden" />
+        <input type="file" @change="onChangeFile" ref="fileInput" class="hidden" accept="image/*" />
         <button class="btn btn-primary" :class="props.buttonSize" @click="fileInput?.click()">
             {{ props.buttonLabel ?? 'Select File' }}
         </button>

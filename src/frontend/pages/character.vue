@@ -88,10 +88,6 @@ const removeImage = () => {
             class="textarea w-full mt-5 min-h-36 sm:min-h-64 border-2 leading-normal"
         />
 
-        <select v-model="character.type" class="select w-full sm:max-w-80 mt-5">
-            <option value="character">Character</option>
-            <option value="user">User</option>
-        </select>
         <!-- Avatar -->
         <div class="flex flex-row mt-5">
             <div class="avatar">

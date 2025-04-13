@@ -1,17 +1,23 @@
 <script lang="ts" setup>
-import {ref, computed} from 'vue'
+import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {Liquid} from 'liquidjs'
+import {TrashIcon} from '@heroicons/vue/24/outline'
 import {characterCollection, chatCollection, loreCollection, type Message} from '@/db'
+import MultiSelectCharacters from '@/components/select-characters.vue'
+import MultiSelectLore from '@/components/select-lore.vue'
 
 const router = useRouter()
-const selectedCharacters = ref<string[]>([])
-const selectedLore = ref<string[]>([])
-const userCharacter = ref('default-user-character')
-const chatName = ref('')
 
 const characters = await characterCollection.toArray()
+type Character = typeof characters[0]
 const lore = await loreCollection.toArray()
+type Lore = typeof lore[0]
+
+const selectedCharacters = ref<Character[]>([])
+const selectedLore = ref<Lore[]>([])
+const userCharacter = ref('')
+const chatName = ref('')
 
 const createChat = async () => {
     const engine = new Liquid()
@@ -19,8 +25,7 @@ const createChat = async () => {
     // If characters have a first message, add it to the chat
     const userName = characters.find((c) => c.id === userCharacter.value)?.name
     const messages: Message[] = []
-    selectedCharacters.value.forEach(async (characterId) => {
-        const character = characters.find((c) => c.id === characterId)
+    selectedCharacters.value.forEach(async (character) => {
         if (character?.firstMessage) {
             // Parse firstMessage template
             const content = engine.parseAndRenderSync(character.firstMessage, {
@@ -42,8 +47,8 @@ const createChat = async () => {
         lastUpdate: Date.now(),
         name: chatName.value,
         userCharacter: userCharacter.value,
-        characters: selectedCharacters.value,
-        lore: selectedLore.value,
+        characters: selectedCharacters.value.map((c) => c.id),
+        lore: selectedLore.value.map((l) => l.id),
         createDate: Date.now(),
         messages: messages,
         archived: false,
@@ -52,108 +57,82 @@ const createChat = async () => {
     router.push({name: 'chat', params: {id}})
 }
 
-const setSelected = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (target.checked) {
-        selectedCharacters.value.push(target.value)
-    } else {
-        selectedCharacters.value = selectedCharacters.value.filter((id) => id !== target.value)
+const removeCharacter = (character: Character) => {
+    selectedCharacters.value = selectedCharacters.value.filter((c) => c.id !== character.id)
+    if (userCharacter.value === character.id) {
+        userCharacter.value = ''
     }
 }
 
-const setSelectedLore = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    if (target.checked) {
-        selectedLore.value.push(target.value)
-    } else {
-        selectedLore.value = selectedLore.value.filter((id) => id !== target.value)
-    }
+const removeLore = (loreId: string) => {
+    selectedLore.value = selectedLore.value.filter((l) => l.id !== loreId)
 }
-
-const notUserCharacters = computed(() => {
-    return characters.filter((character) => character.type !== 'user')
-})
-
-const userCharacters = computed(() => {
-    return characters.filter((character) => character.type === 'user')
-})
 </script>
 
 <template>
-    <div class="p-2">
+    <div class="p-2 md:max-w-96 flex flex-col gap-4">
         <!-- Characters -->
-        <h2 class="text-xl font-bold">Characters</h2>
-        <div class="divider mt-0 mb-1"></div>
-        <div class="flex flex-col">
-            <template v-if="notUserCharacters.length">
-                <div
-                    v-for="character in notUserCharacters"
-                    :key="character.id"
-                    class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
-                    <div class="avatar w-20 h-20">
-                        <img v-if="character.avatar" :src="character.avatar" class="rounded-lg" />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
-                    </div>
-                    <div class="text-lg ml-2">{{ character.name }}</div>
-                    <label class="absolute w-full h-full cursor-pointer">
-                        <input
-                            type="checkbox"
-                            :value="character.id"
-                            :checked="selectedCharacters.includes(character.id)"
-                            @change="setSelected"
-                            class="checkbox absolute top-2 right-4"
-                        />
-                    </label>
-                </div>
-            </template>
-            <template v-else>
-                <div class="font-bold text-lg pt-3 pb-5">No characters found. Create one on the characters page.</div>
-            </template>
-        </div>
+        <div>
+            <h2 class="text-xl font-bold">Characters</h2>
+            <div class="divider mt-0 mb-1"></div>
+            <MultiSelectCharacters :options="characters" v-model="selectedCharacters" placeholder="Search Characters" class="w-full" />
+            <div class="flex flex-col gap-2 w-full mt-4">
+                <div v-for="character in selectedCharacters" :key="character.id" class="card bg-base-200">
+                    <div class="card-body p-2">
+                        <div class="flex flex-row gap-2">
+                            <div class="avatar w-20 h-20">
+                                <img v-if="character.avatar" :src="character.avatar" class="rounded-lg" />
+                                <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
+                            </div>
+                            <div class="text-lg ml-2">{{ character.name }}</div>
 
-        <!-- User Character -->
-        <h2 class="text-xl font-bold">User Character</h2>
-        <div class="divider mt-0 mb-1"></div>
-        <select v-model="userCharacter" class="select bg-base-200">
-            <option v-for="character in userCharacters" :key="character.id" :value="character.id">
-                {{ character.name }}
-            </option>
-        </select>
+                            <button class="btn btn-sm btn-square btn-error absolute top-2 right-2" @click="removeCharacter(character)">
+                                <TrashIcon class="size-4" />
+                            </button>
+
+                            <div class="flex flex-row gap-2 absolute bottom-2 right-2">
+                                <label class="label">User</label>
+                                <input type="radio" name="userCharacter" :value="character.id" v-model="userCharacter" class="radio" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Lore -->
         <div v-if="lore.length" class="w-full">
-            <h2 class="text-xl font-bold mt-5">Lore</h2>
+            <h2 class="text-xl font-bold">Lore</h2>
             <div class="divider mt-0 mb-1"></div>
-            <div class="flex flex-col">
-                <div
-                    v-for="loreBook in lore"
-                    :key="loreBook.id"
-                    class="flex h-24 p-2 mb-2 rounded-lg bg-base-200 relative hover:outline outline-primary">
-                    <div class="text-lg ml-2">{{ loreBook.name }}</div>
-                    <label class="absolute w-full h-full cursor-pointer">
-                        <input
-                            type="checkbox"
-                            :value="loreBook.id"
-                            @change="setSelectedLore"
-                            class="checkbox absolute top-2 right-4"
-                        />
-                    </label>
+            <MultiSelectLore :options="lore" v-model="selectedLore" placeholder="Search Lore" class="w-full" />
+            <div class="flex flex-col gap-2 w-full mt-4">
+                <div v-for="lore in selectedLore" :key="lore.id" class="card bg-base-200">
+                    <div class="card-body p-2">
+                        <div class="flex flex-row justify-between">
+                            <span class="text-lg">{{ lore.name }}</span>
+                            <button class="btn btn-sm btn-square btn-error" @click="removeLore(lore.id)">
+                                <TrashIcon class="size-4" />
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Chat Name -->
-        <h2 class="text-xl font-bold mt-5">Chat Name</h2>
-        <div class="divider mt-0 mb-1"></div>
-        <input
-            type="text"
-            placeholder="(optional)"
-            v-model="chatName"
-            class="input"
-        />
+        <div>
+            <h2 class="text-xl font-bold">Chat Name</h2>
+            <div class="divider mt-0 mb-1"></div>
+            <input
+                type="text"
+                placeholder="(optional)"
+                v-model="chatName"
+                class="input w-full"
+            />
 
-        <div class="flex flex-row mt-5">
-            <button class="btn btn-primary" @click="createChat">Create Chat</button>
+            <div class="flex flex-row mt-5">
+                <button class="btn btn-primary" @click="createChat" :disabled="selectedCharacters.length < 1">Create Chat</button>
+            </div>
         </div>
     </div>
 </template>

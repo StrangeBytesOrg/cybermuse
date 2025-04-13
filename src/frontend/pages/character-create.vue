@@ -118,13 +118,8 @@ const importCharacterPng = (file: File) => {
             class="textarea w-full mt-5 min-h-36 sm:min-h-64 border-2 leading-normal"
         />
 
-        <select v-model="character.type" class="select w-full sm:max-w-80 mt-5">
-            <option value="character">Character</option>
-            <option value="user">User</option>
-        </select>
-
         <!-- Avatar -->
-        <div class="flex flex-row mt-5">
+        <div class="flex flex-row mt-5 gap-5">
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
                     <img v-if="character.avatar" :src="character.avatar" :alt="character.name + ' avatar'" />
@@ -132,8 +127,8 @@ const importCharacterPng = (file: File) => {
                 </div>
             </div>
 
-            <FileInput @changed="uploadAvatar" class="ml-5 mt-auto" />
-            <button v-if="character.avatar" class="btn btn-error mt-auto ml-5" @click="removeImage">Remove</button>
+            <FileInput @changed="uploadAvatar" class="mt-auto" />
+            <button v-if="character.avatar" class="btn btn-error mt-auto" @click="removeImage">Remove</button>
         </div>
 
         <div class="divider"></div>
