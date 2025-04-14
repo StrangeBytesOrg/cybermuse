@@ -70,14 +70,26 @@ const removeLore = (loreId: string) => {
 </script>
 
 <template>
-    <div class="p-2 md:max-w-96 flex flex-col gap-4">
+    <div class="container p-3 md:max-w-96 flex flex-col gap-6 bg-base-200 rounded-lg">
+        <!-- Chat Name -->
+        <div>
+            <h2 class="text-xl font-bold">Chat Name</h2>
+            <div class="divider mt-0 mb-1"></div>
+            <input
+                type="text"
+                placeholder="(optional)"
+                v-model="chatName"
+                class="input w-full"
+            />
+        </div>
+
         <!-- Characters -->
         <div>
             <h2 class="text-xl font-bold">Characters</h2>
             <div class="divider mt-0 mb-1"></div>
             <MultiSelectCharacters :options="characters" v-model="selectedCharacters" placeholder="Search Characters" class="w-full" />
             <div class="flex flex-col gap-2 w-full mt-4">
-                <div v-for="character in selectedCharacters" :key="character.id" class="card bg-base-200">
+                <div v-for="character in selectedCharacters" :key="character.id" class="card bg-base-100">
                     <div class="card-body p-2">
                         <div class="flex flex-row gap-2">
                             <div class="avatar w-20 h-20">
@@ -106,7 +118,7 @@ const removeLore = (loreId: string) => {
             <div class="divider mt-0 mb-1"></div>
             <MultiSelectLore :options="lore" v-model="selectedLore" placeholder="Search Lore" class="w-full" />
             <div class="flex flex-col gap-2 w-full mt-4">
-                <div v-for="lore in selectedLore" :key="lore.id" class="card bg-base-200">
+                <div v-for="lore in selectedLore" :key="lore.id" class="card bg-base-100">
                     <div class="card-body p-2">
                         <div class="flex flex-row justify-between">
                             <span class="text-lg">{{ lore.name }}</span>
@@ -119,20 +131,8 @@ const removeLore = (loreId: string) => {
             </div>
         </div>
 
-        <!-- Chat Name -->
-        <div>
-            <h2 class="text-xl font-bold">Chat Name</h2>
-            <div class="divider mt-0 mb-1"></div>
-            <input
-                type="text"
-                placeholder="(optional)"
-                v-model="chatName"
-                class="input w-full"
-            />
-
-            <div class="flex flex-row mt-5">
-                <button class="btn btn-primary" @click="createChat" :disabled="selectedCharacters.length < 1">Create Chat</button>
-            </div>
+        <div class="mt-5">
+            <button class="btn btn-primary" @click="createChat" :disabled="selectedCharacters.length < 1">Create Chat</button>
         </div>
     </div>
 </template>
