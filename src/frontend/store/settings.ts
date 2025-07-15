@@ -9,8 +9,10 @@ export const useSettingsStore = defineStore('settings', {
             syncProvider: localStorage.getItem('syncProvider'),
             syncServer: localStorage.getItem('syncServer'),
             syncSecret: localStorage.getItem('syncSecret'),
-            connectionProvider: localStorage.getItem('connectionProvider'),
-            connectionServer: localStorage.getItem('connectionServer'),
+            generationProvider: localStorage.getItem('generationProvider'),
+            generationServer: localStorage.getItem('generationServer') ?? '',
+            generationModel: localStorage.getItem('generationModel'),
+            generationKey: localStorage.getItem('generationKey'),
         }
     },
     actions: {
@@ -38,13 +40,21 @@ export const useSettingsStore = defineStore('settings', {
             this.syncSecret = syncSecret
             localStorage.setItem('syncSecret', syncSecret)
         },
-        setConnectionProvider(connectionProvider: string) {
-            this.connectionProvider = connectionProvider
-            localStorage.setItem('connectionProvider', connectionProvider)
+        setGenerationProvider(generationProvider: string) {
+            this.generationProvider = generationProvider
+            localStorage.setItem('generationProvider', generationProvider)
         },
-        setConnectionServer(connectionServer: string) {
-            this.connectionServer = connectionServer
-            localStorage.setItem('connectionServer', connectionServer)
+        setGenerationServer(generationServer: string) {
+            this.generationServer = generationServer
+            localStorage.setItem('generationServer', generationServer)
+        },
+        setGenerationKey(generationKey: string) {
+            this.generationKey = generationKey
+            localStorage.setItem('generationKey', generationKey)
+        },
+        setGenerationModel(generationModel: string) {
+            this.generationModel = generationModel
+            localStorage.setItem('generationModel', generationModel)
         },
     },
 })

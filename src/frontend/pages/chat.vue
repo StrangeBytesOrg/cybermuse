@@ -4,9 +4,8 @@ import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
 import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
-import {useSettingsStore, useHubStore} from '@/store'
+import {useSettingsStore} from '@/store'
 import {responseToIterable} from '@/lib/sse'
-import client from '@/clients/gen-client'
 import Message from '@/components/message.vue'
 import Thumbnail from '@/components/thumbnail.vue'
 import router from '@/router'
@@ -14,7 +13,6 @@ import {ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, TrashIcon} from '@hero
 
 const route = useRoute()
 const settings = useSettingsStore()
-const hub = useHubStore()
 const chatId = route.params.id
 const currentMessage = ref('')
 const pendingMessage = ref(false)
@@ -39,7 +37,7 @@ const updateChat = async () => {
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
-    if (!settings.connectionProvider) throw new Error('Select a connection provider in settings')
+    if (!settings.generationProvider) throw new Error('Select a generation provider in settings')
     if (pendingMessage.value) throw new Error('Message already in progress')
 
     // Only create a new user message if there is text
@@ -52,11 +50,11 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 
 const impersonate = async () => {
     if (pendingMessage.value) throw new Error('Message already in progress')
-    await createMessage(userCharacter.id, '', 'model')
+    await createMessage(userCharacter.id, '', 'user')
     await generateMessage(userCharacter.name)
 }
 
-const createMessage = async (characterId: string, text: string = '', type: 'user' | 'model' | 'system') => {
+const createMessage = async (characterId: string, text: string = '', type: 'system' | 'user' | 'assistant') => {
     chat.messages.push({
         id: Math.random().toString(36).slice(2),
         characterId,
@@ -131,35 +129,50 @@ const generateMessage = async (respondent?: string) => {
         // Create a GBNF string to make sure the message starts with a pre-determined character, or one of the chat characters
         let nameString
         if (respondent) {
-            nameString = `"${respondent}:"`
+            nameString = respondent
         } else {
-            nameString = `(${characters.filter(c => c.id !== userCharacter.id).map((c) => `"${c.name}:"`).join(' | ')})`
+            nameString = characters.filter(c => c.id !== userCharacter.id).map((c) => c.name).join('|')
         }
-        const gbnfString = `root ::= ${nameString} [\\u0000-\\U0010FFFF]*`
+        const pattern = `^(${nameString}): [\\u0000-\\U0010FFFF]*$`
 
         const generationPreset = await generationPresetCollection.get(settings.preset)
-        const baseUrl = settings.connectionProvider === 'hub' ? import.meta.env.VITE_GEN_URL : settings.connectionServer
-        const token = settings.connectionProvider === 'hub' ? hub.token : 'dummy-token'
+        if (!settings.generationServer) throw new Error('No generation server set')
+        const url = `${settings.generationServer.replace(/\/$/, '')}/chat/completions`
 
-        if (!baseUrl) throw new Error('No connection provider set')
-        if (!token) throw new Error('No token set')
+        // TODO check for API Token based on provider
+        // if (!token) throw new Error('No token set')
 
-        const {response} = await client.POST('/chat/completions', {
-            baseUrl,
-            body: {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${settings.generationKey}`,
+            },
+            body: JSON.stringify({
                 stream: true,
-                grammar: gbnfString,
+                model: settings.generationModel,
                 messages: formattedMessages,
-                n_predict: generationPreset.maxTokens,
+                max_tokens: generationPreset.maxTokens,
                 temperature: generationPreset.temperature,
                 min_p: generationPreset.minP,
                 top_p: generationPreset.topP,
                 top_k: generationPreset.topK,
                 // TODO add Penalties
                 // TODO stop strings
-            },
+                response_format: {
+                    type: 'json_schema',
+                    json_schema: {
+                        name: 'response',
+                        strict: true,
+                        schema: {
+                            type: 'string',
+                            description: 'The content of the message',
+                            pattern,
+                        },
+                    },
+                },
+            }),
             signal: abortController.signal,
-            parseAs: 'stream',
         })
         if (!response.ok) throw new Error('Connection to server failed')
         const iterable = responseToIterable(response)
@@ -176,12 +189,11 @@ const generateMessage = async (respondent?: string) => {
                 initialBuffer += content
                 const character = characters.find((c) => initialBuffer.includes(`${c.name}:`))
                 if (character) {
-                    console.log('Picked:', character.name)
                     characterPicked = true
 
                     // If a respondent was not specified we need to create a new message
                     if (!respondent) {
-                        createMessage(character.id, '', 'model')
+                        createMessage(character.id, '', 'assistant')
                     }
                 }
             } else {
@@ -202,7 +214,7 @@ const generateMessage = async (respondent?: string) => {
 
 const newSwipe = async (messageId: string) => {
     if (pendingMessage.value) throw new Error('Message already in progress')
-    if (!settings.connectionProvider) throw new Error('Select a connection provider in settings')
+    if (!settings.generationProvider) throw new Error('Select a connection provider in settings')
     const message = chat.messages.find((m) => m.id === messageId)
     if (!message) throw new Error('Message not found')
     message.content.push('')
@@ -279,7 +291,7 @@ const toggleCtxMenu = () => {
                 </div>
 
                 <!-- Swipe Controls -->
-                <div v-if="index === 0 && message.type === 'model'" class="flex flex-row justify-between px-1 pb-1">
+                <div v-if="index === 0" class="flex flex-row justify-between px-1 pb-1">
                     <!-- Swipe Left -->
                     <div class="flex w-16">
                         <button @click="swipeLeft(message.id)" v-show="message.activeIndex > 0" class="btn btn-sm">
@@ -309,7 +321,7 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
-        <div v-if="!settings.connectionProvider" class="alert alert-warning m-1" role="alert">
+        <div v-if="!settings.generationProvider" class="alert alert-warning m-1" role="alert">
             <ExclamationTriangleIcon class="size-6" />
             Select a generation provider in settings
         </div>

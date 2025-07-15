@@ -4,12 +4,23 @@ import z from 'zod'
 
 export const db = new Dexie('cybermuse')
 
-db.version(1).stores({
+db.version(2).stores({
     characters: 'id',
     lore: 'id',
     chats: 'id',
     templates: 'id',
     generationPresets: 'id',
+}).upgrade(tx => {
+    // Migrate messages from using 'model' to 'assistant' type
+    return tx.table('chats').toCollection().modify(chat => {
+        if (!chat.messages) return
+        chat.messages = chat.messages.map(message => {
+            if (message.type === 'model') {
+                return {...message, type: 'assistant'}
+            }
+            return message
+        })
+    })
 })
 
 export const characterCollection = new Collection(
@@ -52,7 +63,7 @@ export const chatCollection = new Collection(
         messages: z.array(z.object({
             id: z.string(),
             characterId: z.string(),
-            type: z.union([z.literal('user'), z.literal('model'), z.literal('system')]),
+            type: z.union([z.literal('system'), z.literal('user'), z.literal('assistant')]),
             content: z.array(z.string()),
             activeIndex: z.number(),
         })),
