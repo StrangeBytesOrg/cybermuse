@@ -6,14 +6,11 @@ import Thumbnail from '@/components/thumbnail.vue'
 
 const searchName = ref('')
 const orderBy = ref('newest-update')
-const characterType = ref<'user' | 'character' | 'both'>('both')
 const characters = await characterCollection.toArray()
 
 const filteredCharacters = computed(() => {
     const filtered = characters.filter((character) => {
-        const matchesName = character.name.toLowerCase().includes(searchName.value.toLowerCase())
-        const matchesType = character.type === characterType.value || characterType.value === 'both'
-        return matchesName && matchesType
+        return character.name.toLowerCase().includes(searchName.value.toLowerCase())
     })
 
     // Sort the filtered results
@@ -41,14 +38,6 @@ const filteredCharacters = computed(() => {
             placeholder="Search by name"
             class="input w-full sm:w-1/3"
         />
-
-        <select
-            v-model="characterType"
-            class="select w-full sm:w-1/3">
-            <option value="both" default>Character Type</option>
-            <option value="character">Character</option>
-            <option value="user">User</option>
-        </select>
 
         <select v-model="orderBy" class="select w-full sm:w-1/3">
             <option value="newest-update">Recently Updated</option>
