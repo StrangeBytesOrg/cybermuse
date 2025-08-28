@@ -63,7 +63,11 @@ export const chatCollection = new Collection(
         messages: z.array(z.object({
             id: z.string(),
             characterId: z.string(),
-            type: z.union([z.literal('system'), z.literal('user'), z.literal('assistant')]),
+            type: z.union([
+                z.literal('system'),
+                z.literal('user'),
+                z.literal('assistant'),
+            ]),
             content: z.array(z.string()),
             activeIndex: z.number(),
         })),

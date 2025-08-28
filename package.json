@@ -1,6 +1,6 @@
 {
     "name": "cybermuse",
-    "version": "0.238.0",
+    "version": "0.239.0",
     "type": "module",
     "description": "A batteries included AI Chat Application",
     "author": "Strange Bytes",
@@ -13,12 +13,14 @@
         "typecheck": "vue-tsc -p ./src/frontend/tsconfig.json --noEmit"
     },
     "devDependencies": {
+        "@ai-sdk/openai-compatible": "^1.0.13",
         "@heroicons/vue": "^2.2.0",
         "@strangebytes/vue-dexie-live-query": "^0.1.0",
         "@tailwindcss/vite": "^4.1.12",
         "@vitejs/plugin-vue": "^6.0.1",
         "@vue/eslint-config-typescript": "^14.6.0",
         "@vue/tsconfig": "^0.8.1",
+        "ai": "^5.0.27",
         "daisyui": "^5.0.53",
         "dexie": "^4.2.0",
         "dprint": "^0.50.1",

@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import {generateText} from 'ai'
+import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {useToastStore, useSettingsStore, useHubStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
 import HubLogin from '@/components/hub-login.vue'
@@ -47,25 +49,22 @@ const setGenerationModel = (event: Event) => {
 }
 
 const testGeneration = async () => {
-    const url = `${settings.generationServer.replace(/\/$/, '')}/chat/completions`
-    const res = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${settings.generationKey}`,
-        },
-        body: JSON.stringify({
-            model: settings.generationModel,
-            messages: [{role: 'user', content: 'What is the meaning of life?'}],
-            max_tokens: 8,
-        }),
+    const endpoint = createOpenAICompatible({
+        name: 'custom',
+        baseURL: settings.generationServer,
+        apiKey: settings.generationKey ?? '',
     })
-    if (!res.ok) {
-        toast.error('Connection to server failed')
-        return
+    try {
+        await generateText({
+            model: endpoint(settings.generationModel ?? ''),
+            messages: [{role: 'user', content: 'What is the meaning of life?'}],
+            maxOutputTokens: 8,
+        })
+        toast.success('Connection to server successful')
+    } catch (err) {
+        console.error(err)
+        toast.error('Error connecting to server')
     }
-    console.log(await res.json())
-    toast.success('Connection to server successful')
 }
 
 const setSyncProvider = (event: Event) => {

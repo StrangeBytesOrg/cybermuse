@@ -3,9 +3,10 @@ import {ref, reactive} from 'vue'
 import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
+import {streamText} from 'ai'
+import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
 import {useSettingsStore} from '@/store'
-import {responseToIterable} from '@/lib/sse'
 import Message from '@/components/message.vue'
 import Thumbnail from '@/components/thumbnail.vue'
 import router from '@/router'
@@ -37,12 +38,22 @@ const updateChat = async () => {
 const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     event.preventDefault()
 
-    if (!settings.generationProvider) throw new Error('Select a generation provider in settings')
     if (pendingMessage.value) throw new Error('Message already in progress')
+    if (!settings.generationServer) throw new Error('No generation server set')
+    if (!settings.generationModel) throw new Error('No generation model set')
 
     // Only create a new user message if there is text
     if (currentMessage.value !== '') {
         await createMessage(userCharacter.id, currentMessage.value, 'user')
+    }
+
+    const otherCharacters = characters.filter((c) => c.id !== userCharacter.id)
+    if (otherCharacters.length > 1) {
+        console.log('TODO - Pick respondent using LLM')
+    } else if (otherCharacters.length === 1) {
+        console.log('Using only character')
+        if (!otherCharacters[0]) throw new Error('Missing character')
+        createMessage(otherCharacters[0].id, '', 'assistant')
     }
 
     await generateMessage()
@@ -51,10 +62,11 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
 const impersonate = async () => {
     if (pendingMessage.value) throw new Error('Message already in progress')
     await createMessage(userCharacter.id, '', 'user')
-    await generateMessage(userCharacter.name)
+    await generateMessage()
 }
 
-const createMessage = async (characterId: string, text: string = '', type: 'system' | 'user' | 'assistant') => {
+type MessageRoles = 'system' | 'user' | 'assistant'
+const createMessage = async (characterId: string, text: string = '', type: MessageRoles) => {
     chat.messages.push({
         id: Math.random().toString(36).slice(2),
         characterId,
@@ -67,7 +79,7 @@ const createMessage = async (characterId: string, text: string = '', type: 'syst
     currentMessage.value = ''
 }
 
-const getSystemPrompt = async () => {
+const getSystemPrompt = async (): Promise<string> => {
     const engine = new Liquid()
     const {template} = await templateCollection.get(settings.template)
 
@@ -103,7 +115,7 @@ const getSystemPrompt = async () => {
     })
 }
 
-const generateMessage = async (respondent?: string) => {
+const generateMessage = async () => {
     pendingMessage.value = true
 
     try {
@@ -115,94 +127,36 @@ const generateMessage = async (respondent?: string) => {
                 content: prefix + (message.content[message.activeIndex] || ''),
             }
         })
-
-        const formattedMessages = [
-            {role: 'system', content: systemPrompt},
-            ...chatHistory,
-        ]
-
-        // If a respondent was specified, this is a regeneration, so the last message will be empty
-        if (respondent) {
-            formattedMessages.pop()
-        }
-
-        // Create a GBNF string to make sure the message starts with a pre-determined character, or one of the chat characters
-        let nameString
-        if (respondent) {
-            nameString = respondent
-        } else {
-            nameString = characters.filter(c => c.id !== userCharacter.id).map((c) => c.name).join('|')
-        }
-        const pattern = `^(${nameString}): [\\u0000-\\U0010FFFF]*$`
+        chatHistory.pop() // Remove the last empty placeholder message
 
         const generationPreset = await generationPresetCollection.get(settings.preset)
+
         if (!settings.generationServer) throw new Error('No generation server set')
-        const url = `${settings.generationServer.replace(/\/$/, '')}/chat/completions`
-
-        // TODO check for API Token based on provider
-        // if (!token) throw new Error('No token set')
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${settings.generationKey}`,
-            },
-            body: JSON.stringify({
-                stream: true,
-                model: settings.generationModel,
-                messages: formattedMessages,
-                max_tokens: generationPreset.maxTokens,
-                temperature: generationPreset.temperature,
-                min_p: generationPreset.minP,
-                top_p: generationPreset.topP,
-                top_k: generationPreset.topK,
-                // TODO add Penalties
-                // TODO stop strings
-                response_format: {
-                    type: 'json_schema',
-                    json_schema: {
-                        name: 'response',
-                        strict: true,
-                        schema: {
-                            type: 'string',
-                            description: 'The content of the message',
-                            pattern,
-                        },
-                    },
-                },
-            }),
-            signal: abortController.signal,
+        if (!settings.generationModel) throw new Error('No generation model set')
+        const endpoint = createOpenAICompatible({
+            name: settings.generationProvider ?? 'unset',
+            baseURL: settings.generationServer,
+            apiKey: settings.generationKey ?? '',
         })
-        if (!response.ok) throw new Error('Connection to server failed')
-        const iterable = responseToIterable(response)
+        const {textStream} = streamText({
+            model: endpoint(settings.generationModel),
+            system: systemPrompt,
+            messages: chatHistory,
+            temperature: generationPreset.temperature,
+            topP: generationPreset.topP,
+            topK: generationPreset.topK,
+            maxOutputTokens: generationPreset.maxTokens,
+            abortSignal: abortController.signal,
+            // TODO: Add penalties
+            // TODO: Add stop sequences
+        })
         let messageBuffer = ''
-        let initialBuffer = ''
-        let characterPicked = false
-        for await (const {data} of iterable) {
-            if (data === '[DONE]') continue
-            const content = JSON.parse(data).choices[0].delta.content
-            if (!content) continue
-
-            // Determine which character is speaking before outputting to the chat
-            if (!characterPicked) {
-                initialBuffer += content
-                const character = characters.find((c) => initialBuffer.includes(`${c.name}:`))
-                if (character) {
-                    characterPicked = true
-
-                    // If a respondent was not specified we need to create a new message
-                    if (!respondent) {
-                        createMessage(character.id, '', 'assistant')
-                    }
-                }
-            } else {
-                messageBuffer += content
-                const lastMessage = chat.messages[chat.messages.length - 1]
-                if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
-                lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
-                await updateChat()
-            }
+        for await (const text of textStream) {
+            messageBuffer += text
+            const lastMessage = chat.messages[chat.messages.length - 1]
+            if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
+            lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
+            await updateChat()
         }
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return
@@ -214,14 +168,15 @@ const generateMessage = async (respondent?: string) => {
 
 const newSwipe = async (messageId: string) => {
     if (pendingMessage.value) throw new Error('Message already in progress')
-    if (!settings.generationProvider) throw new Error('Select a connection provider in settings')
+    if (!settings.generationServer) throw new Error('No generation server set')
+    if (!settings.generationModel) throw new Error('No generation model set')
+
     const message = chat.messages.find((m) => m.id === messageId)
     if (!message) throw new Error('Message not found')
     message.content.push('')
     message.activeIndex = message.content.length - 1
     await updateChat()
-    const characterName = characterMap[message.characterId]?.name
-    await generateMessage(characterName)
+    await generateMessage()
 }
 
 const swipeLeft = async (messageId: string) => {
@@ -268,7 +223,7 @@ const toggleCtxMenu = () => {
                     <div class="w-18 min-w-18 pl-2">
                         <Thumbnail
                             v-if="characterMap[message.characterId]?.avatar"
-                            :image="characterMap[message.characterId]?.avatar"
+                            :image="characterMap[message.characterId]?.avatar ?? '/assets/img/placeholder-avatar.webp'"
                             :width="512"
                             :height="512"
                             class="w-full rounded"
@@ -321,9 +276,9 @@ const toggleCtxMenu = () => {
         </div>
 
         <!-- Chat Controls -->
-        <div v-if="!settings.generationProvider" class="alert alert-warning m-1" role="alert">
+        <div v-if="!settings.generationServer" class="alert alert-warning m-1" role="alert">
             <ExclamationTriangleIcon class="size-6" />
-            Select a generation provider in settings
+            Select a generation server in settings
         </div>
         <div class="flex absolute bottom-0 left-0 sm:left-52 right-0 px-1 sm:pb-1 sm:pr-2 max-w-[70em] ml-auto mr-auto">
             <!-- Context menu -->
