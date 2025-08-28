@@ -4,11 +4,12 @@ import {useSettingsStore} from '@/store'
 
 export const sync = async () => {
     const settings = useSettingsStore()
-    const baseUrl = settings.syncProvider === 'hub' ? import.meta.env.VITE_SYNC_URL : settings.syncServer
+    if (!settings.syncServer) throw new Error('No sync server selected')
 
-    if (!baseUrl) throw new Error('No sync server selected')
-
-    const {data: remoteDocs, error} = await client.GET('/list', {baseUrl})
+    const {data: remoteDocs, error} = await client.GET('/list', {
+        baseUrl: settings.syncServer,
+        credentials: 'same-origin',
+    })
     if (error) throw error
 
     // Sync Down
@@ -17,7 +18,7 @@ export const sync = async () => {
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${collection}/${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
-                baseUrl,
+                baseUrl: settings.syncServer,
                 params: {
                     path: {collection, key},
                 },
@@ -45,7 +46,7 @@ export const sync = async () => {
     }
     if (docsToPush.length) {
         const {error: pushError} = await client.PUT('/upload', {
-            baseUrl,
+            baseUrl: settings.syncServer,
             body: docsToPush,
         })
         if (pushError) throw error

@@ -71,6 +71,14 @@ const testGeneration = async () => {
 const setSyncProvider = (event: Event) => {
     const target = event.target as HTMLSelectElement
     settings.setSyncProvider(target.value)
+    switch (target.value) {
+        case 'hub':
+            settings.setSyncProvider('https://sync.cybermuse.io')
+            break
+        default:
+            settings.setSyncProvider('')
+            break
+    }
 }
 
 const setSyncServer = (event: Event) => {
