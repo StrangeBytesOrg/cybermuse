@@ -34,7 +34,7 @@ const createChat = async () => {
             })
             messages.push({
                 id: Math.random().toString(36).slice(2),
-                type: 'model',
+                type: 'assistant',
                 content: [content],
                 activeIndex: 0,
                 characterId: character.id,
