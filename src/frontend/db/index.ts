@@ -14,7 +14,7 @@ db.version(2).stores({
     // Migrate messages from using 'model' to 'assistant' type
     return tx.table('chats').toCollection().modify(chat => {
         if (!chat.messages) return
-        chat.messages = chat.messages.map(message => {
+        chat.messages = chat.messages.map((message) => {
             if (message.type === 'model') {
                 return {...message, type: 'assistant'}
             }
@@ -26,11 +26,11 @@ db.version(2).stores({
 export const characterCollection = new Collection(
     db.table('characters'),
     z.object({
-        id: z.string().min(1, {message: 'ID cannot be empty'}),
+        id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string().min(1, {message: 'Name cannot be empty'}),
-        description: z.string().min(1, {message: 'Description cannot be empty'}),
+        name: z.string().min(1, {error: 'Name cannot be empty'}),
+        description: z.string().min(1, {error: 'Description cannot be empty'}),
         firstMessage: z.string().optional(),
         avatar: z.string().optional(),
         shortDescription: z.string().optional(),
@@ -39,10 +39,10 @@ export const characterCollection = new Collection(
 export const loreCollection = new Collection(
     db.table('lore'),
     z.object({
-        id: z.string().min(1, {message: 'ID cannot be empty'}),
+        id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string().min(1, {message: 'Name cannot be empty'}),
+        name: z.string().min(1, {error: 'Name cannot be empty'}),
         entries: z.array(z.object({
             name: z.string(),
             content: z.string(),
@@ -52,12 +52,12 @@ export const loreCollection = new Collection(
 export const chatCollection = new Collection(
     db.table('chats'),
     z.object({
-        id: z.string().min(1, {message: 'ID cannot be empty'}),
+        id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
         name: z.string(),
-        userCharacter: z.string().min(1, {message: 'User character must be set'}),
-        characters: z.array(z.string()).min(1, {message: 'At least one character must be in the chat'}),
+        userCharacter: z.string().min(1, {error: 'User character must be set'}),
+        characters: z.array(z.string()).min(1, {error: 'At least one character must be in the chat'}),
         lore: z.array(z.string()),
         createDate: z.number(),
         messages: z.array(z.object({
@@ -75,21 +75,21 @@ export type Message = Chat['messages'][0]
 export const templateCollection = new Collection(
     db.table('templates'),
     z.object({
-        id: z.string().min(1, {message: 'ID cannot be empty'}),
+        id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string().min(1, {message: 'Name cannot be empty'}),
+        name: z.string().min(1, {error: 'Name cannot be empty'}),
         template: z.string(),
     }),
 )
 export const generationPresetCollection = new Collection(
     db.table('generationPresets'),
     z.object({
-        id: z.string().min(1, {message: 'ID cannot be empty'}),
+        id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
-        name: z.string().min(1, {message: 'Name cannot be empty'}),
-        maxTokens: z.number({message: 'Max tokens cannot be empty'}),
+        name: z.string().min(1, {error: 'Name cannot be empty'}),
+        maxTokens: z.number({error: 'Max tokens cannot be empty'}),
         temperature: z.number().optional(),
         seed: z.number().optional(),
         topK: z.number().optional(),
