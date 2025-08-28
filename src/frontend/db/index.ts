@@ -1,6 +1,6 @@
 import Dexie from 'dexie'
 import {Collection} from '@/lib/dexie-orm'
-import z from 'zod'
+import {z} from 'zod'
 
 export const db = new Dexie('cybermuse')
 

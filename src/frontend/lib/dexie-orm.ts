@@ -1,4 +1,4 @@
-import z from 'zod'
+import {z} from 'zod'
 import Dexie from 'dexie'
 
 /** A strongly-typed collection wrapper for Dexie documents validated by Zod schemas. */
