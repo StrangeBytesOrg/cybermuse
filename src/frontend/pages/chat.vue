@@ -142,12 +142,14 @@ const generateMessage = async () => {
             model: endpoint(settings.generationModel),
             system: systemPrompt,
             messages: chatHistory,
+            seed: generationPreset.seed,
             temperature: generationPreset.temperature,
             topP: generationPreset.topP,
             topK: generationPreset.topK,
             maxOutputTokens: generationPreset.maxTokens,
+            frequencyPenalty: generationPreset.frequencyPenalty,
+            presencePenalty: generationPreset.presencePenalty,
             abortSignal: abortController.signal,
-            // TODO: Add penalties
             // TODO: Add stop sequences
         })
         let messageBuffer = ''

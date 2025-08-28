@@ -76,40 +76,12 @@ const deletePreset = async () => {
 
                 <label class="fieldset-label text-sm">Top K</label>
                 <NumberInput v-model="activePreset.topK" class="input" min="0" />
-            </fieldset>
-
-            <fieldset class="fieldset ml-5">
-                <legend class="fieldset-legend">Penalties</legend>
-
-                <label class="fieldset-label text-sm">Repeat-penalty</label>
-                <NumberInput
-                    v-model="activePreset.repeatPenalty.penalty"
-                    class="input"
-                />
-
-                <label class="fieldset-label text-sm">Presence-penalty</label>
-                <NumberInput
-                    v-model="activePreset.repeatPenalty.presencePenalty"
-                    class="input"
-                />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
-                <NumberInput
-                    v-model="activePreset.repeatPenalty.frequencyPenalty"
-                    class="input"
-                />
+                <NumberInput v-model="activePreset.frequencyPenalty" class="input" />
 
-                <label class="fieldset-label text-sm">Last Tokens</label>
-                <NumberInput
-                    v-model="activePreset.repeatPenalty.lastTokens"
-                    class="input"
-                />
-
-                <label class="fieldset-label text-sm">Penalize-nl</label>
-                <select v-model="activePreset.repeatPenalty.penalizeNewLine" class="select">
-                    <option :value="true">true</option>
-                    <option :value="false">false</option>
-                </select>
+                <label class="fieldset-label text-sm">Presence-penalty</label>
+                <NumberInput v-model="activePreset.presencePenalty" class="input" />
             </fieldset>
         </div>
 

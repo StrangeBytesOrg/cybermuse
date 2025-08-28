@@ -16,13 +16,8 @@ const preset = reactive({
     minP: undefined,
     topP: undefined,
     topK: undefined,
-    repeatPenalty: {
-        penalty: undefined,
-        presencePenalty: undefined,
-        frequencyPenalty: undefined,
-        lastTokens: undefined,
-        penalizeNewLine: undefined,
-    },
+    frequencyPenalty: undefined,
+    presencePenalty: undefined,
 })
 
 const createPreset = async () => {
@@ -64,37 +59,12 @@ const createPreset = async () => {
 
                 <label class="fieldset-label text-sm">Top K</label>
                 <NumberInput v-model="preset.topK" class="input" />
-            </fieldset>
-
-            <fieldset class="fieldset ml-5">
-                <legend class="fieldset-legend">Penalties</legend>
-
-                <label class="fieldset-label text-sm">Repeat-penalty</label>
-                <NumberInput v-model="preset.repeatPenalty.penalty" class="input" />
-
-                <label class="fieldset-label text-sm">Presence-penalty</label>
-                <NumberInput
-                    v-model="preset.repeatPenalty.presencePenalty"
-                    class="input"
-                />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
-                <NumberInput
-                    v-model="preset.repeatPenalty.frequencyPenalty"
-                    class="input"
-                />
+                <NumberInput v-model="preset.frequencyPenalty" class="input" />
 
-                <label class="fieldset-label text-sm">Last Tokens</label>
-                <NumberInput
-                    v-model="preset.repeatPenalty.lastTokens"
-                    class="input"
-                />
-
-                <label class="fieldset-label text-sm">Penalize-nl</label>
-                <select v-model="preset.repeatPenalty.penalizeNewLine" class="select">
-                    <option :value="true">true</option>
-                    <option :value="false">false</option>
-                </select>
+                <label class="fieldset-label text-sm">Presence-penalty</label>
+                <NumberInput v-model="preset.presencePenalty" class="input" />
             </fieldset>
         </div>
 
