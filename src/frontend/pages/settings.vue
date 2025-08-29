@@ -72,10 +72,10 @@ const setSyncProvider = (event: Event) => {
     settings.setSyncProvider(target.value)
     switch (target.value) {
         case 'hub':
-            settings.setSyncProvider('https://sync.cybermuse.io')
+            settings.setSyncServer('https://sync.cybermuse.io')
             break
         default:
-            settings.setSyncProvider('')
+            settings.setSyncServer('')
             break
     }
 }
