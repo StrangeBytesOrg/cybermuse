@@ -121,36 +121,6 @@ const doSync = async () => {
         <fieldset class="bg-base-200 rounded-box p-3 flex flex-col gap-y-3 sm:max-w-sm">
             <legend class="fieldset-legend">Generation</legend>
 
-            <!--<label class="fieldset-label text-sm">Generation Provider</label>
-            <select class="select mt-1" @change="setGenerationProvider" :value="settings.generationProvider">
-                <option value="">Select a provider</option>
-                <!~~ <option value="hub" :disabled="!hub.token">Cybermuse Hub {{ !hub.token ? '(Login required)' : '' }}</option> ~~>
-                <option value="self-hosted">Self Hosted</option>
-                <option value="openrouter">OpenRouter</option>
-                <option value="hub">Cybermuse Hub</option>
-            </select>
-
-            <template v-if="settings.generationProvider === 'self-hosted'">
-                <label class="fieldset-label text-sm mt-2">Server URL</label>
-                <input
-                    @change="setGenerationServer"
-                    :value="settings.generationServer"
-                    type="url"
-                    class="input validator mt-1"
-                    placeholder="Local Generation Server"
-                    pattern="^(https?://).*$"
-                    title="Must be a valid URL"
-                />
-                <p class="validator-hint hidden">Must start with "http" or "https"</p>
-
-                <button @click="testGeneration" class="btn btn-primary block mt-3">Test</button>
-            </template>
-
-            <label class="fieldset-label text-sm mt-2">API Key</label>
-            <input type="text" class="input" v-model="settings.generationKey" />
-            <button @click="" class="btn btn-primary mt-3">Save</button>
-            <button @click="testGeneration" class="btn btn-secondary mt-3 ml-3">Test</button>-->
-
             <label class="fieldset-label text-sm">Provider</label>
             <select @change="setGenerationProvider" :value="settings.generationProvider" class="select">
                 <option value="">Select a provider</option>
