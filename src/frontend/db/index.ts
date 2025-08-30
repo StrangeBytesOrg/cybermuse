@@ -1,6 +1,7 @@
 import {openDB} from 'idb'
 import {z} from 'zod'
 import {Collection} from '@/lib/idb-orm'
+import {fixtureData} from '@/db/fixture'
 
 export const db = await openDB('cybermuse', 20, {
     upgrade(db) {
@@ -11,6 +12,9 @@ export const db = await openDB('cybermuse', 20, {
         db.createObjectStore('generationPresets', {keyPath: 'id'})
     },
 })
+
+// Fixture DB data
+await fixtureData(db)
 
 export const characterCollection = new Collection(
     db,

@@ -1,26 +1,28 @@
 import {createRouter, createWebHistory} from 'vue-router'
+import {useToastStore} from './store'
 
 import Index from './pages/index.vue'
-import Character from './pages/character.vue'
-import Characters from './pages/characters.vue'
-import CreateCharacter from './pages/character-create.vue'
-import Chat from './pages/chat.vue'
-import Chats from './pages/chats.vue'
-import ChatEdit from './pages/chat-edit.vue'
-import Lore from './pages/lore.vue'
-import LoreEdit from './pages/lore-edit.vue'
-import LoreCreate from './pages/lore-create.vue'
-import CreateChat from './pages/chat-create.vue'
-import Templates from './pages/templates.vue'
-import CreateTemplate from './pages/template-create.vue'
-import Presets from './pages/presets.vue'
-import CreatePreset from './pages/preset-create.vue'
-import Settings from './pages/settings.vue'
-import Hub from './pages/hub.vue'
-import About from './pages/about.vue'
 import ErrorPage from './pages/error.vue'
 
-export default createRouter({
+const Character = () => import('@/pages/character.vue')
+const Characters = () => import('@/pages/characters.vue')
+const CreateCharacter = () => import('@/pages/character-create.vue')
+const Chat = () => import('@/pages/chat.vue')
+const Chats = () => import('@/pages/chats.vue')
+const ChatEdit = () => import('@/pages/chat-edit.vue')
+const Lore = () => import('@/pages/lore.vue')
+const LoreEdit = () => import('@/pages/lore-edit.vue')
+const LoreCreate = () => import('@/pages/lore-create.vue')
+const CreateChat = () => import('@/pages/chat-create.vue')
+const Templates = () => import('@/pages/templates.vue')
+const CreateTemplate = () => import('@/pages/template-create.vue')
+const Presets = () => import('@/pages/presets.vue')
+const CreatePreset = () => import('@/pages/preset-create.vue')
+const Settings = () => import('@/pages/settings.vue')
+const Hub = () => import('@/pages/hub.vue')
+const About = () => import('@/pages/about.vue')
+
+const router = createRouter({
     scrollBehavior() {
         document.getElementById('main')?.scrollTo({top: 0, left: 0})
     },
@@ -142,3 +144,11 @@ export default createRouter({
         },
     ],
 })
+
+router.onError((error) => {
+    console.error('[RouterError]', error)
+    const toast = useToastStore()
+    toast.error(error.message)
+})
+
+export default router

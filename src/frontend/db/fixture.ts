@@ -1,4 +1,5 @@
-import {db, characterCollection, templateCollection, generationPresetCollection} from '@/db'
+import type {IDBPDatabase} from 'idb'
+import {characterCollection, templateCollection, generationPresetCollection} from '@/db'
 
 const defaultTemplate = `Roleplay in this chat with the user using the provided character description below.
 {{ characters }}
@@ -6,7 +7,7 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 Use the following background information as lore.
 {{ lore }}{% endif %}`
 
-export const fixtureData = async () => {
+export const fixtureData = async (db: IDBPDatabase) => {
     const characters = await db.getAll('characters')
     if (characters.length === 0) {
         console.log('Creating default characters')
