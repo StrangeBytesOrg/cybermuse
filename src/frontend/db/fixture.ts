@@ -7,7 +7,7 @@ Use the following background information as lore.
 {{ lore }}{% endif %}`
 
 export const fixtureData = async () => {
-    const characters = await db.table('characters').toArray()
+    const characters = await db.getAll('characters')
     if (characters.length === 0) {
         console.log('Creating default characters')
         await characterCollection.put({
@@ -19,7 +19,7 @@ export const fixtureData = async () => {
         })
     }
 
-    const templates = await db.table('templates').toArray()
+    const templates = await db.getAll('templates')
     if (templates.length === 0) {
         console.log('Creating default template')
         await templateCollection.put({
@@ -30,7 +30,7 @@ export const fixtureData = async () => {
         })
     }
 
-    const generationPresets = await db.table('generationPresets').toArray()
+    const generationPresets = await db.getAll('generationPresets')
     if (generationPresets.length === 0) {
         console.log('Creating default generation preset')
         await generationPresetCollection.put({

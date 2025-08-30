@@ -1,16 +1,11 @@
-import Dexie, {type EntityTable} from 'dexie'
+import {openDB} from 'idb'
 import {hash} from '@/lib/hash'
 
-type Thumbnail = {
-    id: string
-    data: Blob
-}
-
-export const thumbnailDb = new Dexie('cybermuse-thumbnails') as Dexie & {
-    thumbs: EntityTable<Thumbnail, 'id'>
-}
-
-thumbnailDb.version(1).stores({thumbs: 'id'})
+export const thumbnailDb = await openDB('cybermuse-thumbnails', 1, {
+    upgrade(db) {
+        db.createObjectStore('thumbs', {keyPath: 'id'})
+    },
+})
 
 const memCache = new Map<string, string>()
 
@@ -69,7 +64,7 @@ export const getImage = async (image: string, width: number, height: number) => 
     }
 
     // See if the thumbnail is already in the database
-    const cachedThumb = await thumbnailDb.thumbs.get(cacheKey)
+    const cachedThumb = await thumbnailDb.get('thumbs', cacheKey)
     if (cachedThumb) {
         const url = URL.createObjectURL(cachedThumb.data)
         memCache.set(cacheKey, url)
@@ -77,7 +72,7 @@ export const getImage = async (image: string, width: number, height: number) => 
     }
 
     const thumbnail = await createThumbnail(image, width, height)
-    await thumbnailDb.thumbs.put({id: cacheKey, data: thumbnail})
+    await thumbnailDb.put('thumbs', {id: cacheKey, data: thumbnail})
     const url = URL.createObjectURL(thumbnail)
     memCache.set(cacheKey, url)
 

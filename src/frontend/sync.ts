@@ -1,3 +1,4 @@
+import {deleteDB} from 'idb'
 import {db} from '@/db'
 import client from '@/clients/sync-client'
 import {useSettingsStore} from '@/store'
@@ -14,7 +15,7 @@ export const sync = async () => {
 
     // Sync Down
     for (const {key, collection, lastUpdate} of remoteDocs) {
-        const localDoc = await db.table(collection).get(key)
+        const localDoc = await db.get(collection, key)
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${collection}/${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
@@ -24,21 +25,21 @@ export const sync = async () => {
                 },
             })
             if (error) throw error
-            await db.table(collection).put(data)
+            await db.put(collection, data)
         }
     }
 
     // Sync up
     const docsToPush = []
-    for (const table of db.tables) {
-        const localDocs = await table.toArray()
+    for (const stores of db.objectStoreNames) {
+        const localDocs = await db.getAll(stores)
         for (const doc of localDocs) {
-            const remoteDoc = remoteDocs.find(d => d.collection === table.name && d.key === doc.id)
+            const remoteDoc = remoteDocs.find(d => d.collection === stores && d.key === doc.id)
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
-                console.log(`Pushing: ${table.name}/${doc.id}`)
+                console.log(`Pushing: ${stores}/${doc.id}`)
                 docsToPush.push({
                     key: doc.id,
-                    collection: table.name,
+                    collection: stores,
                     doc,
                 })
             }
@@ -55,8 +56,8 @@ export const sync = async () => {
 
 export const exportData = async () => {
     const data: Record<string, unknown> = {}
-    for (const table of db.tables) {
-        data[table.name] = await table.toArray()
+    for (const stores of db.objectStoreNames) {
+        data[stores] = await db.getAll(stores)
     }
     const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'})
     const url = URL.createObjectURL(blob)
@@ -69,7 +70,7 @@ export const exportData = async () => {
 
 export const clearData = async () => {
     if (confirm('Are you sure you want to clear all data?')) {
-        await db.delete()
+        await deleteDB('cybermuse')
         localStorage.clear()
         window.location.reload()
     }

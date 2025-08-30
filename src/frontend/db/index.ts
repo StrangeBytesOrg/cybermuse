@@ -1,30 +1,20 @@
-import Dexie from 'dexie'
-import {Collection} from '@/lib/dexie-orm'
+import {openDB} from 'idb'
 import {z} from 'zod'
+import {Collection} from '@/lib/idb-orm'
 
-export const db = new Dexie('cybermuse')
-
-db.version(2).stores({
-    characters: 'id',
-    lore: 'id',
-    chats: 'id',
-    templates: 'id',
-    generationPresets: 'id',
-}).upgrade(tx => {
-    // Migrate messages from using 'model' to 'assistant' type
-    return tx.table('chats').toCollection().modify(chat => {
-        if (!chat.messages) return
-        chat.messages = chat.messages.map((message) => {
-            if (message.type === 'model') {
-                return {...message, type: 'assistant'}
-            }
-            return message
-        })
-    })
+export const db = await openDB('cybermuse', 20, {
+    upgrade(db) {
+        db.createObjectStore('characters', {keyPath: 'id'})
+        db.createObjectStore('lore', {keyPath: 'id'})
+        db.createObjectStore('chats', {keyPath: 'id'})
+        db.createObjectStore('templates', {keyPath: 'id'})
+        db.createObjectStore('generationPresets', {keyPath: 'id'})
+    },
 })
 
 export const characterCollection = new Collection(
-    db.table('characters'),
+    db,
+    'characters',
     z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
@@ -36,8 +26,10 @@ export const characterCollection = new Collection(
         shortDescription: z.string().optional(),
     }),
 )
+
 export const loreCollection = new Collection(
-    db.table('lore'),
+    db,
+    'lore',
     z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
@@ -49,8 +41,10 @@ export const loreCollection = new Collection(
         })),
     }),
 )
+
 export const chatCollection = new Collection(
-    db.table('chats'),
+    db,
+    'chats',
     z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
@@ -76,8 +70,10 @@ export const chatCollection = new Collection(
 )
 export type Chat = z.infer<typeof chatCollection.schema>
 export type Message = Chat['messages'][0]
+
 export const templateCollection = new Collection(
-    db.table('templates'),
+    db,
+    'templates',
     z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
@@ -86,8 +82,10 @@ export const templateCollection = new Collection(
         template: z.string(),
     }),
 )
+
 export const generationPresetCollection = new Collection(
-    db.table('generationPresets'),
+    db,
+    'generationPresets',
     z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
@@ -103,14 +101,3 @@ export const generationPresetCollection = new Collection(
         presencePenalty: z.number().optional(),
     }),
 )
-
-for (const table of db.tables) {
-    table.hook('creating', (primKey, obj) => {
-        if (!obj.lastUpdate) {
-            return {...obj, lastUpdate: Date.now()}
-        }
-    })
-    table.hook('updating', (modifications) => {
-        return {...modifications, lastUpdate: Date.now()}
-    })
-}

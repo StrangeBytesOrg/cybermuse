@@ -54,7 +54,7 @@ const createChat = async () => {
         archived: false,
     })
 
-    router.push({name: 'chat', params: {id}})
+    router.push({name: 'chat', params: {id: id.toString()}})
 }
 
 const removeCharacter = (characterId: string) => {
