@@ -1,5 +1,54 @@
 import {z} from 'zod'
-import type {IDBPDatabase} from 'idb'
+import {type IDBPDatabase, type IDBPTransaction, openDB} from 'idb'
+
+export type Migrations = Record<
+    number,
+    (db: IDBPDatabase, tx: IDBPTransaction<unknown, string[], 'versionchange'>) => Promise<void>
+>
+
+export function createDB(name: string, migrations: Migrations) {
+    const versions = Object.keys(migrations)
+        .map(n => Number(n))
+        .filter(v => Number.isInteger(v) && v > 0)
+        .sort((a, b) => a - b)
+
+    if (!versions.length) {
+        return openDB(name, 1)
+    }
+
+    const lastMigrationVersion = versions[versions.length - 1]
+
+    return openDB(name, lastMigrationVersion, {
+        async upgrade(db, oldVersion, newVersion, transaction) {
+            console.log(`[idb-migrations] upgrade ${oldVersion} -> ${newVersion}`)
+            try {
+                for (const v of versions) {
+                    if (v <= oldVersion) continue
+                    if (typeof newVersion === 'number' && v > newVersion) break
+                    const migration = migrations[v]
+                    if (typeof migration !== 'function') {
+                        throw new Error(`Migration for version ${v} is not a function`)
+                    }
+                    console.log(`[idb-migrations] running v${v}`)
+                    await migration(db, transaction)
+                }
+                await transaction.done
+                console.log('[idb-migrations] success')
+            } catch (err) {
+                console.error('[idb-migrations] Upgrade failed:', err)
+                try {
+                    transaction.abort()
+                } catch {}
+            }
+        },
+        blocked() {
+            console.error(`[idb-migrations] Connection to ${name} blocked.`)
+        },
+        terminated() {
+            console.error(`[idb-migrations] Connection to ${name} unexpectedly terminated.`)
+        },
+    })
+}
 
 export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
     constructor(

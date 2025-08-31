@@ -1,10 +1,9 @@
-import {openDB} from 'idb'
 import {z} from 'zod'
-import {Collection} from '@/lib/idb-orm'
+import {Collection, createDB} from '@/lib/idb-orm'
 import {fixtureData} from '@/db/fixture'
 
-export const db = await openDB('cybermuse', 20, {
-    upgrade(db) {
+export const db = await createDB('cybermuse', {
+    1: async (db) => {
         db.createObjectStore('characters', {keyPath: 'id'})
         db.createObjectStore('lore', {keyPath: 'id'})
         db.createObjectStore('chats', {keyPath: 'id'})
@@ -12,9 +11,6 @@ export const db = await openDB('cybermuse', 20, {
         db.createObjectStore('generationPresets', {keyPath: 'id'})
     },
 })
-
-// Fixture DB data
-await fixtureData(db)
 
 export const characterCollection = new Collection(
     db,
@@ -105,3 +101,6 @@ export const generationPresetCollection = new Collection(
         presencePenalty: z.number().optional(),
     }),
 )
+
+// Fixture DB data
+await fixtureData(db)
