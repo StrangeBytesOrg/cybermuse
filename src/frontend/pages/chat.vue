@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import {ref, reactive} from 'vue'
+import {ref, reactive, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
@@ -15,10 +15,14 @@ import {ChevronLeftIcon, ChevronRightIcon, ArrowPathIcon, TrashIcon} from '@hero
 const route = useRoute()
 const settings = useSettingsStore()
 const chatId = route.params.id
-const currentMessage = ref('')
+const currentMessage = ref(localStorage.getItem(`chat-draft-${chatId}`) || '') // Load saved draft from localStorage
 const pendingMessage = ref(false)
 const showCtxMenu = ref(false)
 let abortController = new AbortController()
+
+watch(currentMessage, (newVal) => {
+    localStorage.setItem(`chat-draft-${chatId}`, newVal)
+})
 
 if (!chatId || Array.isArray(chatId)) {
     router.push({name: 'chats'})
@@ -77,6 +81,7 @@ const createMessage = async (characterId: string, text: string = '', type: Messa
     await updateChat()
 
     currentMessage.value = ''
+    localStorage.removeItem(`chat-draft-${chatId}`)
 }
 
 const getSystemPrompt = async (): Promise<string> => {
@@ -130,7 +135,6 @@ const generateMessage = async () => {
         chatHistory.pop() // Remove the last empty placeholder message
 
         const generationPreset = await generationPresetCollection.get(settings.preset)
-
         if (!settings.generationServer) throw new Error('No generation server set')
         if (!settings.generationModel) throw new Error('No generation model set')
         const endpoint = createOpenAICompatible({
@@ -156,7 +160,7 @@ const generateMessage = async () => {
         for await (const text of textStream) {
             messageBuffer += text
             const lastMessage = chat.messages[chat.messages.length - 1]
-            if (!lastMessage) throw new Error('No last message') // This should never happen, but it keeps TS happy
+            if (!lastMessage) throw new Error('No last message')
             lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
             await updateChat()
         }
