@@ -1,7 +1,15 @@
+# Dependencies
 node_modules
+
+# Build artifacts
 tsconfig.tsbuildinfo
-rclone.conf
-wailsjs/
 dist
 build/bin/
 build/windows/
+
+# Secrets
+rclone.conf
+
+# Miscellaneous
+wailsjs/
+archive
