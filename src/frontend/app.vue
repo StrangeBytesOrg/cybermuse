@@ -31,6 +31,8 @@ onErrorCaptured((error) => {
     }
     return false
 })
+
+import('./db')
 </script>
 
 <template>
