@@ -52,36 +52,38 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
     }
 
     const otherCharacters = characters.filter((c) => c.id !== userCharacter.id)
+    let messageId = ''
     if (otherCharacters.length > 1) {
         console.log('TODO - Pick respondent using LLM')
     } else if (otherCharacters.length === 1) {
-        console.log('Using only character')
         if (!otherCharacters[0]) throw new Error('Missing character')
-        createMessage(otherCharacters[0].id, '', 'assistant')
+        messageId = await createMessage(otherCharacters[0].id, '', 'assistant')
     }
 
-    await generateMessage()
+    currentMessage.value = ''
+    localStorage.removeItem(`chat-draft-${chatId}`)
+
+    await generateMessage(messageId)
 }
 
 const impersonate = async () => {
     if (pendingMessage.value) throw new Error('Message already in progress')
-    await createMessage(userCharacter.id, '', 'user')
-    await generateMessage()
+    const messageId = await createMessage(userCharacter.id, '', 'user')
+    await generateMessage(messageId)
 }
 
 type MessageRoles = 'system' | 'user' | 'assistant'
 const createMessage = async (characterId: string, text: string = '', type: MessageRoles) => {
+    const id = Math.random().toString(36).slice(2)
     chat.messages.push({
-        id: Math.random().toString(36).slice(2),
+        id,
         characterId,
         type,
         content: [text],
         activeIndex: 0,
     })
     await updateChat()
-
-    currentMessage.value = ''
-    localStorage.removeItem(`chat-draft-${chatId}`)
+    return id
 }
 
 const getSystemPrompt = async (): Promise<string> => {
@@ -120,7 +122,9 @@ const getSystemPrompt = async (): Promise<string> => {
     })
 }
 
-const generateMessage = async () => {
+const generateMessage = async (messageId: string) => {
+    const message = chat.messages.find((m) => m.id === messageId)
+    if (!message) throw new Error('Message not found')
     pendingMessage.value = true
 
     try {
@@ -159,18 +163,13 @@ const generateMessage = async () => {
         let messageBuffer = ''
         for await (const text of textStream) {
             messageBuffer += text
-            const lastMessage = chat.messages[chat.messages.length - 1]
-            if (!lastMessage) throw new Error('No last message')
-
-            const charName = characterMap[lastMessage.characterId]?.name
-            if (charName) {
-                const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-                const escaped = escapeRegex(charName)
-                const labelPattern = new RegExp(`(^|\\n)(?:${escaped}\\s*:)+\\s*`, 'gi')
-                messageBuffer = messageBuffer.replace(labelPattern, (_m, boundary) => boundary)
-            }
-
-            lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
+            const charName = characterMap[message.characterId]?.name
+            if (!charName) throw new Error("Couldn't get character name")
+            const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+            const escaped = escapeRegex(charName)
+            const labelPattern = new RegExp(`(^|\\n)(?:${escaped}\\s*:)+\\s*`, 'gi')
+            messageBuffer = messageBuffer.replace(labelPattern, (_m, boundary) => boundary)
+            message.content[message.activeIndex] = messageBuffer.trim()
             await updateChat()
         }
     } catch (error) {
@@ -191,7 +190,7 @@ const newSwipe = async (messageId: string) => {
     message.content.push('')
     message.activeIndex = message.content.length - 1
     await updateChat()
-    await generateMessage()
+    await generateMessage(messageId)
 }
 
 const swipeLeft = async (messageId: string) => {
