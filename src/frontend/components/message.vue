@@ -59,7 +59,7 @@ const update = async () => {
 </template>
 
 <style>
-@reference "../styles/global.css";
+@reference "@/styles/global.css";
 .messageText p {
     @apply mt-2;
     color: var(--msg);

@@ -93,7 +93,7 @@ const removeImage = () => {
             <div class="avatar">
                 <div class="w-36 h-36 rounded-xl">
                     <img v-if="character.avatar" :src="character.avatar" :alt="character.name + ' avatar'" />
-                    <img v-else src="../assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
+                    <img v-else src="@/assets/img/placeholder-avatar.webp" :alt="character.name + ' avatar'" />
                 </div>
             </div>
             <FileSelect @changed="uploadAvatar" class="ml-5 mt-auto" />

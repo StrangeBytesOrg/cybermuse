@@ -244,7 +244,7 @@ const toggleCtxMenu = () => {
                             class="w-full rounded"
                             alt="character avatar"
                         />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" class="w-full rounded" alt="character avatar" />
+                        <img v-else src="@/assets/img/placeholder-avatar.webp" class="w-full rounded" alt="character avatar" />
                     </div>
 
                     <!-- Delete -->

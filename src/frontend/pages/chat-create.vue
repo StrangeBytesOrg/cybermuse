@@ -94,7 +94,7 @@ const removeLore = (loreId: string) => {
                         <div class="flex flex-row gap-2">
                             <div class="avatar w-20 h-20">
                                 <img v-if="character.avatar" :src="character.avatar" class="rounded-lg" />
-                                <img v-else src="../assets/img/placeholder-avatar.webp" class="rounded-lg" />
+                                <img v-else src="@/assets/img/placeholder-avatar.webp" class="rounded-lg" />
                             </div>
                             <div class="text-lg ml-2">{{ character.name }}</div>
 

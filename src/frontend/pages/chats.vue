@@ -85,7 +85,7 @@ const formatTitle = (chat: Chat) => {
                             :height="512"
                             :alt="characterMap[character].name"
                         />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                        <img v-else src="@/assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
                 </div>
             </div>

@@ -62,7 +62,7 @@ const filteredCharacters = computed(() => {
                             :height="512"
                             :alt="character.name"
                         />
-                        <img v-else src="../assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
+                        <img v-else src="@/assets/img/placeholder-avatar.webp" alt="placeholder avatar" />
                     </div>
                 </div>
                 <div class="inline-flex flex-col h-36 ml-3">
