@@ -161,6 +161,15 @@ const generateMessage = async () => {
             messageBuffer += text
             const lastMessage = chat.messages[chat.messages.length - 1]
             if (!lastMessage) throw new Error('No last message')
+
+            const charName = characterMap[lastMessage.characterId]?.name
+            if (charName) {
+                const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+                const escaped = escapeRegex(charName)
+                const labelPattern = new RegExp(`(^|\\n)(?:${escaped}\\s*:)+\\s*`, 'gi')
+                messageBuffer = messageBuffer.replace(labelPattern, (_m, boundary) => boundary)
+            }
+
             lastMessage.content[lastMessage.activeIndex] = messageBuffer.trim()
             await updateChat()
         }
