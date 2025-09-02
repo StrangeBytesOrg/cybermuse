@@ -3,7 +3,8 @@ import {ref, reactive, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
-import {streamText} from 'ai'
+import {streamText, generateText, tool} from 'ai'
+import {z} from 'zod'
 import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {chatCollection, characterCollection, loreCollection, templateCollection, generationPresetCollection} from '@/db'
 import {useSettingsStore} from '@/store'
@@ -51,17 +52,18 @@ const fullSend = async (event: KeyboardEvent | MouseEvent) => {
         await createMessage(userCharacter.id, currentMessage.value, 'user')
     }
 
+    currentMessage.value = ''
+    localStorage.removeItem(`chat-draft-${chatId}`)
+
     const otherCharacters = characters.filter((c) => c.id !== userCharacter.id)
     let messageId = ''
     if (otherCharacters.length > 1) {
-        console.log('TODO - Pick respondent using LLM')
+        const responseCharacterId = await pickRespondent()
+        messageId = await createMessage(responseCharacterId, '', 'assistant')
     } else if (otherCharacters.length === 1) {
         if (!otherCharacters[0]) throw new Error('Missing character')
         messageId = await createMessage(otherCharacters[0].id, '', 'assistant')
     }
-
-    currentMessage.value = ''
-    localStorage.removeItem(`chat-draft-${chatId}`)
 
     await generateMessage(messageId)
 }
@@ -86,7 +88,7 @@ const createMessage = async (characterId: string, text: string = '', type: Messa
     return id
 }
 
-const getSystemPrompt = async (): Promise<string> => {
+const getSystemPrompt = async () => {
     const engine = new Liquid()
     const {template} = await templateCollection.get(settings.template)
 
@@ -122,6 +124,65 @@ const getSystemPrompt = async (): Promise<string> => {
     })
 }
 
+const getChatHistory = () => {
+    return chat.messages.map((message) => {
+        const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
+        return {
+            role: message.type,
+            content: prefix + (message.content[message.activeIndex] || ''),
+        }
+    })
+}
+
+const pickRespondent = async () => {
+    const otherCharacters = characters.filter((c) => c.id !== userCharacter.id)
+    const fallback = otherCharacters[0]?.id
+    if (!fallback) throw new Error('No other characters to pick from')
+
+    try {
+        const systemPrompt = await getSystemPrompt()
+        const chatHistory = getChatHistory()
+        chatHistory.push({
+            role: 'system',
+            content: 'You must pick exactly one next speaker by calling the pickCharacter tool. Do not respond with narrative text. Only call the tool.',
+        })
+
+        if (!settings.generationServer) throw new Error('No generation server set')
+        if (!settings.generationModel) throw new Error('No generation model set')
+        const endpoint = createOpenAICompatible({
+            name: settings.generationProvider ?? 'unset',
+            baseURL: settings.generationServer,
+            apiKey: settings.generationKey ?? undefined,
+        })
+
+        const allowedNames = otherCharacters.map((c) => c.name)
+        const {staticToolResults} = await generateText({
+            model: endpoint(settings.generationModel),
+            system: systemPrompt,
+            messages: chatHistory,
+            tools: {
+                pickCharacter: tool({
+                    description: 'Select which character should speak next in the roleplay chat based on context and recent turns.',
+                    inputSchema: z.object({
+                        character: z
+                            .enum(allowedNames as [string, ...string[]])
+                            .describe('Name of the chosen next speaker'),
+                    }),
+                    execute: async ({character}) => ({character}),
+                }),
+            },
+            toolChoice: 'required',
+        })
+        const firstResult = staticToolResults[0]
+        const character = otherCharacters.find((c) => c.name === firstResult?.input?.character)
+        if (!character) throw new Error('Character not found in tool call result')
+        return character.id
+    } catch (error) {
+        console.error('Error picking respondent:', error)
+        return fallback
+    }
+}
+
 const generateMessage = async (messageId: string) => {
     const message = chat.messages.find((m) => m.id === messageId)
     if (!message) throw new Error('Message not found')
@@ -129,14 +190,8 @@ const generateMessage = async (messageId: string) => {
 
     try {
         const systemPrompt = await getSystemPrompt()
-        const chatHistory = chat.messages.map((message) => {
-            const prefix = `${characterMap[message.characterId]?.name || 'Missing Character'}: `
-            return {
-                role: message.type,
-                content: prefix + (message.content[message.activeIndex] || ''),
-            }
-        })
-        chatHistory.pop() // Remove the last empty placeholder message
+        const chatHistory = getChatHistory()
+        chatHistory.pop() // The current last message should be empty, so ignore it
 
         const generationPreset = await generationPresetCollection.get(settings.preset)
         if (!settings.generationServer) throw new Error('No generation server set')
@@ -144,7 +199,7 @@ const generateMessage = async (messageId: string) => {
         const endpoint = createOpenAICompatible({
             name: settings.generationProvider ?? 'unset',
             baseURL: settings.generationServer,
-            apiKey: settings.generationKey ?? '',
+            apiKey: settings.generationKey ?? undefined,
         })
         const {textStream} = streamText({
             model: endpoint(settings.generationModel),
