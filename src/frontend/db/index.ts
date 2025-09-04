@@ -2,7 +2,7 @@ import {z} from 'zod'
 import {Collection, createDB} from '@/lib/idb-orm'
 import {fixtureData} from '@/db/fixture'
 
-export const db = await createDB('cybermuse', {
+export const db = await createDB('cybermuse', 1, {
     1: async (db) => {
         db.createObjectStore('characters', {keyPath: 'id'})
         db.createObjectStore('lore', {keyPath: 'id'})
@@ -12,10 +12,11 @@ export const db = await createDB('cybermuse', {
     },
 })
 
-export const characterCollection = new Collection(
+export const characterCollection = new Collection({
     db,
-    'characters',
-    z.object({
+    store: 'characters',
+    version: 0,
+    schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
@@ -25,12 +26,13 @@ export const characterCollection = new Collection(
         avatar: z.string().optional(),
         shortDescription: z.string().optional(),
     }),
-)
+})
 
-export const loreCollection = new Collection(
+export const loreCollection = new Collection({
     db,
-    'lore',
-    z.object({
+    store: 'lore',
+    version: 0,
+    schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
@@ -40,12 +42,13 @@ export const loreCollection = new Collection(
             content: z.string(),
         })),
     }),
-)
+})
 
-export const chatCollection = new Collection(
+export const chatCollection = new Collection({
     db,
-    'chats',
-    z.object({
+    store: 'chats',
+    version: 1,
+    schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
@@ -67,26 +70,39 @@ export const chatCollection = new Collection(
         })),
         archived: z.boolean(),
     }),
-)
+    migrations: {
+        1: (doc) => {
+            if (!Array.isArray(doc.messages)) throw new Error('Invalid messages array')
+            doc.messages.forEach((msg) => {
+                if (msg.type === 'model') {
+                    msg.type = 'assistant'
+                }
+            })
+            return doc
+        },
+    },
+})
 export type Chat = z.infer<typeof chatCollection.schema>
 export type Message = Chat['messages'][0]
 
-export const templateCollection = new Collection(
+export const templateCollection = new Collection({
     db,
-    'templates',
-    z.object({
+    store: 'templates',
+    version: 0,
+    schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         template: z.string(),
     }),
-)
+})
 
-export const generationPresetCollection = new Collection(
+export const generationPresetCollection = new Collection({
     db,
-    'generationPresets',
-    z.object({
+    store: 'generationPresets',
+    version: 0,
+    schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
         deleted: z.number().optional(),
@@ -100,7 +116,15 @@ export const generationPresetCollection = new Collection(
         frequencyPenalty: z.number().optional(),
         presencePenalty: z.number().optional(),
     }),
-)
+})
 
-// Fixture DB data
+type Collections = Record<string, Collection<z.ZodObject>>
+export const collections: Collections = {
+    characters: characterCollection,
+    lore: loreCollection,
+    chats: chatCollection,
+    templates: templateCollection,
+    generationPresets: generationPresetCollection,
+}
+
 await fixtureData(db)

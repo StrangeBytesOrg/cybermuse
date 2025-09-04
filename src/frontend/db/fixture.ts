@@ -17,7 +17,7 @@ export const fixtureData = async (db: IDBPDatabase) => {
             name: 'User',
             description: 'The user of the system.',
             shortDescription: 'A default user character you can use.',
-        })
+        }, false)
     }
 
     const templates = await db.getAll('templates')
@@ -28,7 +28,7 @@ export const fixtureData = async (db: IDBPDatabase) => {
             lastUpdate: 0,
             name: 'Default',
             template: defaultTemplate,
-        })
+        }, false)
     }
 
     const generationPresets = await db.getAll('generationPresets')
@@ -39,6 +39,6 @@ export const fixtureData = async (db: IDBPDatabase) => {
             lastUpdate: 0,
             name: 'Default',
             maxTokens: 512,
-        })
+        }, false)
     }
 }

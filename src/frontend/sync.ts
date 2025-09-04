@@ -1,5 +1,5 @@
 import {deleteDB} from 'idb'
-import {db} from '@/db'
+import {db, collections} from '@/db'
 import client from '@/clients/sync-client'
 import {useSettingsStore} from '@/store'
 
@@ -16,6 +16,7 @@ export const sync = async () => {
     // Sync Down
     for (const {key, collection, lastUpdate} of remoteDocs) {
         const localDoc = await db.get(collection, key)
+        // TODO pull if localDoc version < remote version (but not past current schema version)
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
             console.log(`Pulling: ${collection}/${key}`)
             const {data, error} = await client.GET('/download/{collection}/{key}', {
@@ -25,21 +26,36 @@ export const sync = async () => {
                 },
             })
             if (error) throw error
-            await db.put(collection, data)
+
+            const localCollection = collections[collection]
+            if (!data) throw new Error(`No data received for ${collection}/${key}`)
+            if (!localCollection) throw new Error(`No collection found for ${collection}`)
+            if (data.deleted) {
+                // If the document is marked as deleted, skip migration and schema validation
+                await db.put(collection, data)
+                continue
+            }
+            if (data.version < localCollection.version) {
+                const migrated = await localCollection.migrate(data)
+                await localCollection.put(migrated, false)
+            } else {
+                await localCollection.put(data, false)
+            }
         }
     }
 
     // Sync up
     const docsToPush = []
-    for (const stores of db.objectStoreNames) {
-        const localDocs = await db.getAll(stores)
+    for (const collection of db.objectStoreNames) {
+        const localDocs = await db.getAll(collection)
         for (const doc of localDocs) {
-            const remoteDoc = remoteDocs.find(d => d.collection === stores && d.key === doc.id)
+            const remoteDoc = remoteDocs.find(d => d.collection === collection && d.key === doc.id)
+            // TODO also push if localDoc version > remote version
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
-                console.log(`Pushing: ${stores}/${doc.id}`)
+                console.log(`Pushing: ${collection}/${doc.id}`)
                 docsToPush.push({
                     key: doc.id,
-                    collection: stores,
+                    collection,
                     doc,
                 })
             }

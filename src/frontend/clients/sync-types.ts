@@ -115,6 +115,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
+                        version: number
                     } & Record<string, never>
                 }[]
                 'multipart/form-data': {
@@ -123,6 +124,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
+                        version: number
                     } & Record<string, never>
                 }[]
                 'text/plain': {
@@ -131,6 +133,7 @@ export interface operations {
                     doc: {
                         id: string
                         lastUpdate: number
+                        version: number
                     } & Record<string, never>
                 }[]
             }
@@ -164,14 +167,20 @@ export interface operations {
                     'application/json': {
                         id: string
                         lastUpdate: number
+                        version: number
+                        deleted?: number
                     }
                     'multipart/form-data': {
                         id: string
                         lastUpdate: number
+                        version: number
+                        deleted?: number
                     }
                     'text/plain': {
                         id: string
                         lastUpdate: number
+                        version: number
+                        deleted?: number
                     }
                 }
             }
