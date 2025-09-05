@@ -33,3 +33,6 @@ require (
 	golang.org/x/sys v0.35.0 // indirect
 	golang.org/x/text v0.28.0 // indirect
 )
+
+// Temporary fix for go-webview2 cross build issue
+replace github.com/wailsapp/go-webview2 => github.com/wailsapp/go-webview2 v1.0.21
