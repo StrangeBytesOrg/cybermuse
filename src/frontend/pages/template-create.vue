@@ -33,7 +33,7 @@ const createTemplate = async () => {
         lastUpdate: Date.now(),
         ...template,
     })
-    settings.setTemplate(templateId)
+    settings.template = templateId
     toast.success('Template created')
     router.push({name: 'templates'})
 }

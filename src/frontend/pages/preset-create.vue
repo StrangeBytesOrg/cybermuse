@@ -27,7 +27,7 @@ const createPreset = async () => {
         lastUpdate: Date.now(),
         ...preset,
     })
-    settings.setPreset(presetId)
+    settings.preset = presetId
     toast.success('Created new preset')
     router.push({name: 'presets'})
 }

@@ -16,7 +16,7 @@ const activeTemplate = computed(() => {
 
 const setActiveTemplate = async (event: Event) => {
     const target = event.target as HTMLSelectElement
-    settings.setTemplate(target.value)
+    settings.template = target.value
     toast.success('Active template set')
 }
 
@@ -45,7 +45,7 @@ const deleteTemplate = async () => {
 
     if (activeTemplate.value) {
         await templateCollection.delete(activeTemplate.value.id)
-        settings.setTemplate('default-template')
+        settings.template = 'default-template'
         toast.success('Template deleted')
     }
 }

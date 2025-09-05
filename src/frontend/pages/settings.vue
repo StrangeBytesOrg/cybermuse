@@ -4,6 +4,7 @@ import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {useToastStore, useSettingsStore, useHubStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
 import HubLogin from '@/components/hub-login.vue'
+import {watch} from 'vue'
 
 const settings = useSettingsStore()
 const hub = useHubStore()
@@ -12,41 +13,31 @@ const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 
 hub.checkAuth()
 
-const setTheme = async (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    settings.setTheme(target.value)
-}
-
-const setGenerationProvider = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    settings.setGenerationProvider(target.value)
-    switch (target.value) {
+// Watch for provider changes to auto-set server URLs
+watch(() => settings.generationProvider, (newProvider) => {
+    switch (newProvider) {
         case 'hub':
-            settings.setGenerationServer('https://api.cybermuse.io')
+            settings.generationServer = 'https://api.cybermuse.io'
             break
         case 'openrouter':
-            settings.setGenerationServer('https://openrouter.ai/api/v1')
+            settings.generationServer = 'https://openrouter.ai/api/v1'
             break
         default:
-            settings.setGenerationServer('')
+            settings.generationServer = ''
             break
     }
-}
+})
 
-const setGenerationServer = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    settings.setGenerationServer(target.value)
-}
-
-const setGenerationKey = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    settings.setGenerationKey(target.value)
-}
-
-const setGenerationModel = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    settings.setGenerationModel(target.value)
-}
+watch(() => settings.syncProvider, (newProvider) => {
+    switch (newProvider) {
+        case 'hub':
+            settings.syncServer = 'https://sync.cybermuse.io'
+            break
+        default:
+            settings.syncServer = ''
+            break
+    }
+})
 
 const testGeneration = async () => {
     const endpoint = createOpenAICompatible({
@@ -67,29 +58,6 @@ const testGeneration = async () => {
     }
 }
 
-const setSyncProvider = (event: Event) => {
-    const target = event.target as HTMLSelectElement
-    settings.setSyncProvider(target.value)
-    switch (target.value) {
-        case 'hub':
-            settings.setSyncServer('https://sync.cybermuse.io')
-            break
-        default:
-            settings.setSyncServer('')
-            break
-    }
-}
-
-const setSyncServer = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    settings.setSyncServer(target.value)
-}
-
-const setSyncSecret = (event: Event) => {
-    const target = event.target as HTMLInputElement
-    settings.setSyncSecret(target.value)
-}
-
 const doSync = async () => {
     await sync()
     toast.success('Synced')
@@ -101,7 +69,7 @@ const doSync = async () => {
         <!-- Theme -->
         <fieldset class="bg-base-200 rounded-box p-3 sm:max-w-sm">
             <legend class="fieldset-legend">Theme</legend>
-            <select class="select" @change="setTheme" :value="settings.theme">
+            <select class="select" v-model="settings.theme">
                 <option v-for="theme in themes" :value="theme" :key="theme">{{ theme }}</option>
             </select>
         </fieldset>
@@ -122,7 +90,7 @@ const doSync = async () => {
             <legend class="fieldset-legend">Generation</legend>
 
             <label class="fieldset-label text-sm">Provider</label>
-            <select @change="setGenerationProvider" :value="settings.generationProvider" class="select">
+            <select v-model="settings.generationProvider" class="select">
                 <option value="">Select a provider</option>
                 <option value="custom">Self Hosted/Custom</option>
                 <option value="openrouter">OpenRouter</option>
@@ -132,8 +100,7 @@ const doSync = async () => {
             <template v-if="settings.generationProvider === 'custom'">
                 <label class="fieldset-label text-sm">Generation Server URL</label>
                 <input
-                    @change="setGenerationServer"
-                    :value="settings.generationServer"
+                    v-model="settings.generationServer"
                     type="url"
                     class="input validator"
                     placeholder="Local Generation Server"
@@ -147,8 +114,7 @@ const doSync = async () => {
 
             <label class="fieldset-label text-sm">Generation Model</label>
             <input
-                @change="setGenerationModel"
-                :value="settings.generationModel"
+                v-model="settings.generationModel"
                 type="text"
                 class="input"
                 placeholder="e.g. gpt-3.5-turbo"
@@ -156,13 +122,12 @@ const doSync = async () => {
 
             <label class="fieldset-label text-sm">API Key</label>
             <input
-                @change="setGenerationKey"
-                :value="settings.generationKey"
+                v-model="settings.generationKey"
                 type="text"
                 class="input"
             />
 
-            <button @click="testGeneration" class="btn btn-primary">Test</button>
+            <button @click="testGeneration" class="btn btn-primary w-full">Test</button>
         </fieldset>
 
         <!-- Sync -->
@@ -170,7 +135,7 @@ const doSync = async () => {
             <legend class="fieldset-legend">Sync</legend>
 
             <label class="fieldset-label text-sm">Sync Provider</label>
-            <select @change="setSyncProvider" :value="settings.syncProvider" class="select mt-1">
+            <select v-model="settings.syncProvider" class="select mt-1">
                 <option value="">Select a provider</option>
                 <option value="hub" :disabled="!hub.token">Cybermuse Hub {{ !hub.token ? '(Login required)' : '' }}</option>
                 <option value="self-hosted">Self Hosted</option>
@@ -179,8 +144,7 @@ const doSync = async () => {
             <template v-if="settings.syncProvider === 'self-hosted'">
                 <label class="fieldset-label text-sm mt-2">Server URL</label>
                 <input
-                    @change="setSyncServer"
-                    :value="settings.syncServer"
+                    v-model="settings.syncServer"
                     class="input validator mt-1"
                     required
                     placeholder="Local Generation Server"
@@ -190,7 +154,7 @@ const doSync = async () => {
                 <p class="validator-hint hidden">Must start with "http" or "https"</p>
 
                 <label class="fieldset-label text-sm mt-2">Password</label>
-                <input @change="setSyncSecret" :value="settings.syncSecret" type="text" class="input mt-1" />
+                <input v-model="settings.syncSecret" type="text" class="input mt-1" />
             </template>
 
             <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>

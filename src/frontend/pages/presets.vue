@@ -14,7 +14,7 @@ const activePreset = computed(() => {
 
 const setActivePreset = async (event: Event) => {
     const target = event.target as HTMLSelectElement
-    settings.setPreset(target.value)
+    settings.preset = target.value
     toast.success('Active preset set')
 }
 
@@ -32,7 +32,7 @@ const deletePreset = async () => {
 
     if (activePreset.value) {
         await generationPresetCollection.delete(activePreset.value.id)
-        settings.setPreset('default-generation-preset')
+        settings.preset = 'default-generation-preset'
         toast.success('Preset deleted')
     }
 }

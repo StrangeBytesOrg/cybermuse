@@ -34,6 +34,7 @@
         "openapi-typescript": "^7.9.1",
         "oxlint": "^1.13.0",
         "pinia": "^3.0.3",
+        "pinia-plugin-persistedstate": "^4.5.0",
         "rollup-license-plugin": "^3.0.2",
         "tailwindcss": "^4.1.12",
         "vite": "^7.1.3",

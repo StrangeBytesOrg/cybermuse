@@ -19,9 +19,9 @@ const login = async () => {
     if (error) {
         toast.error(`Error logging in: ${error}`)
     } else {
-        hub.setToken(data.token)
+        hub.setToken(data?.token ?? '')
         if (settings.generationProvider === '') {
-            settings.setGenerationProvider('hub')
+            settings.generationProvider = 'hub'
         }
         toast.success('Logged in successfully')
     }
