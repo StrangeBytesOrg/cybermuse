@@ -2,13 +2,15 @@
 import {watch, ref} from 'vue'
 import {generateText} from 'ai'
 import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
-import {useToastStore, useSettingsStore, useHubStore} from '@/store'
+import {useToastStore, useSettingsStore, useHubStore, useSyncStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
 import HubLogin from '@/components/hub-login.vue'
+import SyncProgress from '@/components/sync-progress.vue'
 
 const settings = useSettingsStore()
 const hub = useHubStore()
 const toast = useToastStore()
+const syncStore = useSyncStore()
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
 const validJson = ref(true)
 
@@ -69,8 +71,13 @@ const testGeneration = async () => {
 }
 
 const doSync = async () => {
-    await sync()
-    toast.success('Synced')
+    try {
+        await sync()
+        toast.success('Synced')
+    } catch (error) {
+        console.error('Sync failed:', error)
+        toast.error('Sync failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
 }
 </script>
 
@@ -171,7 +178,11 @@ const doSync = async () => {
                 <input v-model="settings.syncSecret" type="text" class="input mt-1" />
             </template>
 
-            <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3">Sync</button>
+            <button v-if="settings.syncProvider" @click="doSync" class="btn btn-primary block mt-3" :disabled="syncStore.isRunning">
+                <span v-if="syncStore.isRunning" class="loading loading-spinner loading-sm"></span> {{ syncStore.isRunning ? 'Syncing...' : 'Sync' }}
+            </button>
+
+            <SyncProgress />
         </fieldset>
 
         <!-- Data -->

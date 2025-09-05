@@ -1,4 +1,5 @@
 export {useHubStore} from './hub'
 export {useMenuStore} from './menu'
 export {useSettingsStore} from './settings'
+export {useSyncStore} from './sync'
 export {useToastStore} from './toast'

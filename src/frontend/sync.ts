@@ -1,28 +1,84 @@
 import {deleteDB} from 'idb'
 import {db, collections} from '@/db'
 import client from '@/clients/sync-client'
-import {useSettingsStore} from '@/store'
+import {useSettingsStore, useSyncStore} from '@/store'
 
 export const sync = async () => {
     const settings = useSettingsStore()
+    const syncStore = useSyncStore()
+
     if (!settings.syncServer) throw new Error('No sync server selected')
 
-    const {data: listData, error: listError} = await client.GET('/list', {
-        baseUrl: settings.syncServer,
-        credentials: 'same-origin',
-    })
-    if (listError) throw listError
+    try {
+        syncStore.startSync()
 
-    // TODO Use a transaction for the whole sync process
-    // Sync down documents
-    for (const {key, lastUpdate} of listData.documents) {
-        const [collection, id] = key.split(':')
-        if (!collection || !id) throw new Error(`Invalid document key: ${key}`)
-        const isDeleted = await db.get('deletions', id)
-        if (isDeleted) continue
-        const localDoc = await db.get(collection, id)
-        if (!localDoc || lastUpdate > localDoc.lastUpdate) {
-            console.log(`Pulling: ${key}`)
+        const {data: listData, error: listError} = await client.GET('/list', {
+            baseUrl: settings.syncServer,
+            credentials: 'same-origin',
+        })
+        if (listError) throw listError
+
+        // Pre-calculate what needs to be done for accurate progress
+        const documentsToDownload = []
+        const docsToPush = []
+
+        // Check documents that need downloading
+        for (const docInfo of listData.documents) {
+            const {key, lastUpdate} = docInfo
+            const [collection, id] = key.split(':')
+            if (!collection || !id) continue
+            const isDeleted = await db.get('deletions', id)
+            if (isDeleted) continue
+            const localDoc = await db.get(collection, id)
+            if (!localDoc || lastUpdate > localDoc.lastUpdate) {
+                documentsToDownload.push(docInfo)
+            }
+        }
+
+        // Build documents to push array
+        for (const collection of Object.keys(collections)) {
+            const localDocs = await db.getAll(collection)
+            for (const doc of localDocs) {
+                const remoteDoc = listData.documents.find(d => d.key === `${collection}:${doc.id}`)
+                if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
+                    docsToPush.push({key: `${collection}:${doc.id}`, doc})
+                }
+            }
+        }
+
+        const totalOperations = documentsToDownload.length + (docsToPush.length > 0 ? 1 : 0) + 1
+        let currentOperation = 0
+
+        // Handle case where there's nothing to sync
+        if (totalOperations === 0) {
+            syncStore.updateProgress({
+                phase: 'complete',
+                total: 1,
+                current: 1,
+                message: 'Everything is already up to date',
+            })
+            syncStore.finishSync()
+            return
+        }
+
+        // TODO Use a transaction for the whole sync process
+        // Sync down documents
+        syncStore.updateProgress({
+            phase: 'downloading',
+            total: totalOperations,
+            current: currentOperation,
+            message: `Downloading ${documentsToDownload.length} documents...`,
+        })
+
+        for (const {key} of documentsToDownload) {
+            const [collection, id] = key.split(':')
+            if (!collection || !id) throw new Error(`Invalid document key: ${key}`)
+
+            syncStore.updateProgress({
+                current: currentOperation,
+                message: `Downloading ${key}...`,
+            })
+
             const {data, error} = await client.GET('/download/{key}', {
                 baseUrl: settings.syncServer,
                 params: {path: {key}},
@@ -38,48 +94,55 @@ export const sync = async () => {
             } else {
                 await localCollection.put(data, false)
             }
+            currentOperation += 1
         }
-    }
 
-    // Sync down deletions
-    for (const {key, deletedAt} of listData.deletions) {
-        const [collection, id] = key.split(':')
-        if (!collection || !id) throw new Error(`Invalid deletion key: ${key}`)
-        const isDeleted = await db.get('deletions', id)
-        if (isDeleted) continue
-        console.log(`Processing deletion: ${collection}:${id}`)
-        await db.delete(collection, id)
-        await db.put('deletions', {id, collection, deletedAt})
-    }
-
-    // Sync up documents
-    const docsToPush = []
-    for (const collection of Object.keys(collections)) {
-        const localDocs = await db.getAll(collection)
-        for (const doc of localDocs) {
-            const remoteDoc = listData.documents.find(d => d.key === `${collection}:${doc.id}`)
-            // TODO also push if localDoc version > remote version
-            if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
-                console.log(`Pushing: ${collection}:${doc.id}`)
-                docsToPush.push({key: `${collection}:${doc.id}`, doc})
-            }
-        }
-    }
-
-    const deletions = (await db.getAll('deletions')).map((deletion) => ({
-        key: `${deletion.collection}:${deletion.id}`,
-        deletedAt: deletion.deletedAt,
-    }))
-
-    if (docsToPush.length || deletions.length) {
-        const {error: pushError} = await client.PUT('/upload', {
-            baseUrl: settings.syncServer,
-            body: {
-                documents: docsToPush,
-                deletions,
-            },
+        // Process deletions
+        syncStore.updateProgress({
+            phase: 'processing-deletions',
+            current: currentOperation,
+            message: `Processing ${listData.deletions.length} deletions...`,
         })
-        if (pushError) throw pushError
+
+        for (const {key, deletedAt} of listData.deletions) {
+            const [collection, id] = key.split(':')
+            if (!collection || !id) throw new Error(`Invalid deletion key: ${key}`)
+            const isDeleted = await db.get('deletions', id)
+            if (isDeleted) continue
+
+            await db.delete(collection, id)
+            await db.put('deletions', {id, collection, deletedAt})
+        }
+        currentOperation += 1
+
+        // Prepare deletions for upload
+        const deletions = (await db.getAll('deletions')).map((deletion) => ({
+            key: `${deletion.collection}:${deletion.id}`,
+            deletedAt: deletion.deletedAt,
+        }))
+
+        if (docsToPush.length || deletions.length) {
+            syncStore.updateProgress({
+                phase: 'uploading',
+                current: currentOperation,
+                message: `Uploading ${docsToPush.length} documents and ${deletions.length} deletions...`,
+            })
+
+            const {error: pushError} = await client.PUT('/upload', {
+                baseUrl: settings.syncServer,
+                body: {
+                    documents: docsToPush,
+                    deletions,
+                },
+            })
+            if (pushError) throw pushError
+            currentOperation += 1
+        }
+
+        syncStore.finishSync()
+    } catch (error) {
+        syncStore.errorSync(error instanceof Error ? error.message : 'Unknown error occurred')
+        throw error
     }
 }
 
