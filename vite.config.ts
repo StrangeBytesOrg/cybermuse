@@ -17,6 +17,23 @@ export default defineConfig({
         sourcemap: true,
         outDir: path.resolve(import.meta.dirname, 'dist'),
         emptyOutDir: true,
+        rollupOptions: {
+            output: {
+                manualChunks(id) {
+                    // Create a vendor chunk
+                    if (id.includes('node_modules')) {
+                        return 'vendor'
+                    }
+                },
+                // Clean up chunk file names
+                chunkFileNames: (chunkInfo) => {
+                    if (chunkInfo.name.includes('vue_vue_type_script_setup_true_lang')) {
+                        return 'assets/component-[hash].js'
+                    }
+                    return 'assets/[name]-[hash].js'
+                },
+            },
+        },
     },
     resolve: {
         alias: {
