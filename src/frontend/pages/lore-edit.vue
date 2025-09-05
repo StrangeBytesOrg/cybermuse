@@ -39,8 +39,6 @@ const deleteLore = async () => {
 </script>
 
 <template>
-    <div v-if="lore.deleted" class="alert alert-error mb-2">Pending Deletion</div>
-
     <div class="flex flex-col bg-base-200 rounded-lg p-3">
         <input type="text" v-model="lore.name" class="input" placeholder="Lore Name" />
 

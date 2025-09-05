@@ -61,7 +61,6 @@ const removeImage = () => {
 </script>
 
 <template>
-    <div v-if="character.deleted" class="alert alert-error mb-2">Pending Deletion</div>
     <div v-if="character" class="flex flex-col w-full bg-base-200 rounded-lg p-3">
         <input
             type="text"
