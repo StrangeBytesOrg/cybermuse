@@ -1,15 +1,16 @@
 <script lang="ts" setup>
+import {watch, ref} from 'vue'
 import {generateText} from 'ai'
 import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {useToastStore, useSettingsStore, useHubStore} from '@/store'
 import {sync, exportData, clearData} from '@/sync'
 import HubLogin from '@/components/hub-login.vue'
-import {watch} from 'vue'
 
 const settings = useSettingsStore()
 const hub = useHubStore()
 const toast = useToastStore()
 const themes = ['dark', 'forest', 'dracula', 'aqua', 'winter', 'pastel']
+const validJson = ref(true)
 
 hub.checkAuth()
 
@@ -36,6 +37,15 @@ watch(() => settings.syncProvider, (newProvider) => {
         default:
             settings.syncServer = ''
             break
+    }
+})
+
+watch(() => settings.providerOptions, (newOptions) => {
+    try {
+        JSON.parse(newOptions || '{}')
+        validJson.value = true
+    } catch {
+        validJson.value = false
     }
 })
 
@@ -126,6 +136,10 @@ const doSync = async () => {
                 type="text"
                 class="input"
             />
+
+            <label class="label">Provider Options</label>
+            <textarea class="textarea" v-model="settings.providerOptions"></textarea>
+            <p v-if="!validJson" class="text-error text-sm">Provider options must be valid JSON</p>
 
             <button @click="testGeneration" class="btn btn-primary w-full">Test</button>
         </fieldset>

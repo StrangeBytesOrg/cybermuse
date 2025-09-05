@@ -13,6 +13,7 @@ export const useSettingsStore = defineStore('settings', {
             generationServer: '',
             generationModel: '',
             generationKey: '',
+            providerOptions: '',
         }
     },
     persist: true,

@@ -197,7 +197,7 @@ const generateMessage = async (messageId: string) => {
         if (!settings.generationServer) throw new Error('No generation server set')
         if (!settings.generationModel) throw new Error('No generation model set')
         const endpoint = createOpenAICompatible({
-            name: settings.generationProvider ?? 'unset',
+            name: 'custom',
             baseURL: settings.generationServer,
             apiKey: settings.generationKey ?? undefined,
         })
@@ -214,6 +214,9 @@ const generateMessage = async (messageId: string) => {
             presencePenalty: generationPreset.presencePenalty,
             abortSignal: abortController.signal,
             // TODO: Add stop sequences
+            providerOptions: {
+                custom: JSON.parse(settings.providerOptions || '{}'),
+            },
         })
         let messageBuffer = ''
         for await (const text of textStream) {
