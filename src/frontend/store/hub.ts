@@ -1,12 +1,15 @@
 import {defineStore} from 'pinia'
-import {useToastStore} from '@/store'
-import hubClient from '@/clients/hub-client'
+import {useToastStore} from './toast'
+import {createHubClient} from '@/clients/hub-client'
 
 export const useHubStore = defineStore('hub', {
     state: () => {
         return {
             token: localStorage.getItem('hubToken'),
         }
+    },
+    getters: {
+        authenticatedClient: (state) => createHubClient(state.token),
     },
     actions: {
         setToken(token: string) {
@@ -18,12 +21,12 @@ export const useHubStore = defineStore('hub', {
             localStorage.removeItem('hubToken')
         },
         async logout() {
-            await hubClient.POST('/logout')
+            await this.authenticatedClient.POST('/logout')
             this.removeToken()
         },
         async checkAuth() {
             if (!this.token) return false
-            const {response} = await hubClient.GET('/verify_token')
+            const {response} = await this.authenticatedClient.GET('/verify_token')
             if (response.status === 401) {
                 useToastStore().warn('Hub login expired. Please login again.')
                 this.removeToken()
