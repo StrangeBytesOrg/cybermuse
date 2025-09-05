@@ -10,9 +10,15 @@ const baseSchema = z.looseObject({
     id: z.string().min(1, {error: 'ID cannot be empty'}),
     lastUpdate: z.number().default(0),
     version: z.number().default(0),
-    deleted: z.number().optional(),
 })
 export type BaseDocument = z.infer<typeof baseSchema>
+
+const deletionSchema = z.object({
+    id: z.string(),
+    collection: z.string(),
+    deletedAt: z.number(),
+})
+export type DeletionRecord = z.infer<typeof deletionSchema>
 
 export function createDB(name: string, version: number, migrations: Migrations) {
     const versions = Object.keys(migrations)
@@ -76,19 +82,18 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
 
     /** Get a document by its key. */
     async get(key: string | number) {
-        return this.schema.parse(await this.db.get(this.store, key))
+        const doc = await this.db.get(this.store, key)
+        if (!doc) throw new Error(`Document not found: ${this.store}/${key}`)
+        return this.schema.parse(doc)
     }
 
     /** Put a document into the collection. */
     async put(doc: z.infer<T>, updateTimestamp = true) {
-        return await this.db.put(
-            this.store,
-            this.schema.parse({
-                ...doc,
-                version: this.version,
-                lastUpdate: updateTimestamp ? Date.now() : doc.lastUpdate,
-            }),
-        )
+        return await this.db.put(this.store, {
+            ...this.schema.parse(doc),
+            version: this.version,
+            lastUpdate: updateTimestamp ? Date.now() : doc.lastUpdate,
+        })
     }
 
     /** Update a document in the collection. */
@@ -107,15 +112,25 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
         )
     }
 
-    /** Convert document into a tombstone */
+    /** Delete a document and record in deletions store */
     async delete(key: string | number) {
-        return await this.db.put(this.store, {id: key, lastUpdate: Date.now(), deleted: 1})
+        const doc = await this.get(key) // Ensure it exists before deleting
+        if (!doc) {
+            console.warn(`Document not found for deletion: ${this.store}/${key}`)
+            return
+        }
+        await this.db.delete(this.store, key)
+        await this.db.put('deletions', {
+            id: key.toString(),
+            collection: this.store,
+            deletedAt: Date.now(),
+        })
     }
 
     /** List all documents in the collection. */
     async toArray() {
         const docs = await this.db.getAll(this.store)
-        return docs.filter(doc => !doc.deleted).map((doc) => this.schema.parse(doc))
+        return docs.map((doc) => this.schema.parse(doc))
     }
 
     /** Get documents from an array of keys */
@@ -126,7 +141,7 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
         const docs = await Promise.all(keys.map(k => tx.store.get(k)))
         await tx.done
 
-        return docs.filter(doc => !doc.deleted).map(doc => this.schema.parse(doc))
+        return docs.map(doc => this.schema.parse(doc))
     }
 
     /** Migrate a document to a new version */
@@ -139,5 +154,11 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
             }
         })
         return this.schema.parse(baseDoc)
+    }
+
+    /** Get deletions for this collection */
+    async getDeletions() {
+        const deletions = await this.db.getAll('deletions')
+        return deletions.filter((d: DeletionRecord) => d.collection === this.store)
     }
 }

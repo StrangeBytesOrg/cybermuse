@@ -36,14 +36,14 @@ export interface paths {
         patch?: never
         trace?: never
     }
-    '/download/{collection}/{key}': {
+    '/download/{key}': {
         parameters: {
             query?: never
             header?: never
             path?: never
             cookie?: never
         }
-        get: operations['getDownloadByCollectionByKey']
+        get: operations['getDownloadByKey']
         put?: never
         post?: never
         delete?: never
@@ -79,23 +79,38 @@ export interface operations {
                 }
                 content: {
                     'application/json': {
-                        key: string
-                        collection: string
-                        lastUpdate: number
-                        deleted?: number
-                    }[]
+                        documents: {
+                            key: string
+                            lastUpdate: number
+                            version: number
+                        }[]
+                        deletions: {
+                            key: string
+                            deletedAt: number
+                        }[]
+                    }
                     'multipart/form-data': {
-                        key: string
-                        collection: string
-                        lastUpdate: number
-                        deleted?: number
-                    }[]
+                        documents: {
+                            key: string
+                            lastUpdate: number
+                            version: number
+                        }[]
+                        deletions: {
+                            key: string
+                            deletedAt: number
+                        }[]
+                    }
                     'text/plain': {
-                        key: string
-                        collection: string
-                        lastUpdate: number
-                        deleted?: number
-                    }[]
+                        documents: {
+                            key: string
+                            lastUpdate: number
+                            version: number
+                        }[]
+                        deletions: {
+                            key: string
+                            deletedAt: number
+                        }[]
+                    }
                 }
             }
         }
@@ -110,32 +125,47 @@ export interface operations {
         requestBody: {
             content: {
                 'application/json': {
-                    key: string
-                    collection: string
-                    doc: {
-                        id: string
-                        lastUpdate: number
-                        version: number
-                    } & Record<string, never>
-                }[]
+                    documents: {
+                        key: string
+                        doc: {
+                            id: string
+                            lastUpdate: number
+                            version: number
+                        } & Record<string, never>
+                    }[]
+                    deletions: {
+                        key: string
+                        deletedAt: number
+                    }[]
+                }
                 'multipart/form-data': {
-                    key: string
-                    collection: string
-                    doc: {
-                        id: string
-                        lastUpdate: number
-                        version: number
-                    } & Record<string, never>
-                }[]
+                    documents: {
+                        key: string
+                        doc: {
+                            id: string
+                            lastUpdate: number
+                            version: number
+                        } & Record<string, never>
+                    }[]
+                    deletions: {
+                        key: string
+                        deletedAt: number
+                    }[]
+                }
                 'text/plain': {
-                    key: string
-                    collection: string
-                    doc: {
-                        id: string
-                        lastUpdate: number
-                        version: number
-                    } & Record<string, never>
-                }[]
+                    documents: {
+                        key: string
+                        doc: {
+                            id: string
+                            lastUpdate: number
+                            version: number
+                        } & Record<string, never>
+                    }[]
+                    deletions: {
+                        key: string
+                        deletedAt: number
+                    }[]
+                }
             }
         }
         responses: {
@@ -147,12 +177,11 @@ export interface operations {
             }
         }
     }
-    getDownloadByCollectionByKey: {
+    getDownloadByKey: {
         parameters: {
             query?: never
             header?: never
             path: {
-                collection: string
                 key: string
             }
             cookie?: never
@@ -165,22 +194,16 @@ export interface operations {
                 }
                 content: {
                     'application/json': {
-                        id: string
                         lastUpdate: number
                         version: number
-                        deleted?: number
                     }
                     'multipart/form-data': {
-                        id: string
                         lastUpdate: number
                         version: number
-                        deleted?: number
                     }
                     'text/plain': {
-                        id: string
                         lastUpdate: number
                         version: number
-                        deleted?: number
                     }
                 }
             }

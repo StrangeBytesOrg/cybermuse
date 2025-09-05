@@ -9,6 +9,7 @@ export const db = await createDB('cybermuse', 1, {
         db.createObjectStore('chats', {keyPath: 'id'})
         db.createObjectStore('templates', {keyPath: 'id'})
         db.createObjectStore('generationPresets', {keyPath: 'id'})
+        db.createObjectStore('deletions', {keyPath: 'id'})
     },
 })
 
@@ -19,7 +20,6 @@ export const characterCollection = new Collection({
     schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
-        deleted: z.number().optional(),
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         description: z.string().min(1, {error: 'Description cannot be empty'}),
         firstMessage: z.string().optional(),
@@ -35,7 +35,6 @@ export const loreCollection = new Collection({
     schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
-        deleted: z.number().optional(),
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         entries: z.array(z.object({
             name: z.string(),
@@ -51,7 +50,6 @@ export const chatCollection = new Collection({
     schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
-        deleted: z.number().optional(),
         name: z.string(),
         userCharacter: z.string().min(1, {error: 'User character must be set'}),
         characters: z.array(z.string()).min(1, {error: 'At least one character must be in the chat'}),
@@ -92,7 +90,6 @@ export const templateCollection = new Collection({
     schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
-        deleted: z.number().optional(),
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         template: z.string(),
     }),
@@ -105,7 +102,6 @@ export const generationPresetCollection = new Collection({
     schema: z.object({
         id: z.string().min(1, {error: 'ID cannot be empty'}),
         lastUpdate: z.number(),
-        deleted: z.number().optional(),
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         maxTokens: z.number({error: 'Max tokens cannot be empty'}),
         temperature: z.number().optional(),

@@ -7,34 +7,31 @@ export const sync = async () => {
     const settings = useSettingsStore()
     if (!settings.syncServer) throw new Error('No sync server selected')
 
-    const {data: remoteDocs, error} = await client.GET('/list', {
+    const {data: listData, error: listError} = await client.GET('/list', {
         baseUrl: settings.syncServer,
         credentials: 'same-origin',
     })
-    if (error) throw error
+    if (listError) throw listError
 
-    // Sync Down
-    for (const {key, collection, lastUpdate} of remoteDocs) {
-        const localDoc = await db.get(collection, key)
-        // TODO pull if localDoc version < remote version (but not past current schema version)
+    // TODO Use a transaction for the whole sync process
+    // Sync down documents
+    for (const {key, lastUpdate} of listData.documents) {
+        const [collection, id] = key.split(':')
+        if (!collection || !id) throw new Error(`Invalid document key: ${key}`)
+        const isDeleted = await db.get('deletions', id)
+        if (isDeleted) continue
+        const localDoc = await db.get(collection, id)
         if (!localDoc || lastUpdate > localDoc.lastUpdate) {
-            console.log(`Pulling: ${collection}/${key}`)
-            const {data, error} = await client.GET('/download/{collection}/{key}', {
+            console.log(`Pulling: ${key}`)
+            const {data, error} = await client.GET('/download/{key}', {
                 baseUrl: settings.syncServer,
-                params: {
-                    path: {collection, key},
-                },
+                params: {path: {key}},
             })
             if (error) throw error
 
             const localCollection = collections[collection]
-            if (!data) throw new Error(`No data received for ${collection}/${key}`)
+            if (!data) throw new Error(`No data received for ${collection}/${id}`)
             if (!localCollection) throw new Error(`No collection found for ${collection}`)
-            if (data.deleted) {
-                // If the document is marked as deleted, skip migration and schema validation
-                await db.put(collection, data)
-                continue
-            }
             if (data.version < localCollection.version) {
                 const migrated = await localCollection.migrate(data)
                 await localCollection.put(migrated, false)
@@ -44,29 +41,45 @@ export const sync = async () => {
         }
     }
 
-    // Sync up
+    // Sync down deletions
+    for (const {key, deletedAt} of listData.deletions) {
+        const [collection, id] = key.split(':')
+        if (!collection || !id) throw new Error(`Invalid deletion key: ${key}`)
+        const isDeleted = await db.get('deletions', id)
+        if (isDeleted) continue
+        console.log(`Processing deletion: ${collection}:${id}`)
+        await db.delete(collection, id)
+        await db.put('deletions', {id, collection, deletedAt})
+    }
+
+    // Sync up documents
     const docsToPush = []
-    for (const collection of db.objectStoreNames) {
+    for (const collection of Object.keys(collections)) {
         const localDocs = await db.getAll(collection)
         for (const doc of localDocs) {
-            const remoteDoc = remoteDocs.find(d => d.collection === collection && d.key === doc.id)
+            const remoteDoc = listData.documents.find(d => d.key === `${collection}:${doc.id}`)
             // TODO also push if localDoc version > remote version
             if (!remoteDoc || doc.lastUpdate > remoteDoc.lastUpdate) {
-                console.log(`Pushing: ${collection}/${doc.id}`)
-                docsToPush.push({
-                    key: doc.id,
-                    collection,
-                    doc,
-                })
+                console.log(`Pushing: ${collection}:${doc.id}`)
+                docsToPush.push({key: `${collection}:${doc.id}`, doc})
             }
         }
     }
-    if (docsToPush.length) {
+
+    const deletions = (await db.getAll('deletions')).map((deletion) => ({
+        key: `${deletion.collection}:${deletion.id}`,
+        deletedAt: deletion.deletedAt,
+    }))
+
+    if (docsToPush.length || deletions.length) {
         const {error: pushError} = await client.PUT('/upload', {
             baseUrl: settings.syncServer,
-            body: docsToPush,
+            body: {
+                documents: docsToPush,
+                deletions,
+            },
         })
-        if (pushError) throw error
+        if (pushError) throw pushError
     }
 }
 
