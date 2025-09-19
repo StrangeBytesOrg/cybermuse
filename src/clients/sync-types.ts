@@ -68,7 +68,7 @@ export interface paths {
         patch?: never
         trace?: never
     }
-    '/': {
+    '/{key}': {
         parameters: {
             query?: never
             header?: never
@@ -78,7 +78,7 @@ export interface paths {
         get?: never
         put?: never
         post?: never
-        delete: operations['deleteIndex']
+        delete: operations['deleteByKey']
         options?: never
         head?: never
         patch?: never
@@ -300,29 +300,16 @@ export interface operations {
             }
         }
     }
-    deleteIndex: {
+    deleteByKey: {
         parameters: {
             query?: never
             header?: never
-            path?: never
+            path: {
+                key: string
+            }
             cookie?: never
         }
-        requestBody: {
-            content: {
-                'application/json': {
-                    key: string
-                    deletedAt: number
-                }
-                'multipart/form-data': {
-                    key: string
-                    deletedAt: number
-                }
-                'text/plain': {
-                    key: string
-                    deletedAt: number
-                }
-            }
-        }
+        requestBody?: never
         responses: {
             200: {
                 headers: {

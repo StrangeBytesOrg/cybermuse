@@ -10,7 +10,8 @@
         "preview": "vite preview",
         "fmt": "dprint fmt",
         "lint": "oxlint && eslint",
-        "typecheck": "vue-tsc -p ./src/frontend/tsconfig.json --noEmit"
+        "typecheck": "vue-tsc -p ./src/frontend/tsconfig.json --noEmit",
+        "gen-sync-types": "openapi-typescript http://localhost:31700/docs/json --output ./src/frontend/clients/sync-types.ts"
     },
     "devDependencies": {
         "@ai-sdk/openai-compatible": "^1.0.13",

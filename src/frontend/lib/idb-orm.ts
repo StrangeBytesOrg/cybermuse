@@ -75,7 +75,7 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
     }) {
         this.db = options.db
         this.store = options.store
-        this.version = options.version || 1
+        this.version = options.version
         this.schema = options.schema
         this.migrations = options.migrations || {}
     }
@@ -94,6 +94,11 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
             version: this.version,
             lastUpdate: updateTimestamp ? Date.now() : doc.lastUpdate,
         })
+    }
+
+    /* Validate a document with the schema */
+    validate(doc: unknown) {
+        return this.schema.parse(doc)
     }
 
     /** Update a document in the collection. */
@@ -153,7 +158,11 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
                 baseDoc = migration(baseDoc)
             }
         })
-        return this.schema.parse(baseDoc)
+        return {
+            ...this.schema.parse(baseDoc),
+            version: this.version,
+            lastUpdate: Date.now(),
+        }
     }
 
     /** Get deletions for this collection */
