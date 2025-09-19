@@ -1,9 +1,11 @@
 <script lang="ts" setup>
 import {watch, ref} from 'vue'
+import {deleteDB} from 'idb'
+import {db} from '@/db'
 import {generateText} from 'ai'
 import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
 import {useToastStore, useSettingsStore, useHubStore, useSyncStore} from '@/store'
-import {sync, exportData, clearData} from '@/sync'
+import {sync} from '@/sync'
 import HubLogin from '@/components/hub-login.vue'
 import SyncProgress from '@/components/sync-progress.vue'
 
@@ -77,6 +79,15 @@ const doSync = async () => {
     } catch (error) {
         console.error('Sync failed:', error)
         toast.error('Sync failed: ' + (error instanceof Error ? error.message : 'Unknown error'))
+    }
+}
+
+const clearData = async () => {
+    if (confirm('Are you sure you want to clear all data?')) {
+        db.close()
+        await deleteDB('cybermuse')
+        localStorage.clear()
+        alert('Data cleared. Please restart the app.')
     }
 }
 </script>
@@ -188,7 +199,7 @@ const doSync = async () => {
         <!-- Data -->
         <fieldset class="flex flex-row gap-3 bg-base-200 rounded-box p-3 sm:max-w-sm">
             <legend class="fieldset-legend">Manage Data</legend>
-            <button @click="exportData" class="btn btn-primary">Export Data</button>
+            <!-- <button @click="exportData" class="btn btn-primary">Export Data</button> -->
             <button @click="clearData" class="btn btn-error">Clear Data</button>
         </fieldset>
     </div>

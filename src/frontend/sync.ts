@@ -1,4 +1,3 @@
-import {deleteDB} from 'idb'
 import {db, collections} from '@/db'
 import {createSyncClient} from '@/clients/sync-client'
 import {useSettingsStore, useSyncStore} from '@/store'
@@ -148,26 +147,5 @@ export const sync = async () => {
     } catch (error) {
         syncStore.errorSync(error instanceof Error ? error.message : 'Unknown error occurred')
         throw error
-    }
-}
-
-export const exportData = async () => {
-    const data: Record<string, unknown> = {}
-    for (const stores of db.objectStoreNames) {
-        data[stores] = await db.getAll(stores)
-    }
-    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'})
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'data.json'
-    a.click()
-    URL.revokeObjectURL(url)
-}
-
-export const clearData = async () => {
-    if (confirm('Are you sure you want to clear all data?')) {
-        await deleteDB('cybermuse')
-        localStorage.clear()
     }
 }
