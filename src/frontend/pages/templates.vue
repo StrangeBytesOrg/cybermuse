@@ -7,17 +7,39 @@ import Editable from '@/components/editable.vue'
 
 const toast = useToastStore()
 const settings = useSettingsStore()
-const templates = reactive(await templateCollection.toArray())
+let templates = reactive(await templateCollection.toArray())
 const example = ref('')
+const createMode = ref(false)
+const newTemplate = reactive({
+    name: '',
+    template: '',
+})
 
 const activeTemplate = computed(() => {
     return templates.find((template) => template.id === settings.template)
+})
+
+const currentTemplate = computed(() => {
+    return createMode.value ? newTemplate : activeTemplate.value
 })
 
 const setActiveTemplate = async (event: Event) => {
     const target = event.target as HTMLSelectElement
     settings.template = target.value
     toast.success('Active template set')
+}
+
+const createTemplate = async () => {
+    const templateId = newTemplate.name.toLowerCase().replace(/ /g, '-')
+    await templateCollection.put({
+        id: templateId,
+        lastUpdate: Date.now(),
+        ...newTemplate,
+    })
+    templates = reactive(await templateCollection.toArray())
+    settings.template = templateId
+    createMode.value = false
+    toast.success('Created new template')
 }
 
 const validateTemplate = () => {
@@ -45,6 +67,7 @@ const deleteTemplate = async () => {
 
     if (activeTemplate.value) {
         await templateCollection.delete(activeTemplate.value.id)
+        templates = reactive(await templateCollection.toArray())
         settings.template = 'default-template'
         toast.success('Template deleted')
     }
@@ -77,7 +100,8 @@ const getPreview = async () => {
     })
 
     const engine = new Liquid()
-    example.value = await engine.parseAndRender(activeTemplate.value.template, {
+    const templateString = currentTemplate.value?.template ?? ''
+    example.value = await engine.parseAndRender(templateString, {
         characters: characterString,
         lore: loreString ?? undefined,
     })
@@ -85,35 +109,37 @@ const getPreview = async () => {
 </script>
 
 <template>
-    <div class="flex flex-row">
-        <div class="flex flex-col">
-            <select @change="setActiveTemplate" :value="settings.template" class="select min-w-60">
-                <option v-for="template in templates" :key="template.id" :value="template.id">
-                    {{ template.name }}
-                </option>
-            </select>
-        </div>
+    <div class="flex flex-row gap-x-2 px-1 md:px-0 w-full">
+        <select @change="setActiveTemplate" :value="settings.template" class="select flex-1 flex-grow">
+            <option v-for="template in templates" :key="template.id" :value="template.id">
+                {{ template.name }}
+            </option>
+        </select>
 
-        <router-link :to="{name: 'create-template'}" class="btn btn-primary mt-auto ml-3">Create Template</router-link>
+        <button @click="createMode = !createMode" :class="['btn', createMode ? 'btn-primary' : 'btn-success']">
+            {{ createMode ? 'Cancel' : '+ Create Template' }}
+        </button>
     </div>
 
-    <fieldset v-if="activeTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 pt-1 mt-3">
+    <fieldset v-if="currentTemplate" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 mt-2 w-full">
         <label class="label text-sm">Template Name</label>
-        <input v-model="activeTemplate.name" type="text" class="input" />
+        <input v-model="currentTemplate.name" type="text" class="input" />
 
-        <label class="label text-sm mt-3">Template</label>
+        <label class="label text-sm">Template</label>
         <Editable
-            v-model="activeTemplate.template"
+            v-model="currentTemplate.template"
             editable="plaintext-only"
             class="textarea w-full max-h-96 overflow-y-scroll whitespace-pre-wrap p-2"
         />
 
         <div class="flex flex-row space-x-2 mt-3">
-            <button @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
+            <button v-if="createMode" @click="createTemplate" class="btn btn-primary flex-grow">Create</button>
+            <button v-else @click="updateTemplate" class="btn btn-primary flex-grow">Save</button>
             <button @click="getPreview" class="btn flex-grow">Preview</button>
-            <button @click="deleteTemplate" class="btn btn-error flex-grow">Delete</button>
+            <button v-if="!createMode" @click="deleteTemplate" class="btn btn-error flex-grow">Delete</button>
         </div>
     </fieldset>
+
     <div v-else class="mt-3">Template Not Found</div>
 
     <div class="w-full" v-if="example">

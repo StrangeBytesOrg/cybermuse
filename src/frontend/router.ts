@@ -15,9 +15,7 @@ const LoreEdit = () => import('@/pages/lore-edit.vue')
 const LoreCreate = () => import('@/pages/lore-create.vue')
 const CreateChat = () => import('@/pages/chat-create.vue')
 const Templates = () => import('@/pages/templates.vue')
-const CreateTemplate = () => import('@/pages/template-create.vue')
 const Presets = () => import('@/pages/presets.vue')
-const CreatePreset = () => import('@/pages/preset-create.vue')
 const Settings = () => import('@/pages/settings.vue')
 const Hub = () => import('@/pages/hub.vue')
 const About = () => import('@/pages/about.vue')
@@ -101,22 +99,10 @@ const router = createRouter({
             meta: {title: 'Templates'},
         },
         {
-            path: '/create-template',
-            name: 'create-template',
-            component: CreateTemplate,
-            meta: {title: 'Create Template', back: true},
-        },
-        {
             path: '/presets',
             name: 'presets',
             component: Presets,
             meta: {title: 'Presets'},
-        },
-        {
-            path: '/create-preset',
-            name: 'create-preset',
-            component: CreatePreset,
-            meta: {title: 'Create Preset', back: true},
         },
         {
             path: '/settings',

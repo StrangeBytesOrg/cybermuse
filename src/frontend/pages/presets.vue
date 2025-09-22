@@ -1,21 +1,50 @@
 <script lang="ts" setup>
-import {computed} from 'vue'
+import {computed, ref, reactive} from 'vue'
 import {useToastStore, useSettingsStore} from '@/store'
 import {generationPresetCollection} from '@/db'
 import NumberInput from '@/components/number-input.vue'
 
 const toast = useToastStore()
 const settings = useSettingsStore()
-const presets = await generationPresetCollection.toArray()
+let presets = reactive(await generationPresetCollection.toArray())
+const createMode = ref(false)
+const newPreset = reactive({
+    name: '',
+    maxTokens: 512,
+    temperature: undefined,
+    seed: undefined,
+    minP: undefined,
+    topP: undefined,
+    topK: undefined,
+    frequencyPenalty: undefined,
+    presencePenalty: undefined,
+})
 
 const activePreset = computed(() => {
     return presets.find((preset) => preset.id === settings.preset)
+})
+
+const currentPreset = computed(() => {
+    return createMode.value ? newPreset : activePreset.value
 })
 
 const setActivePreset = async (event: Event) => {
     const target = event.target as HTMLSelectElement
     settings.preset = target.value
     toast.success('Active preset set')
+}
+
+const createPreset = async () => {
+    const presetId = newPreset.name.toLowerCase().replace(/ /g, '-')
+    await generationPresetCollection.put({
+        id: presetId,
+        lastUpdate: Date.now(),
+        ...newPreset,
+    })
+    presets = reactive(await generationPresetCollection.toArray())
+    settings.preset = presetId
+    createMode.value = false
+    toast.success('Created new preset')
 }
 
 const updatePreset = async () => {
@@ -32,6 +61,7 @@ const deletePreset = async () => {
 
     if (activePreset.value) {
         await generationPresetCollection.delete(activePreset.value.id)
+        presets = reactive(await generationPresetCollection.toArray())
         settings.preset = 'default-generation-preset'
         toast.success('Preset deleted')
     }
@@ -39,56 +69,59 @@ const deletePreset = async () => {
 </script>
 
 <template>
-    <div class="flex flex-row">
-        <div class="flex flex-col">
-            <select @change="setActivePreset" :value="activePreset?.id" class="select min-w-60">
-                <option v-for="preset in presets" :key="preset.id" :value="preset.id">
-                    {{ preset.name }}
-                </option>
-            </select>
-        </div>
+    <div class="flex flex-row gap-x-2 px-1 md:px-0 max-w-lg">
+        <select @change="setActivePreset" :value="activePreset?.id" class="select flex-1 flex-grow">
+            <option v-for="preset in presets" :key="preset.id" :value="preset.id">
+                {{ preset.name }}
+            </option>
+        </select>
 
-        <router-link :to="{name: 'create-preset'}" class="btn btn-primary mt-auto ml-3">Create Preset</router-link>
+        <button @click="createMode = !createMode" :class="['btn', createMode ? 'btn-primary' : 'btn-success']">
+            {{ createMode ? 'Cancel' : '+ Create Preset' }}
+        </button>
     </div>
 
-    <div v-if="activePreset" class="flex flex-col justify-between bg-base-200 rounded-lg p-3 pt-1 mt-3">
-        <div class="flex flex-row">
-            <fieldset class="fieldset">
-                <legend class="fieldset-legend">Basic Settings</legend>
-
+    <fieldset v-if="currentPreset" class="fieldset flex flex-col bg-base-200 rounded-lg p-3 mt-2 max-w-lg">
+        <div class="flex flex-row gap-4">
+            <div class="flex flex-col gap-2">
                 <label class="fieldset-label text-sm">Preset Name</label>
-                <input v-model="activePreset.name" type="text" class="input" />
+                <input v-model="currentPreset.name" type="text" class="input" />
 
                 <label class="fieldset-label text-sm">Max Response Tokens</label>
-                <NumberInput v-model="activePreset.maxTokens" class="input" min="0" />
+                <NumberInput v-model="currentPreset.maxTokens" class="input" min="0" />
 
                 <label class="fieldset-label text-sm">Temperature</label>
-                <NumberInput v-model="activePreset.temperature" class="input" step="0.1" min="0" />
+                <NumberInput v-model="currentPreset.temperature" class="input" step="0.1" min="0" />
 
                 <label class="fieldset-label text-sm">Seed</label>
-                <NumberInput v-model="activePreset.seed" class="input" min="0" />
+                <NumberInput v-model="currentPreset.seed" class="input" min="0" />
+            </div>
 
+            <div class="flex flex-col gap-2">
                 <label class="fieldset-label text-sm">Min P</label>
-                <NumberInput v-model="activePreset.minP" class="input" step="0.01" min="0" />
+                <NumberInput v-model="currentPreset.minP" class="input" step="0.01" min="0" />
 
                 <label class="fieldset-label text-sm">Top P</label>
-                <NumberInput v-model="activePreset.topP" class="input" step="0.01" min="0" />
+                <NumberInput v-model="currentPreset.topP" class="input" step="0.01" min="0" />
 
                 <label class="fieldset-label text-sm">Top K</label>
-                <NumberInput v-model="activePreset.topK" class="input" min="0" />
+                <NumberInput v-model="currentPreset.topK" class="input" min="0" />
+                <label class="fieldset-label text-sm">Presence-penalty</label>
+                <NumberInput v-model="currentPreset.presencePenalty" class="input" />
 
                 <label class="fieldset-label text-sm">Frequency-penalty</label>
-                <NumberInput v-model="activePreset.frequencyPenalty" class="input" />
-
-                <label class="fieldset-label text-sm">Presence-penalty</label>
-                <NumberInput v-model="activePreset.presencePenalty" class="input" />
-            </fieldset>
+                <NumberInput v-model="currentPreset.frequencyPenalty" class="input" />
+            </div>
         </div>
 
-        <div class="flex flex-row space-x-2 mt-5">
-            <button @click="updatePreset" class="btn btn-primary">Save</button>
-            <button @click="deletePreset" class="btn btn-error">Delete</button>
+        <div class="divider"></div>
+
+        <div class="flex flex-row space-x-2">
+            <button v-if="createMode" @click="createPreset" class="btn btn-primary">Create</button>
+            <button v-else @click="updatePreset" class="btn btn-primary">Save</button>
+            <button v-if="!createMode" @click="deletePreset" class="btn btn-error">Delete</button>
         </div>
-    </div>
+    </fieldset>
+
     <div v-else>Preset not found</div>
 </template>
