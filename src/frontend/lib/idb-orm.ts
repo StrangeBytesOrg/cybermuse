@@ -143,7 +143,7 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
         const docs = await Promise.all(keys.map(k => tx.store.get(k)))
         await tx.done
 
-        return docs.map(doc => this.schema.parse(doc))
+        return docs.filter(doc => doc !== undefined).map(doc => this.schema.parse(doc))
     }
 
     /** Migrate a document to a new version */
