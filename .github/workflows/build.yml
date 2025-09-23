@@ -27,17 +27,9 @@ jobs:
         uses: actions/checkout@v4
 
       # Covers both libgtk for Linux build and nsis for Windows installer build
-      - name: Install System Dependencies
-        if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
-
-      - name: Setup Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: '1.23.5'
-
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+      # - name: Install System Dependencies
+      #   if: runner.os == 'Linux'
+      #   run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -45,7 +37,9 @@ jobs:
           bun-version: latest
 
       - name: Build App
-        run: wails build -skipbindings -platform=${{ matrix.build.platform }} -nsis=${{ matrix.build.platform == 'windows/amd64' }} -ldflags "-X main.version=${{env.APP_VERSION}}"
+        run: |
+          bun install
+          bun run make
 
       - name: Compress Linux Binary
         if: matrix.build.platform == 'linux/amd64'

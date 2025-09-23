@@ -7,7 +7,7 @@ import {createViteLicensePlugin} from 'rollup-license-plugin'
 
 export default defineConfig({
     root: path.resolve('./src/frontend/'),
-    base: '/',
+    base: '',
     plugins: [
         vue(),
         tailwindcss(),

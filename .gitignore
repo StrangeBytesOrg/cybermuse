@@ -6,6 +6,7 @@ tsconfig.tsbuildinfo
 dist
 build/bin/
 build/windows/
+out
 
 # Secrets
 rclone.conf

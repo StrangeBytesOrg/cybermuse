@@ -1,4 +1,4 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import {createRouter, createWebHashHistory} from 'vue-router'
 import {useToastStore} from './store'
 
 import Index from './pages/index.vue'
@@ -24,7 +24,7 @@ const router = createRouter({
     scrollBehavior() {
         document.getElementById('main')?.scrollTo({top: 0, left: 0})
     },
-    history: createWebHistory(),
+    history: createWebHashHistory(),
     routes: [
         {
             path: '/',
