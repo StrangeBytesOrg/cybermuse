@@ -1,5 +1,5 @@
 import {z} from 'zod'
-import {Collection, createDB} from '@/lib/idb-orm'
+import {Collection, createDB, makeSchema} from '@/lib/idb-orm'
 import {fixtureData} from '@/db/fixture'
 
 export const db = await createDB('cybermuse', 1, {
@@ -17,9 +17,7 @@ export const characterCollection = new Collection({
     db,
     store: 'characters',
     version: 0,
-    schema: z.object({
-        id: z.string().min(1, {error: 'ID cannot be empty'}),
-        lastUpdate: z.number(),
+    schema: makeSchema({
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         description: z.string().min(1, {error: 'Description cannot be empty'}),
         firstMessage: z.string().optional(),
@@ -32,9 +30,7 @@ export const loreCollection = new Collection({
     db,
     store: 'lore',
     version: 0,
-    schema: z.object({
-        id: z.string().min(1, {error: 'ID cannot be empty'}),
-        lastUpdate: z.number(),
+    schema: makeSchema({
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         entries: z.array(z.object({
             name: z.string(),
@@ -47,9 +43,7 @@ export const chatCollection = new Collection({
     db,
     store: 'chats',
     version: 1,
-    schema: z.object({
-        id: z.string().min(1, {error: 'ID cannot be empty'}),
-        lastUpdate: z.number(),
+    schema: makeSchema({
         name: z.string(),
         userCharacter: z.string().min(1, {error: 'User character must be set'}),
         characters: z.array(z.string()).min(1, {error: 'At least one character must be in the chat'}),
@@ -87,9 +81,7 @@ export const templateCollection = new Collection({
     db,
     store: 'templates',
     version: 0,
-    schema: z.object({
-        id: z.string().min(1, {error: 'ID cannot be empty'}),
-        lastUpdate: z.number(),
+    schema: makeSchema({
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         template: z.string(),
     }),
@@ -99,9 +91,7 @@ export const generationPresetCollection = new Collection({
     db,
     store: 'generationPresets',
     version: 0,
-    schema: z.object({
-        id: z.string().min(1, {error: 'ID cannot be empty'}),
-        lastUpdate: z.number(),
+    schema: makeSchema({
         name: z.string().min(1, {error: 'Name cannot be empty'}),
         maxTokens: z.number({error: 'Max tokens cannot be empty'}),
         temperature: z.number().optional(),

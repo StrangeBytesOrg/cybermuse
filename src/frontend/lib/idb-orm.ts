@@ -20,6 +20,15 @@ const deletionSchema = z.object({
 })
 export type DeletionRecord = z.infer<typeof deletionSchema>
 
+export function makeSchema<T extends z.ZodRawShape>(shape: T) {
+    return z.object({
+        id: z.string().optional().default(() => crypto.randomUUID()),
+        lastUpdate: z.number().optional().default(() => Date.now()),
+        version: z.number().default(0),
+        ...shape,
+    })
+}
+
 export function createDB(name: string, version: number, migrations: Migrations) {
     const versions = Object.keys(migrations)
         .map(n => Number(n))
@@ -88,12 +97,20 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
     }
 
     /** Put a document into the collection. */
-    async put(doc: z.infer<T>, updateTimestamp = true) {
+    async put(
+        doc: Omit<z.infer<T>, 'id' | 'lastUpdate' | 'version'> & {
+            id?: string
+            lastUpdate?: number
+        },
+        updateTimestamp = true,
+    ) {
+        if (updateTimestamp) {
+            doc.lastUpdate = Date.now()
+        }
         return await this.db.put(this.store, {
-            ...this.schema.parse(doc),
             version: this.version,
-            lastUpdate: updateTimestamp ? Date.now() : doc.lastUpdate,
-        })
+            ...this.schema.parse(doc),
+        }) as string
     }
 
     /* Validate a document with the schema */

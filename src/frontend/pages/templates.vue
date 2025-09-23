@@ -30,14 +30,9 @@ const setActiveTemplate = async (event: Event) => {
 }
 
 const createTemplate = async () => {
-    const templateId = newTemplate.name.toLowerCase().replace(/ /g, '-')
-    await templateCollection.put({
-        id: templateId,
-        lastUpdate: Date.now(),
-        ...newTemplate,
-    })
+    const id = await templateCollection.put(newTemplate)
     templates = reactive(await templateCollection.toArray())
-    settings.template = templateId
+    settings.template = id
     createMode.value = false
     toast.success('Created new template')
 }

@@ -10,7 +10,7 @@ let presets = reactive(await generationPresetCollection.toArray())
 const createMode = ref(false)
 const newPreset = reactive({
     name: '',
-    maxTokens: 512,
+    maxTokens: undefined,
     temperature: undefined,
     seed: undefined,
     minP: undefined,
@@ -35,14 +35,9 @@ const setActivePreset = async (event: Event) => {
 }
 
 const createPreset = async () => {
-    const presetId = newPreset.name.toLowerCase().replace(/ /g, '-')
-    await generationPresetCollection.put({
-        id: presetId,
-        lastUpdate: Date.now(),
-        ...newPreset,
-    })
+    const id = await generationPresetCollection.put(newPreset)
     presets = reactive(await generationPresetCollection.toArray())
-    settings.preset = presetId
+    settings.preset = id
     createMode.value = false
     toast.success('Created new preset')
 }
