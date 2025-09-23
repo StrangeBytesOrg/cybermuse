@@ -8,7 +8,7 @@
     "scripts": {
         "dev": "vite --host",
         "build": "vite build",
-        "build-electron": "DEV=1 bun run build-electron.ts",
+        "build-electron": "bun run build-electron.ts",
         "make": "bun run build && bun run build-electron",
         "preview": "vite preview",
         "fmt": "dprint fmt",
