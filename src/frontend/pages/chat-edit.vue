@@ -38,7 +38,8 @@ const updateChat = async () => {
 }
 
 const archiveChat = async () => {
-    await chatCollection.update(chatId, {archived: true})
+    chat.archived = true
+    await chatCollection.put(chat)
     router.push({name: 'chats'})
 }
 

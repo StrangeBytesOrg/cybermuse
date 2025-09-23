@@ -101,22 +101,6 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
         return this.schema.parse(doc)
     }
 
-    /** Update a document in the collection. */
-    async update(
-        key: string | number,
-        doc: Partial<z.infer<T>>,
-        options: {updateTimestamp?: boolean} = {updateTimestamp: true},
-    ) {
-        return await this.db.put(
-            this.store,
-            this.schema.parse({
-                ...await this.get(key),
-                ...doc,
-                lastUpdate: options.updateTimestamp ? Date.now() : undefined,
-            }),
-        )
-    }
-
     /** Delete a document and record in deletions store */
     async delete(key: string | number) {
         const doc = await this.get(key) // Ensure it exists before deleting
