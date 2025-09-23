@@ -3,9 +3,20 @@ import fs from 'node:fs'
 import path from 'node:path'
 
 const dev = Boolean(process.env.DEV)
+const buildPlatform = process.env.BUILD_PLATFORM
+
+// Determine targets based on platform
+let targets
+if (buildPlatform === 'linux') {
+    targets = builder.createTargets([builder.Platform.LINUX])
+} else if (buildPlatform === 'windows') {
+    targets = builder.createTargets([builder.Platform.WINDOWS])
+} else if (buildPlatform === 'darwin') {
+    targets = builder.createTargets([builder.Platform.MAC])
+}
 
 const artifacts = await builder.build({
-    // targets: builder.createTargets([builder.Platform.WINDOWS]),
+    targets,
     config: {
         productName: 'Cybermuse Desktop',
         appId: 'io.cybermuse.app',

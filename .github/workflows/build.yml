@@ -8,53 +8,54 @@ on:
 jobs:
   build:
     permissions: write-all
+    env:
+      APP_VERSION: ${{ github.ref_name }}
     strategy:
       fail-fast: false
       matrix:
         build:
           - name: build-linux
             os: ubuntu-22.04
-            platform: linux/amd64
+            platform: linux
           - name: build-windows
             os: ubuntu-22.04
-            platform: windows/amd64
+            platform: windows
           - name: build-mac
             os: macos-latest
-            platform: darwin/amd64
+            platform: darwin
     runs-on: ${{ matrix.build.os }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Covers both libgtk for Linux build and nsis for Windows installer build
-      # - name: Install System Dependencies
-      #   if: runner.os == 'Linux'
-      #   run: sudo apt-get update && sudo apt-get install -y zip nsis libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu
+      # Install system dependencies for Electron builds
+      - name: Install System Dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zip nsis
+          # Install Wine for Windows cross-compilation
+          if [ "${{ matrix.build.platform }}" = "windows" ]; then
+            sudo apt-get install -y wine64
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: Build App
-        run: |
-          bun install
-          bun run make
+      - name: Install Dependencies
+        run: bun install
 
-      - name: Compress Linux Binary
-        if: matrix.build.platform == 'linux/amd64'
-        run: cd build/bin && tar -cJf cybermuse-linux-x64.tar.xz cybermuse
-
-      - name: Compress Windows Binary/Installer
-        if: matrix.build.platform == 'windows/amd64'
-        run: |
-          cd build/bin
-          zip -r cybermuse-windows-x64.zip cybermuse.exe
-          zip -r cybermuse-windows-installer.zip cybermuse-amd64-installer.exe
-
-      - name: Compress Mac Binary
-        if: matrix.build.platform == 'darwin/amd64'
-        run: cd build/bin && zip -r cybermuse-mac-x64.zip cybermuse.app
+      - name: Build Electron App
+        run: bun run make
+        env:
+          BUILD_PLATFORM: ${{ matrix.build.platform }}
 
       - name: Upload Github Release Files
         uses: softprops/action-gh-release@v2
@@ -63,6 +64,8 @@ jobs:
           files: |
             build/bin/*.tar.xz
             build/bin/*.zip
+          draft: false
+          prerelease: false
 
       # - name: Setup RClone
       #   uses: AnimMouse/setup-rclone@v1
