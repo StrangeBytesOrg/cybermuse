@@ -3,6 +3,7 @@ import {ref} from 'vue'
 import {useRouter} from 'vue-router'
 import {Liquid} from 'liquidjs'
 import {TrashIcon} from '@heroicons/vue/24/outline'
+import {randomId} from '@/lib/random-id'
 import {characterCollection, chatCollection, loreCollection, type Message} from '@/db'
 import MultiSelectCharacters from '@/components/select-characters.vue'
 import MultiSelectLore from '@/components/select-lore.vue'
@@ -33,7 +34,7 @@ const createChat = async () => {
                 user: userName,
             })
             messages.push({
-                id: Math.random().toString(36).slice(2),
+                id: randomId(),
                 type: 'assistant',
                 content: [content],
                 activeIndex: 0,
@@ -43,8 +44,6 @@ const createChat = async () => {
     })
 
     const id = await chatCollection.put({
-        id: `chat-${Math.random().toString(36).slice(2)}`,
-        lastUpdate: Date.now(),
         name: chatName.value,
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value.map((c) => c.id),

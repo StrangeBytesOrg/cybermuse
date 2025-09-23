@@ -1,10 +1,9 @@
 import {z} from 'zod'
 import {type IDBPDatabase, type IDBPTransaction, openDB} from 'idb'
+import {randomId} from './random-id'
 
-export type Migrations = Record<
-    number,
-    (db: IDBPDatabase, tx: IDBPTransaction<unknown, string[], 'versionchange'>) => Promise<void>
->
+type Tx = IDBPTransaction<unknown, string[], 'versionchange'>
+export type Migrations = Record<number, (db: IDBPDatabase, tx: Tx) => Promise<void>>
 
 const baseSchema = z.looseObject({
     id: z.string().min(1, {error: 'ID cannot be empty'}),
@@ -22,7 +21,7 @@ export type DeletionRecord = z.infer<typeof deletionSchema>
 
 export function makeSchema<T extends z.ZodRawShape>(shape: T) {
     return z.object({
-        id: z.string().optional().default(() => crypto.randomUUID()),
+        id: z.string().optional().default(() => randomId()),
         lastUpdate: z.number().optional().default(() => Date.now()),
         version: z.number().default(0),
         ...shape,
@@ -98,10 +97,7 @@ export class Collection<T extends z.ZodObject<z.ZodRawShape>> {
 
     /** Put a document into the collection. */
     async put(
-        doc: Omit<z.infer<T>, 'id' | 'lastUpdate' | 'version'> & {
-            id?: string
-            lastUpdate?: number
-        },
+        doc: Omit<z.infer<T>, 'id' | 'lastUpdate' | 'version'> & {id?: string; lastUpdate?: number},
         updateTimestamp = true,
     ) {
         if (updateTimestamp) {

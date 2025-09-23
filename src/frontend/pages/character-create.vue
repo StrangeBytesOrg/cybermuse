@@ -37,11 +37,7 @@ const validateTemplates = () => {
 
 const createCharacter = async () => {
     validateTemplates()
-    await characterCollection.put({
-        id: character.name.toLowerCase().replace(/[^a-z0-9]/g, '-'),
-        lastUpdate: Date.now(),
-        ...character,
-    })
+    await characterCollection.put(character)
     toast.success('Character created')
     await router.push({name: 'characters'})
 }

@@ -51,7 +51,7 @@ const deleteChat = async () => {
 const duplicateChat = async () => {
     await chatCollection.put({
         ...chat,
-        id: `chat-${Math.random().toString(36).slice(2)}`,
+        id: undefined, // Let the ORM generate a new ID
         lastUpdate: Date.now(),
         createDate: Date.now(),
     })

@@ -19,12 +19,7 @@ const addEntry = () => {
 }
 
 const createLore = async () => {
-    await loreCollection.put({
-        id: lore.name.toLowerCase().replace(/ /g, '-'),
-        lastUpdate: Date.now(),
-        name: lore.name,
-        entries: lore.entries,
-    })
+    await loreCollection.put(lore)
     toast.success('Lore created')
     await router.push({name: 'lore'})
 }
