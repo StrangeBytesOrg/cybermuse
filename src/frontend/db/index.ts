@@ -93,7 +93,7 @@ export const generationPresetCollection = new Collection({
     version: 0,
     schema: makeSchema({
         name: z.string().min(1, {error: 'Name cannot be empty'}),
-        maxTokens: z.number({error: 'Max tokens cannot be empty'}),
+        maxTokens: z.number().optional(),
         temperature: z.number().optional(),
         seed: z.number().optional(),
         topK: z.number().optional(),
