@@ -187,7 +187,37 @@ export interface operations {
                 headers: {
                     [name: string]: unknown
                 }
-                content?: never
+                content: {
+                    'application/json': {
+                        success: boolean
+                    }
+                    'multipart/form-data': {
+                        success: boolean
+                    }
+                    'text/plain': {
+                        success: boolean
+                    }
+                }
+            }
+            400: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
+            }
+            413: {
+                headers: {
+                    [name: string]: unknown
+                }
+                content: {
+                    'application/json': string
+                    'multipart/form-data': string
+                    'text/plain': string
+                }
             }
         }
     }

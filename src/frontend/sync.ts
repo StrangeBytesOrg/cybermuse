@@ -115,7 +115,7 @@ export const sync = async () => {
             const {error: uploadError} = await client.PUT('/upload', {
                 body: {key, doc},
             })
-            if (uploadError) throw uploadError
+            if (uploadError) throw new Error(uploadError)
             currentOperation += 1
         }
 
