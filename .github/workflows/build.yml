@@ -3,13 +3,11 @@ name: App Build
 on:
   workflow_dispatch:
   push:
-    tags: ['v*']
+    tags: ['v*', 'ci-*']
 
 jobs:
   build:
     permissions: write-all
-    env:
-      APP_VERSION: ${{ github.ref_name }}
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +63,8 @@ jobs:
             build/bin/*.tar.xz
             build/bin/*.zip
           draft: false
-          prerelease: false
+          # Automatically mark releases as prerelease if the tag starts with 'ci-'
+          prerelease: ${{ startsWith(github.ref_name, 'ci-') }}
 
       # - name: Setup RClone
       #   uses: AnimMouse/setup-rclone@v1
