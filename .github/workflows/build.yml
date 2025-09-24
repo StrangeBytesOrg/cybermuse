@@ -13,10 +13,10 @@ jobs:
       matrix:
         build:
           - name: build-linux
-            os: ubuntu-22.04
+            os: ubuntu-24.04
             platform: linux
           - name: build-windows
-            os: ubuntu-22.04
+            os: windows-latest
             platform: windows
           - name: build-mac
             os: macos-latest
@@ -26,21 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Install system dependencies for Electron builds
-      - name: Install System Dependencies
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y zip nsis
-          # Install Wine for Windows cross-compilation
-          if [ "${{ matrix.build.platform }}" = "windows" ]; then
-            sudo apt-get install -y wine64 wine32
-          fi
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
