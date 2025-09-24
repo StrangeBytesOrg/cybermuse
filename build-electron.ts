@@ -29,12 +29,13 @@ const artifacts = await builder.build({
             {from: './dist', to: ''},
         ],
         artifactName: '${name}-${os}-${arch}.${ext}',
+        icon: path.resolve('build/appicon.png'),
         linux: {
             target: dev ? ['dir'] : ['tar.xz'],
             compression: 'store', // Seems like "normal" actually does max and "store" does normal
         },
         win: {
-            target: ['nsis'],
+            target: ['zip'],
             publish: null, // Prevent publishing to GitHub
         },
         mac: {
@@ -52,8 +53,6 @@ const artifacts = await builder.build({
             console.log('Copying electron.js to dist/')
             fs.copyFileSync(path.resolve('./src/backend/electron.js'), path.resolve('./dist/electron.js'))
         },
-        // afterPack: async ({outDir, packager}) => {
-        // },
     },
 })
 console.log(`Built artifacts: \n${artifacts.join('\n')}`)

@@ -52,7 +52,6 @@ jobs:
             build/bin/*.tar.xz
             build/bin/*.zip
           draft: false
-          # Automatically mark releases as prerelease if the tag starts with 'ci-'
           prerelease: ${{ startsWith(github.ref_name, 'ci-') }}
 
       # - name: Setup RClone
