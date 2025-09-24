@@ -27,9 +27,9 @@ const artifacts = await builder.build({
         files: [
             'package.json',
             {from: './dist', to: ''},
+            'build/icon.png',
         ],
         artifactName: '${name}-${os}-${arch}.${ext}',
-        icon: path.resolve('build/appicon.png'),
         linux: {
             target: dev ? ['dir'] : ['tar.xz'],
             compression: 'store', // Seems like "normal" actually does max and "store" does normal

@@ -1,21 +1,22 @@
-import {app, shell, BrowserWindow} from 'electron'
+import {app, shell, BrowserWindow, nativeImage} from 'electron'
+import path from 'node:path'
 
-// import sourcemapSupport from 'source-map-support'
-// sourcemapSupport.install()
-
-// app.disableHardwareAcceleration()
+// app.disableHardwareAcceleration() // Fixes an issue on some Linux systems.
 const lock = app.requestSingleInstanceLock()
 if (!lock) {
-    console.log('Another instance is already running')
+    console.error('Another instance is already running')
     app.quit()
     process.exit(0)
 }
 
 app.on('ready', () => {
+    const iconPath = path.join(app.getAppPath(), 'build', 'icon.png')
+    const icon = nativeImage.createFromPath(iconPath)
     const win = new BrowserWindow({
         width: 800,
         height: 800,
         webPreferences: {},
+        icon,
     })
 
     win.setMenu(null)

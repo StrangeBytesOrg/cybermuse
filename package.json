@@ -1,6 +1,6 @@
 {
     "name": "cybermuse",
-    "version": "0.242.0",
+    "version": "0.242.1",
     "main": "electron.js",
     "type": "module",
     "description": "A batteries included AI Chat Application",
