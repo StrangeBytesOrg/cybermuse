@@ -94,11 +94,14 @@ const getPreview = async () => {
         })
     })
 
+    const exampleInstruction = 'Alice and Bob have a friendly conversation about their day.'
+
     const engine = new Liquid()
     const templateString = currentTemplate.value?.template ?? ''
     example.value = await engine.parseAndRender(templateString, {
         characters: characterString,
         lore: loreString ?? undefined,
+        instruction: exampleInstruction,
     })
 }
 </script>

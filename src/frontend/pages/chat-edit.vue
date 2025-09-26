@@ -130,6 +130,17 @@ const removeLore = (loreId: string) => {
             </div>
         </div>
 
+        <!-- Chat Instruction -->
+        <div>
+            <div class="text-lg font-bold mt-3">Chat Instruction</div>
+            <div class="divider mt-0 mb-1"></div>
+            <textarea
+                v-model="chat.instruction"
+                placeholder="(optional) Provide a brief instruction to set the direction of the chat"
+                class="textarea w-full">
+            </textarea>
+        </div>
+
         <div class="divider mb-3"></div>
         <div class="flex flex-row space-x-3">
             <button @click.prevent="updateChat" class="btn btn-primary">Update</button>

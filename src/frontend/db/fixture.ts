@@ -5,7 +5,9 @@ const defaultTemplate = `Roleplay in this chat with the user using the provided 
 {{ characters }}
 {% if lore %}
 Use the following background information as lore.
-{{ lore }}{% endif %}`
+{{ lore }}{% endif %}
+{% if instruction %}
+{{ instruction }}{% endif %}`
 
 export const fixtureData = async (db: IDBPDatabase) => {
     const characters = await db.getAll('characters')

@@ -108,6 +108,7 @@ const getSystemPrompt = async () => {
     return engine.parseAndRenderSync(template, {
         characters: characterString,
         lore: loreString,
+        instruction: chat.instruction,
     })
 }
 

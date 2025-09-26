@@ -48,6 +48,7 @@ export const chatCollection = new Collection({
         userCharacter: z.string().min(1, {error: 'User character must be set'}),
         characters: z.array(z.string()).min(1, {error: 'At least one character must be in the chat'}),
         lore: z.array(z.string()),
+        instruction: z.string().optional(),
         createDate: z.number(),
         messages: z.array(z.object({
             id: z.string(),

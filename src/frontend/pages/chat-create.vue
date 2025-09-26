@@ -19,6 +19,7 @@ const selectedCharacters = ref<Character[]>([])
 const selectedLore = ref<Lore[]>([])
 const userCharacter = ref('')
 const chatName = ref('')
+const chatInstruction = ref('')
 
 const createChat = async () => {
     const engine = new Liquid()
@@ -48,6 +49,7 @@ const createChat = async () => {
         userCharacter: userCharacter.value,
         characters: selectedCharacters.value.map((c) => c.id),
         lore: selectedLore.value.map((l) => l.id),
+        instruction: chatInstruction.value,
         createDate: Date.now(),
         messages: messages,
         archived: false,
@@ -128,6 +130,17 @@ const removeLore = (loreId: string) => {
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Chat Instruction -->
+        <div>
+            <h2 class="text-xl font-bold">Chat Instruction</h2>
+            <div class="divider mt-0 mb-1"></div>
+            <textarea
+                class="textarea w-full"
+                placeholder="(optional) Provide a brief instruction to set the direction of the chat"
+                v-model="chatInstruction">
+            </textarea>
         </div>
 
         <div class="mt-5">
