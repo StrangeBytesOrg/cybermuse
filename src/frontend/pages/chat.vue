@@ -2,7 +2,7 @@
 import {ref, reactive, watch} from 'vue'
 import {useRoute} from 'vue-router'
 import {Liquid} from 'liquidjs'
-import {Bars4Icon, ExclamationTriangleIcon} from '@heroicons/vue/24/outline'
+import {Bars4Icon, ExclamationTriangleIcon, InformationCircleIcon} from '@heroicons/vue/24/outline'
 import {streamText, generateText, tool} from 'ai'
 import {z} from 'zod'
 import {createOpenAICompatible} from '@ai-sdk/openai-compatible'
@@ -228,14 +228,18 @@ const generateMessage = async (messageId: string) => {
             const labelPattern = new RegExp(`(^|\\n)(?:${escaped}\\s*:)+\\s*`, 'gi')
             messageBuffer = messageBuffer.replace(labelPattern, (_m, boundary) => boundary)
             message.content[message.activeIndex] = messageBuffer.trim()
+            const timeTaken = (Date.now() - startTime) / 1000
+            message.meta = {
+                model: settings.generationModel,
+                createdAt: Date.now(),
+                timeTaken,
+            }
             await updateChat()
         }
     } catch (error) {
         if (error instanceof Error && error.name === 'AbortError') return
         throw error
     } finally {
-        const timeTaken = (Date.now() - startTime) / 1000
-        console.log(`Generation took ${timeTaken} seconds`)
         pendingMessage.value = false
     }
 }
@@ -318,9 +322,19 @@ const toggleCtxMenu = () => {
                     </button>
 
                     <div class="flex flex-col flex-grow px-2">
-                        <div class="font-bold">
-                            {{ characterMap[message.characterId]?.name || 'Missing Character' }}
+                        <div class="flex flex-row space-x-2">
+                            <span class="font-bold">{{ characterMap[message.characterId]?.name || 'Missing Character' }}</span>
+
+                            <!-- Message Meta Info -->
+                            <div v-if="message.meta" class="dropdown dropdown-hover self-center">
+                                <InformationCircleIcon tabindex="0" role="button" class="size-4" />
+                                <div tabindex="0" class="dropdown-content card card-sm p-2 bg-base-100 z-1 w-64 shadow-lg">
+                                    {{ message.meta.model }}<br />
+                                    Time: {{ message.meta.timeTaken?.toFixed(2) }}s<br />
+                                </div>
+                            </div>
                         </div>
+
                         <Message v-if="chat.messages[index]" v-model="message.content[message.activeIndex]" @update="updateChat" />
                     </div>
                 </div>

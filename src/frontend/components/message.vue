@@ -61,7 +61,7 @@ const update = async () => {
 <style>
 @reference "@/styles/global.css";
 .messageText p {
-    @apply mt-2;
+    @apply mb-2;
     color: var(--msg);
 }
 .messageText q {

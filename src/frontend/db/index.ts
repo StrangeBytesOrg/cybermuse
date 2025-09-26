@@ -59,6 +59,11 @@ export const chatCollection = new Collection({
             ]),
             content: z.array(z.string()),
             activeIndex: z.number(),
+            meta: z.object({
+                model: z.string(),
+                createdAt: z.number(),
+                timeTaken: z.number(),
+            }).optional(),
         })),
         archived: z.boolean(),
     }),
